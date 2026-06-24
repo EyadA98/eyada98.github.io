@@ -1981,8 +1981,8 @@ function disconnectSync(){ syncCfg = null; localStorage.removeItem(SYNC_KEY); se
    Overrides the legacy sync above: setSyncState/scheduleSync are
    redefined here, so saves now push to the signed-in user's row.
    ============================================================ */
-const SUPABASE_URL = "https://zshbjjcvwvibayzsmibp.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_RQTYm_1bl9w9Kx6YNxfwyQ_QeG5nxDN";
+const SUPABASE_URL = "https://vulzuubswllmeypxwznq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bHp1dWJzd2xsbWV5cHh3em5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyOTY2MjYsImV4cCI6MjA5Nzg3MjYyNn0.Lmrf-2I-jFaof--__snquTrpa-992y7S1hBhowQtvFY";
 const supaReady = /^https:\/\//.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length > 40 && !!window.supabase;
 const supa = supaReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const GUEST_FLAG = "financeBoard.guest";
