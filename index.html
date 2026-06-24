@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Hub</title>
+<title>Eyad Alfi</title>
 <script>try{var _t=localStorage.getItem('hub.theme')||'dark';document.documentElement.classList.toggle('dark',_t!=='light');}catch(e){document.documentElement.classList.add('dark');}</script>
 <meta name="theme-color" content="#0d0926">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hub">
+<meta name="apple-mobile-web-app-title" content="Eyad Alfi">
 <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cdefs%3E%3ClinearGradient id="g" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0%25" stop-color="%238E7FD0"/%3E%3Cstop offset="100%25" stop-color="%2326225C"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="100" height="100" rx="22" fill="url(%23g)"/%3E%3Cg transform="translate(20,21.6) scale(0.3053) translate(-381.64,-176.88)" fill="%23ffffff"%3E%3Cpath d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/%3E%3Cpath d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/%3E%3Cpath d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/%3E%3C/g%3E%3C/svg%3E'>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -234,6 +235,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   .bottombar button.active{color:#fff;background:linear-gradient(140deg,#f3b98e 0%,#ec9d6a 45%,#dd824b 100%);box-shadow:0 6px 18px rgba(221,130,75,.5)}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.setlbl{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block}
 </style>
 </head>
 <body>
@@ -252,6 +254,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button class="nav" data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
   <button class="nav" data-tab="links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Quick Links</button>
+  <button class="nav" data-tab="goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>Goals</button>
   <div class="side-foot">Your private headquarters</div>
 </aside>
 
@@ -259,6 +262,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
 <div class="topbar">
   <div class="tb-left"><div><div class="crumb" id="crumb">Home</div><h2 id="pageTitle" class="marc">Dashboard</h2></div></div>
   <div class="top-actions">
+    <div id="avatarChip" title="Profile" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:1.05rem;background:rgba(255,255,255,.08);border:1px solid var(--border);cursor:pointer" onclick="openSettings()"></div>
     <button class="btn soft round" onclick="toggleTheme()" title="Theme" aria-label="Toggle theme"><span id="themeIcon"></span></button>
     <button class="btn soft round" onclick="openSettings()" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.5 14H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.5V3a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 4.6l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
     <button class="btn soft" id="acctBtn" onclick="openAccount()">Account</button>
@@ -290,6 +294,10 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   <div class="card" style="margin-top:18px">
     <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
     <div id="homeLinks"></div>
+  </div>
+  <div class="card" id="calCard" style="margin-top:18px;display:none">
+    <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Upcoming · Calendar</h2><button class="btn soft" id="calBtn" onclick="connectCal()">Connect</button></div>
+    <div id="calList"><span class="muted">Add your Google OAuth Client ID in Settings, then connect to see your week.</span></div>
   </div>
   <div class="grid" id="insightStrip" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:18px"></div>
 </div>
@@ -329,6 +337,12 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   <div class="card"><div id="linksList"></div></div>
 </div>
 
+<!-- GOALS -->
+<div class="tab" id="tab-goals">
+  <div class="section-head"><h2>Goals &amp; Habits</h2><button class="btn" onclick="addGoal()">+ Add goal</button></div>
+  <div class="grid" id="goalsList" style="grid-template-columns:repeat(auto-fit,minmax(270px,1fr))"></div>
+</div>
+
 </main>
 </div>
 
@@ -337,6 +351,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   <button data-tab="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
   <button data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
+  <button data-tab="goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Goals</button>
   <button data-tab="links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7"/></svg>Links</button>
 </nav>
 
@@ -355,9 +370,9 @@ const GUEST_FLAG = "hub.guest";
 let user = null;
 
 const DEFAULT = {
-  profile:{ name:"" },
-  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"https://eyada98.github.io/Travel-Planner/" },
-  notes:[], tasks:[],
+  profile:{ name:"Eyad Alfi", avatar:"🧭" },
+  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"https://eyada98.github.io/Travel-Planner/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", showPrayer:true, showWeather:true, showCalendar:true },
+  notes:[], tasks:[], goals:[],
   links:[
     {group:"Build", label:"GitHub", url:"https://github.com"},
     {group:"Build", label:"Supabase", url:"https://supabase.com/dashboard"},
@@ -379,7 +394,11 @@ let data = (function(){
     return loadLocal(KEY) || JSON.parse(JSON.stringify(DEFAULT));
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); }
 })();
-function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); }catch(e){} }
+function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); }catch(e){} scheduleHubSync(); }
+let _hubTimer=null;
+function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
+async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){ console.error("Hub sync failed:",(e&&e.message)||e); } }
+async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec&&(!data.updatedAt||(rec.updatedAt&&rec.updatedAt>data.updatedAt))){ data=fill(rec); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
@@ -391,7 +410,7 @@ function toggleTheme(){ const dark=!document.documentElement.classList.contains(
 updThemeIcon();
 
 /* ============ Navigation ============ */
-const PAGES={home:["Home","Dashboard"],apps:["Apps","Your Apps"],notes:["Workspace","Notes"],tasks:["Workspace","Tasks"],links:["Workspace","Quick Links"]};
+const PAGES={home:["Home","Dashboard"],apps:["Apps","Your Apps"],notes:["Workspace","Notes"],tasks:["Workspace","Tasks"],links:["Workspace","Quick Links"],goals:["Workspace","Goals & Habits"]};
 function go(name){
   document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.id==="tab-"+name));
@@ -401,7 +420,8 @@ function go(name){
 document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 
 /* ============ Render ============ */
-function render(){ renderHome(); renderApps(); renderNotes(); renderTasks(); renderLinks(); }
+function render(){ applyLang(); renderHome(); renderApps(); renderNotes(); renderTasks(); renderLinks(); renderGoals(); var a=document.getElementById("avatarChip"); if(a) a.textContent=data.profile.avatar||"🧭"; }
+function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function hijri(d){ try{ return new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d)+" AH"; }catch(e){ return ""; } }
@@ -417,9 +437,10 @@ function renderHome(){
   const openTasks=data.tasks.filter(t=>!t.done).length;
   const notes=data.notes.length;
   document.getElementById("todayStrip").innerHTML=
-    `<div class="ts" id="wxBox"><b>—</b><span>Weather</span></div>`+
+    (data.settings.showWeather!==false?`<div class="ts" id="wxBox"><b>—</b><span>Weather</span></div>`:"")+
     `<div class="ts"><b>${openTasks}</b><span>Open tasks</span></div>`+
-    `<div class="ts"><b>${notes}</b><span>Notes</span></div>`;
+    `<div class="ts"><b>${notes}</b><span>Notes</span></div>`+
+    `<div class="ts"><b>${data.goals.length}</b><span>Goals</span></div>`;
   renderAppCards("appCards");
   // today tasks
   const today=new Date().toISOString().slice(0,10);
@@ -429,7 +450,10 @@ function renderHome(){
   // home links (first few)
   document.getElementById("homeLinks").innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
   renderInsights();
-  loadWeather(); loadPrayers();
+  if(data.settings.showWeather!==false) loadWeather();
+  var pr=document.getElementById("prayersRow"); if(pr) pr.style.display=(data.settings.showPrayer!==false)?"":"none";
+  if(data.settings.showPrayer!==false) loadPrayers();
+  renderCalWidget();
 }
 
 function appDef(){
@@ -443,7 +467,7 @@ function appDef(){
 function renderAppCards(id){
   const el=document.getElementById(id); if(!el) return;
   el.innerHTML = appDef().map(a=>{
-    const stat = a.key==="finance" ? (financeStat||"") : "";
+    const stat = a.key==="finance" ? (financeStat||"") : (a.key==="travel" ? travelStat() : "");
     return `<a class="card lift app-card" href="${esc(a.url||'#')}" ${/^https?:/.test(a.url||'')?'target="_blank" rel="noopener"':''}>
       <span class="arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
       <div class="ico ${a.tile}">${a.icon}</div>
@@ -520,6 +544,59 @@ async function addLink(){
 }
 function delLink(i){ data.links.splice(i,1); save(); render(); }
 
+/* ---- Travel countdown ---- */
+function travelStat(){ var d=data.settings.nextTripDate; if(!d) return ""; var diff=Math.ceil((new Date(d+"T00:00:00")-new Date(new Date().toISOString().slice(0,10)+"T00:00:00"))/86400000); if(isNaN(diff)||diff<0) return ""; var dest=data.settings.nextTripDest||"your trip"; return diff===0?("Today · "+dest):(diff+"d · "+dest); }
+
+/* ---- Goals & habits ---- */
+function fmtNum(x){ return Number(x||0).toLocaleString("en-US",{maximumFractionDigits:2}); }
+function goalCur(g){ if(g.linkNet){ var nx=parseFloat(String(financeStat).replace(/[^0-9.]/g,"")); return isNaN(nx)?0:nx; } return +g.current||0; }
+function ring(pct){ var r=26,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(1,pct))); return '<svg width="68" height="68" viewBox="0 0 68 68"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8a64c8"/><stop offset="100%" stop-color="#f3b98e"/></linearGradient></defs><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="rgba(138,100,200,.18)" stroke-width="7"/><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="url(#gr)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 34 34)"/></svg>'; }
+function renderGoals(){
+  var el=document.getElementById("goalsList"); if(!el) return;
+  el.innerHTML = data.goals.length ? data.goals.map(function(g,i){
+    var cur=goalCur(g), pct=g.target? cur/g.target : 0;
+    return '<div class="card"><div style="display:flex;gap:16px;align-items:center">'
+      +'<div style="position:relative;flex:none">'+ring(pct)+'<div style="position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:.78rem">'+Math.round(pct*100)+'%</div></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:800">'+esc(g.name)+'</div>'
+      +'<div class="muted" style="font-size:.84rem;margin-top:2px">'+esc(fmtNum(cur))+' / '+esc(fmtNum(g.target))+' '+esc(g.unit||"")+'</div>'
+      +(g.linkNet?'<div class="pill" style="margin-top:6px">Linked to net worth</div>':'')+'</div></div>'
+      +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'
+      +(g.linkNet?'':'<button class="btn soft" onclick="updGoal('+i+')">Update</button>')
+      +'<button class="btn danger" onclick="delGoal('+i+')">Delete</button></div></div>';
+  }).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph">🎯</div><p>No goals yet. Add one to track progress with a ring.</p></div>';
+}
+async function addGoal(){
+  var name=await promptModal("New goal","What are you tracking? (e.g. Net worth target, Trips this year, Books)","");
+  if(!name) return;
+  var target=await promptModal("New goal","Target (number)","");
+  if(target===null) return;
+  var unit=await promptModal("New goal","Unit (optional: SAR, trips, books…)","")||"";
+  data.goals.push({id:uid(),name:name.trim(),target:+target||0,current:0,unit:unit.trim(),linkNet:/net.?worth/i.test(name)}); save(); render(); toast("Goal added");
+}
+async function updGoal(i){ var g=data.goals[i]; if(!g) return; var v=await promptModal("Update progress",g.name,String(g.current||0)); if(v===null) return; g.current=+v||0; save(); render(); }
+function delGoal(i){ data.goals.splice(i,1); save(); render(); }
+
+/* ---- Google Calendar (read-only) ---- */
+function renderCalWidget(){ var c=document.getElementById("calCard"); if(!c) return; c.style.display=(data.settings.showCalendar!==false)?"":"none"; }
+function connectCal(){
+  var cid=data.settings.gcalId; if(!cid){ toast("Add your Google OAuth Client ID in Settings"); openSettings(); return; }
+  if(!window.google||!google.accounts||!google.accounts.oauth2){ toast("Google not ready — try again in a moment"); return; }
+  try{
+    var tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:"https://www.googleapis.com/auth/calendar.readonly",callback:function(resp){ if(resp&&resp.access_token) loadCalEvents(resp.access_token); }});
+    tc.requestAccessToken();
+  }catch(e){ toast("Couldn't start Google sign-in"); }
+}
+async function loadCalEvents(token){
+  try{
+    var tMin=new Date(); tMin.setHours(0,0,0,0); var tMax=new Date(); tMax.setDate(tMax.getDate()+7);
+    var url="https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=8&timeMin="+tMin.toISOString()+"&timeMax="+tMax.toISOString();
+    var j=await fetch(url,{headers:{Authorization:"Bearer "+token}}).then(function(r){return r.json();});
+    var items=j.items||[];
+    document.getElementById("calList").innerHTML = items.length ? items.map(function(e){ var when=(e.start&&(e.start.dateTime||e.start.date))||""; var d=when?new Date(when):null; var lbl=d?d.toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):""; return '<div class="row-item"><div class="tt"><div class="t">'+esc(e.summary||"(no title)")+'</div><div class="meta">'+esc(lbl)+'</div></div></div>'; }).join("") : '<span class="muted">No events in the next 7 days.</span>';
+    var b=document.getElementById("calBtn"); if(b) b.textContent="Refresh";
+  }catch(e){ document.getElementById("calList").innerHTML='<span class="muted">Couldn\'t load events.</span>'; }
+}
+
 /* ============ Widgets: weather + prayer ============ */
 let _wxCache={}, _prayCache={};
 async function loadWeather(){
@@ -558,29 +635,43 @@ async function loadFinance(){
     let net=null;
     if(Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
-    if(net!=null){ financeStat="SAR "+Number(net).toLocaleString("en-US",{maximumFractionDigits:0}); renderAppCards("appCards"); renderAppCards("appCardsFull"); renderInsights(); }
+    if(net!=null){ financeStat=(data.settings.currency||"SAR")+" "+Number(net).toLocaleString("en-US",{maximumFractionDigits:0}); renderAppCards("appCards"); renderAppCards("appCardsFull"); renderInsights(); }
   }catch(e){}
 }
 
 /* ============ Settings ============ */
 function openSettings(){
-  showModal(`<h4>Settings</h4>
-    <label class="muted" style="font-size:.78rem;font-weight:700">Your name</label>
-    <input class="fld" id="setName" value="${esc(data.profile.name||"")}" placeholder="e.g. Eyad" style="margin:6px 0 12px">
-    <label class="muted" style="font-size:.78rem;font-weight:700">City (prayer times & weather)</label>
-    <input class="fld" id="setCity" value="${esc(data.settings.city||"Makkah")}" placeholder="Makkah" style="margin:6px 0 12px">
-    <label class="muted" style="font-size:.78rem;font-weight:700">Finance Board URL</label>
-    <input class="fld" id="setFin" value="${esc(data.settings.financeUrl||"")}" placeholder="./finance/" style="margin:6px 0 12px">
-    <label class="muted" style="font-size:.78rem;font-weight:700">Travel Planner URL</label>
-    <input class="fld" id="setTrav" value="${esc(data.settings.travelUrl||"")}" placeholder="https://…" style="margin:6px 0 4px">
-    <div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>`);
+  var s=data.settings;
+  function chk(id,on,lbl){ return '<label style="display:flex;align-items:center;gap:9px;font-size:.9rem;font-weight:600;margin:5px 0;cursor:pointer"><input type="checkbox" id="'+id+'" '+(on!==false?"checked":"")+' style="width:18px;height:18px;accent-color:var(--lavender)"> '+lbl+'</label>'; }
+  showModal('<h4>Settings</h4><div style="max-height:64vh;overflow:auto;padding-right:6px">'
+    +'<label class="setlbl">Name</label><input class="fld" id="setName" value="'+esc(data.profile.name||"")+'" style="margin:6px 0 10px">'
+    +'<label class="setlbl">Avatar (emoji)</label><input class="fld" id="setAvatar" value="'+esc(data.profile.avatar||"🧭")+'" style="margin:6px 0 10px;max-width:100px">'
+    +'<label class="setlbl">City — prayer &amp; weather</label><input class="fld" id="setCity" value="'+esc(s.city||"Makkah")+'" style="margin:6px 0 10px">'
+    +'<div style="display:flex;gap:10px"><div style="flex:1"><label class="setlbl">Currency</label><input class="fld" id="setCur" value="'+esc(s.currency||"SAR")+'" style="margin:6px 0 10px"></div>'
+    +'<div style="flex:1"><label class="setlbl">Language</label><select class="fld" id="setLang" style="margin:6px 0 10px"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select></div></div>'
+    +'<label class="setlbl">Next trip — destination &amp; date</label><div style="display:flex;gap:10px;margin:6px 0 10px"><input class="fld" id="setTripDest" value="'+esc(s.nextTripDest||"")+'" placeholder="e.g. Dubai" style="flex:1"><input class="fld" id="setTripDate" type="date" value="'+esc(s.nextTripDate||"")+'" style="flex:1"></div>'
+    +'<label class="setlbl">Finance Board URL</label><input class="fld" id="setFin" value="'+esc(s.financeUrl||"")+'" style="margin:6px 0 10px">'
+    +'<label class="setlbl">Travel Planner URL</label><input class="fld" id="setTrav" value="'+esc(s.travelUrl||"")+'" style="margin:6px 0 10px">'
+    +'<label class="setlbl">Google OAuth Client ID — Calendar (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 12px">'
+    +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")
+    +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
 }
 function saveSettings(){
+  var s=data.settings;
   data.profile.name=document.getElementById("setName").value.trim();
-  data.settings.city=document.getElementById("setCity").value.trim()||"Makkah";
-  data.settings.financeUrl=document.getElementById("setFin").value.trim();
-  data.settings.travelUrl=document.getElementById("setTrav").value.trim();
-  _wxCache={}; _prayCache={}; save(); closeModal(); render(); toast("Settings saved");
+  data.profile.avatar=document.getElementById("setAvatar").value.trim()||"🧭";
+  s.city=document.getElementById("setCity").value.trim()||"Makkah";
+  s.currency=document.getElementById("setCur").value.trim()||"SAR";
+  s.lang=document.getElementById("setLang").value;
+  s.nextTripDest=document.getElementById("setTripDest").value.trim();
+  s.nextTripDate=document.getElementById("setTripDate").value;
+  s.financeUrl=document.getElementById("setFin").value.trim();
+  s.travelUrl=document.getElementById("setTrav").value.trim();
+  s.gcalId=document.getElementById("setGcal").value.trim();
+  s.showPrayer=document.getElementById("wPrayer").checked;
+  s.showWeather=document.getElementById("wWeather").checked;
+  s.showCalendar=document.getElementById("wCal").checked;
+  _wxCache={}; _prayCache={}; save(); applyLang(); closeModal(); render(); toast("Settings saved");
 }
 
 /* ============ Modal helpers ============ */
@@ -613,10 +704,10 @@ function authUI(mode){
   const tabs=`<div class="auth-tabs"><button class="${mode==='in'?'active':''}" onclick="authUI('in')">Sign in</button><button class="${mode==='up'?'active':''}" onclick="authUI('up')">Create account</button></div>`;
   root.innerHTML=`<div class="auth-card">
     <div class="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
-    <h2 class="marc">Your Headquarters</h2><div class="tag">Everything you build & use, in one place.</div>
+    <h2 class="marc">Eyad Alfi</h2><div class="tag">Everything you build & use, in one place.</div>
     ${tabs}
-    <input class="fld" id="aEmail" type="email" placeholder="Email" autocomplete="email">
-    <input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}">
+    <input class="fld" id="aEmail" type="email" placeholder="Email" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
+    <input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
     <div class="auth-err" id="aErr"></div>
     <button class="btn full" id="aBtn" onclick="${mode==='up'?'doSignUp()':'doSignIn()'}">${mode==='up'?'Create account':'Sign in'}</button>
     <div class="auth-links"><button onclick="guestMode()">Continue without account</button>${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}</div>
@@ -657,11 +748,11 @@ async function initAuth(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
-    if(signedIn){ closeAuth(); const d=loadLocal(KEY+":"+u.id); if(d){ data=d; } render(); loadFinance(); toast("Welcome back ✓"); }
+    if(signedIn){ closeAuth(); const d=loadLocal(KEY+":"+u.id); if(d){ data=d; } render(); loadFinance(); pullHub(); toast("Welcome back ✓"); }
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); }
+  if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); pullHub(); }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
