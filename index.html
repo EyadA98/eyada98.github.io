@@ -296,10 +296,6 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
     <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
     <div id="homeLinks"></div>
   </div>
-  <div class="card" id="calCard" style="margin-top:18px;display:none">
-    <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Upcoming · Calendar</h2><button class="btn soft" id="calBtn" onclick="connectCal()">Connect</button></div>
-    <div id="calList"><span class="muted">Add your Google OAuth Client ID in Settings, then connect to see your week.</span></div>
-  </div>
   <div class="grid" id="insightStrip" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:18px"></div>
 </div>
 
@@ -362,8 +358,8 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
 
 <script>
 /* ============ Config ============ */
-const SUPABASE_URL = "https://zshbjjcvwvibayzsmibp.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_RQTYm_1bl9w9Kx6YNxfwyQ_QeG5nxDN";
+const SUPABASE_URL = "https://vulzuubswllmeypxwznq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bHp1dWJzd2xsbWV5cHh3em5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyOTY2MjYsImV4cCI6MjA5Nzg3MjYyNn0.Lmrf-2I-jFaof--__snquTrpa-992y7S1hBhowQtvFY";
 const supaReady = /^https:\/\//.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20 && !!window.supabase;
 const supa = supaReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const KEY = "hub.v1";
@@ -659,8 +655,7 @@ function openSettings(){
     +'<div style="display:flex;gap:10px"><div style="flex:1"><label class="setlbl">Currency</label><input class="fld" id="setCur" value="'+esc(s.currency||"SAR")+'" style="margin:6px 0 10px"></div>'
     +'<div style="flex:1"><label class="setlbl">Language</label><select class="fld" id="setLang" style="margin:6px 0 10px"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select></div></div>'
     +'<label class="setlbl">Next trip — destination &amp; date</label><div style="display:flex;gap:10px;margin:6px 0 10px"><input class="fld" id="setTripDest" value="'+esc(s.nextTripDest||"")+'" placeholder="e.g. Dubai" style="flex:1"><input class="fld" id="setTripDate" type="date" value="'+esc(s.nextTripDate||"")+'" style="flex:1"></div>'
-    +'<label class="setlbl">Google OAuth Client ID — Calendar (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 12px">'
-    +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")
+    +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")
     +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
 }
 function saveSettings(){
@@ -671,10 +666,8 @@ function saveSettings(){
   s.lang=document.getElementById("setLang").value;
   s.nextTripDest=document.getElementById("setTripDest").value.trim();
   s.nextTripDate=document.getElementById("setTripDate").value;
-  s.gcalId=document.getElementById("setGcal").value.trim();
   s.showPrayer=document.getElementById("wPrayer").checked;
   s.showWeather=document.getElementById("wWeather").checked;
-  s.showCalendar=document.getElementById("wCal").checked;
   _wxCache={}; _prayCache={}; save(); applyLang(); closeModal(); render(); toast("Settings saved");
 }
 
