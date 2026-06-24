@@ -431,6 +431,65 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
 .av-menu button svg{width:16px;height:16px;opacity:.8}
 .av-menu button.danger-item{color:var(--red)}
 
+
+/* ===== UI refresh batch (clock / prayer / calendar / pickers) ===== */
+.topbar h2{letter-spacing:-.01em}
+/* Clock centerpiece */
+.wclock{display:flex;flex-direction:column;align-items:flex-end;gap:11px;text-align:right}
+@media(max-width:760px){.wclock{align-items:flex-start;text-align:left}}
+.wtime{font-family:'Marcellus',serif;font-size:clamp(2.9rem,6.8vw,4.4rem);line-height:.95;display:flex;align-items:baseline;gap:7px;letter-spacing:.01em}
+.wtime .sec{font-size:.32em;opacity:.5;font-weight:400}
+.wtime .mer{font-size:.26em;font-weight:700;letter-spacing:.12em;opacity:.72;font-family:'Plus Jakarta Sans',sans-serif}
+.wdate-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:7px 15px;font-weight:700;font-size:.92rem}
+.wdate-chip svg{opacity:.85}
+.whijri{opacity:.66;font-size:.82rem;font-weight:500}
+/* Prayer next countdown */
+.prayer-next{display:flex;flex-direction:column;gap:3px;margin-bottom:16px;padding:16px 20px;border-radius:16px;background:var(--grad-iri);color:#fff;box-shadow:var(--glow-lav)}
+.pn-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.13em;opacity:.85;font-weight:800}
+.pn-name{font-family:'Marcellus',serif;font-size:1.55rem;line-height:1.1}
+.pn-count{font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+.pn-count span{font-weight:600;opacity:.82;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-left:5px}
+/* Calendar event chips */
+.cal-cell{min-height:88px;display:flex;flex-direction:column}
+.cal-evs{margin-top:5px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.cal-ev{font-size:.63rem;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.ev-task{background:rgba(138,100,200,.22);color:var(--lavender)}
+.ev-event{background:rgba(243,185,142,.26);color:var(--peach)}
+.ev-zakat{background:rgba(127,209,196,.24);color:var(--green)}
+.cal-cell.sel .cal-ev{background:rgba(255,255,255,.26);color:#fff}
+.cal-more{font-size:.6rem;color:var(--muted);font-weight:800;padding-left:2px}
+.cal-cell.sel .cal-more{color:rgba(255,255,255,.85)}
+.cal-dots{position:static;display:none;gap:3px;margin-top:4px}
+@media(max-width:680px){.cal-cell{min-height:54px}.cal-evs{display:none}.cal-dots{display:flex}}
+/* Gmail scroll list */
+.gm-list{max-height:430px;overflow:auto;padding-right:4px}
+/* ===== Custom date picker + select (Travel Planner / Finance parity) ===== */
+.dp-btn,.cs-btn{width:100%;min-height:40px;border-radius:12px;padding:8px 12px;font-family:inherit;font-size:.92rem;font-weight:500;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;transition:border-color .2s,box-shadow .2s;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid #d4c6ef}
+.dp-btn:hover,.cs-btn:hover{border-color:var(--lavender)}
+.dp-btn:focus,.cs-btn:focus{outline:none;border-color:var(--lavender);box-shadow:0 0 0 3px rgba(138,100,200,.22)}
+.cs-auto{width:auto;min-width:120px;font-weight:600}
+.dp-ph{opacity:.55}
+.dp-ic,.cs-ic{display:flex;color:var(--lavender);opacity:.85;flex:none}
+.cs-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp-pop{position:fixed;z-index:140;width:252px;border-radius:16px;padding:12px;animation:pop .2s var(--ease);background:var(--card);border:1px solid var(--border);box-shadow:var(--sh-2)}
+.cs-pop{position:fixed;z-index:140;border-radius:14px;padding:6px;max-height:288px;overflow:auto;animation:pop .18s var(--ease);background:var(--card);border:1px solid var(--border);box-shadow:var(--sh-2)}
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dp-title{font-family:'Marcellus',serif;font-size:1rem;color:var(--text)}
+.dp-nav{width:30px;height:30px;border-radius:9px;border:none;background:rgba(138,100,200,.16);color:var(--lavender);font-size:1.15rem;line-height:1;cursor:pointer;transition:background .2s}
+.dp-nav:hover{background:rgba(138,100,200,.3)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.dp-w{text-align:center;font-size:.64rem;font-weight:800;color:var(--muted);padding:2px 0}
+.dp-day{height:32px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:.82rem;cursor:pointer;color:var(--text);transition:background .15s}
+.dp-day:hover{background:rgba(138,100,200,.16)}
+.dp-today{box-shadow:inset 0 0 0 1.5px rgba(138,100,200,.65)}
+.dp-sel{background:var(--grad-iri);color:#fff;font-weight:800}
+.dp-foot{text-align:center;margin-top:9px}
+.dp-clear{font-size:.72rem;color:var(--muted);background:rgba(138,100,200,.14);border:none;border-radius:8px;padding:5px 14px;cursor:pointer;font-family:inherit}
+.cs-opt{display:block;width:100%;text-align:left;border:none;background:none;border-radius:9px;padding:9px 12px;font-family:inherit;font-size:.88rem;color:var(--text);cursor:pointer;white-space:nowrap;transition:background .15s}
+.cs-opt:hover{background:rgba(138,100,200,.16)}
+.cs-sel{background:var(--grad-iri);color:#fff;font-weight:700}
+
 </style>
 </head>
 <body>
@@ -479,7 +538,7 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
       </div>
       <div class="wclock">
         <div class="wtime" id="clockTime">--:--</div>
-        <div class="wdate-lg" id="dateLine">&mdash;</div>
+        <div class="wdate-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span id="dateLine">&mdash;</span></div>
         <div class="whijri" id="hijriLine"></div>
       </div>
     </div>
@@ -488,6 +547,7 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
   <!-- PRAYER TIMES -->
   <div class="card prayer-card" id="prayerCard" style="margin-bottom:18px">
     <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
+    <div class="prayer-next" id="prayerNext"></div>
     <div class="prow" id="prayersRow"></div>
   </div>
 
@@ -570,8 +630,8 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
       <button id="tv-table" onclick="setTaskView('table')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Table</button>
     </div>
     <input class="fld" id="taskSearch" placeholder="Search&hellip;" style="max-width:170px" oninput="renderTasks()">
-    <select class="fld" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
-    <select class="fld" id="taskSort" style="max-width:150px" onchange="renderTasks()"><option value="created">Newest</option><option value="due">Due date</option><option value="priority">Priority</option><option value="title">Title</option></select>
+    <select class="fld bare" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
+    <select class="fld bare" id="taskSort" style="max-width:150px" onchange="renderTasks()"><option value="created">Newest</option><option value="due">Due date</option><option value="priority">Priority</option><option value="title">Title</option></select>
   </div>
   <div id="taskViewBody"></div>
 </div>
@@ -674,6 +734,7 @@ function render(){ applyLang();
   try{ renderLinks(); }catch(e){ console.error(e); }
   try{ renderGoals(); }catch(e){ console.error(e); }
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
+  try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
 }
 function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
@@ -755,7 +816,7 @@ function kindBadge(k){var m={task:["b-todo","Task"],event:["b-doing","Event"],za
 function wsChip(ic,txt){return '<div class="ws">'+ic+'<span>'+esc(txt)+'</span></div>';}
 function sumRow(ic,html){return '<div class="sum-row"><span class="si">'+ic+'</span><div>'+html+'</div></div>';}
 function emptyTasks(){return '<div class="empty"><div class="glyph">'+IC.task+'</div><p>No tasks here yet.</p><div style="margin-top:12px"><button class="btn" onclick="openTask()">+ New task</button></div></div>';}
-function tickClock(){var el=document.getElementById("clockTime");if(!el)return;var n=new Date();function p(x){return String(x).padStart(2,"0");}el.innerHTML=p(n.getHours())+":"+p(n.getMinutes())+'<span class="sec">'+p(n.getSeconds())+'</span>';}
+function tickClock(){var el=document.getElementById("clockTime");if(!el)return;var n=new Date();function p(x){return String(x).padStart(2,"0");}var h=n.getHours();var mer=h<12?"AM":"PM";var h12=(h%12)||12;el.innerHTML=h12+":"+p(n.getMinutes())+'<span class="sec">'+p(n.getSeconds())+'</span><span class="mer">'+mer+'</span>';}
 function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;});}
 function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).length;var ev=todayEvents().length;var parts=[wsChip(IC.task,due+" task"+(due!==1?"s":"")+" due"),wsChip(IC.cal,ev+" event"+(ev!==1?"s":""))];if(financeStat)parts.push(wsChip(IC.money,financeStat));el.innerHTML=parts.join("");}
 
@@ -771,7 +832,8 @@ var calView="month",calCursor=new Date(),calSel=null;
 function setCalView(v){calView=v;var m=document.getElementById("calV-month"),a=document.getElementById("calV-agenda");if(m)m.classList.toggle("on",v==="month");if(a)a.classList.toggle("on",v==="agenda");renderCalendar();}
 function calStep(d){if(calView==="month"){calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth()+d,1);}else{calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth(),calCursor.getDate()+d*7);}renderCalendar();}
 function calItemsByDate(){var map={};function add(date,label,kind){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task");});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";add(w.slice(0,10),e.summary||"(event)","event");});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}return map;}
-function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
+function evClass(k){return k==="event"?"ev-event":(k==="zakat"?"ev-zakat":"ev-task");}
+function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){return '<span class="cal-ev '+evClass(it.kind)+'" title="'+esc(it.label)+'">'+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
 function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item">'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div></div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item">'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div></div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
 function computeNudges(){
@@ -881,6 +943,7 @@ function openTask(id){
     +(isNew?'':'<div class="muted" style="font-size:.72rem;margin-top:12px">Created '+new Date(t.created||Date.now()).toLocaleDateString()+(t.updated?(' &middot; updated '+new Date(t.updated).toLocaleDateString()):'')+'</div>')
     +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="delTask(\''+t.id+'\');closeModal()">Delete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveTask(\''+(t.id||"")+'\')">'+(isNew?"Create task":"Save")+'</button></div>';
   showModal(html,"wide");
+  try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
   setTimeout(function(){ var e=document.getElementById("tdTitle"); if(e) e.focus(); },30);
 }
 function saveTask(id){
@@ -994,15 +1057,27 @@ function relTime(ts){ if(!ts) return ""; var d=(typeof ts==="number")?ts:Date.pa
 function istBadge(k){ var m={on:["is-on","Connected"],off:["is-off","Not Connected"],sync:["is-sync","Connecting"],err:["is-off","Error"]}; var x=m[k]||m.off; return '<span class="istate '+x[0]+'">'+(k==="sync"?'<span class="ispin"></span>':'<span class="idot"></span>')+x[1]+'</span>'; }
 function googleClientId(){ return (data.settings&&data.settings.gcalId)||""; }
 function intState(kind){ var st=kind==="cal"?calState:gmailState; if(st==="connecting")return"connecting"; if(st==="connected")return"connected"; if(st==="error")return"error"; var persisted=kind==="cal"?data.settings.calConnected:data.settings.gmailConnected; if(persisted&&data.settings.googleEmail)return"stale"; return"off"; }
-function gAuth(scope,onToken){
-  var cid=googleClientId();
-  if(!cid){ toast("Add your Google Client ID in Settings"); openSettings(); return false; }
-  if(!window.google||!google.accounts||!google.accounts.oauth2){ toast("Google not ready — try again in a moment"); return false; }
+var CAL_SCOPE="https://www.googleapis.com/auth/calendar.readonly";
+var GMAIL_SCOPE="https://www.googleapis.com/auth/gmail.modify";
+function saveGToken(kind,token,expiresIn){ try{ localStorage.setItem("hub."+kind+".tok",token); localStorage.setItem("hub."+kind+".exp",String(Date.now()+((+expiresIn||3300)*1000))); }catch(e){} }
+function getGToken(kind){ try{ var t=localStorage.getItem("hub."+kind+".tok"); var e=+localStorage.getItem("hub."+kind+".exp")||0; if(t&&e>Date.now()+30000) return t; }catch(e){} return null; }
+function clearGToken(kind){ try{ localStorage.removeItem("hub."+kind+".tok"); localStorage.removeItem("hub."+kind+".exp"); }catch(e){} }
+function gGetToken(kind,scope,cb,silent){
+  var cached=getGToken(kind); if(cached){ cb(cached); return true; }
+  var cid=googleClientId(); if(!cid){ if(!silent){ toast("Add your Google Client ID in Settings"); openSettings(); } return false; }
+  if(!window.google||!google.accounts||!google.accounts.oauth2){ if(!silent) toast("Google not ready — try again in a moment"); return false; }
   try{
-    var tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:scope+" https://www.googleapis.com/auth/userinfo.email",callback:function(resp){ if(resp&&resp.access_token){ onToken(resp.access_token); } else { onToken(null,resp); } }});
-    tc.requestAccessToken();
+    var tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:scope+" https://www.googleapis.com/auth/userinfo.email",
+      callback:function(resp){ if(resp&&resp.access_token){ saveGToken(kind,resp.access_token,resp.expires_in); cb(resp.access_token); } else { cb(null,resp); } },
+      error_callback:function(err){ cb(null,err); }});
+    tc.requestAccessToken(silent?{prompt:""}:{});
     return true;
-  }catch(e){ toast("Couldn't start Google sign-in"); return false; }
+  }catch(e){ if(!silent) toast("Couldn't start Google sign-in"); return false; }
+}
+function gAutoConnect(){
+  if(!googleClientId()) return;
+  if(data.settings.calConnected){ gGetToken("gcal",CAL_SCOPE,function(tok){ if(tok){ calToken=tok; calState="connected"; loadCalEvents(tok); renderCalConn(); } },true); }
+  if(data.settings.gmailConnected){ gGetToken("gmail",GMAIL_SCOPE,function(tok){ if(tok){ gmailToken=tok; gmailState="connected"; gmailLoad().then(function(){ renderGmail(); }); renderGmail(); } },true); }
 }
 async function gFetchEmail(token){ try{ var j=await fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+token}}).then(function(r){return r.json();}); return (j&&j.email)||""; }catch(e){ return ""; } }
 
@@ -1019,9 +1094,8 @@ function renderCalConn(){
   }
 }
 function calConnect(){
-  if(!googleClientId()){ toast("Add your Google Client ID in Settings"); openSettings(); return; }
   calState="connecting"; renderCalConn();
-  var ok=gAuth("https://www.googleapis.com/auth/calendar.readonly", async function(token){
+  var ok=gGetToken("gcal",CAL_SCOPE, async function(token){
     if(!token){ calState="error"; renderCalConn(); return; }
     calToken=token; var em=await gFetchEmail(token); if(em) data.settings.googleEmail=em; data.settings.calConnected=true; data.settings.calLastSync=Date.now(); save();
     await loadCalEvents(token);
@@ -1069,12 +1143,11 @@ function renderGmail(){
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
-  return '<div class="gm-item'+(m.unread?' unread':'')+'"><div class="gm-av">'+esc(initials)+'</div><div class="gm-main" onclick="gmOpen(\''+m.id+'\')"><div class="gm-row1"><span class="gm-from">'+esc(m.fromName||m.from||"Unknown")+'</span><span class="gm-time">'+esc(m.time)+'</span></div><div class="gm-subj">'+esc(m.subject||"(no subject)")+'</div><div class="gm-prev">'+esc(m.snippet||"")+'</div></div><div class="gm-acts"><button class="icon-btn'+(m.starred?' on':'')+'" title="'+(m.starred?'Unstar':'Star')+'" onclick="gmStar(\''+m.id+'\','+(m.starred?'true':'false')+')">'+I_STAR+'</button>'+(m.unread?'<button class="icon-btn" title="Mark read" onclick="gmMarkRead(\''+m.id+'\')">'+I_CHECK+'</button>':'')+'<button class="icon-btn" title="Archive" onclick="gmArchive(\''+m.id+'\')">'+I_ARCH+'</button></div></div>';
+  return '<div class="gm-item'+(m.unread?' unread':'')+'"><div class="gm-av">'+esc(initials)+'</div><div class="gm-main" onclick="gmOpen(\''+m.id+'\')"><div class="gm-row1"><span class="gm-from">'+esc(m.fromName||m.from||"Unknown")+'</span><span class="gm-time">'+esc(m.time)+'</span></div><div class="gm-subj">'+esc(m.subject||"(no subject)")+'</div></div><div class="gm-acts"><button class="icon-btn'+(m.starred?' on':'')+'" title="'+(m.starred?'Unstar':'Star')+'" onclick="gmStar(\''+m.id+'\','+(m.starred?'true':'false')+')">'+I_STAR+'</button>'+(m.unread?'<button class="icon-btn" title="Mark read" onclick="gmMarkRead(\''+m.id+'\')">'+I_CHECK+'</button>':'')+'<button class="icon-btn" title="Archive" onclick="gmArchive(\''+m.id+'\')">'+I_ARCH+'</button></div></div>';
 }
 function gmailConnect(){
-  if(!googleClientId()){ toast("Add your Google Client ID in Settings"); openSettings(); return; }
   gmailState="connecting"; renderGmail();
-  var ok=gAuth("https://www.googleapis.com/auth/gmail.modify", async function(token){
+  var ok=gGetToken("gmail",GMAIL_SCOPE, async function(token){
     if(!token){ gmailState="error"; renderGmail(); return; }
     gmailToken=token; var em=await gFetchEmail(token); if(em) data.settings.googleEmail=em; data.settings.gmailConnected=true; data.settings.gmailLastSync=Date.now(); save();
     await gmailLoad();
@@ -1087,29 +1160,31 @@ async function gmailApi(path,method,body){
   var opt={method:method||"GET",headers:{Authorization:"Bearer "+gmailToken}};
   if(body){ opt.headers["Content-Type"]="application/json"; opt.body=JSON.stringify(body); }
   var r=await fetch("https://gmail.googleapis.com/gmail/v1/users/me/"+path,opt);
+  if(r.status===401){ clearGToken("gmail"); gmailToken=null; throw new Error("gmail 401"); }
   if(!r.ok) throw new Error("gmail http "+r.status);
   return r.json();
 }
 async function gmCount(q){ try{ var j=await gmailApi("messages?maxResults=1&q="+encodeURIComponent(q)); return j.resultSizeEstimate||0; }catch(e){ return 0; } }
 async function gmailLoad(){
   try{
-    var unread=await gmCount("is:unread in:inbox");
-    var today=await gmCount("newer_than:1d in:inbox");
+    var primary="in:inbox category:primary";
+    var unread=await gmCount("is:unread "+primary);
+    var today=await gmCount("newer_than:1d "+primary);
     var important=await gmCount("is:important in:inbox");
     var starred=await gmCount("is:starred");
     gmailStats={unread:unread,today:today,important:important,starred:starred};
-    var lst=await gmailApi("messages?maxResults=5&q="+encodeURIComponent("in:inbox"));
+    var lst=await gmailApi("messages?maxResults=20&q="+encodeURIComponent(primary));
     var ids=(lst.messages||[]).map(function(x){return x.id;});
-    var msgs=[];
-    for(var i=0;i<ids.length;i++){
-      var m=await gmailApi("messages/"+ids[i]+"?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date");
-      var hd={}; ((m.payload&&m.payload.headers)||[]).forEach(function(h){ hd[h.name]=h.value; });
-      var fromRaw=hd.From||""; var nm=fromRaw.replace(/<[^>]*>/,"").replace(/"/g,"").trim()||fromRaw;
-      var labels=m.labelIds||[];
-      var when=Date.parse(hd.Date||"")|| (+m.internalDate||0);
-      msgs.push({id:ids[i],from:fromRaw,fromName:nm,subject:hd.Subject||"",snippet:m.snippet||"",time:relTime(when),unread:labels.indexOf("UNREAD")>=0,starred:labels.indexOf("STARRED")>=0});
-    }
-    gmailMsgs=msgs; data.settings.gmailLastSync=Date.now(); save();
+    var msgs=await Promise.all(ids.map(function(id){
+      return gmailApi("messages/"+id+"?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date").then(function(m){
+        var hd={}; ((m.payload&&m.payload.headers)||[]).forEach(function(h){ hd[h.name]=h.value; });
+        var fromRaw=hd.From||""; var nm=fromRaw.replace(/<[^>]*>/,"").replace(/"/g,"").trim()||fromRaw;
+        var labels=m.labelIds||[]; var when=Date.parse(hd.Date||"")||(+m.internalDate||0);
+        return {id:id,from:fromRaw,fromName:nm,subject:hd.Subject||"",time:relTime(when),unread:labels.indexOf("UNREAD")>=0,starred:labels.indexOf("STARRED")>=0};
+      }).catch(function(){ return null; });
+    }));
+    gmailMsgs=msgs.filter(Boolean);
+    data.settings.gmailLastSync=Date.now(); save();
   }catch(e){ gmailState="error"; }
 }
 function gmOpen(id){ window.open("https://mail.google.com/mail/u/0/#all/"+id,"_blank","noopener"); }
@@ -1124,7 +1199,6 @@ function closeAvMenu(){ var m=document.getElementById("avMenu"); if(m) m.classLi
 function avMenuHtml(){
   var signed=!!user; var email=signed?(user.email||""):""; var nm=(data.profile&&data.profile.name)||"Guest";
   var h='<div class="avm-head"><b>'+esc(nm)+'</b><span>'+(email?esc(email):'Not signed in')+'</span></div>';
-  h+='<button onclick="closeAvMenu();openSettings()">'+I_USER+' Edit profile</button>';
   h+='<button onclick="closeAvMenu();openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8M4.6 9A1.6 1.6 0 0 0 3.5 14M12 2v2M12 20v2M4 12H2M22 12h-2"/></svg> Preferences</button>';
   h+=signed? '<button class="danger-item" onclick="closeAvMenu();signOut()">'+I_SIGNOUT+' Sign out</button>' : '<button onclick="closeAvMenu();openAccount()">'+I_SIGNOUT+' Sign in</button>';
   return h;
@@ -1147,6 +1221,19 @@ async function loadWeather(){
   }catch(e){}
 }
 function wxDesc(c){ if(c==0)return"Clear"; if(c<3)return"Sunny"; if(c<50)return"Cloudy"; if(c<70)return"Rain"; if(c<80)return"Showers"; return"Storm"; }
+var _prayList=null;
+function renderPrayerNext(){
+  var el=document.getElementById("prayerNext"); if(!el) return;
+  if(!_prayList){ el.style.display="none"; return; }
+  el.style.display="";
+  var now=new Date(); var nowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+  var next=null;
+  for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; var ps=pr.h*3600+pr.m*60; if(ps>nowS){ next={name:pr.name,sec:ps-nowS}; break; } }
+  if(!next){ var f=_prayList[0]; next={name:f.name,sec:(86400-nowS)+(f.h*3600+f.m*60)}; }
+  var hh=Math.floor(next.sec/3600), mm=Math.floor((next.sec%3600)/60), ss=next.sec%60;
+  function p2(x){ return (x<10?"0":"")+x; }
+  el.innerHTML='<div class="pn-label">Next Prayer</div><div class="pn-name">'+esc(next.name)+'</div><div class="pn-count">'+p2(hh)+'h '+p2(mm)+'m '+p2(ss)+'s<span>remaining</span></div>';
+}
 async function loadPrayers(){
   const city=data.settings.city||"Makkah"; const row=document.getElementById("prayersRow"); if(!row) return;
   try{
@@ -1155,7 +1242,9 @@ async function loadPrayers(){
     const t=j.data.timings; const order=[["Fajr",t.Fajr],["Dhuhr",t.Dhuhr],["Asr",t.Asr],["Maghrib",t.Maghrib],["Isha",t.Isha]];
     const now=new Date(), nowM=now.getHours()*60+now.getMinutes();
     let nextIdx=order.findIndex(([n,tm])=>{ const [H,M]=tm.split(":").map(Number); return H*60+M>nowM; }); if(nextIdx<0) nextIdx=0;
+    _prayList=order.map(function(o){ var pp=String(o[1]).split(":"); return {name:o[0],h:+pp[0],m:+pp[1]}; });
     row.innerHTML=order.map(([n,tm],i)=>`<div class="pr2 ${i===nextIdx?'next':''}"><div class="nm">${n}</div><b>${tm}</b></div>`).join("");
+    renderPrayerNext();
   }catch(e){ row.innerHTML=""; }
 }
 
@@ -1186,6 +1275,7 @@ function openSettings(){
     +'<label class="setlbl">Google Client ID &mdash; Calendar &amp; Gmail (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 10px">'
     +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")+chk("wGmail",s.showGmail,"Gmail")
     +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
+  try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
 }
 var _acTimer=null,_acIdx=-1,_acItems=[];
 function cityAC(q){ var box=document.getElementById("cityAClist"); if(!box) return; q=(q||"").trim(); if(q.length<2){ box.classList.remove("show"); box.innerHTML=""; return; } clearTimeout(_acTimer); _acTimer=setTimeout(function(){ fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(q)+"&count=6&language=en").then(function(r){return r.json();}).then(function(j){ _acItems=(j&&j.results)||[]; _acIdx=-1; if(!_acItems.length){ box.classList.remove("show"); box.innerHTML=""; return; } box.innerHTML=_acItems.map(function(r,i){ return '<div class="ac-item" data-i="'+i+'" onmousedown="cityPick('+i+')"><span>'+esc(r.name)+'</span><small>'+esc([r.admin1,r.country].filter(Boolean).join(", "))+'</small></div>'; }).join(""); box.classList.add("show"); }).catch(function(){}); },220); }
@@ -1286,9 +1376,82 @@ async function initAuth(){
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
+/* ============ Custom date picker + select (Travel Planner / Finance parity) ============ */
+function _pad2(n){return (n<10?"0":"")+n;}
+function prettyDate(iso){if(!iso)return "";var p=String(iso).split("-");if(p.length<3)return iso;var d=new Date(+p[0],+p[1]-1,+p[2]);if(isNaN(d))return iso;return d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});}
+var _dp=null;
+function _dpClose(){if(_dp){_dp.pop.remove();_dp=null;document.removeEventListener("mousedown",_dpOutside,true);}}
+function _dpOutside(e){if(_dp&&!_dp.pop.contains(e.target)&&!_dp.btn.contains(e.target))_dpClose();}
+function _dpPlace(pop,btn){var r=btn.getBoundingClientRect();var W=252;var ph=pop.offsetHeight||320;var left=Math.max(8,Math.min(r.left,window.innerWidth-W-8));var below=window.innerHeight-r.bottom>=ph+8;var top=below?r.bottom+6:Math.max(8,r.top-ph-6);pop.style.left=left+"px";pop.style.top=top+"px";}
+function _dpOpen(inp,btn,relabel){
+  _dpClose();
+  var pop=document.createElement("div");pop.className="dp-pop";
+  var base=inp.value?new Date(inp.value):new Date();var cur={y:base.getFullYear(),m:base.getMonth()};
+  function draw(){
+    var first=new Date(cur.y,cur.m,1),start=first.getDay(),days=new Date(cur.y,cur.m+1,0).getDate();
+    var td=new Date();var todayISO=td.getFullYear()+"-"+_pad2(td.getMonth()+1)+"-"+_pad2(td.getDate());
+    var html='<div class="dp-head"><button type="button" class="dp-nav" data-n="-1" aria-label="Previous month">‹</button><div class="dp-title">'+first.toLocaleDateString(undefined,{month:"long",year:"numeric"})+'</div><button type="button" class="dp-nav" data-n="1" aria-label="Next month">›</button></div>';
+    html+='<div class="dp-grid">'+["S","M","T","W","T","F","S"].map(function(w){return '<div class="dp-w">'+w+'</div>';}).join("")+'</div><div class="dp-grid">';
+    for(var i=0;i<start;i++)html+='<div></div>';
+    for(var dd=1;dd<=days;dd++){var iso=cur.y+"-"+_pad2(cur.m+1)+"-"+_pad2(dd);var sel=inp.value===iso,today=iso===todayISO;html+='<button type="button" class="dp-day'+(sel?" dp-sel":"")+(today&&!sel?" dp-today":"")+'" data-iso="'+iso+'">'+dd+'</button>';}
+    html+='</div>'+(inp.value?'<div class="dp-foot"><button type="button" class="dp-clear">Clear date</button></div>':'');
+    pop.innerHTML=html;
+  }
+  draw();document.body.appendChild(pop);_dpPlace(pop,btn);
+  pop.addEventListener("click",function(e){
+    var nav=e.target.closest(".dp-nav");if(nav){cur.m+=+nav.dataset.n;if(cur.m<0){cur.m=11;cur.y--;}if(cur.m>11){cur.m=0;cur.y++;}draw();_dpPlace(pop,btn);return;}
+    var day=e.target.closest(".dp-day");if(day){inp.value=day.dataset.iso;relabel();_dpClose();inp.dispatchEvent(new Event("change",{bubbles:true}));return;}
+    if(e.target.closest(".dp-clear")){inp.value="";relabel();_dpClose();inp.dispatchEvent(new Event("change",{bubbles:true}));return;}
+  });
+  _dp={pop:pop,btn:btn};
+  setTimeout(function(){document.addEventListener("mousedown",_dpOutside,true);},0);
+}
+function enhanceDatePickers(){
+  document.querySelectorAll('input[type=date]').forEach(function(inp){
+    if(inp.dataset.dp)return;inp.dataset.dp="1";inp.style.display="none";
+    var btn=document.createElement("button");btn.type="button";btn.className="dp-btn";
+    btn.setAttribute("aria-label", inp.getAttribute("aria-label")||"Pick date");
+    function relabel(){btn.innerHTML='<span class="'+(inp.value?"":"dp-ph")+'">'+(inp.value?prettyDate(inp.value):"Select date")+'</span><span class="dp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>';}
+    relabel();
+    btn.addEventListener("click",function(e){e.stopPropagation();if(_dp&&_dp.btn===btn){_dpClose();return;}_dpOpen(inp,btn,relabel);});
+    inp.parentNode.insertBefore(btn,inp);
+  });
+}
+var CS_CHEV='<span class="cs-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></span>';
+var _cs=null;
+function _csClose(){if(_cs){_cs.pop.remove();_cs=null;document.removeEventListener("mousedown",_csOutside,true);}}
+function _csOutside(e){if(_cs&&!_cs.pop.contains(e.target)&&!_cs.btn.contains(e.target))_csClose();}
+function _csPlace(pop,btn){var r=btn.getBoundingClientRect();var W=Math.max(r.width,150);pop.style.minWidth=W+"px";var ph=pop.offsetHeight||200;var left=Math.max(8,Math.min(r.left,window.innerWidth-W-8));var below=window.innerHeight-r.bottom>=ph+8;var top=below?r.bottom+5:Math.max(8,r.top-ph-5);pop.style.left=left+"px";pop.style.top=top+"px";}
+function _csRelabel(sel){var btn=sel._csbtn;if(!btn)return;var o=sel.options[sel.selectedIndex];btn.innerHTML='<span class="cs-val">'+((o?o.textContent:"")||"").replace(/</g,"&lt;")+'</span>'+CS_CHEV;}
+function _csOpen(sel,btn){
+  _csClose();
+  var pop=document.createElement("div");pop.className="cs-pop";var html="";
+  for(var i=0;i<sel.options.length;i++){var o=sel.options[i];html+='<button type="button" class="cs-opt'+(i===sel.selectedIndex?" cs-sel":"")+'" data-i="'+i+'">'+((o.textContent||"").replace(/</g,"&lt;"))+'</button>';}
+  pop.innerHTML=html;document.body.appendChild(pop);_csPlace(pop,btn);
+  pop.addEventListener("click",function(e){var b=e.target.closest(".cs-opt");if(!b)return;sel.selectedIndex=+b.dataset.i;_csRelabel(sel);_csClose();sel.dispatchEvent(new Event("change",{bubbles:true}));});
+  _cs={pop:pop,btn:btn};
+  setTimeout(function(){document.addEventListener("mousedown",_csOutside,true);},0);
+}
+function enhanceSelects(){
+  document.querySelectorAll("select").forEach(function(sel){
+    if(!sel.dataset.cs){
+      sel.dataset.cs="1";sel.style.display="none";
+      var btn=document.createElement("button");btn.type="button";
+      btn.className="cs-btn"+((sel.classList.contains("bare"))?" cs-auto":"");
+      btn.setAttribute("aria-label",sel.getAttribute("aria-label")||"Select");
+      sel.parentNode.insertBefore(btn,sel);sel._csbtn=btn;
+      btn.addEventListener("click",function(e){e.stopPropagation();if(_cs&&_cs.btn===btn){_csClose();return;}_csOpen(sel,btn);});
+    }
+    _csRelabel(sel);
+  });
+}
+
 /* ============ Boot ============ */
 render();
-setInterval(function(){ var hub=document.getElementById("tab-home"); if(document.getElementById("clockTime")&&hub&&hub.classList.contains("active")) tickClock(); },1000);
+setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} } },1000);
+setInterval(function(){ if(user&&supa&&document.visibilityState==="visible") loadFinance(); },60000);
+document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&user&&supa) loadFinance(); });
+(function waitG(n){ if(window.google&&google.accounts&&google.accounts.oauth2){ try{ gAutoConnect(); }catch(e){} } else if(n>0){ setTimeout(function(){ waitG(n-1); },400); } })(15);
 initAuth();
 (function(){ var s=document.getElementById("splash"); function go(){ setTimeout(()=>s.classList.add("hide"),600); setTimeout(()=>{ if(s.parentNode) s.parentNode.removeChild(s); },1400); } if(document.readyState==="complete") go(); else window.addEventListener("load",go); })();
 </script>
