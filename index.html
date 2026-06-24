@@ -236,6 +236,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .setlbl{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block}
+.glyph svg{width:34px;height:34px;opacity:.55;display:inline-block}
 </style>
 </head>
 <body>
@@ -262,7 +263,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
 <div class="topbar">
   <div class="tb-left"><div><div class="crumb" id="crumb">Home</div><h2 id="pageTitle" class="marc">Dashboard</h2></div></div>
   <div class="top-actions">
-    <div id="avatarChip" title="Profile" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:1.05rem;background:rgba(255,255,255,.08);border:1px solid var(--border);cursor:pointer" onclick="openSettings()"></div>
+    <div id="avatarChip" title="Profile" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:.9rem;font-weight:800;color:#fff;background:var(--grad-iri);box-shadow:var(--glow-lav);cursor:pointer" onclick="openSettings()"></div>
     <button class="btn soft round" onclick="toggleTheme()" title="Theme" aria-label="Toggle theme"><span id="themeIcon"></span></button>
     <button class="btn soft round" onclick="openSettings()" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.5 14H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.5V3a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 4.6l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
     <button class="btn soft" id="acctBtn" onclick="openAccount()">Account</button>
@@ -307,7 +308,7 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
   <div class="section-head"><h2>Your apps</h2></div>
   <div class="grid apps" id="appCardsFull"></div>
   <div class="card" style="margin-top:18px;text-align:center;border-style:dashed">
-    <div class="empty"><div class="glyph">✦</div><p>More projects coming soon — this is your headquarters.</p></div>
+    <div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.2 6.3L21 11l-6.8 1.7L12 19l-2.2-6.3L3 11l6.8-1.7z"/></svg></div><p>More projects coming soon — this is your headquarters.</p></div>
   </div>
 </div>
 
@@ -370,8 +371,8 @@ const GUEST_FLAG = "hub.guest";
 let user = null;
 
 const DEFAULT = {
-  profile:{ name:"Eyad Alfi", avatar:"🧭" },
-  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"https://eyada98.github.io/Travel-Planner/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", showPrayer:true, showWeather:true, showCalendar:true },
+  profile:{ name:"Eyad Alfi" },
+  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", showPrayer:true, showWeather:true, showCalendar:true },
   notes:[], tasks:[], goals:[],
   links:[
     {group:"Build", label:"GitHub", url:"https://github.com"},
@@ -420,7 +421,16 @@ function go(name){
 document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 
 /* ============ Render ============ */
-function render(){ applyLang(); renderHome(); renderApps(); renderNotes(); renderTasks(); renderLinks(); renderGoals(); var a=document.getElementById("avatarChip"); if(a) a.textContent=data.profile.avatar||"🧭"; }
+function avatarText(){ var nm=((data.profile&&data.profile.name)||"").trim(); if(!nm) return "•"; var p=nm.split(/\s+/); return (p[0].charAt(0)+(p[1]?p[1].charAt(0):"")).toUpperCase(); }
+function render(){ applyLang();
+  try{ renderHome(); }catch(e){ console.error("renderHome",e); }
+  try{ renderApps(); }catch(e){ console.error(e); }
+  try{ renderNotes(); }catch(e){ console.error(e); }
+  try{ renderTasks(); }catch(e){ console.error(e); }
+  try{ renderLinks(); }catch(e){ console.error(e); }
+  try{ renderGoals(); }catch(e){ console.error(e); }
+  var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
+}
 function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
@@ -440,13 +450,13 @@ function renderHome(){
     (data.settings.showWeather!==false?`<div class="ts" id="wxBox"><b>—</b><span>Weather</span></div>`:"")+
     `<div class="ts"><b>${openTasks}</b><span>Open tasks</span></div>`+
     `<div class="ts"><b>${notes}</b><span>Notes</span></div>`+
-    `<div class="ts"><b>${data.goals.length}</b><span>Goals</span></div>`;
+    `<div class="ts"><b>${(data.goals||[]).length}</b><span>Goals</span></div>`;
   renderAppCards("appCards");
   // today tasks
   const today=new Date().toISOString().slice(0,10);
   const due=data.tasks.filter(t=>!t.done).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")).slice(0,6);
   document.getElementById("todayTasks").innerHTML = due.length? due.map(t=>taskRow(t)).join("")
-    : '<div class="empty"><div class="glyph">✓</div><p>Nothing due — you are all clear.</p></div>';
+    : '<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><p>Nothing due — you are all clear.</p></div>';
   // home links (first few)
   document.getElementById("homeLinks").innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
   renderInsights();
@@ -483,10 +493,10 @@ function renderInsights(){
   const out=[];
   const today=new Date().toISOString().slice(0,10);
   const overdue=data.tasks.filter(t=>!t.done&&t.due&&t.due<today).length;
-  if(overdue) out.push(insight("🔴",`<b>${overdue}</b> task${overdue>1?"s":""} overdue — take a look in Tasks.`));
-  if(financeStat) out.push(insight("◆",`Latest recorded net worth: <b>${esc(financeStat)}</b>.`));
+  if(overdue) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',`<b>${overdue}</b> task${overdue>1?"s":""} overdue — take a look in Tasks.`));
+  if(financeStat) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',`Latest recorded net worth: <b>${esc(financeStat)}</b>.`));
   const dueSoon=data.tasks.filter(t=>!t.done&&t.due&&t.due>=today).sort((a,b)=>a.due.localeCompare(b.due))[0];
-  if(dueSoon) out.push(insight("🗓",`Next due: <b>${esc(dueSoon.t)}</b> on ${esc(dueSoon.due)}.`));
+  if(dueSoon) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',`Next due: <b>${esc(dueSoon.t)}</b> on ${esc(dueSoon.due)}.`));
   document.getElementById("insightStrip").innerHTML = out.join("");
 }
 function insight(ic,html){ return `<div class="insight"><div class="ico">${ic}</div><div>${html}</div></div>`; }
@@ -501,7 +511,7 @@ function taskRow(t){
 function renderTasks(){
   const list=[...data.tasks].sort((a,b)=>(a.done-b.done)||((a.due||"9999").localeCompare(b.due||"9999")));
   document.getElementById("taskList").innerHTML = list.length? list.map(taskRow).join("")
-    : '<div class="empty"><div class="glyph">✓</div><p>No tasks yet. Add one above.</p></div>';
+    : '<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><p>No tasks yet. Add one above.</p></div>';
 }
 function addTask(){
   const i=document.getElementById("newTask"), d=document.getElementById("newTaskDue");
@@ -520,7 +530,7 @@ function renderNotes(){
   const list=data.notes.filter(n=>!q||n.body.toLowerCase().includes(q));
   document.getElementById("notesList").innerHTML = list.length? list.map(n=>
     `<div class="card note-card"><div class="nbody">${esc(n.body)}</div><div class="ndate"><span>${new Date(n.ts).toLocaleDateString()}</span><button class="btn danger" onclick="delNote('${n.id}')" aria-label="Delete">✕</button></div></div>`
-  ).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph">🗒</div><p>No notes'+(q?" match your search":" yet")+'.</p></div>';
+  ).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h6"/></svg></div><p>No notes'+(q?" match your search":" yet")+'.</p></div>';
 }
 
 /* ---- Links ---- */
@@ -532,7 +542,7 @@ function renderLinks(){
     `<div class="link-group"><h3>${esc(g)}</h3><div>${groups[g].map(l=>
       `<span class="link-chip" style="cursor:default"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px"><span class="dot"></span>${esc(l.label)}</a><button class="btn danger" style="margin-left:6px;padding:2px 7px" onclick="delLink(${l.i})" aria-label="Delete">✕</button></span>`
     ).join("")}</div></div>`
-  ).join("") : '<div class="empty"><div class="glyph">🔗</div><p>No links yet.</p></div>';
+  ).join("") : '<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div><p>No links yet.</p></div>';
 }
 async function addLink(){
   const label=await promptModal("Add a quick link","Label","");
@@ -553,7 +563,7 @@ function goalCur(g){ if(g.linkNet){ var nx=parseFloat(String(financeStat).replac
 function ring(pct){ var r=26,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(1,pct))); return '<svg width="68" height="68" viewBox="0 0 68 68"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8a64c8"/><stop offset="100%" stop-color="#f3b98e"/></linearGradient></defs><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="rgba(138,100,200,.18)" stroke-width="7"/><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="url(#gr)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 34 34)"/></svg>'; }
 function renderGoals(){
   var el=document.getElementById("goalsList"); if(!el) return;
-  el.innerHTML = data.goals.length ? data.goals.map(function(g,i){
+  el.innerHTML = (data.goals&&data.goals.length) ? data.goals.map(function(g,i){
     var cur=goalCur(g), pct=g.target? cur/g.target : 0;
     return '<div class="card"><div style="display:flex;gap:16px;align-items:center">'
       +'<div style="position:relative;flex:none">'+ring(pct)+'<div style="position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:.78rem">'+Math.round(pct*100)+'%</div></div>'
@@ -563,7 +573,7 @@ function renderGoals(){
       +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'
       +(g.linkNet?'':'<button class="btn soft" onclick="updGoal('+i+')">Update</button>')
       +'<button class="btn danger" onclick="delGoal('+i+')">Delete</button></div></div>';
-  }).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph">🎯</div><p>No goals yet. Add one to track progress with a ring.</p></div>';
+  }).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div><p>No goals yet. Add one to track progress with a ring.</p></div>';
 }
 async function addGoal(){
   var name=await promptModal("New goal","What are you tracking? (e.g. Net worth target, Trips this year, Books)","");
@@ -645,13 +655,10 @@ function openSettings(){
   function chk(id,on,lbl){ return '<label style="display:flex;align-items:center;gap:9px;font-size:.9rem;font-weight:600;margin:5px 0;cursor:pointer"><input type="checkbox" id="'+id+'" '+(on!==false?"checked":"")+' style="width:18px;height:18px;accent-color:var(--lavender)"> '+lbl+'</label>'; }
   showModal('<h4>Settings</h4><div style="max-height:64vh;overflow:auto;padding-right:6px">'
     +'<label class="setlbl">Name</label><input class="fld" id="setName" value="'+esc(data.profile.name||"")+'" style="margin:6px 0 10px">'
-    +'<label class="setlbl">Avatar (emoji)</label><input class="fld" id="setAvatar" value="'+esc(data.profile.avatar||"🧭")+'" style="margin:6px 0 10px;max-width:100px">'
     +'<label class="setlbl">City — prayer &amp; weather</label><input class="fld" id="setCity" value="'+esc(s.city||"Makkah")+'" style="margin:6px 0 10px">'
     +'<div style="display:flex;gap:10px"><div style="flex:1"><label class="setlbl">Currency</label><input class="fld" id="setCur" value="'+esc(s.currency||"SAR")+'" style="margin:6px 0 10px"></div>'
     +'<div style="flex:1"><label class="setlbl">Language</label><select class="fld" id="setLang" style="margin:6px 0 10px"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select></div></div>'
     +'<label class="setlbl">Next trip — destination &amp; date</label><div style="display:flex;gap:10px;margin:6px 0 10px"><input class="fld" id="setTripDest" value="'+esc(s.nextTripDest||"")+'" placeholder="e.g. Dubai" style="flex:1"><input class="fld" id="setTripDate" type="date" value="'+esc(s.nextTripDate||"")+'" style="flex:1"></div>'
-    +'<label class="setlbl">Finance Board URL</label><input class="fld" id="setFin" value="'+esc(s.financeUrl||"")+'" style="margin:6px 0 10px">'
-    +'<label class="setlbl">Travel Planner URL</label><input class="fld" id="setTrav" value="'+esc(s.travelUrl||"")+'" style="margin:6px 0 10px">'
     +'<label class="setlbl">Google OAuth Client ID — Calendar (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 12px">'
     +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")
     +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
@@ -659,14 +666,11 @@ function openSettings(){
 function saveSettings(){
   var s=data.settings;
   data.profile.name=document.getElementById("setName").value.trim();
-  data.profile.avatar=document.getElementById("setAvatar").value.trim()||"🧭";
   s.city=document.getElementById("setCity").value.trim()||"Makkah";
   s.currency=document.getElementById("setCur").value.trim()||"SAR";
   s.lang=document.getElementById("setLang").value;
   s.nextTripDest=document.getElementById("setTripDest").value.trim();
   s.nextTripDate=document.getElementById("setTripDate").value;
-  s.financeUrl=document.getElementById("setFin").value.trim();
-  s.travelUrl=document.getElementById("setTrav").value.trim();
   s.gcalId=document.getElementById("setGcal").value.trim();
   s.showPrayer=document.getElementById("wPrayer").checked;
   s.showWeather=document.getElementById("wWeather").checked;
