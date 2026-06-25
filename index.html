@@ -942,7 +942,7 @@ html:not(.dark) .lbl-chip{background:#fff}
 /* Gmail: list fills the equal-height card, Sync/Open Gmail pinned to bottom */
 .dash-row2 #gmailCard{display:flex;flex-direction:column}
 .dash-row2 #gmailCard>#gmailBody{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
-.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:none!important;overflow:auto}
+.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:400px!important;overflow:auto}
 .dash-row2 #gmailBody .gm-actions{margin-top:auto}
 /* Tasks overview: colored priority labels */
 .pflag{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;flex:none;min-width:40px;text-align:center}
@@ -951,6 +951,14 @@ html.dark .pflag.p-high{color:var(--peach)}
 .pflag.p-med{background:rgba(138,100,200,.2);color:var(--lavender)}
 .pflag.p-low{background:rgba(127,209,196,.2);color:var(--green)}
 
+.hero-ribbon{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.hpill{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:7px 14px;font-size:.85rem;font-weight:600;color:#fff}
+.hpill svg{width:15px;height:15px;opacity:.88}
+.hpill b{font-weight:800}
+.hpill.alert{background:rgba(255,120,108,.24);border-color:rgba(255,120,108,.36)}
+.hero-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.hero-actions .btn{padding:9px 16px}
+@media(max-width:760px){.hero-ribbon{gap:7px}.hpill{padding:6px 11px;font-size:.8rem}}
 </style>
 </head>
 <body>
@@ -993,8 +1001,8 @@ html.dark .pflag.p-high{color:var(--peach)}
       <div class="whero-left">
         <div class="eyebrow" id="greetEyebrow">Welcome back</div>
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
-        <div class="wsummary" id="welcomeSummary" style="margin-top:14px"></div>
-        <div id="dailySummary" style="margin-top:10px"></div>
+        <div class="hero-ribbon" id="welcomeSummary"></div>
+        <div class="hero-actions"><button class="btn" onclick="openTask()">+ Add task</button><button class="btn soft" onclick="quickNoteFromDash()">+ Add note</button></div>
         <div class="wsum-h">Upcoming</div><div id="upcomingList"></div>
       </div>
       <div class="wboxes">
@@ -1311,7 +1319,8 @@ function tickClock(){var el=document.getElementById("clockTime");if(!el)return;v
 function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;});}
 var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
 function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var now=new Date(),nowS=now.getHours()*3600+now.getMinutes()*60; for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
-function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).length;var ev=todayEvents().length;var parts=[wsChip(IC.task,due+" due"),wsChip(IC.cal,ev+" meeting"+(ev!==1?"s":""))];var np=nextPrayerShort();if(np)parts.push(wsChip(IC.moon,np));if(gmailStats&&gmailStats.unread)parts.push(wsChip(MAIL_IC,gmailStats.unread+" unread"));else if(financeStat)parts.push(wsChip(IC.money,financeStat));el.innerHTML=parts.join("");}
+function hpill(ic,html,cls){ return '<span class="hpill'+(cls?" "+cls:"")+'">'+ic+'<span>'+html+'</span></span>'; }
+function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var over=op.filter(function(x){return x.due&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));if(gmailStats&&gmailStats.unread)parts.push(hpill(MAIL_IC,"<b>"+gmailStats.unread+"</b> unread"));el.innerHTML=parts.join("");}
 
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
