@@ -926,6 +926,31 @@ html:not(.dark) .lbl-chip{background:#fff}
 .notes-tools #noteSearch{flex:1 1 auto;min-width:0;max-width:240px}
 .notes-tools .btn{white-space:nowrap;flex:none}
 @media(max-width:560px){.notes-tools{flex-wrap:wrap;justify-content:flex-end}.notes-tools #noteSearch{flex:1 1 140px}}
+
+/* ===== batch v15: box fit, gmail fill, priority labels ===== */
+/* hero boxes: center content, sized to fit (no overflow) */
+.wbox{min-height:150px;padding:18px;justify-content:center;gap:7px;overflow:hidden}
+.wbox-lbl{margin-bottom:0}
+.wbox .wtime{font-size:2.6rem;line-height:1.05}
+.wbox .wtime .mer{font-size:.32em;margin-left:6px}
+.wbox-val{font-size:.98rem;line-height:1.28}
+.wbox .whijri{font-size:.7rem;margin-top:3px}
+.wx-box{gap:12px}
+.wx-box .wx-ic,.wx-box .wx-ic svg{width:46px;height:46px}
+.wx-box .wx-t{font-size:1.95rem}
+@media(max-width:760px){.wbox{min-height:96px}.wbox .wtime{font-size:1.9rem}}
+/* Gmail: list fills the equal-height card, Sync/Open Gmail pinned to bottom */
+.dash-row2 #gmailCard{display:flex;flex-direction:column}
+.dash-row2 #gmailCard>#gmailBody{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:none!important;overflow:auto}
+.dash-row2 #gmailBody .gm-actions{margin-top:auto}
+/* Tasks overview: colored priority labels */
+.pflag{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;flex:none;min-width:40px;text-align:center}
+.pflag.p-high{background:rgba(221,130,75,.22);color:var(--peach-deep)}
+html.dark .pflag.p-high{color:var(--peach)}
+.pflag.p-med{background:rgba(138,100,200,.2);color:var(--lavender)}
+.pflag.p-low{background:rgba(127,209,196,.2);color:var(--green)}
+
 </style>
 </head>
 <body>
@@ -1187,7 +1212,7 @@ function go(name){
   document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.id==="tab-"+name));
   const p=PAGES[name]||["",""]; document.getElementById("crumb").textContent=p[0]; document.getElementById("pageTitle").textContent=p[1];
-  window.scrollTo({top:0}); render();
+  if(name==="home"&&user&&supa){ try{ loadFinance(); }catch(e){} } window.scrollTo({top:0}); render();
 }
 document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 
@@ -2011,7 +2036,7 @@ function scheduleMasonry(){ if(_msnRAF) cancelAnimationFrame(_msnRAF); _msnRAF=r
 function layoutMasonry(){ var grid=document.getElementById("dashStack"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
 window.addEventListener("resize",scheduleMasonry);
 /* ===== batch v12 additions: Tasks Overview + Recent Notes ===== */
-function toRow(x){ var today=isoLocal(new Date()); var over=x.due&&x.due<today; return '<div class="to-row" onclick="openTask(\''+x.id+'\')"><span class="pdot p-'+(x.priority||"med")+'" title="Priority"></span><span class="to-title">'+esc(x.t)+'</span>'+(x.due?'<span class="to-due'+(over?" over":"")+'">'+esc(fmtShort(x.due))+'</span>':'')+'</div>'; }
+function toRow(x){ var today=isoLocal(new Date()); var over=x.due&&x.due<today; var _pl={high:"High",med:"Med",low:"Low"}; return '<div class="to-row" onclick="openTask(\''+x.id+'\')"><span class="pflag p-'+(x.priority||"med")+'">'+(_pl[x.priority||"med"])+'</span><span class="to-title">'+esc(x.t)+'</span>'+(x.due?'<span class="to-due'+(over?" over":"")+'">'+esc(fmtShort(x.due))+'</span>':'')+'</div>'; }
 function renderTasksOverview(){
   var el=document.getElementById("toBody"); if(!el) return;
   var t=isoLocal(new Date());
@@ -2047,7 +2072,7 @@ function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var 
 /* ============ Boot ============ */
 render();
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} } },1000);
-setInterval(function(){ if(user&&supa&&document.visibilityState==="visible") loadFinance(); },60000);
+setInterval(function(){ if(user&&supa&&document.visibilityState==="visible") loadFinance(); },30000);
 document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&user&&supa) loadFinance(); });
 scheduleMasonry();
 setTimeout(scheduleMasonry,300); setTimeout(scheduleMasonry,1200);
