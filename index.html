@@ -616,6 +616,75 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
   .av-menu{left:10px;right:10px}
 }
 
+
+/* ===== batch v5: bento grid, light audit, new widgets, board collapse ===== */
+/* Bento grid */
+#dashWidgets{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;align-items:start}
+.dash-widget{min-width:0}
+.dash-widget .card{margin-bottom:0!important;height:100%}
+.dash-widget>.section-head{margin:0 0 12px}
+[data-w="briefing"],[data-w="weather"],[data-w="prayer"]{grid-column:span 2}
+[data-w="calendar"],[data-w="tasks"],[data-w="gmail"],[data-w="notes"],[data-w="apps"],[data-w="links"]{grid-column:span 3}
+@media(max-width:1100px){
+  #dashWidgets{grid-template-columns:repeat(2,1fr)}
+  [data-w]{grid-column:span 1!important}
+  [data-w="prayer"]{grid-column:span 2!important}
+}
+@media(max-width:680px){
+  #dashWidgets{grid-template-columns:1fr;gap:14px}
+  [data-w]{grid-column:span 1!important}
+}
+/* keep apps grid from forcing height */
+.dash-widget[data-w="apps"] .card,.dash-widget[data-w="apps"]{height:auto}
+.dash-widget[data-w="apps"]{display:flex;flex-direction:column}
+/* ===== Light-theme audit (final): solid selection + readable popovers ===== */
+.prayer-next{background:var(--violet)!important;color:#fff}
+.prayer-card .pr2.next{background:var(--violet)!important;color:#fff}
+.cal-cell.sel,.dp-sel,.cs-sel{background:var(--violet)!important;color:#fff}
+.cal-cell.sel .cal-ev,.cal-cell.sel .cal-more,.cal-cell.sel .dn{color:#fff}
+html:not(.dark) .modal,html:not(.dark) .cs-pop,html:not(.dark) .dp-pop,html:not(.dark) .av-menu,html:not(.dark) .ac-list,html:not(.dark) .dash-tools,html:not(.dark) .toast{color:var(--text)}
+html:not(.dark) .cs-opt,html:not(.dark) .dp-day,html:not(.dark) .dp-title{color:var(--text)}
+html:not(.dark) .cs-sel,html:not(.dark) .dp-sel{color:#fff}
+html:not(.dark) .dp-w,html:not(.dark) .ag-day{color:var(--muted)}
+.prayer-card .pr2{color:var(--text)}
+html:not(.dark) .toast{background:rgba(255,255,255,.96);border:1px solid var(--border);border-left:3px solid var(--peach)}
+/* ===== Quick capture widget ===== */
+.qc-seg{display:flex;gap:4px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:99px;padding:3px;margin-bottom:10px}
+html:not(.dark) .qc-seg{background:rgba(255,255,255,.5)}
+.qc-seg button{flex:1;border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.8rem;padding:7px;border-radius:99px;cursor:pointer}
+.qc-seg button.on{background:var(--grad-iri);color:#fff}
+.qc-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:560px){.qc-cols{grid-template-columns:1fr;gap:12px}}
+.qc-col h4{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800;margin-bottom:7px}
+.qc-item{font-size:.85rem;font-weight:500;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qc-item:last-child{border-bottom:none}
+.qc-item:hover{color:var(--lavender)}
+/* ===== Weather card ===== */
+.wx-card{display:flex;align-items:center;gap:16px}
+.wx-ico{width:58px;height:58px;flex:none;display:grid;place-items:center}
+.wx-ico svg{width:46px;height:46px}
+.wx-temp{font-family:'Marcellus',serif;font-size:2.7rem;line-height:1}
+.wx-meta{color:var(--muted);font-size:.82rem;margin-top:3px}
+/* briefing sub-headings */
+.dash-widget[data-w="briefing"] h3{margin-top:14px}
+/* ===== Task board: collapse + column reorder ===== */
+.kcol-head{display:flex;align-items:center;gap:7px;justify-content:flex-start;cursor:grab}
+.kcol-head.col-drag{opacity:.5}
+.kcol-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kcol-caret{display:inline-grid;place-items:center;cursor:pointer;transition:transform .2s;color:var(--muted)}
+.kcol.collapsed .kcol-caret{transform:rotate(-90deg)}
+.kcol.collapsed{min-width:0;width:auto;max-width:none;flex:0 0 auto}
+.kcol.collapsed .kcol-body{display:none}
+.kcol.collapsed .kcol-head{cursor:pointer}
+.kcol.col-over{border-color:var(--peach)}
+/* status default star */
+.st-def.on{color:var(--peach);border-color:var(--peach)}
+/* extra mobile */
+@media(max-width:600px){
+  .wx-temp{font-size:2.3rem}
+  .dash-bar{margin-bottom:10px}
+}
+
 </style>
 </head>
 <body>
@@ -652,7 +721,7 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
 
 <!-- HOME -->
 <div class="tab active" id="tab-home">
-  <!-- WELCOME + WIDGETS (fixed) -->
+  <!-- WELCOME (fixed) -->
   <div class="hero">
     <div class="whero">
       <div>
@@ -660,10 +729,9 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
         <div class="wsummary" id="welcomeSummary"></div>
       </div>
-      <div class="wwidgets">
+      <div class="wwidgets" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="wtile wtile-time"><div class="wtile-lbl">Time</div><div class="wtime" id="clockTime">--:--</div></div>
         <div class="wtile"><div class="wtile-lbl">Date</div><div class="wtile-val" id="dateLine">&mdash;</div><div class="whijri" id="hijriLine"></div></div>
-        <div class="wtile" id="weatherTile"><div class="wtile-lbl">Weather</div><div class="wtile-val" id="ambient">&mdash;</div></div>
       </div>
     </div>
   </div>
@@ -671,9 +739,36 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
   <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Drag cards, use arrows to reorder, or hide what you don&rsquo;t need.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
 
   <div id="dashWidgets">
+    <!-- MORNING BRIEFING -->
+    <div class="dash-widget" data-w="briefing">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem" id="briefTitle">Today</h2></div>
+        <div id="dailySummary"></div>
+        <h3>Agenda</h3><div id="agendaList"></div>
+        <h3>Upcoming</h3><div id="upcomingList"></div>
+      </div>
+    </div>
+
+    <!-- WEATHER -->
+    <div class="dash-widget" data-w="weather">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Weather</h2><button class="btn soft round" onclick="retryWeather()" title="Refresh" aria-label="Refresh weather"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg></button></div>
+        <div id="weatherBody"></div>
+      </div>
+    </div>
+
+    <!-- PRAYER -->
+    <div class="dash-widget" data-w="prayer">
+      <div class="card prayer-card" id="prayerCard">
+        <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
+        <div class="prayer-next" id="prayerNext"></div>
+        <div class="prow" id="prayersRow"></div>
+      </div>
+    </div>
+
     <!-- CALENDAR -->
     <div class="dash-widget" data-w="calendar">
-      <div class="card" id="calCard" style="margin-bottom:18px">
+      <div class="card" id="calCard">
         <div class="integ-head" style="margin-bottom:14px"><div class="integ-title" style="flex:1">Calendar</div></div>
         <div id="calConn" style="margin-bottom:16px"></div>
         <div class="cal-head">
@@ -688,42 +783,39 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
       </div>
     </div>
 
-    <!-- TODAY'S OVERVIEW -->
-    <div class="dash-widget" data-w="overview">
-      <div class="section-head"><h2>Today&rsquo;s overview</h2><button class="btn soft" onclick="go('tasks')">Manage tasks</button></div>
-      <div class="ov-grid" style="margin-bottom:18px">
-        <div class="card ov-card"><h3>Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h3><div id="ovTasks"></div>
-          <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
-        </div>
-        <div class="card ov-card"><h3>Today&rsquo;s agenda</h3><div id="agendaList"></div></div>
-        <div class="card ov-card"><h3>Upcoming</h3><div id="upcomingList"></div></div>
-        <div class="card ov-card"><h3>Daily summary</h3><div id="dailySummary"></div></div>
+    <!-- TODAY'S TASKS -->
+    <div class="dash-widget" data-w="tasks">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h2><button class="btn soft" onclick="go('tasks')">All tasks</button></div>
+        <div id="ovTasks"></div>
+        <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
       </div>
     </div>
 
     <!-- GMAIL -->
     <div class="dash-widget" data-w="gmail">
-      <div class="card" id="gmailCard" style="margin-bottom:18px"><div id="gmailBody"></div></div>
+      <div class="card" id="gmailCard"><div id="gmailBody"></div></div>
     </div>
 
-    <!-- PRAYER TIMES -->
-    <div class="dash-widget" data-w="prayer">
-      <div class="card prayer-card" id="prayerCard" style="margin-bottom:18px">
-        <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
-        <div class="prayer-next" id="prayerNext"></div>
-        <div class="prow" id="prayersRow"></div>
+    <!-- NOTES / QUICK CAPTURE -->
+    <div class="dash-widget" data-w="notes">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick capture</h2><button class="btn soft" onclick="go('notes')">Notes</button></div>
+        <div class="qc-seg" id="qcSeg"><button class="on" data-m="note" onclick="qcMode('note')">Note</button><button data-m="task" onclick="qcMode('task')">Task</button></div>
+        <div style="display:flex;gap:8px"><input class="fld" id="qcInput" placeholder="Capture a note&hellip;" onkeydown="if(event.key==='Enter')qcAdd()"><button class="btn" onclick="qcAdd()">Add</button></div>
+        <div class="qc-cols"><div class="qc-col"><h4>Recent notes</h4><div id="qcNotes"></div></div><div class="qc-col"><h4>Recent tasks</h4><div id="qcTasks"></div></div></div>
       </div>
     </div>
 
     <!-- APPS -->
     <div class="dash-widget" data-w="apps">
       <div class="section-head"><h2>Your apps</h2></div>
-      <div class="grid apps" id="appCards" style="margin-bottom:18px"></div>
+      <div class="grid apps" id="appCards"></div>
     </div>
 
     <!-- QUICK LINKS -->
     <div class="dash-widget" data-w="links">
-      <div class="card" style="margin-bottom:18px">
+      <div class="card">
         <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
         <div id="homeLinks"></div>
       </div>
@@ -804,7 +896,7 @@ let user = null;
 
 const DEFAULT = {
   profile:{ name:"Eyad Alfi" },
-  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true, googlePhoto:"", googleName:"", statusesV:2, statuses:[{id:"todo",name:"To Do"},{id:"doing",name:"In Progress"},{id:"done",name:"Done"}], dashLayout:[{k:"calendar",h:false},{k:"overview",h:false},{k:"gmail",h:false},{k:"prayer",h:false},{k:"apps",h:false},{k:"links",h:false}] },
+  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true, googlePhoto:"", googleName:"", statusesV:2, statuses:[{id:"todo",name:"To Do"},{id:"doing",name:"In Progress"},{id:"done",name:"Done"}], dashLayout:[{k:"briefing",h:false},{k:"weather",h:false},{k:"prayer",h:false},{k:"calendar",h:false},{k:"tasks",h:false},{k:"gmail",h:false},{k:"notes",h:false},{k:"apps",h:false},{k:"links",h:false}], dashV:2, defaultStatus:"todo", collapsedCols:[] },
   notes:[], tasks:[], goals:[],
   links:[
     {group:"Build", label:"GitHub", url:"https://github.com"},
@@ -830,7 +922,7 @@ function fill(d){
   if(!Array.isArray(d.settings.statuses)||!d.settings.statuses.length) d.settings.statuses=JSON.parse(JSON.stringify(DEFAULT.settings.statuses));
   var _ids=d.settings.statuses.map(function(x){return x.id;});
   (d.tasks||[]).forEach(function(t){ if(!t.status)t.status=(t.done?"done":_ids[0]); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
-  var KN=["calendar","overview","gmail","prayer","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
+  if((d.settings.dashV||0)<2){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=2; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
   return d;
 }
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
@@ -895,7 +987,7 @@ function renderHome(){
   renderAppCards("appCards");
   try{ renderDashboard(); }catch(e){} renderToday(); renderCalendar(); try{renderCalConn();renderGmail();}catch(e){}
   var hlk=document.getElementById("homeLinks"); if(hlk) hlk.innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
-  var wt=document.getElementById("weatherTile"); if(wt) wt.style.display=(data.settings.showWeather!==false)?"":"none"; if(data.settings.showWeather!==false) loadWeather();
+  try{ loadWeather(); renderQuickCapture(); }catch(e){}
   var pc=document.getElementById("prayerCard"); if(pc) pc.style.display=(data.settings.showPrayer!==false)?"":"none";
   var pcty=document.getElementById("prayerCity"); if(pcty) pcty.textContent=data.settings.city?("· "+data.settings.city):"";
   if(data.settings.showPrayer!==false) loadPrayers();
@@ -965,7 +1057,7 @@ function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary")
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
 function renderOvTasks(){var el=document.getElementById("ovTasks");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});var c=document.getElementById("ovTaskCnt");if(c)c.textContent=due.length;el.innerHTML=due.length?due.map(function(x){var over=x.due<t;return '<div class="mini-item"><div class="chk" onclick="event.stopPropagation();toggleTask(\''+x.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0;cursor:pointer" onclick="openTask(\''+x.id+'\')"><div style="font-weight:600">'+esc(x.t)+'</div>'+(over?'<div class="kdue over" style="font-size:.72rem">Overdue &middot; '+esc(fmtShort(x.due))+'</div>':'')+'</div><span class="pdot p-'+(x.priority||"med")+'"></span></div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing due today &mdash; you are clear.</div>';}
-function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:"backlog",priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
+function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
 function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due>t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task"});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";if(w.slice(0,10)>t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat"});}items.sort(function(a,b){return a.date.localeCompare(b.date);});el.innerHTML=items.length?items.slice(0,6).map(function(it){return '<div class="mini-item"><div class="mini-time">'+esc(fmtShort(it.date))+'</div><div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+kindBadge(it.kind)+'</div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing upcoming.</div>';}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
@@ -1034,10 +1126,15 @@ function renderTasks(){
   return renderTaskBoard(host);
 }
 function renderTaskBoard(host){
-  var arr=taskList();
+  var arr=taskList(); var cc=data.settings.collapsedCols||[];
   host.innerHTML='<div class="kanban">'+statuses().map(function(col){
     var items=arr.filter(function(t){return taskStatus(t)===col.id;});
-    return '<div class="kcol" data-col="'+col.id+'" ondragover="kOver(event)" ondrop="kDrop(event,\''+col.id+'\')" ondragleave="kLeave(event)"><div class="kcol-head">'+esc(col.name)+'<span class="cnt">'+items.length+'</span></div>'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">&mdash;</div>')+'</div>';
+    var clp=cc.indexOf(col.id)>=0;
+    return '<div class="kcol'+(clp?" collapsed":"")+'" data-col="'+col.id+'" ondragover="kOver(event)" ondrop="kDrop(event,\''+col.id+'\')" ondragleave="kLeave(event)">'
+      +'<div class="kcol-head" draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragend="colDragEnd(event)" ondragover="dOver(event)" ondrop="colDrop(event,\''+col.id+'\')">'
+      +'<span class="kcol-caret" onclick="event.stopPropagation();toggleCol(\''+col.id+'\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></span>'
+      +'<span class="kcol-name">'+esc(col.name)+'</span><span class="cnt">'+items.length+'</span></div>'
+      +'<div class="kcol-body">'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">&mdash;</div>')+'</div></div>';
   }).join("")+'</div>';
 }
 function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!t.done;
@@ -1071,7 +1168,7 @@ function kEnd(){ document.querySelectorAll(".kcard.dragging,.kcol.over").forEach
 function kDrop(e,status){ e.preventDefault(); var id=kDragId||e.dataTransfer.getData("text/plain"); moveTask(id,null,status); kDragId=null; kEnd(); }
 function openTask(id){
   var t=id?(data.tasks||[]).find(function(x){return x.id===id;}):null; var isNew=!t;
-  if(isNew) t={id:"",t:"",desc:"",status:(statuses()[0]?statuses()[0].id:"backlog"),priority:"med",start:"",due:"",tags:[],assignee:""};
+  if(isNew) t={id:"",t:"",desc:"",status:defaultStatusId(),priority:"med",start:"",due:"",tags:[],assignee:""};
   function sel(v,o){ return o.map(function(x){return '<option value="'+x[0]+'" '+(v===x[0]?"selected":"")+'>'+x[1]+'</option>';}).join(""); }
   var html='<h4>'+(isNew?"New task":"Task details")+'</h4>'
     +'<label class="setlbl">Title</label><input class="fld" id="tdTitle" value="'+esc(t.t)+'" style="margin:6px 0 10px">'
@@ -1268,13 +1365,13 @@ function renderGmail(){
   }
   if(st==="connecting"){ el.innerHTML=head+'<div style="margin-top:14px">'+skelRows(6)+'</div>'; return; }
   if(!gmailStats){
-    el.innerHTML=head+'<div class="iconn-bar" style="margin-top:14px"><div class="iconn-sub">'+istBadge("on")+(data.settings.gmailLastSync?'<span class="muted">&middot; last synced '+esc(relTime(data.settings.gmailLastSync))+'</span>':'')+'</div><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync now</button></div>';
+    el.innerHTML=head+'<div class="iconn-bar" style="margin-top:14px"><div class="iconn-sub"><span class="muted" style="font-size:.78rem">'+(data.settings.gmailLastSync?("Last synced "+esc(relTime(data.settings.gmailLastSync))):"Connected")+'</span></div><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync now</button></div>';
     return;
   }
   var g=gmailStats;
   var list=(gmailMsgs&&gmailMsgs.length)? '<div class="gm-list">'+gmailMsgs.map(gmRow).join("")+'</div>' : '<div class="muted" style="padding:16px 2px;font-size:.86rem;text-align:center">Your inbox is all caught up.</div>';
   var actions='<div class="gm-actions"><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
-  el.innerHTML=head+'<div class="iconn-substrip">'+istBadge("on")+'<span class="muted" style="font-size:.76rem">synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+list+actions;
+  el.innerHTML=head+'<div class="iconn-substrip"><span class="muted" style="font-size:.76rem">Primary &middot; synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+list+actions;
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
@@ -1332,22 +1429,29 @@ document.addEventListener("click",function(e){ if(!e.target.closest(".av-wrap"))
 
 /* ============ Widgets: weather + prayer ============ */
 let _wxCache={}, _prayCache={};
+var WX_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="#f3b98e" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>';
+var WX_CLOUD='<svg viewBox="0 0 24 24" fill="none" stroke="#bba4e4" stroke-width="2"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 18z"/></svg>';
+var WX_RAIN='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width="2"><path d="M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 15M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>';
+var WX_STORM='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width="2"><path d="M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 15M13 11l-3 6h4l-3 5"/></svg>';
+function wxIcon(c){ if(c<=1) return WX_SUN; if(c<48) return WX_CLOUD; if(c>=95) return WX_STORM; return WX_RAIN; }
 async function loadWeather(){
-  const city=data.settings.city||"Makkah"; const box=document.getElementById("ambient"); if(!box) return;
+  const box=document.getElementById("weatherBody"); if(!box) return;
+  const city=data.settings.city||"Makkah";
   if(_wxCache[city]){ box.innerHTML=_wxCache[city]; return; }
-  box.innerHTML='<span class="skel skel-l" style="display:inline-block;width:88px;height:15px;vertical-align:middle"></span>';
+  box.innerHTML='<div class="wx-card"><div class="skel" style="width:58px;height:58px;border-radius:14px"></div><div style="flex:1"><div class="skel skel-l" style="width:74px;height:26px"></div><div class="skel skel-l" style="width:130px;height:11px;margin-top:9px"></div></div></div>';
   try{
     const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(r=>r.json());
     const loc=g&&g.results&&g.results[0];
-    if(!loc){ box.innerHTML='<span class="muted" style="font-size:.82rem">Set a valid city in Preferences</span>'; return; }
-    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code").then(r=>r.json());
-    if(!w||!w.current) throw new Error("no current");
-    const temp=Math.round(w.current.temperature_2m);
-    const desc=wxDesc(w.current.weather_code);
-    const html='<b style="font-size:1.15rem">'+temp+'°C</b> <span style="opacity:.78">'+esc(desc)+'</span><div class="muted" style="font-size:.74rem;margin-top:1px">'+esc(loc.name||city)+'</div>';
+    if(!loc){ box.innerHTML='<div class="muted" style="font-size:.85rem">Couldn\'t find &ldquo;'+esc(city)+'&rdquo;. Set your city in Preferences. <button class="btn soft" style="margin-top:8px" onclick="openSettings()">Open Preferences</button></div>'; return; }
+    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min&timezone=auto").then(r=>r.json());
+    if(!w||!w.current) throw new Error("no data");
+    const temp=Math.round(w.current.temperature_2m), desc=wxDesc(w.current.weather_code), feels=Math.round(w.current.apparent_temperature);
+    const hi=(w.daily&&w.daily.temperature_2m_max)?Math.round(w.daily.temperature_2m_max[0]):null;
+    const lo=(w.daily&&w.daily.temperature_2m_min)?Math.round(w.daily.temperature_2m_min[0]):null;
+    const html='<div class="wx-card"><div class="wx-ico">'+wxIcon(w.current.weather_code)+'</div><div style="min-width:0"><div class="wx-temp">'+temp+'°</div><div style="font-weight:700">'+esc(desc)+'</div><div class="wx-meta">'+esc(loc.name||city)+(hi!=null?' &middot; H'+hi+'° L'+lo+'°':'')+(isFinite(feels)?' &middot; feels '+feels+'°':'')+'</div></div></div>';
     _wxCache[city]=html; box.innerHTML=html;
   }catch(e){
-    box.innerHTML='<span class="muted" style="font-size:.82rem">Weather unavailable</span> <button class="icon-btn" title="Retry" onclick="retryWeather()" style="display:inline-grid;vertical-align:middle">'+I_REFRESH+'</button>';
+    box.innerHTML='<div class="muted" style="font-size:.85rem">Weather is unavailable right now. <button class="btn soft" style="margin-top:8px" onclick="retryWeather()">Retry</button></div>';
   }
 }
 function retryWeather(){ var c=data.settings.city||"Makkah"; delete _wxCache[c]; loadWeather(); }
@@ -1599,10 +1703,10 @@ function lDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); var id=kDra
 function openStatuses(){ var html='<h4>Manage statuses</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Rename, reorder or remove the columns your tasks move through.</p><div id="stList" style="max-height:54vh;overflow:auto">'+statuses().map(stRow).join("")+'</div><button class="btn soft" style="margin-top:10px" onclick="addStatus()">+ Add status</button><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveStatuses()">Save</button></div>'; showModal(html,"wide"); }
 var ST_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
 var ST_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
-function stRow(c){ return '<div class="st-row" data-id="'+esc(c.id)+'"><input class="fld st-name" value="'+esc(c.name)+'"><button type="button" class="st-mini" title="Move up" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" title="Move down" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" title="Delete" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button></div>'; }
-function addStatus(){ var l=document.getElementById("stList"); if(!l) return; var d=document.createElement("div"); d.className="st-row"; d.dataset.id="s"+uid(); d.innerHTML='<input class="fld st-name" value="New status"><button type="button" class="st-mini" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button>'; l.appendChild(d); var inp=d.querySelector(".st-name"); if(inp){ inp.focus(); inp.select(); } }
+function stRow(c){ var df=(data.settings.defaultStatus||defaultStatusId())===c.id; return '<div class="st-row" data-id="'+esc(c.id)+'"><input class="fld st-name" value="'+esc(c.name)+'"><button type="button" class="st-mini st-def'+(df?" on":"")+'" title="Default for new tasks" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" title="Move up" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" title="Move down" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" title="Delete" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button></div>'; }
+function addStatus(){ var l=document.getElementById("stList"); if(!l) return; var d=document.createElement("div"); d.className="st-row"; d.dataset.id="s"+uid(); d.innerHTML='<input class="fld st-name" value="New status"><button type="button" class="st-mini st-def" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button>'; l.appendChild(d); var inp=d.querySelector(".st-name"); if(inp){ inp.focus(); inp.select(); } }
 function moveStatusRow(btn,dir){ var row=btn.closest(".st-row"); if(!row) return; var l=row.parentNode; if(dir<0&&row.previousElementSibling) l.insertBefore(row,row.previousElementSibling); else if(dir>0&&row.nextElementSibling) l.insertBefore(row.nextElementSibling,row); }
-function saveStatuses(){ var rows=document.querySelectorAll("#stList .st-row"); var list=[]; rows.forEach(function(r){ var nm=r.querySelector(".st-name").value.trim(); if(nm) list.push({id:r.dataset.id,name:nm}); }); if(!list.length){ toast("Keep at least one status"); return; } var ids=list.map(function(x){return x.id;}); (data.tasks||[]).forEach(function(t){ if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status==="done"); }); data.settings.statuses=list; save(); closeModal(); render(); toast("Statuses updated"); }
+function saveStatuses(){ var rows=document.querySelectorAll("#stList .st-row"); var list=[]; var def=null; rows.forEach(function(r){ var nm=r.querySelector(".st-name").value.trim(); if(nm){ list.push({id:r.dataset.id,name:nm}); if(r.querySelector(".st-def.on")) def=r.dataset.id; } }); if(!list.length){ toast("Keep at least one status"); return; } var ids=list.map(function(x){return x.id;}); (data.tasks||[]).forEach(function(t){ if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status==="done"); }); data.settings.statuses=list; data.settings.defaultStatus=(def&&ids.indexOf(def)>=0)?def:ids[0]; save(); closeModal(); render(); toast("Statuses updated"); }
 /* Single Google OAuth (one token for Calendar + Gmail) */
 var COMBINED_SCOPE=CAL_SCOPE+" "+GMAIL_SCOPE;
 function googleConnect(){
@@ -1632,7 +1736,7 @@ function gAvatar(){ var p=data.settings.googlePhoto; if(p) return '<img class="g
 function googleChip(extra,sub){ var email=data.settings.googleEmail||"Google account"; return '<div class="gchip">'+gAvatar()+'<div class="gchip-main"><div class="gchip-email">'+esc(email)+'</div><div class="gchip-sub">'+istBadge("on")+'<span class="muted" style="font-size:.74rem">'+(sub?esc(sub):"Calendar &amp; Gmail")+'</span></div></div><div class="gchip-actions">'+(extra||"")+'<button class="btn soft" onclick="googleDisconnect()">Disconnect</button></div></div>'; }
 function googleDisconnect(){ clearGToken("google"); clearGToken("gcal"); clearGToken("gmail"); calToken=null; gmailToken=null; calState="idle"; gmailState="idle"; calEvents=null; gmailStats=null; gmailMsgs=null; data.settings.calConnected=false; data.settings.gmailConnected=false; data.settings.googleEmail=""; data.settings.googlePhoto=""; data.settings.googleName=""; save(); try{ renderCalConn(); renderGmail(); renderCalendar(); renderToday(); renderWelcomeSummary(); }catch(e){} toast("Google disconnected"); }
 /* Dashboard customization */
-var DASH_KEYS=["calendar","overview","gmail","prayer","apps","links"];
+var DASH_KEYS=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"];
 var dashDragK=null;
 function dashLayout(){ var l=data.settings.dashLayout; if(!Array.isArray(l)) l=[]; var seen={}; l=l.filter(function(w){ if(!w||!w.k||DASH_KEYS.indexOf(w.k)<0||seen[w.k]) return false; seen[w.k]=1; return true; }); DASH_KEYS.forEach(function(k){ if(!seen[k]) l.push({k:k,h:false}); }); data.settings.dashLayout=l; return l; }
 function renderDashboard(){ var host=document.getElementById("dashWidgets"); if(!host) return; dashLayout().forEach(function(w){ var el=host.querySelector('[data-w="'+w.k+'"]'); if(!el) return; el.classList.toggle("w-hidden",!!w.h); host.appendChild(el); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
@@ -1641,6 +1745,27 @@ function renderDashTools(){ var host=document.getElementById("dashWidgets"); if(
 function dashMove(k,dir){ var l=dashLayout(); var i=l.findIndex(function(w){return w.k===k;}); if(i<0) return; var j=i+dir; if(j<0||j>=l.length) return; var tmp=l[i]; l[i]=l[j]; l[j]=tmp; data.settings.dashLayout=l; save(); renderDashboard(); }
 function dashHide(k){ var l=dashLayout(); var w=l.find(function(x){return x.k===k;}); if(w){ w.h=!w.h; data.settings.dashLayout=l; save(); renderDashboard(); } }
 function dashDropOn(targetK){ if(!dashDragK||dashDragK===targetK) return; var l=dashLayout(); var from=l.findIndex(function(w){return w.k===dashDragK;}); var to=l.findIndex(function(w){return w.k===targetK;}); if(from<0||to<0) return; var moved=l.splice(from,1)[0]; l.splice(to,0,moved); data.settings.dashLayout=l; dashDragK=null; save(); renderDashboard(); }
+
+/* ===== batch v5 additions (quick capture, default status, column collapse/reorder) ===== */
+var STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.4 7L12 17.8 5.4 21l1.4-7L1.6 9.3l7-.8z"/></svg>';
+function defaultStatusId(){ var d=data.settings.defaultStatus; var ss=statuses(); if(d){ for(var i=0;i<ss.length;i++) if(ss[i].id===d) return d; } return ss[0]?ss[0].id:"todo"; }
+function setStDefault(btn){ document.querySelectorAll("#stList .st-def").forEach(function(b){ b.classList.remove("on"); }); btn.classList.add("on"); }
+/* Quick capture widget */
+var qcM="note";
+function qcMode(m){ qcM=m; var seg=document.getElementById("qcSeg"); if(seg) seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on",b.dataset.m===m); }); var i=document.getElementById("qcInput"); if(i) i.placeholder=(m==="task"?"Quick add task…":"Capture a note…"); }
+function qcAdd(){ var i=document.getElementById("qcInput"); if(!i) return; var v=i.value.trim(); if(!v) return; if(qcM==="task"){ data.tasks.push({id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"med",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()}); } else { data.notes.unshift({id:uid(),body:v,ts:Date.now(),updated:Date.now(),pinned:false,archived:false}); } i.value=""; save(); render(); toast(qcM==="task"?"Task added":"Note added"); }
+function renderQuickCapture(){
+  var n=document.getElementById("qcNotes");
+  if(n){ var notes=(data.notes||[]).filter(function(x){return !x.archived;}).slice(0,4); n.innerHTML=notes.length?notes.map(function(x){ return '<div class="qc-item" onclick="editNote(\''+x.id+'\')">'+esc((x.body||"").split("\n")[0]||"(empty note)")+'</div>'; }).join(""):'<div class="muted" style="font-size:.82rem">No notes yet.</div>'; }
+  var t=document.getElementById("qcTasks");
+  if(t){ var tk=(data.tasks||[]).filter(function(x){return x.status!=="done";}).slice().sort(function(a,b){return (b.updated||b.created||0)-(a.updated||a.created||0);}).slice(0,4); t.innerHTML=tk.length?tk.map(function(x){ return '<div class="qc-item" onclick="openTask(\''+x.id+'\')">'+esc(x.t)+'</div>'; }).join(""):'<div class="muted" style="font-size:.82rem">No open tasks.</div>'; }
+}
+/* Column collapse + reorder */
+function toggleCol(id){ var cc=data.settings.collapsedCols||[]; var i=cc.indexOf(id); if(i>=0) cc.splice(i,1); else cc.push(id); data.settings.collapsedCols=cc; save(); renderTasks(); }
+var colDragId=null;
+function colDragStart(e,id){ colDragId=id; try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain","col:"+id); }catch(_){ } var h=e.target.closest(".kcol-head"); if(h) h.classList.add("col-drag"); }
+function colDragEnd(e){ colDragId=null; document.querySelectorAll(".kcol-head.col-drag,.kcol.col-over").forEach(function(x){ x.classList.remove("col-drag","col-over"); }); }
+function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); if(!colDragId||colDragId===targetId){ colDragId=null; return; } var ss=statuses(); var from=-1,to=-1,i; for(i=0;i<ss.length;i++){ if(ss[i].id===colDragId)from=i; if(ss[i].id===targetId)to=i; } if(from<0||to<0){ colDragId=null; return; } var m=ss.splice(from,1)[0]; ss.splice(to,0,m); data.settings.statuses=ss; colDragId=null; save(); render(); }
 
 /* ============ Boot ============ */
 render();
