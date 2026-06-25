@@ -767,6 +767,40 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .lnk{background:none;border:none;color:var(--lavender);font-weight:700;cursor:pointer;font-family:inherit;font-size:.76rem;padding:0}
 .lnk:hover{text-decoration:underline}
 
+
+/* ===== batch v9: welcome hero + main/rail + prayer fix + remove logo ===== */
+.tb-logo{display:none!important}
+/* welcome hero */
+.welcome-hero .whero{display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center}
+@media(max-width:760px){.welcome-hero .whero{grid-template-columns:1fr;gap:18px}}
+.whero-left{min-width:0}
+.welcome-hero .muted{color:rgba(255,255,255,.72)!important}
+.wsum-h{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;opacity:.7;font-weight:800;margin:16px 0 6px}
+.wboxes{display:grid;grid-template-columns:repeat(3,minmax(82px,118px));gap:10px;align-items:stretch}
+@media(max-width:760px){.wboxes{grid-template-columns:repeat(3,1fr)}}
+.wbox{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.wbox-lbl{font-size:.54rem;text-transform:uppercase;letter-spacing:.1em;opacity:.72;font-weight:800;margin-bottom:5px}
+.wbox .wtime{font-size:1.75rem;line-height:1;font-family:'Marcellus',serif}
+.wbox .wtime .sec,.wbox .wtime .mer{display:none}
+.wbox-val{font-weight:700;font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wbox .whijri{font-size:.64rem;opacity:.68;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* main + rail (content-height, varied widths) */
+#dashGrid{display:flex;gap:18px;align-items:flex-start}
+#dashMain{flex:1.65;min-width:0;display:flex;flex-direction:column;gap:18px}
+#dashRail{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+@media(max-width:1000px){#dashGrid{flex-direction:column}#dashMain,#dashRail{width:100%;flex:1 1 auto}}
+.dash-widget{margin:0!important;width:auto!important;position:static!important;left:auto!important;top:auto!important;break-inside:auto}
+.dash-widget>.card{height:auto!important}
+.dash-widget.w-hidden{display:none}
+.dash-edit .dash-widget.w-hidden{display:block;opacity:.4}
+/* prayer overflow fix (responsive tiles, no spill) */
+.prayer-card .prow{display:grid;grid-template-columns:repeat(auto-fit,minmax(52px,1fr));gap:8px}
+.prayer-card .pr2{min-width:0;overflow:hidden;padding:10px 4px}
+.prayer-card .pr2 b{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.prayer-card .pr2 .nm{font-size:.58rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prayer-next{flex-wrap:wrap;padding:14px 16px}
+.pn-count{font-size:1.05rem}
+
 </style>
 </head>
 <body>
@@ -790,7 +824,7 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 
 <div class="content">
 <div class="topbar">
-  <div class="tb-left"><div class="tb-logo" aria-hidden="true"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div><div><div class="crumb" id="crumb">Home</div><h2 id="pageTitle">Dashboard</h2></div></div>
+  <div class="tb-left"><div><div class="crumb" id="crumb">Home</div><h2 id="pageTitle">Dashboard</h2></div></div>
   <div class="top-actions">
         <button class="btn soft round" onclick="toggleTheme()" title="Theme" aria-label="Toggle theme"><span id="themeIcon"></span></button>
     <div class="av-wrap">
@@ -803,104 +837,89 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 
 <!-- HOME -->
 <div class="tab active" id="tab-home">
-  <!-- WELCOME (fixed) -->
-  <div class="hero">
+  <!-- WELCOME HERO -->
+  <div class="hero welcome-hero">
     <div class="whero">
-      <div>
+      <div class="whero-left">
         <div class="eyebrow" id="greetEyebrow">Welcome back</div>
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
-        <div class="wsummary" id="welcomeSummary"></div>
+        <div id="dailySummary" style="margin-top:16px"></div>
+        <div class="wsum-h">Upcoming</div><div id="upcomingList"></div>
       </div>
-      <div class="wwidgets" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-        <div class="wtile wtile-time"><div class="wtile-lbl">Time</div><div class="wtime" id="clockTime">--:--</div></div>
-        <div class="wtile"><div class="wtile-lbl">Date</div><div class="wtile-val" id="dateLine">&mdash;</div><div class="whijri" id="hijriLine"></div></div>
+      <div class="wboxes">
+        <div class="wbox"><div class="wbox-lbl">Time</div><div class="wtime" id="clockTime">--:--</div></div>
+        <div class="wbox"><div class="wbox-lbl">Date</div><div class="wbox-val" id="dateLine">&mdash;</div><div class="whijri" id="hijriLine"></div></div>
+        <div class="wbox" id="weatherTile"><div class="wbox-lbl">Weather</div><div class="wbox-val" id="ambient">&mdash;</div></div>
       </div>
     </div>
   </div>
 
-  <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Drag cards, use arrows to reorder, or hide what you don&rsquo;t need.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
+  <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Use the arrows to reorder, or hide what you don&rsquo;t need.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
 
-  <div id="dashWidgets">
-    <!-- MORNING BRIEFING -->
-    <div class="dash-widget" data-w="briefing">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem" id="briefTitle">Today</h2></div>
-        <div id="dailySummary"></div>
-        <h3 style="margin-top:14px">Upcoming</h3><div id="upcomingList"></div>
-      </div>
-    </div>
-
-    <!-- WEATHER -->
-    <div class="dash-widget" data-w="weather">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Weather</h2><button class="btn soft round" onclick="retryWeather()" title="Refresh" aria-label="Refresh weather"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg></button></div>
-        <div id="weatherBody"></div>
-      </div>
-    </div>
-
-    <!-- PRAYER -->
-    <div class="dash-widget" data-w="prayer">
-      <div class="card prayer-card" id="prayerCard">
-        <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
-        <div class="prayer-next" id="prayerNext"></div>
-        <div class="prow" id="prayersRow"></div>
-      </div>
-    </div>
-
-    <!-- CALENDAR -->
-    <div class="dash-widget" data-w="calendar">
-      <div class="card" id="calCard">
-        <div class="integ-head" style="margin-bottom:14px"><div class="integ-title" style="flex:1">Calendar</div></div>
-        <div id="calConn" style="margin-bottom:16px"></div>
-        <div class="cal-head">
-          <div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div>
-          <div class="cal-nav">
-            <button class="btn soft round" onclick="calStep(-1)" aria-label="Previous"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
-            <div class="cal-title" id="calTitle">&mdash;</div>
-            <button class="btn soft round" onclick="calStep(1)" aria-label="Next"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
-          </div>
+  <div id="dashGrid">
+    <div id="dashMain">
+      <!-- TASKS -->
+      <div class="dash-widget" data-w="tasks">
+        <div class="card">
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h2><button class="btn soft" onclick="go('tasks')">All tasks</button></div>
+          <div id="ovTasks"></div>
+          <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
         </div>
-        <div id="calBody"></div>
+      </div>
+      <!-- GMAIL -->
+      <div class="dash-widget" data-w="gmail">
+        <div class="card" id="gmailCard"><div id="gmailBody"></div></div>
+      </div>
+      <!-- CALENDAR -->
+      <div class="dash-widget" data-w="calendar">
+        <div class="card" id="calCard">
+          <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem">Calendar</h2>
+            <div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div>
+          </div>
+          <div id="calConn" style="margin-bottom:12px"></div>
+          <div class="cal-head" style="justify-content:flex-end">
+            <div class="cal-nav">
+              <button class="btn soft round" onclick="calStep(-1)" aria-label="Previous"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+              <div class="cal-title" id="calTitle">&mdash;</div>
+              <button class="btn soft round" onclick="calStep(1)" aria-label="Next"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+          <div id="calBody"></div>
+        </div>
+      </div>
+      <!-- NOTES / QUICK CAPTURE -->
+      <div class="dash-widget" data-w="notes">
+        <div class="card">
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick capture</h2><button class="btn soft" onclick="go('notes')">Notes</button></div>
+          <div class="qc-seg" id="qcSeg"><button class="on" data-m="note" onclick="qcMode('note')">Note</button><button data-m="task" onclick="qcMode('task')">Task</button></div>
+          <div style="display:flex;gap:8px"><input class="fld" id="qcInput" placeholder="Capture a note&hellip;" onkeydown="if(event.key==='Enter')qcAdd()"><button class="btn" onclick="qcAdd()">Add</button></div>
+          <div class="qc-cols"><div class="qc-col"><h4>Recent notes</h4><div id="qcNotes"></div></div><div class="qc-col"><h4>Recent tasks</h4><div id="qcTasks"></div></div></div>
+        </div>
+      </div>
+      <!-- PRAYER -->
+      <div class="dash-widget" data-w="prayer">
+        <div class="card prayer-card" id="prayerCard">
+          <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
+          <div class="prayer-next" id="prayerNext"></div>
+          <div class="prow" id="prayersRow"></div>
+        </div>
+      </div>
+      <!-- QUICK LINKS -->
+      <div class="dash-widget" data-w="links">
+        <div class="card">
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
+          <div id="homeLinks"></div>
+        </div>
+      </div>
+      <!-- APPS -->
+      <div class="dash-widget" data-w="apps">
+        <div class="card">
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Your apps</h2></div>
+          <div class="grid apps" id="appCards"></div>
+        </div>
       </div>
     </div>
-
-    <!-- TODAY'S TASKS -->
-    <div class="dash-widget" data-w="tasks">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h2><button class="btn soft" onclick="go('tasks')">All tasks</button></div>
-        <div id="ovTasks"></div>
-        <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
-      </div>
-    </div>
-
-    <!-- GMAIL -->
-    <div class="dash-widget" data-w="gmail">
-      <div class="card" id="gmailCard"><div id="gmailBody"></div></div>
-    </div>
-
-    <!-- NOTES / QUICK CAPTURE -->
-    <div class="dash-widget" data-w="notes">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick capture</h2><button class="btn soft" onclick="go('notes')">Notes</button></div>
-        <div class="qc-seg" id="qcSeg"><button class="on" data-m="note" onclick="qcMode('note')">Note</button><button data-m="task" onclick="qcMode('task')">Task</button></div>
-        <div style="display:flex;gap:8px"><input class="fld" id="qcInput" placeholder="Capture a note&hellip;" onkeydown="if(event.key==='Enter')qcAdd()"><button class="btn" onclick="qcAdd()">Add</button></div>
-        <div class="qc-cols"><div class="qc-col"><h4>Recent notes</h4><div id="qcNotes"></div></div><div class="qc-col"><h4>Recent tasks</h4><div id="qcTasks"></div></div></div>
-      </div>
-    </div>
-
-    <!-- APPS -->
-    <div class="dash-widget" data-w="apps">
-      <div class="section-head"><h2>Your apps</h2></div>
-      <div class="grid apps" id="appCards"></div>
-    </div>
-
-    <!-- QUICK LINKS -->
-    <div class="dash-widget" data-w="links">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
-        <div id="homeLinks"></div>
-      </div>
-    </div>
+    <div id="dashRail"></div>
   </div>
 </div>
 
@@ -977,7 +996,7 @@ let user = null;
 
 const DEFAULT = {
   profile:{ name:"Eyad Alfi" },
-  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true, googlePhoto:"", googleName:"", statusesV:2, statuses:[{id:"todo",name:"To Do"},{id:"doing",name:"In Progress"},{id:"done",name:"Done"}], dashLayout:[{k:"briefing",h:false},{k:"tasks",h:false},{k:"calendar",h:false},{k:"gmail",h:false},{k:"notes",h:false},{k:"weather",h:false},{k:"prayer",h:false},{k:"links",h:false},{k:"apps",h:false}], dashV:3, defaultStatus:"todo", collapsedCols:[] },
+  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true, googlePhoto:"", googleName:"", statusesV:2, statuses:[{id:"todo",name:"To Do"},{id:"doing",name:"In Progress"},{id:"done",name:"Done"}], dashLayout:[{k:"tasks",h:false},{k:"calendar",h:false},{k:"gmail",h:false},{k:"notes",h:false},{k:"prayer",h:false},{k:"links",h:false},{k:"apps",h:false}], dashV:4, defaultStatus:"todo", collapsedCols:[] },
   notes:[], tasks:[], goals:[],
   links:[
     {group:"Build", label:"GitHub", url:"https://github.com"},
@@ -1003,7 +1022,7 @@ function fill(d){
   if(!Array.isArray(d.settings.statuses)||!d.settings.statuses.length) d.settings.statuses=JSON.parse(JSON.stringify(DEFAULT.settings.statuses));
   var _ids=d.settings.statuses.map(function(x){return x.id;});
   (d.tasks||[]).forEach(function(t){ if(!t.status)t.status=(t.done?"done":_ids[0]); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
-  if((d.settings.dashV||0)<3){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=3; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
+  if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
   return d;
 }
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
@@ -1516,23 +1535,21 @@ var WX_RAIN='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width=
 var WX_STORM='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width="2"><path d="M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 15M13 11l-3 6h4l-3 5"/></svg>';
 function wxIcon(c){ if(c<=1) return WX_SUN; if(c<48) return WX_CLOUD; if(c>=95) return WX_STORM; return WX_RAIN; }
 async function loadWeather(){
-  const box=document.getElementById("weatherBody"); if(!box) return;
+  const box=document.getElementById("ambient"); if(!box) return;
   const city=data.settings.city||"Makkah";
   if(_wxCache[city]){ box.innerHTML=_wxCache[city]; return; }
-  box.innerHTML='<div class="wx-card"><div class="skel" style="width:58px;height:58px;border-radius:14px"></div><div style="flex:1"><div class="skel skel-l" style="width:74px;height:26px"></div><div class="skel skel-l" style="width:130px;height:11px;margin-top:9px"></div></div></div>';
+  box.innerHTML='<span class="skel skel-l" style="display:inline-block;width:52px;height:13px;vertical-align:middle"></span>';
   try{
-    const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(r=>r.json());
+    const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(function(r){return r.json();});
     const loc=g&&g.results&&g.results[0];
-    if(!loc){ box.innerHTML='<div class="muted" style="font-size:.85rem">Couldn\'t find &ldquo;'+esc(city)+'&rdquo;. Set your city in Preferences. <button class="btn soft" style="margin-top:8px" onclick="openSettings()">Open Preferences</button></div>'; return; }
-    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min&timezone=auto").then(r=>r.json());
-    if(!w||!w.current) throw new Error("no data");
-    const temp=Math.round(w.current.temperature_2m), desc=wxDesc(w.current.weather_code), feels=Math.round(w.current.apparent_temperature);
-    const hi=(w.daily&&w.daily.temperature_2m_max)?Math.round(w.daily.temperature_2m_max[0]):null;
-    const lo=(w.daily&&w.daily.temperature_2m_min)?Math.round(w.daily.temperature_2m_min[0]):null;
-    const html='<div class="wx-card"><div class="wx-ico">'+wxIcon(w.current.weather_code)+'</div><div style="min-width:0"><div class="wx-temp">'+temp+'°</div><div style="font-weight:700">'+esc(desc)+'</div><div class="wx-meta">'+esc(loc.name||city)+(hi!=null?' &middot; H'+hi+'° L'+lo+'°':'')+(isFinite(feels)?' &middot; feels '+feels+'°':'')+'</div></div></div>';
+    if(!loc){ box.innerHTML='<span class="muted" style="font-size:.7rem">Set city</span>'; return; }
+    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code").then(function(r){return r.json();});
+    if(!w||!w.current) throw new Error("x");
+    const temp=Math.round(w.current.temperature_2m), desc=wxDesc(w.current.weather_code);
+    const html='<b style="font-size:1.25rem">'+temp+'°</b><div class="whijri" style="opacity:.85">'+esc(desc)+'</div>';
     _wxCache[city]=html; box.innerHTML=html;
   }catch(e){
-    box.innerHTML='<div class="muted" style="font-size:.85rem">Weather is unavailable right now. <button class="btn soft" style="margin-top:8px" onclick="retryWeather()">Retry</button></div>';
+    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.72rem">Retry</button>';
   }
 }
 function retryWeather(){ var c=data.settings.city||"Makkah"; delete _wxCache[c]; loadWeather(); }
@@ -1817,12 +1834,13 @@ function gAvatar(){ var p=data.settings.googlePhoto; if(p) return '<img class="g
 function googleChip(extra,sub){ var email=data.settings.googleEmail||"Google account"; return '<div class="gchip">'+gAvatar()+'<div class="gchip-main"><div class="gchip-email">'+esc(email)+'</div><div class="gchip-sub">'+istBadge("on")+'<span class="muted" style="font-size:.74rem">'+(sub?esc(sub):"Calendar &amp; Gmail")+'</span></div></div><div class="gchip-actions">'+(extra||"")+'<button class="btn soft" onclick="googleDisconnect()">Disconnect</button></div></div>'; }
 function googleDisconnect(){ clearGToken("google"); clearGToken("gcal"); clearGToken("gmail"); calToken=null; gmailToken=null; calState="idle"; gmailState="idle"; calEvents=null; gmailStats=null; gmailMsgs=null; data.settings.calConnected=false; data.settings.gmailConnected=false; data.settings.googleEmail=""; data.settings.googlePhoto=""; data.settings.googleName=""; save(); try{ renderCalConn(); renderGmail(); renderCalendar(); renderToday(); renderWelcomeSummary(); }catch(e){} toast("Google disconnected"); }
 /* Dashboard customization */
-var DASH_KEYS=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"];
+var DASH_KEYS=["tasks","calendar","gmail","notes","prayer","links","apps"];
+var DASH_COL={tasks:"main",gmail:"main",calendar:"rail",notes:"rail",prayer:"rail",links:"rail",apps:"rail"};
 var dashDragK=null;
 function dashLayout(){ var l=data.settings.dashLayout; if(!Array.isArray(l)) l=[]; var seen={}; l=l.filter(function(w){ if(!w||!w.k||DASH_KEYS.indexOf(w.k)<0||seen[w.k]) return false; seen[w.k]=1; return true; }); DASH_KEYS.forEach(function(k){ if(!seen[k]) l.push({k:k,h:false}); }); data.settings.dashLayout=l; return l; }
-function renderDashboard(){ var host=document.getElementById("dashWidgets"); if(!host) return; dashLayout().forEach(function(w){ var el=host.querySelector('[data-w="'+w.k+'"]'); if(!el) return; el.classList.toggle("w-hidden",!!w.h); host.appendChild(el); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); scheduleMasonry(); }
-function toggleDashEdit(){ var on=!document.body.classList.contains("dash-edit"); document.body.classList.toggle("dash-edit",on); var b=document.getElementById("dashEditBtn"); if(b) b.textContent=on?"Done":"Customize"; var h=document.getElementById("dashHint"); if(h) h.style.display=on?"":"none"; var host=document.getElementById("dashWidgets"); if(on){ renderDashTools(); scheduleMasonry(); } else if(host){ host.querySelectorAll(".dash-tools").forEach(function(x){x.remove();}); host.querySelectorAll(".dash-widget").forEach(function(el){ el.removeAttribute("draggable"); el.ondragstart=el.ondragend=el.ondragover=el.ondragleave=el.ondrop=null; }); renderDashboard(); } }
-function renderDashTools(){ var host=document.getElementById("dashWidgets"); if(!host) return; dashLayout().forEach(function(w){ var el=host.querySelector('[data-w="'+w.k+'"]'); if(!el) return; el.setAttribute("draggable","true"); var t=el.querySelector(":scope > .dash-tools"); if(!t){ t=document.createElement("div"); t.className="dash-tools"; el.appendChild(t); } t.innerHTML='<button title="Move up" onclick="dashMove(\''+w.k+'\',-1)">'+ST_UP+'</button><button title="Move down" onclick="dashMove(\''+w.k+'\',1)">'+ST_DN+'</button><button title="'+(w.h?"Show":"Hide")+'" onclick="dashHide(\''+w.k+'\')">'+(w.h?EYE_OFF:EYE)+'</button>'; el.ondragstart=function(e){ dashDragK=w.k; el.classList.add("dragging"); try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain",w.k); }catch(_){ } }; el.ondragend=function(){ el.classList.remove("dragging"); host.querySelectorAll(".dash-over").forEach(function(x){x.classList.remove("dash-over");}); }; el.ondragover=function(e){ e.preventDefault(); el.classList.add("dash-over"); }; el.ondragleave=function(){ el.classList.remove("dash-over"); }; el.ondrop=function(e){ e.preventDefault(); el.classList.remove("dash-over"); dashDropOn(w.k); }; }); }
+function renderDashboard(){ var main=document.getElementById("dashMain"), rail=document.getElementById("dashRail"); if(!main||!rail) return; dashLayout().forEach(function(w){ var el=document.querySelector('.dash-widget[data-w="'+w.k+'"]'); if(!el) return; el.classList.toggle("w-hidden",!!w.h); (DASH_COL[w.k]==="rail"?rail:main).appendChild(el); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
+function toggleDashEdit(){ var on=!document.body.classList.contains("dash-edit"); document.body.classList.toggle("dash-edit",on); var b=document.getElementById("dashEditBtn"); if(b) b.textContent=on?"Done":"Customize"; var h=document.getElementById("dashHint"); if(h) h.style.display=on?"":"none"; var host=document.getElementById("dashGrid"); if(on){ renderDashTools(); scheduleMasonry(); } else if(host){ host.querySelectorAll(".dash-tools").forEach(function(x){x.remove();}); host.querySelectorAll(".dash-widget").forEach(function(el){ el.removeAttribute("draggable"); el.ondragstart=el.ondragend=el.ondragover=el.ondragleave=el.ondrop=null; }); renderDashboard(); } }
+function renderDashTools(){ var host=document.getElementById("dashGrid"); if(!host) return; dashLayout().forEach(function(w){ var el=host.querySelector('[data-w="'+w.k+'"]'); if(!el) return; el.setAttribute("draggable","true"); var t=el.querySelector(":scope > .dash-tools"); if(!t){ t=document.createElement("div"); t.className="dash-tools"; el.appendChild(t); } t.innerHTML='<button title="Move up" onclick="dashMove(\''+w.k+'\',-1)">'+ST_UP+'</button><button title="Move down" onclick="dashMove(\''+w.k+'\',1)">'+ST_DN+'</button><button title="'+(w.h?"Show":"Hide")+'" onclick="dashHide(\''+w.k+'\')">'+(w.h?EYE_OFF:EYE)+'</button>'; el.ondragstart=function(e){ dashDragK=w.k; el.classList.add("dragging"); try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain",w.k); }catch(_){ } }; el.ondragend=function(){ el.classList.remove("dragging"); host.querySelectorAll(".dash-over").forEach(function(x){x.classList.remove("dash-over");}); }; el.ondragover=function(e){ e.preventDefault(); el.classList.add("dash-over"); }; el.ondragleave=function(){ el.classList.remove("dash-over"); }; el.ondrop=function(e){ e.preventDefault(); el.classList.remove("dash-over"); dashDropOn(w.k); }; }); }
 function dashMove(k,dir){ var l=dashLayout(); var i=l.findIndex(function(w){return w.k===k;}); if(i<0) return; var j=i+dir; if(j<0||j>=l.length) return; var tmp=l[i]; l[i]=l[j]; l[j]=tmp; data.settings.dashLayout=l; save(); renderDashboard(); }
 function dashHide(k){ var l=dashLayout(); var w=l.find(function(x){return x.k===k;}); if(w){ w.h=!w.h; data.settings.dashLayout=l; save(); renderDashboard(); } }
 function dashDropOn(targetK){ if(!dashDragK||dashDragK===targetK) return; var l=dashLayout(); var from=l.findIndex(function(w){return w.k===dashDragK;}); var to=l.findIndex(function(w){return w.k===targetK;}); if(from<0||to<0) return; var moved=l.splice(from,1)[0]; l.splice(to,0,moved); data.settings.dashLayout=l; dashDragK=null; save(); renderDashboard(); }
@@ -1852,7 +1870,7 @@ function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); if(!colDr
 var SPAN={calendar:2,gmail:2,apps:2,notes:2,briefing:1,weather:1,prayer:1,tasks:1,links:1};
 var _msnRAF=null;
 function scheduleMasonry(){ if(_msnRAF) cancelAnimationFrame(_msnRAF); _msnRAF=requestAnimationFrame(function(){ try{ layoutMasonry(); }catch(e){} }); }
-function layoutMasonry(){ var grid=document.getElementById("dashWidgets"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
+function layoutMasonry(){ var grid=document.getElementById("dashGrid"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
 window.addEventListener("resize",scheduleMasonry);
 /* ============ Boot ============ */
 render();
@@ -1861,7 +1879,7 @@ setInterval(function(){ if(user&&supa&&document.visibilityState==="visible") loa
 document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&user&&supa) loadFinance(); });
 scheduleMasonry();
 setTimeout(scheduleMasonry,300); setTimeout(scheduleMasonry,1200);
-(function(){ var g=document.getElementById("dashWidgets"); if(g&&window.MutationObserver){ try{ new MutationObserver(function(){ scheduleMasonry(); }).observe(g,{childList:true,subtree:true}); }catch(e){} } })();
+(function(){ var g=document.getElementById("dashGrid"); if(g&&window.MutationObserver){ try{ new MutationObserver(function(){ scheduleMasonry(); }).observe(g,{childList:true,subtree:true}); }catch(e){} } })();
 (function waitG(n){ if(window.google&&google.accounts&&google.accounts.oauth2){ try{ gAutoConnect(); }catch(e){} } else if(n>0){ setTimeout(function(){ waitG(n-1); },400); } })(15);
 initAuth();
 (function(){ var s=document.getElementById("splash"); function go(){ setTimeout(()=>s.classList.add("hide"),600); setTimeout(()=>{ if(s.parentNode) s.parentNode.removeChild(s); },1400); } if(document.readyState==="complete") go(); else window.addEventListener("load",go); })();
