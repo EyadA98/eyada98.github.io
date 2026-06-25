@@ -1046,7 +1046,7 @@ function fill(d){
   for(const k of Object.keys(DEFAULT_DATA)) if(d[k]===undefined) d[k]=JSON.parse(JSON.stringify(DEFAULT_DATA[k]));
   return d;
 }
-function save(silent){ try{ data.updatedAt = new Date().toISOString(); localStorage.setItem(user? KEY+":"+user.id : KEY, JSON.stringify(data)); if(!silent) toast("Saved"); }catch(e){} scheduleSync(); }
+function save(silent){ try{ data.updatedAt = new Date().toISOString(); try{var _nt=totals(); if(_nt&&isFinite(_nt.net)){ data.netWorth=_nt.net; data.netWorthAt=Date.now(); }}catch(_){} localStorage.setItem(user? KEY+":"+user.id : KEY, JSON.stringify(data)); if(!silent) toast("Saved"); }catch(e){} scheduleSync(); }
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("show");
