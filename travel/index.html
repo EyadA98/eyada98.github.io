@@ -287,7 +287,7 @@ function KPI({label,value,icon}){ const {dark}=useContext(Theme); return (
 
 function LogoMark({size=34}){ return (
   <svg width={size} height={size} viewBox="0 0 100 100">
-    <defs><linearGradient id="lgbg" x1="0" y1="0" x2="100" y2="100"><stop offset="0" stopColor="#3a2a63"/><stop offset="1" stopColor="#15103a"/></linearGradient></defs>
+    <defs><linearGradient id="lgbg" x1="0" y1="0" x2="100" y2="100"><stop offset="0" stopColor="#8a64c8"/><stop offset="1" stopColor="#623f94"/></linearGradient></defs>
     <rect width="100" height="100" rx="24" fill="url(#lgbg)"/>
     <g transform="translate(-92.6 -31.1) scale(0.3003)" fill="#ffffff">
       <path d="m381.6378 217.79134l10.228363 -40.913376l171.15747 0l-10.2283325 40.913376z"/>
@@ -1145,6 +1145,7 @@ function App(){
       <div className={`min-h-screen ${dark?'app-bg-dark text-lavender-50':'app-bg-light text-lavender-950'} font-sans transition-colors`} style={{paddingBottom:showBottomNav?'90px':'0'}}>
         <header className={`sticky top-0 z-40 frost ${dark?'glass-dark':'glass-light'} border-b`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <button onClick={()=>setView('trips')} title="Trips" className="flex items-center"><Logo logo={logo}/></button>
             <nav className="hidden md:flex items-center gap-1">{TOPNAV.map(t=><button key={t.id} onClick={()=>setView(t.id)} className={`px-3.5 py-2 rounded-xl text-sm font-semibold transition ${view===t.id?'iridescent text-indigo2-950 shadow-glow':(dark?'text-lavender-200 hover:bg-white/5':'text-lavender-700 hover:bg-lavender-100')}`}>{t.label}</button>)}</nav>
             <div className="flex items-center gap-2">
               {currentTrip&&<select value={cur} onChange={e=>changeCurrency(e.target.value)} className="tp-soft rounded-full h-10 pl-3 pr-2 text-sm">{Object.entries(CURRENCIES).map(([k,v])=><option key={k} value={k}>{v.flag} {k}</option>)}</select>}
