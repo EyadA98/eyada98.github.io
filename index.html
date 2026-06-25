@@ -911,6 +911,21 @@ html:not(.dark) .lbl-chip{background:#fff}
 .lbl-chip.on{background:var(--grad-iri);color:#fff;border-color:transparent}
 .lbl-name{flex:1}
 
+
+/* ===== batch v14: fix greeting clip + equal-height pairs ===== */
+/* greeting gradient: use background-image (shorthand was resetting background-clip) */
+.welcome-hero h1.marc{background:none!important;background-image:linear-gradient(102deg,#fcd9b6 0%,#f3b98e 40%,#e89a5e 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;color:transparent!important;display:inline-block;padding-bottom:3px}
+.welcome-hero h1.marc #greetLine,.welcome-hero h1.marc #userName{background:none!important;-webkit-text-fill-color:transparent!important;color:transparent!important}
+/* equal-height pairs: out-rank the #dashStack height:auto rule */
+#dashStack .dash-row2 .dash-widget>.card{height:100%!important}
+#dashStack .dash-row2{align-items:stretch}
+
+.wbox .wtime .sec{display:none}
+.wbox .wtime .mer{display:inline-block!important;font-size:.3em;font-weight:700;opacity:.72;margin-left:7px;letter-spacing:.08em}
+.notes-tools{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;min-width:0}
+.notes-tools #noteSearch{flex:1 1 auto;min-width:0;max-width:240px}
+.notes-tools .btn{white-space:nowrap;flex:none}
+@media(max-width:560px){.notes-tools{flex-wrap:wrap;justify-content:flex-end}.notes-tools #noteSearch{flex:1 1 140px}}
 </style>
 </head>
 <body>
@@ -1048,8 +1063,8 @@ html:not(.dark) .lbl-chip{background:#fff}
 <!-- NOTES -->
 <div class="tab" id="tab-notes">
   <div class="section-head"><h2>Notes</h2>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <input class="fld" id="noteSearch" placeholder="Search notes&hellip;" style="max-width:220px" oninput="renderNotes()">
+    <div class="notes-tools">
+      <input class="fld" id="noteSearch" placeholder="Search notes&hellip;" oninput="renderNotes()">
       <button class="btn soft" onclick="openLabels()">Labels</button>
       <button class="btn soft" id="archToggle" onclick="toggleArchivedView()">Show archived</button>
     </div>
@@ -1190,7 +1205,7 @@ function render(){ applyLang();
 function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
-function hijri(d){ try{ return new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d)+" AH"; }catch(e){ return ""; } }
+function hijri(d){ try{ var x=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d); return /AH/i.test(x)?x:(x+" AH"); }catch(e){ return ""; } }
 
 function renderHome(){
   const now=new Date(), h=now.getHours();
@@ -1711,7 +1726,8 @@ async function loadFinance(){
     const {data:rows}=await supa.from("boards").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1);
     const d=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]&&rows[0].updated_at) financeUpdated=rows[0].updated_at; if(!d) return;
     let net=null;
-    if(Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
+    if(typeof d.netWorth==="number" && isFinite(d.netWorth)) net=d.netWorth;
+    if(net==null && Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
     if(net!=null) financeStat=(data.settings.currency||"SAR")+" "+Number(net).toLocaleString("en-US",{maximumFractionDigits:0});
     if(Array.isArray(d.zaka)&&d.zaka.length){ var last=d.zaka.map(function(z){return z.dateG;}).filter(Boolean).sort().pop(); if(last){ var nx=new Date(last); nx.setDate(nx.getDate()+354); zakatDue=Math.ceil((nx-new Date())/86400000); } }
