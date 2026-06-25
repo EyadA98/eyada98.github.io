@@ -749,6 +749,24 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 [data-w="weather"]>.card,[data-w="prayer"]>.card,[data-w="links"]>.card{height:auto!important}
 @media(max-width:700px){[data-w]>.card{height:auto!important}}
 
+
+/* ===== batch v8: content-height column composition (Sunsama/Notion-style) ===== */
+#dashWidgets{display:block!important;position:static!important;height:auto!important;column-count:3;column-gap:18px}
+.dash-widget{display:block;break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;margin:0 0 18px!important;width:auto!important;position:static!important;left:auto!important;top:auto!important;grid-column:auto!important;align-self:auto!important}
+.dash-widget>.card{height:auto!important}
+@media(max-width:1100px){#dashWidgets{column-count:2}}
+@media(max-width:700px){#dashWidgets{column-count:1;column-gap:0}.dash-widget{margin-bottom:14px!important}}
+/* tighter cards = more density */
+.dash-widget .card{padding:16px 18px}
+.dash-widget .section-head{margin:0 0 10px!important}
+.gm-list{max-height:300px!important}
+/* compact calendar connection (account UI removed; lives in Settings) */
+.cal-synced{display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--muted)}
+.cal-synced .gdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.cal-synced .ispin{width:11px;height:11px;border:2px solid var(--peach);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex:none}
+.lnk{background:none;border:none;color:var(--lavender);font-weight:700;cursor:pointer;font-family:inherit;font-size:.76rem;padding:0}
+.lnk:hover{text-decoration:underline}
+
 </style>
 </head>
 <body>
@@ -808,8 +826,7 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
       <div class="card">
         <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem" id="briefTitle">Today</h2></div>
         <div id="dailySummary"></div>
-        <h3>Agenda</h3><div id="agendaList"></div>
-        <h3>Upcoming</h3><div id="upcomingList"></div>
+        <h3 style="margin-top:14px">Upcoming</h3><div id="upcomingList"></div>
       </div>
     </div>
 
@@ -1391,13 +1408,13 @@ async function gFetchEmail(token){ try{ var j=await fetch("https://www.googleapi
 /* ---- Calendar connection ---- */
 function renderCalConn(){
   var el=document.getElementById("calConn"); if(!el) return;
-  var st=intState("cal"); var email=data.settings.googleEmail||"";
+  var st=intState("cal");
   if(st==="connected"||st==="stale"){
-    el.innerHTML=googleChip('<button class="btn soft" onclick="calSync()" title="Sync now">'+I_REFRESH+'</button>',(data.settings.calLastSync?("Synced "+relTime(data.settings.calLastSync)):"Connected"));
+    el.innerHTML='<div class="cal-synced"><span class="gdot"></span>Calendar synced'+(data.settings.calLastSync?(" "+esc(relTime(data.settings.calLastSync))):"")+'<button class="lnk" style="margin-left:auto" onclick="calSync()">Sync</button></div>';
   } else if(st==="connecting"){
-    el.innerHTML='<div class="iconn-bar"><div class="iconn-acct">'+gico(G_SVG)+'<div><div class="iconn-name">Connecting to Google Calendar…</div><div class="iconn-sub">'+istBadge("sync")+'</div></div></div></div>';
+    el.innerHTML='<div class="cal-synced"><span class="ispin"></span>Connecting to Google…</div>';
   } else {
-    el.innerHTML='<div class="iconn onboard">'+gico(G_SVG,true)+'<div class="iconn-mid"><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap"><b style="font-size:1rem">Google Calendar</b>'+istBadge(st==="error"?"err":"off")+'</div><p class="muted" style="font-size:.85rem;margin:0;line-height:1.5">Connect your Google Calendar to view events, meetings, reminders and upcoming schedules directly from your dashboard.</p></div><button class="btn" onclick="calConnect()">Connect Google Calendar</button></div>'+(st==="error"?'<div class="ierr">Couldn\'t connect. Check your Client ID and that the Calendar API is enabled, then try again.</div>':'');
+    el.innerHTML='<button class="btn soft" onclick="googleConnect()" style="width:100%;justify-content:center">Connect Google Calendar</button>'+(st==="error"?'<div class="cal-synced" style="margin-top:6px;color:var(--red)">Couldn&rsquo;t connect &mdash; check your Client ID in Preferences</div>':'');
   }
 }
 function calConnect(){ googleConnect(); }
@@ -1572,7 +1589,7 @@ function openSettings(){
     +'<label class="setlbl">City &mdash; prayer &amp; weather</label><div class="ac-wrap" style="margin:6px 0 10px"><input class="fld" id="setCity" autocomplete="off" value="'+esc(s.city||"Makkah")+'" placeholder="Start typing a city…" oninput="cityAC(this.value)" onfocus="cityAC(this.value)" onkeydown="cityACKey(event)"><div class="ac-list" id="cityAClist"></div></div>'
     +'<label class="setlbl">Language</label><select class="fld" id="setLang" style="margin:6px 0 10px"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select>'
     +'<label class="setlbl">Google Client ID &mdash; Calendar &amp; Gmail (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 10px">'
-    +'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")+chk("wGmail",s.showGmail,"Gmail")
+    +'<label class="setlbl" style="display:block;margin:4px 0 8px">Connected accounts</label><div style="margin-bottom:14px">'+(data.settings.googleEmail?googleChip('<button class="btn soft" onclick="googleConnect()" title="Reconnect">'+I_REFRESH+'</button>'):'<button class="btn soft" onclick="googleConnect()">Connect Google (Calendar &amp; Gmail)</button>')+'</div>'+'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")+chk("wGmail",s.showGmail,"Gmail")
     +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
   try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
 }
