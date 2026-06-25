@@ -711,6 +711,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 .av-menu button svg{width:16px;height:16px;opacity:.8;flex:none}
 .av-menu button.danger-item{color:var(--red)}
 
+#syncStatus{display:none!important}
 </style>
 </head>
 <body>
@@ -748,11 +749,11 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 <div class="content">
 <div class="topbar" id="topbar">
   <div class="tb-left">
-    <a class="hq-btn" href="../" title="Back to your HQ" aria-label="Back to HQ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><b>HQ</b></a>
     <div class="tb-titles"><div class="crumb" id="crumb">Insights</div><h2 id="pageTitle">Overview</h2></div>
   </div>
   <div class="top-actions">
     <span class="note" id="syncStatus" style="margin:0"></span>
+    <a class="hq-btn" href="../" title="Back to your HQ" aria-label="Back to HQ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><b>HQ</b></a>
     <button class="btn soft tb-more" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light or dark theme" title="Toggle theme"><span id="themeIcon"></span></button>
     <div class="av-wrap">
       <div id="avatarChip" title="Account" onclick="toggleAvMenu(event)"></div>
@@ -2133,7 +2134,7 @@ async function saveNewPassword(){
 }
 function updateAcctBtn(){
   const b = document.getElementById("acctBtn"); if(b) b.textContent = user ? (user.email||"Account").split("@")[0] : "Account";
-  const av=document.getElementById("avatarChip"); if(av){ var nm=(user&&user.email)||""; av.textContent = nm? nm.slice(0,2).toUpperCase() : "\u2022"; }
+  const av=document.getElementById("avatarChip"); if(av){ var nm=(user&&user.email)||""; av.textContent = nm? nm.charAt(0).toUpperCase() : "\u2022"; }
 }
 var _AVI={user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>',up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M7 13l5-5 5 5M5 3h14"/></svg>',prn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',rst:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>',out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'};
 function toggleAvMenu(e){ if(e)e.stopPropagation(); var m=document.getElementById("avMenu"); if(!m)return; if(m.classList.contains("show")){m.classList.remove("show");return;} m.innerHTML=avMenuHtml(); m.classList.add("show"); }
