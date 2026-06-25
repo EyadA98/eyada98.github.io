@@ -490,6 +490,70 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
 .cs-opt:hover{background:rgba(138,100,200,.16)}
 .cs-sel{background:var(--grad-iri);color:#fff;font-weight:700}
 
+
+/* ===== batch v3: welcome widgets, contrast, statuses, mobile, skeletons ===== */
+.whero{display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center}
+@media(max-width:760px){.whero{grid-template-columns:1fr;gap:18px}}
+.wwidgets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:250px}
+@media(max-width:760px){.wwidgets{min-width:0}}
+.wtile{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.17);border-radius:15px;padding:12px 15px}
+.wtile-time{grid-column:1 / -1}
+.wtile-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.13em;opacity:.72;font-weight:800;margin-bottom:4px}
+.wtile .wtime{font-size:clamp(2.3rem,5.2vw,3.1rem)}
+.wtile-val{font-weight:700;font-size:.98rem}
+#weatherTile .wtile-val{font-size:.9rem;font-weight:600;line-height:1.35}
+.whijri{opacity:.66;font-size:.76rem;font-weight:500;margin-top:3px}
+/* light-mode contrast fixes (peach text on light surfaces) */
+html:not(.dark) .b-doing,html:not(.dark) .ev-event,html:not(.dark) .is-sync,html:not(.dark) .kproj,html:not(.dark) .istate.is-sync{color:var(--peach-deep)}
+.b-block{background:rgba(214,85,76,.16);color:var(--red)}
+.b-arch{background:rgba(106,95,134,.2);color:var(--muted)}
+/* status board -> horizontal scroll for many columns */
+.kanban{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
+.kanban .kcol{min-width:250px;max-width:300px;flex:0 0 auto}
+@media(max-width:560px){.kanban .kcol{min-width:82vw}}
+.kcard[draggable]{touch-action:none}
+/* manage statuses rows */
+.st-row{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.st-row .st-name{flex:1}
+.st-mini{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;flex:none;transition:all .15s}
+.st-mini:hover{border-color:var(--lavender);color:var(--lavender)}
+.st-mini svg{width:15px;height:15px}
+/* skeleton shimmer */
+.skel{position:relative;overflow:hidden;background:rgba(138,100,200,.12);border-radius:8px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);animation:shim 1.3s infinite}
+@keyframes shim{100%{transform:translateX(100%)}}
+.skel-row{display:flex;gap:11px;align-items:center;padding:11px 8px}
+.skel-c{width:34px;height:34px;border-radius:50%;flex:none}
+.skel-l{height:11px}
+/* ===== Mobile pass ===== */
+html,body{max-width:100%;overflow-x:hidden}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@media(max-width:600px){
+  main{padding:12px 13px 118px}
+  .card{padding:15px}
+  .hero{padding:22px 18px;border-radius:20px}
+  .section-head{margin:2px 0 12px}
+  .section-head h2{font-size:1.03rem}
+  .ov-grid,.gm-metrics{gap:12px}
+  .integ-title{font-size:1rem}
+  .wtile .wtime{font-size:2.4rem;letter-spacing:0}
+  .pn-name{font-size:1.4rem}
+  /* bottom-sheet modals */
+  .overlay{align-items:flex-end;padding:0}
+  .modal,.modal.wide{max-width:none;width:100%;border-radius:22px 22px 0 0;max-height:92vh;overflow:auto;animation:sheetUp .3s var(--ease);padding:22px 18px calc(18px + env(safe-area-inset-bottom))}
+  .f2{grid-template-columns:1fr}
+  .av-menu{position:fixed;left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));min-width:0}
+  /* larger touch targets */
+  .icon-btn{padding:9px}
+  .btn{padding:11px 18px;font-size:.9rem}
+  .cs-btn,.dp-btn{min-height:44px}
+  .tv-switch button{padding:9px 12px}
+  .tv-bar .fld{min-height:42px}
+  .bottombar button{padding:9px 4px}
+  .bottombar button svg{width:22px;height:22px}
+  .notes-masonry{columns:1}
+}
+
 </style>
 </head>
 <body>
@@ -505,10 +569,9 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
   <div class="nav-label">Apps</div>
   <button class="nav" data-tab="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
   <div class="nav-label">Workspace</div>
-  <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button class="nav" data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
+  <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button class="nav" data-tab="links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Quick Links</button>
-  <button class="nav" data-tab="goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>Goals</button>
   <div class="side-foot">Your private headquarters</div>
 </aside>
 
@@ -527,39 +590,20 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
 
 <!-- HOME -->
 <div class="tab active" id="tab-home">
-  <!-- WELCOME + TIME/DATE -->
+  <!-- WELCOME + WIDGETS -->
   <div class="hero">
-    <div id="ambient"></div>
     <div class="whero">
       <div>
         <div class="eyebrow" id="greetEyebrow">Welcome back</div>
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
         <div class="wsummary" id="welcomeSummary"></div>
       </div>
-      <div class="wclock">
-        <div class="wtime" id="clockTime">--:--</div>
-        <div class="wdate-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span id="dateLine">&mdash;</span></div>
-        <div class="whijri" id="hijriLine"></div>
+      <div class="wwidgets">
+        <div class="wtile wtile-time"><div class="wtile-lbl">Time</div><div class="wtime" id="clockTime">--:--</div></div>
+        <div class="wtile"><div class="wtile-lbl">Date</div><div class="wtile-val" id="dateLine">&mdash;</div><div class="whijri" id="hijriLine"></div></div>
+        <div class="wtile" id="weatherTile"><div class="wtile-lbl">Weather</div><div class="wtile-val" id="ambient">&mdash;</div></div>
       </div>
     </div>
-  </div>
-
-  <!-- PRAYER TIMES -->
-  <div class="card prayer-card" id="prayerCard" style="margin-bottom:18px">
-    <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
-    <div class="prayer-next" id="prayerNext"></div>
-    <div class="prow" id="prayersRow"></div>
-  </div>
-
-  <!-- TODAY'S OVERVIEW -->
-  <div class="section-head"><h2>Today&rsquo;s overview</h2><button class="btn soft" onclick="go('tasks')">Manage tasks</button></div>
-  <div class="ov-grid" style="margin-bottom:18px">
-    <div class="card ov-card"><h3>Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h3><div id="ovTasks"></div>
-      <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
-    </div>
-    <div class="card ov-card"><h3>Today&rsquo;s agenda</h3><div id="agendaList"></div></div>
-    <div class="card ov-card"><h3>Upcoming</h3><div id="upcomingList"></div></div>
-    <div class="card ov-card"><h3>Daily summary</h3><div id="dailySummary"></div></div>
   </div>
 
   <!-- CALENDAR -->
@@ -577,23 +621,35 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
     <div id="calBody"></div>
   </div>
 
+  <!-- TODAY'S OVERVIEW -->
+  <div class="section-head"><h2>Today&rsquo;s overview</h2><button class="btn soft" onclick="go('tasks')">Manage tasks</button></div>
+  <div class="ov-grid" style="margin-bottom:18px">
+    <div class="card ov-card"><h3>Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h3><div id="ovTasks"></div>
+      <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
+    </div>
+    <div class="card ov-card"><h3>Today&rsquo;s agenda</h3><div id="agendaList"></div></div>
+    <div class="card ov-card"><h3>Upcoming</h3><div id="upcomingList"></div></div>
+    <div class="card ov-card"><h3>Daily summary</h3><div id="dailySummary"></div></div>
+  </div>
+
   <!-- GMAIL -->
   <div class="card" id="gmailCard" style="margin-bottom:18px"><div id="gmailBody"></div></div>
+
+  <!-- PRAYER TIMES -->
+  <div class="card prayer-card" id="prayerCard" style="margin-bottom:18px">
+    <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
+    <div class="prayer-next" id="prayerNext"></div>
+    <div class="prow" id="prayersRow"></div>
+  </div>
 
   <!-- APPS -->
   <div class="section-head"><h2>Your apps</h2></div>
   <div class="grid apps" id="appCards" style="margin-bottom:18px"></div>
 
-  <!-- MOMENTUM + LINKS -->
-  <div class="grid" style="grid-template-columns:1.3fr 1fr">
-    <div class="card">
-      <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Momentum</h2><button class="btn soft" onclick="go('goals')">Goals</button></div>
-      <div id="momentum"></div>
-    </div>
-    <div class="card">
-      <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
-      <div id="homeLinks"></div>
-    </div>
+  <!-- QUICK LINKS -->
+  <div class="card">
+    <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
+    <div id="homeLinks"></div>
   </div>
 </div>
 
@@ -631,7 +687,8 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
     </div>
     <input class="fld" id="taskSearch" placeholder="Search&hellip;" style="max-width:170px" oninput="renderTasks()">
     <select class="fld bare" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
-    <select class="fld bare" id="taskSort" style="max-width:150px" onchange="renderTasks()"><option value="created">Newest</option><option value="due">Due date</option><option value="priority">Priority</option><option value="title">Title</option></select>
+    <select class="fld bare" id="taskSort" style="max-width:150px" onchange="renderTasks()"><option value="manual">My order</option><option value="created">Newest</option><option value="due">Due date</option><option value="priority">Priority</option><option value="title">Title</option></select>
+    <button class="btn soft" onclick="openStatuses()" aria-label="Manage statuses">Statuses</button>
   </div>
   <div id="taskViewBody"></div>
 </div>
@@ -642,21 +699,14 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
   <div class="card"><div id="linksList"></div></div>
 </div>
 
-<!-- GOALS -->
-<div class="tab" id="tab-goals">
-  <div class="section-head"><h2>Goals &amp; Habits</h2><button class="btn" onclick="addGoal()">+ Add goal</button></div>
-  <div class="grid" id="goalsList" style="grid-template-columns:repeat(auto-fit,minmax(270px,1fr))"></div>
-</div>
-
 </main>
 </div>
 
 <nav class="bottombar">
   <button data-tab="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
-  <button data-tab="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
-  <button data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
-  <button data-tab="goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Goals</button>
+  <button data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
+  <button data-tab="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
   <button data-tab="links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7"/></svg>Links</button>
 </nav>
 
@@ -676,7 +726,7 @@ let user = null;
 
 const DEFAULT = {
   profile:{ name:"Eyad Alfi" },
-  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true },
+  settings:{ city:"Makkah", financeUrl:"./finance/", travelUrl:"./travel/", lang:"en", currency:"SAR", nextTripDest:"", nextTripDate:"", gcalId:"", googleEmail:"", calConnected:false, gmailConnected:false, calLastSync:0, gmailLastSync:0, showPrayer:true, showWeather:true, showCalendar:true, showGmail:true, statuses:[{id:"backlog",name:"Backlog"},{id:"planned",name:"Planned"},{id:"doing",name:"In Progress"},{id:"waiting",name:"Waiting"},{id:"review",name:"Review"},{id:"blocked",name:"Blocked"},{id:"done",name:"Completed"},{id:"archived",name:"Archived"}] },
   notes:[], tasks:[], goals:[],
   links:[
     {group:"Build", label:"GitHub", url:"https://github.com"},
@@ -689,7 +739,15 @@ const DEFAULT = {
 /* ============ State ============ */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function storeKey(){ return user ? KEY+":"+user.id : KEY; }
-function fill(d){ for(const k of Object.keys(DEFAULT)) if(d[k]===undefined) d[k]=JSON.parse(JSON.stringify(DEFAULT[k])); if(!d.settings) d.settings={}; for(const k of Object.keys(DEFAULT.settings)) if(d.settings[k]===undefined) d.settings[k]=DEFAULT.settings[k]; return d; }
+function fill(d){
+  for(const k of Object.keys(DEFAULT)) if(d[k]===undefined) d[k]=JSON.parse(JSON.stringify(DEFAULT[k]));
+  if(!d.settings) d.settings={};
+  for(const k of Object.keys(DEFAULT.settings)) if(d.settings[k]===undefined) d.settings[k]=(DEFAULT.settings[k]&&typeof DEFAULT.settings[k]==="object")?JSON.parse(JSON.stringify(DEFAULT.settings[k])):DEFAULT.settings[k];
+  if(!Array.isArray(d.settings.statuses)||!d.settings.statuses.length) d.settings.statuses=JSON.parse(JSON.stringify(DEFAULT.settings.statuses));
+  var _ids=d.settings.statuses.map(function(x){return x.id;});
+  (d.tasks||[]).forEach(function(t){ if(t.status==="todo")t.status="backlog"; if(!t.status)t.status=(t.done?"done":"backlog"); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
+  return d;
+}
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
 let data = (function(){
   try{
@@ -732,7 +790,6 @@ function render(){ applyLang();
   try{ renderNotes(); }catch(e){ console.error(e); }
   try{ renderTasks(); }catch(e){ console.error(e); }
   try{ renderLinks(); }catch(e){ console.error(e); }
-  try{ renderGoals(); }catch(e){ console.error(e); }
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
   try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
 }
@@ -751,9 +808,9 @@ function renderHome(){
   var hl=document.getElementById("hijriLine"); if(hl) hl.textContent=hijri(now);
   tickClock(); renderWelcomeSummary();
   renderAppCards("appCards");
-  renderToday(); renderMomentum(); renderCalendar(); try{renderCalConn();renderGmail();}catch(e){}
+  renderToday(); renderCalendar(); try{renderCalConn();renderGmail();}catch(e){}
   var hlk=document.getElementById("homeLinks"); if(hlk) hlk.innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
-  var amb=document.getElementById("ambient"); if(amb){ amb.style.display=(data.settings.showWeather!==false)?"":"none"; if(data.settings.showWeather!==false) loadWeather(); }
+  var wt=document.getElementById("weatherTile"); if(wt) wt.style.display=(data.settings.showWeather!==false)?"":"none"; if(data.settings.showWeather!==false) loadWeather();
   var pc=document.getElementById("prayerCard"); if(pc) pc.style.display=(data.settings.showPrayer!==false)?"":"none";
   var pcty=document.getElementById("prayerCity"); if(pcty) pcty.textContent=data.settings.city?("· "+data.settings.city):"";
   if(data.settings.showPrayer!==false) loadPrayers();
@@ -811,7 +868,7 @@ var IC={
  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 };
-function statusBadge(st){var m={todo:["b-todo","To do"],doing:["b-doing","In progress"],done:["b-done","Done"]};var x=m[st]||m.todo;return '<span class="badge '+x[0]+'">'+x[1]+'</span>';}
+function statusBadge(id){return '<span class="badge '+stBadgeClass(id)+'">'+esc(statusName(id))+'</span>';}
 function kindBadge(k){var m={task:["b-todo","Task"],event:["b-doing","Event"],zakat:["b-done","Zakat"]};var x=m[k]||m.task;return '<span class="badge '+x[0]+'">'+x[1]+'</span>';}
 function wsChip(ic,txt){return '<div class="ws">'+ic+'<span>'+esc(txt)+'</span></div>';}
 function sumRow(ic,html){return '<div class="sum-row"><span class="si">'+ic+'</span><div>'+html+'</div></div>';}
@@ -823,7 +880,7 @@ function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary")
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
 function renderOvTasks(){var el=document.getElementById("ovTasks");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});var c=document.getElementById("ovTaskCnt");if(c)c.textContent=due.length;el.innerHTML=due.length?due.map(function(x){var over=x.due<t;return '<div class="mini-item"><div class="chk" onclick="event.stopPropagation();toggleTask(\''+x.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0;cursor:pointer" onclick="openTask(\''+x.id+'\')"><div style="font-weight:600">'+esc(x.t)+'</div>'+(over?'<div class="kdue over" style="font-size:.72rem">Overdue &middot; '+esc(fmtShort(x.due))+'</div>':'')+'</div><span class="pdot p-'+(x.priority||"med")+'"></span></div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing due today &mdash; you are clear.</div>';}
-function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:"todo",priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
+function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:"backlog",priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
 function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due>t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task"});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";if(w.slice(0,10)>t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat"});}items.sort(function(a,b){return a.date.localeCompare(b.date);});el.innerHTML=items.length?items.slice(0,6).map(function(it){return '<div class="mini-item"><div class="mini-time">'+esc(fmtShort(it.date))+'</div><div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+kindBadge(it.kind)+'</div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing upcoming.</div>';}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
@@ -867,21 +924,21 @@ function setCapMode(m){ capMode=m; renderCapModes(); }
 function capture(){ var el=document.getElementById("capInput"); var v=el.value.trim(); if(!v) return; var mode=capMode; if(/^https?:\/\//i.test(v)) mode="link";
   if(mode==="link") data.links.push({group:"Inbox",label:v.replace(/^https?:\/\//,"").slice(0,42),url:v});
   else if(mode==="note") data.notes.unshift({id:uid(),body:v,ts:Date.now()});
-  else data.tasks.push({id:uid(),t:v,due:"",priority:"med",project:"",status:"todo",done:false,created:Date.now()});
+  else data.tasks.push({id:uid(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now()});
   el.value=""; save(); render(); toast(mode==="link"?"Link saved":mode==="note"?"Note saved":"Task added");
 }
 /* ---- Tasks: multi-view (board / cards / list / table) ---- */
 var KCOLS=[["todo","To Do"],["doing","In Progress"],["done","Done"]];
 var taskView="board";
-function taskStatus(t){ return t.done?"done":(t.status||"todo"); }
+function taskStatus(t){ var id=t.status||"backlog"; var ss=statuses(); for(var i=0;i<ss.length;i++){ if(ss[i].id===id) return id; } return ss[0]?ss[0].id:"backlog"; }
 function setTaskView(v){ taskView=v; ["board","card","list","table"].forEach(function(x){var b=document.getElementById("tv-"+x); if(b) b.classList.toggle("on",x===v);}); renderTasks(); }
 function taskList(){
   var q=((document.getElementById("taskSearch")&&document.getElementById("taskSearch").value)||"").toLowerCase();
   var fp=(document.getElementById("taskFilterP")&&document.getElementById("taskFilterP").value)||"";
-  var sort=(document.getElementById("taskSort")&&document.getElementById("taskSort").value)||"created";
+  var sort=(document.getElementById("taskSort")&&document.getElementById("taskSort").value)||"manual";
   var arr=(data.tasks||[]).filter(function(t){ var hay=((t.t||"")+" "+(t.desc||"")+" "+((t.tags||[]).join(" "))+" "+(t.project||"")).toLowerCase(); return (!q||hay.indexOf(q)>=0)&&(!fp||(t.priority||"med")===fp); });
   var pr={high:0,med:1,low:2};
-  arr.sort(function(a,b){ if(sort==="due") return (a.due||"9999-99-99").localeCompare(b.due||"9999-99-99"); if(sort==="priority") return (pr[a.priority||"med"])-(pr[b.priority||"med"]); if(sort==="title") return (a.t||"").localeCompare(b.t||""); return (b.created||0)-(a.created||0); });
+  if(sort&&sort!=="manual") arr.sort(function(a,b){ if(sort==="due") return (a.due||"9999-99-99").localeCompare(b.due||"9999-99-99"); if(sort==="priority") return (pr[a.priority||"med"])-(pr[b.priority||"med"]); if(sort==="title") return (a.t||"").localeCompare(b.t||""); return (b.created||0)-(a.created||0); });
   return arr;
 }
 function renderTasks(){
@@ -893,13 +950,13 @@ function renderTasks(){
 }
 function renderTaskBoard(host){
   var arr=taskList();
-  host.innerHTML='<div class="kanban">'+KCOLS.map(function(col){
-    var items=arr.filter(function(t){return taskStatus(t)===col[0];});
-    return '<div class="kcol" data-col="'+col[0]+'" ondragover="kOver(event)" ondrop="kDrop(event,\''+col[0]+'\')" ondragleave="kLeave(event)"><div class="kcol-head">'+col[1]+'<span class="cnt">'+items.length+'</span></div>'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">&mdash;</div>')+'</div>';
+  host.innerHTML='<div class="kanban">'+statuses().map(function(col){
+    var items=arr.filter(function(t){return taskStatus(t)===col.id;});
+    return '<div class="kcol" data-col="'+col.id+'" ondragover="kOver(event)" ondrop="kDrop(event,\''+col.id+'\')" ondragleave="kLeave(event)"><div class="kcol-head">'+esc(col.name)+'<span class="cnt">'+items.length+'</span></div>'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">&mdash;</div>')+'</div>';
   }).join("")+'</div>';
 }
 function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!t.done;
-  return '<div class="kcard '+(t.done?"done":"")+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" ondragend="kEnd(event)" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')">'
+  return '<div class="kcard '+(t.done?"done":"")+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="dOver(event)" ondrop="kDropCard(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')">'
     +'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')" aria-label="Delete">'+IC.x+'</button>'
     +'<div class="ktitle">'+esc(t.t)+'</div><div class="kmeta"><span class="pdot p-'+(t.priority||"med")+'" title="Priority"></span>'
     +(t.project?'<span class="kproj">'+esc(t.project)+'</span>':'')
@@ -913,7 +970,7 @@ function renderTaskCards(host){ var arr=taskList(); if(!arr.length){host.innerHT
 }
 function renderTaskListView(host){ var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;} var today=isoLocal(new Date());
   host.innerHTML='<div class="tlist">'+arr.map(function(t){var over=t.due&&t.due<today&&!t.done;
-    return '<div class="tli" onclick="if(!event.target.closest(\'.chk\')&&!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="chk '+(t.done?"done":"")+'" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0"><div style="font-weight:600'+(t.done?";text-decoration:line-through;opacity:.5":"")+'">'+esc(t.t)+'</div><div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">'+statusBadge(taskStatus(t))+(t.due?'<span class="kdue '+(over?"over":"")+'" style="font-size:.74rem">'+esc(fmtShort(t.due))+'</span>':'')+((t.tags||[]).slice(0,3).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div></div><span class="pdot p-'+(t.priority||"med")+'"></span><button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div>';
+    return '<div class="tli" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="dOver(event)" ondrop="lDrop(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.chk\')&&!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="chk '+(t.done?"done":"")+'" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0"><div style="font-weight:600'+(t.done?";text-decoration:line-through;opacity:.5":"")+'">'+esc(t.t)+'</div><div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">'+statusBadge(taskStatus(t))+(t.due?'<span class="kdue '+(over?"over":"")+'" style="font-size:.74rem">'+esc(fmtShort(t.due))+'</span>':'')+((t.tags||[]).slice(0,3).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div></div><span class="pdot p-'+(t.priority||"med")+'"></span><button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div>';
   }).join("")+'</div>';
 }
 function renderTaskTable(host){ var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;} var today=isoLocal(new Date());
@@ -926,15 +983,15 @@ function kStart(e,id){ kDragId=id; e.dataTransfer.effectAllowed="move"; try{e.da
 function kOver(e){ e.preventDefault(); var c=e.target.closest(".kcol"); if(c)c.classList.add("over"); }
 function kLeave(e){ var c=e.target.closest(".kcol"); if(c)c.classList.remove("over"); }
 function kEnd(){ document.querySelectorAll(".kcard.dragging,.kcol.over").forEach(function(x){x.classList.remove("dragging","over");}); }
-function kDrop(e,status){ e.preventDefault(); var id=kDragId||e.dataTransfer.getData("text/plain"); var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ t.status=status; t.done=(status==="done"); t.updated=Date.now(); } kDragId=null; kEnd(); save(); render(); }
+function kDrop(e,status){ e.preventDefault(); var id=kDragId||e.dataTransfer.getData("text/plain"); moveTask(id,null,status); kDragId=null; kEnd(); }
 function openTask(id){
   var t=id?(data.tasks||[]).find(function(x){return x.id===id;}):null; var isNew=!t;
-  if(isNew) t={id:"",t:"",desc:"",status:"todo",priority:"med",start:"",due:"",tags:[],assignee:""};
+  if(isNew) t={id:"",t:"",desc:"",status:(statuses()[0]?statuses()[0].id:"backlog"),priority:"med",start:"",due:"",tags:[],assignee:""};
   function sel(v,o){ return o.map(function(x){return '<option value="'+x[0]+'" '+(v===x[0]?"selected":"")+'>'+x[1]+'</option>';}).join(""); }
   var html='<h4>'+(isNew?"New task":"Task details")+'</h4>'
     +'<label class="setlbl">Title</label><input class="fld" id="tdTitle" value="'+esc(t.t)+'" style="margin:6px 0 10px">'
     +'<label class="setlbl">Description</label><textarea class="fld" id="tdDesc" rows="3" style="margin:6px 0 10px">'+esc(t.desc||"")+'</textarea>'
-    +'<div class="f2"><div><label class="setlbl">Status</label><select class="fld" id="tdStatus" style="margin-top:6px">'+sel(t.status||"todo",[["todo","To do"],["doing","In progress"],["done","Done"]])+'</select></div>'
+    +'<div class="f2"><div><label class="setlbl">Status</label><select class="fld" id="tdStatus" style="margin-top:6px">'+statuses().map(function(c){return '<option value="'+c.id+'" '+(((t.status||"backlog")===c.id)?"selected":"")+'>'+esc(c.name)+'</option>';}).join("")+'</select></div>'
     +'<div><label class="setlbl">Priority</label><select class="fld" id="tdPrio" style="margin-top:6px">'+sel(t.priority||"med",[["high","High"],["med","Medium"],["low","Low"]])+'</select></div></div>'
     +'<div class="f2" style="margin-top:10px"><div><label class="setlbl">Start date</label><input class="fld" id="tdStart" type="date" value="'+esc(t.start||"")+'" style="margin-top:6px"></div>'
     +'<div><label class="setlbl">Due date</label><input class="fld" id="tdDue" type="date" value="'+esc(t.due||"")+'" style="margin-top:6px"></div></div>'
@@ -954,7 +1011,7 @@ function saveTask(id){
   else { data.tasks.push(Object.assign({id:uid(),project:"",created:Date.now(),updated:Date.now()},f)); }
   save(); closeModal(); render(); toast(id?"Task updated":"Task created");
 }
-function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ t.done=!t.done; t.status=t.done?"done":(t.status==="done"?"todo":(t.status||"todo")); t.updated=Date.now(); save(); render(); } }
+function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ if(t.status==="done"){ t.status="backlog"; t.done=false; } else { t.status="done"; t.done=true; } t.updated=Date.now(); save(); render(); } }
 function delTask(id){ data.tasks=(data.tasks||[]).filter(function(x){return x.id!==id;}); save(); render(); }
 
 /* ---- Notes ---- */
@@ -1076,8 +1133,12 @@ function gGetToken(kind,scope,cb,silent){
 }
 function gAutoConnect(){
   if(!googleClientId()) return;
-  if(data.settings.calConnected){ gGetToken("gcal",CAL_SCOPE,function(tok){ if(tok){ calToken=tok; calState="connected"; loadCalEvents(tok); renderCalConn(); } },true); }
-  if(data.settings.gmailConnected){ gGetToken("gmail",GMAIL_SCOPE,function(tok){ if(tok){ gmailToken=tok; gmailState="connected"; gmailLoad().then(function(){ renderGmail(); }); renderGmail(); } },true); }
+  if(data.settings.calConnected||data.settings.gmailConnected){
+    gGetToken("google",COMBINED_SCOPE,function(tok){ if(!tok) return; calToken=tok; gmailToken=tok;
+      if(data.settings.calConnected){ calState="connected"; loadCalEvents(tok); renderCalConn(); }
+      if(data.settings.gmailConnected){ gmailState="connected"; gmailLoad().then(function(){ renderGmail(); }); renderGmail(); }
+    },true);
+  }
 }
 async function gFetchEmail(token){ try{ var j=await fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+token}}).then(function(r){return r.json();}); return (j&&j.email)||""; }catch(e){ return ""; } }
 
@@ -1086,24 +1147,14 @@ function renderCalConn(){
   var el=document.getElementById("calConn"); if(!el) return;
   var st=intState("cal"); var email=data.settings.googleEmail||"";
   if(st==="connected"||st==="stale"){
-    el.innerHTML='<div class="iconn-bar"><div class="iconn-acct">'+gico(G_SVG)+'<div><div class="iconn-name">'+esc(email||"Google account")+'</div><div class="iconn-sub">'+istBadge("on")+(data.settings.calLastSync?'<span class="muted">&middot; synced '+esc(relTime(data.settings.calLastSync))+'</span>':'')+'</div></div></div><button class="btn soft" onclick="calConnect()">'+I_REFRESH+' Sync now</button></div>';
+    el.innerHTML='<div class="iconn-bar"><div class="iconn-acct">'+gico(G_SVG)+'<div><div class="iconn-name">'+esc(email||"Google account")+'</div><div class="iconn-sub">'+istBadge("on")+(data.settings.calLastSync?'<span class="muted">&middot; synced '+esc(relTime(data.settings.calLastSync))+'</span>':'')+'</div></div></div><button class="btn soft" onclick="calSync()">'+I_REFRESH+' Sync now</button></div>';
   } else if(st==="connecting"){
     el.innerHTML='<div class="iconn-bar"><div class="iconn-acct">'+gico(G_SVG)+'<div><div class="iconn-name">Connecting to Google Calendar…</div><div class="iconn-sub">'+istBadge("sync")+'</div></div></div></div>';
   } else {
     el.innerHTML='<div class="iconn onboard">'+gico(G_SVG,true)+'<div class="iconn-mid"><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap"><b style="font-size:1rem">Google Calendar</b>'+istBadge(st==="error"?"err":"off")+'</div><p class="muted" style="font-size:.85rem;margin:0;line-height:1.5">Connect your Google Calendar to view events, meetings, reminders and upcoming schedules directly from your dashboard.</p></div><button class="btn" onclick="calConnect()">Connect Google Calendar</button></div>'+(st==="error"?'<div class="ierr">Couldn\'t connect. Check your Client ID and that the Calendar API is enabled, then try again.</div>':'');
   }
 }
-function calConnect(){
-  calState="connecting"; renderCalConn();
-  var ok=gGetToken("gcal",CAL_SCOPE, async function(token){
-    if(!token){ calState="error"; renderCalConn(); return; }
-    calToken=token; var em=await gFetchEmail(token); if(em) data.settings.googleEmail=em; data.settings.calConnected=true; data.settings.calLastSync=Date.now(); save();
-    await loadCalEvents(token);
-    if(calState!=="error") calState="connected";
-    renderCalConn(); renderCalendar();
-  });
-  if(!ok){ calState="idle"; renderCalConn(); }
-}
+function calConnect(){ googleConnect(); }
 async function loadCalEvents(token){
   try{
     var tMin=new Date(); tMin.setHours(0,0,0,0); var tMax=new Date(); tMax.setDate(tMax.getDate()+30);
@@ -1130,32 +1181,21 @@ function renderGmail(){
     el.innerHTML=head+'<div class="iconn onboard" style="margin-top:16px">'+gico(GM_SVG,true)+'<div class="iconn-mid"><div style="margin-bottom:5px"><b style="font-size:1rem">Not connected</b></div><p class="muted" style="font-size:.85rem;margin:0;line-height:1.5">Connect Gmail to view unread emails, important messages and inbox activity directly from your dashboard.</p></div><button class="btn" onclick="gmailConnect()">Connect Gmail</button></div>'+(st==="error"?'<div class="ierr">Couldn\'t reach Gmail. Check your Client ID and that the Gmail API is enabled, then try again.</div>':'');
     return;
   }
-  if(st==="connecting"){ el.innerHTML=head+'<div class="iload"><span class="ispin big"></span><span>Connecting &amp; syncing your inbox…</span></div>'; return; }
+  if(st==="connecting"){ el.innerHTML=head+'<div style="margin-top:14px">'+skelRows(6)+'</div>'; return; }
   if(!gmailStats){
-    el.innerHTML=head+'<div class="iconn-bar" style="margin-top:14px"><div class="iconn-sub">'+istBadge("on")+(data.settings.gmailLastSync?'<span class="muted">&middot; last synced '+esc(relTime(data.settings.gmailLastSync))+'</span>':'')+'</div><button class="btn soft" onclick="gmailConnect()">'+I_REFRESH+' Sync now</button></div>';
+    el.innerHTML=head+'<div class="iconn-bar" style="margin-top:14px"><div class="iconn-sub">'+istBadge("on")+(data.settings.gmailLastSync?'<span class="muted">&middot; last synced '+esc(relTime(data.settings.gmailLastSync))+'</span>':'')+'</div><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync now</button></div>';
     return;
   }
   var g=gmailStats;
-  var metrics='<div class="gm-metrics"><div class="gm-metric primary"><b>'+g.unread+'</b><span>Unread</span></div><div class="gm-metric"><b>'+g.today+'</b><span>Today</span></div><div class="gm-metric"><b>'+g.important+'</b><span>Important</span></div><div class="gm-metric"><b>'+g.starred+'</b><span>Starred</span></div></div>';
   var list=(gmailMsgs&&gmailMsgs.length)? '<div class="gm-list">'+gmailMsgs.map(gmRow).join("")+'</div>' : '<div class="muted" style="padding:16px 2px;font-size:.86rem;text-align:center">Your inbox is all caught up.</div>';
-  var actions='<div class="gm-actions"><button class="btn soft" onclick="gmailConnect()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
-  el.innerHTML=head+'<div class="iconn-substrip">'+istBadge("on")+'<span class="muted" style="font-size:.76rem">synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+metrics+list+actions;
+  var actions='<div class="gm-actions"><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
+  el.innerHTML=head+'<div class="iconn-substrip">'+istBadge("on")+'<span class="muted" style="font-size:.76rem">synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+list+actions;
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
   return '<div class="gm-item'+(m.unread?' unread':'')+'"><div class="gm-av">'+esc(initials)+'</div><div class="gm-main" onclick="gmOpen(\''+m.id+'\')"><div class="gm-row1"><span class="gm-from">'+esc(m.fromName||m.from||"Unknown")+'</span><span class="gm-time">'+esc(m.time)+'</span></div><div class="gm-subj">'+esc(m.subject||"(no subject)")+'</div></div><div class="gm-acts"><button class="icon-btn'+(m.starred?' on':'')+'" title="'+(m.starred?'Unstar':'Star')+'" onclick="gmStar(\''+m.id+'\','+(m.starred?'true':'false')+')">'+I_STAR+'</button>'+(m.unread?'<button class="icon-btn" title="Mark read" onclick="gmMarkRead(\''+m.id+'\')">'+I_CHECK+'</button>':'')+'<button class="icon-btn" title="Archive" onclick="gmArchive(\''+m.id+'\')">'+I_ARCH+'</button></div></div>';
 }
-function gmailConnect(){
-  gmailState="connecting"; renderGmail();
-  var ok=gGetToken("gmail",GMAIL_SCOPE, async function(token){
-    if(!token){ gmailState="error"; renderGmail(); return; }
-    gmailToken=token; var em=await gFetchEmail(token); if(em) data.settings.googleEmail=em; data.settings.gmailConnected=true; data.settings.gmailLastSync=Date.now(); save();
-    await gmailLoad();
-    if(gmailState!=="error") gmailState="connected";
-    renderGmail();
-  });
-  if(!ok){ gmailState="idle"; renderGmail(); }
-}
+function gmailConnect(){ googleConnect(); }
 async function gmailApi(path,method,body){
   var opt={method:method||"GET",headers:{Authorization:"Bearer "+gmailToken}};
   if(body){ opt.headers["Content-Type"]="application/json"; opt.body=JSON.stringify(body); }
@@ -1445,6 +1485,51 @@ function enhanceSelects(){
     _csRelabel(sel);
   });
 }
+
+/* ===== batch v3 additions (statuses, drag-reorder, single OAuth, skeletons) ===== */
+function statuses(){ var s=data.settings.statuses; if(!Array.isArray(s)||!s.length){ s=JSON.parse(JSON.stringify(DEFAULT.settings.statuses)); data.settings.statuses=s; } return s; }
+function statusName(id){ var ss=statuses(); for(var i=0;i<ss.length;i++){ if(ss[i].id===id) return ss[i].name; } return id; }
+function stBadgeClass(id){ return {backlog:"b-todo",planned:"b-todo",doing:"b-doing",waiting:"b-doing",review:"b-doing",blocked:"b-block",done:"b-done",archived:"b-arch"}[id]||"b-todo"; }
+function dOver(e){ e.preventDefault(); }
+function moveTask(dragId,beforeId,status){
+  var arr=data.tasks||[]; var di=-1,i;
+  for(i=0;i<arr.length;i++){ if(arr[i].id===dragId){ di=i; break; } }
+  if(di<0) return; var t=arr[di]; arr.splice(di,1);
+  if(status!=null){ t.status=status; t.done=(status==="done"); }
+  var bi=-1; if(beforeId){ for(i=0;i<arr.length;i++){ if(arr[i].id===beforeId){ bi=i; break; } } }
+  if(bi<0) arr.push(t); else arr.splice(bi,0,t);
+  t.updated=Date.now();
+  var ss=document.getElementById("taskSort"); if(ss) ss.value="manual";
+  save(); render();
+}
+function kDropCard(e,targetId){ e.preventDefault(); e.stopPropagation(); var id=kDragId||e.dataTransfer.getData("text/plain"); var tgt=(data.tasks||[]).find(function(x){return x.id===targetId;}); moveTask(id,targetId,tgt?taskStatus(tgt):null); kDragId=null; kEnd(); }
+function lDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); var id=kDragId||e.dataTransfer.getData("text/plain"); moveTask(id,targetId,null); kDragId=null; kEnd(); }
+/* Manage statuses */
+function openStatuses(){ var html='<h4>Manage statuses</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Rename, reorder or remove the columns your tasks move through.</p><div id="stList" style="max-height:54vh;overflow:auto">'+statuses().map(stRow).join("")+'</div><button class="btn soft" style="margin-top:10px" onclick="addStatus()">+ Add status</button><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveStatuses()">Save</button></div>'; showModal(html,"wide"); }
+var ST_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
+var ST_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+function stRow(c){ return '<div class="st-row" data-id="'+esc(c.id)+'"><input class="fld st-name" value="'+esc(c.name)+'"><button type="button" class="st-mini" title="Move up" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" title="Move down" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" title="Delete" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button></div>'; }
+function addStatus(){ var l=document.getElementById("stList"); if(!l) return; var d=document.createElement("div"); d.className="st-row"; d.dataset.id="s"+uid(); d.innerHTML='<input class="fld st-name" value="New status"><button type="button" class="st-mini" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button>'; l.appendChild(d); var inp=d.querySelector(".st-name"); if(inp){ inp.focus(); inp.select(); } }
+function moveStatusRow(btn,dir){ var row=btn.closest(".st-row"); if(!row) return; var l=row.parentNode; if(dir<0&&row.previousElementSibling) l.insertBefore(row,row.previousElementSibling); else if(dir>0&&row.nextElementSibling) l.insertBefore(row.nextElementSibling,row); }
+function saveStatuses(){ var rows=document.querySelectorAll("#stList .st-row"); var list=[]; rows.forEach(function(r){ var nm=r.querySelector(".st-name").value.trim(); if(nm) list.push({id:r.dataset.id,name:nm}); }); if(!list.length){ toast("Keep at least one status"); return; } var ids=list.map(function(x){return x.id;}); (data.tasks||[]).forEach(function(t){ if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status==="done"); }); data.settings.statuses=list; save(); closeModal(); render(); toast("Statuses updated"); }
+/* Single Google OAuth (one token for Calendar + Gmail) */
+var COMBINED_SCOPE=CAL_SCOPE+" "+GMAIL_SCOPE;
+function googleConnect(){
+  calState="connecting"; gmailState="connecting"; renderCalConn(); renderGmail();
+  var ok=gGetToken("google",COMBINED_SCOPE, async function(token){
+    if(!token){ calState="error"; gmailState="error"; renderCalConn(); renderGmail(); return; }
+    calToken=token; gmailToken=token;
+    var em=await gFetchEmail(token); if(em) data.settings.googleEmail=em;
+    data.settings.calConnected=true; data.settings.gmailConnected=true; data.settings.calLastSync=Date.now(); save();
+    await loadCalEvents(token); if(calState!=="error") calState="connected"; renderCalConn(); renderCalendar();
+    gmailState="connecting"; renderGmail();
+    await gmailLoad(); if(gmailState!=="error") gmailState="connected"; data.settings.gmailLastSync=Date.now(); save(); renderGmail();
+  });
+  if(!ok){ calState="idle"; gmailState="idle"; renderCalConn(); renderGmail(); }
+}
+function calSync(){ var t=getGToken("google")||calToken; if(!t){ googleConnect(); return; } calToken=t; calState="connected"; renderCalConn(); loadCalEvents(t); }
+function gmailSync(){ var t=getGToken("google")||gmailToken; if(!t){ googleConnect(); return; } gmailToken=t; gmailState="connecting"; renderGmail(); gmailLoad().then(function(){ gmailState=(gmailState==="error"?"error":"connected"); renderGmail(); }); }
+function skelRows(n){ var r=""; for(var i=0;i<(n||5);i++){ r+='<div class="skel-row"><div class="skel skel-c"></div><div style="flex:1"><div class="skel skel-l" style="width:42%"></div><div class="skel skel-l" style="width:72%;margin-top:7px"></div></div></div>'; } return r; }
 
 /* ============ Boot ============ */
 render();
