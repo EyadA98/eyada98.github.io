@@ -1032,6 +1032,9 @@ html.dark .pflag.p-high{color:var(--peach)}
 /* respect reduced motion (reinforce) */
 @media(prefers-reduced-motion:reduce){.dash-widget>.card:hover,.wbox:hover,.cal-cell:hover,.app-card:hover,.app-card:hover .ico,.link-chip:hover,.note-card:hover,.prayer-card .pr2:hover,.to-row:hover{transform:none!important}}
 
+.wbox{justify-content:flex-start!important;gap:6px}
+#toBody,#rnBody{overflow-x:hidden!important;overflow-y:auto}
+.to-row,.rn-row{margin-left:0!important;margin-right:0!important}
 </style>
 </head>
 <body>
@@ -1075,7 +1078,6 @@ html.dark .pflag.p-high{color:var(--peach)}
         <div class="eyebrow" id="greetEyebrow">Welcome back</div>
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
         <div class="hero-ribbon" id="welcomeSummary"></div>
-        <div class="hero-actions"><button class="btn" onclick="openTask()">+ Add task</button><button class="btn soft" onclick="quickNoteFromDash()">+ Add note</button></div>
         <div class="wsum-h">Upcoming</div><div id="upcomingList"></div>
       </div>
       <div class="wboxes">
@@ -1481,14 +1483,14 @@ function renderTaskBoard(host){
 function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!t.done;
   return '<div class="kcard '+(t.done?"done":"")+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="dOver(event)" ondrop="kDropCard(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')">'
     +'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')" aria-label="Delete">'+IC.x+'</button>'
-    +'<div class="ktitle">'+esc(t.t)+'</div><div class="kmeta"><span class="pdot p-'+(t.priority||"med")+'" title="Priority"></span>'
+    +'<div class="ktitle">'+esc(t.t)+'</div><div class="kmeta">'+priFlag(t.priority)+''
     +(t.project?'<span class="kproj">'+esc(t.project)+'</span>':'')
     +((t.tags||[]).slice(0,2).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))
     +(t.due?'<span class="kdue '+(over?"over":"")+'">'+esc(fmtShort(t.due))+'</span>':'')+'</div></div>';
 }
 function renderTaskCards(host){ var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;} var today=isoLocal(new Date());
   host.innerHTML='<div class="tcards">'+arr.map(function(t){var over=t.due&&t.due<today&&!t.done;var st=taskStatus(t);var prog=st==="done"?100:(st==="doing"?50:5);
-    return '<div class="card tcard" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="tc-top">'+statusBadge(st)+'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div><div style="font-weight:700;font-size:.96rem">'+esc(t.t)+'</div>'+(t.desc?'<div class="muted" style="font-size:.82rem;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(t.desc)+'</div>':'')+'<div class="kmeta" style="margin-top:11px"><span class="pdot p-'+(t.priority||"med")+'"></span>'+(t.due?'<span class="kdue '+(over?"over":"")+'">'+esc(fmtShort(t.due))+'</span>':'')+(t.assignee?'<span class="tag-chip">'+esc(t.assignee)+'</span>':'')+((t.tags||[]).slice(0,2).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div><div class="tc-prog"><i style="width:'+prog+'%"></i></div></div>';
+    return '<div class="card tcard" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="tc-top">'+statusBadge(st)+'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div><div style="font-weight:700;font-size:.96rem">'+esc(t.t)+'</div>'+(t.desc?'<div class="muted" style="font-size:.82rem;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(t.desc)+'</div>':'')+'<div class="kmeta" style="margin-top:11px">'+priFlag(t.priority)+''+(t.due?'<span class="kdue '+(over?"over":"")+'">'+esc(fmtShort(t.due))+'</span>':'')+(t.assignee?'<span class="tag-chip">'+esc(t.assignee)+'</span>':'')+((t.tags||[]).slice(0,2).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div><div class="tc-prog"><i style="width:'+prog+'%"></i></div></div>';
   }).join("")+'</div>';
 }
 function renderTaskListView(host){ var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;} var today=isoLocal(new Date());
@@ -2151,6 +2153,7 @@ function lblRow(l){ return '<div class="st-row" data-l="'+esc(l)+'"><input class
 function renameLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var oldL=row.dataset.l; var newL=row.querySelector(".lbl-name").value.trim(); if(!newL||newL===oldL) return; (data.notes||[]).forEach(function(n){ if(n.labels&&n.labels.length){ n.labels=n.labels.map(function(x){return x===oldL?newL:x;}).filter(function(x,i,a){return a.indexOf(x)===i;}); } }); if(notesFilterLabel===oldL) notesFilterLabel=newL; save(); renderNotes(); toast("Label renamed"); openLabels(); }
 function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var l=row.dataset.l; (data.notes||[]).forEach(function(n){ if(n.labels) n.labels=n.labels.filter(function(x){return x!==l;}); }); if(notesFilterLabel===l) notesFilterLabel=""; save(); renderNotes(); toast("Label deleted"); openLabels(); }
 
+function priFlag(p){ var m={high:"High",med:"Med",low:"Low"}; p=p||"med"; return '<span class="pflag p-'+p+'">'+(m[p]||"Med")+'</span>'; }
 /* ============ Boot ============ */
 render();
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} } },1000);
