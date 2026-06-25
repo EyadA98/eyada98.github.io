@@ -1037,6 +1037,10 @@ html.dark .pflag.p-high{color:var(--peach)}
 .to-row,.rn-row{margin-left:0!important;margin-right:0!important}
 .wbox{position:relative;justify-content:center!important;padding-top:44px}
 .wbox-lbl{position:absolute;top:18px;left:18px;margin:0}
+.welcome-hero h1.marc{background-image:linear-gradient(110deg,#c6b3ef 0%,#caa7ec 42%,#f3b98e 100%)!important}
+/* topbar page title parity with Finance Board */
+.content .topbar .crumb{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.content .topbar h2,#pageTitle{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif!important;font-size:1.22rem!important;font-weight:800!important;letter-spacing:-.01em!important}
 </style>
 </head>
 <body>
@@ -1302,7 +1306,7 @@ function go(name){
 document.querySelectorAll("aside button.nav,.bottombar button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 
 /* ============ Render ============ */
-function avatarText(){ var nm=((data.profile&&data.profile.name)||"").trim(); if(!nm) return "•"; var p=nm.split(/\s+/); return (p[0].charAt(0)+(p[1]?p[1].charAt(0):"")).toUpperCase(); }
+function avatarText(){ var nm=((data.profile&&data.profile.name)||(user&&user.email)||"").trim(); return nm? nm.charAt(0).toUpperCase() : "\u2022"; }
 function render(){ applyLang();
   try{ renderHome(); }catch(e){ console.error("renderHome",e); }
   try{ renderApps(); }catch(e){ console.error(e); }
