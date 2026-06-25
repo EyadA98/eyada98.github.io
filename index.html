@@ -877,6 +877,40 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .rn-prev{font-size:.8rem;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rn-row:hover .rn-title{color:var(--lavender)}
 
+
+/* ===== batch v13: bigger hero boxes, peach greeting, equal pairs, note labels ===== */
+.welcome-hero .whero{grid-template-columns:minmax(0,1.2fr) minmax(480px,1fr)!important;gap:34px}
+.wboxes{gap:16px}
+.wbox{min-height:158px;padding:22px 20px}
+.wbox-lbl{font-size:.66rem;margin-bottom:8px}
+.wbox .wtime{font-size:3.3rem}
+.wbox-val{font-size:1.15rem}
+.wbox .whijri{font-size:.76rem;margin-top:5px}
+.wx-box{gap:14px}
+.wx-box .wx-ic,.wx-box .wx-ic svg{width:52px;height:52px}
+.wx-box .wx-t{font-size:2.2rem}
+.wx-box .muted{font-size:.82rem}
+@media(max-width:760px){.welcome-hero .whero{grid-template-columns:1fr!important}.wbox{min-height:108px;padding:14px}.wbox .wtime{font-size:2rem}.wx-box .wx-ic,.wx-box .wx-ic svg{width:38px;height:38px}.wx-box .wx-t{font-size:1.6rem}}
+/* peach/orange greeting gradient (Travel Planner feel) */
+.welcome-hero h1.marc{background:linear-gradient(102deg,#fcd9b6 0%,#f3b98e 42%,#e0894f 100%)!important;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-bottom:3px;display:inline-block}
+.welcome-hero h1.marc #greetLine,.welcome-hero h1.marc #userName{-webkit-text-fill-color:transparent;color:transparent}
+/* equal-height pairs */
+.dash-row2 .card{display:flex;flex-direction:column}
+.dash-row2 .section-head,.dash-row2 .cal-head,.dash-row2 #calConn{flex:none}
+#toBody,#rnBody{flex:1 1 auto;min-height:0;overflow:auto;max-height:380px}
+.dash-row2 #gmailBody,.dash-row2 #calBody{min-height:0}
+/* note label pills */
+.note-labels,.rn-labels{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.nlabel{font-size:.64rem;font-weight:700;background:rgba(138,100,200,.18);color:var(--lavender);border-radius:6px;padding:2px 8px;white-space:nowrap}
+html:not(.dark) .nlabel{background:rgba(138,100,200,.14)}
+.rn-labels .nlabel{font-size:.6rem;padding:1px 7px}
+.lbl-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.lbl-chip{font-size:.74rem;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 13px;cursor:pointer;transition:all .15s}
+html:not(.dark) .lbl-chip{background:#fff}
+.lbl-chip:hover{border-color:var(--lavender);color:var(--lavender)}
+.lbl-chip.on{background:var(--grad-iri);color:#fff;border-color:transparent}
+.lbl-name{flex:1}
+
 </style>
 </head>
 <body>
@@ -954,7 +988,7 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
       </div>
       <div class="dash-widget" data-w="notes">
         <div class="card">
-          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Recent notes</h2><button class="btn soft" onclick="go('notes')">View all</button></div>
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Notes</h2><button class="btn soft" onclick="go('notes')">View all</button></div>
           <div id="rnBody"></div>
           <div style="margin-top:14px"><button class="btn" onclick="quickNoteFromDash()">+ Add note</button></div>
         </div>
@@ -1016,11 +1050,14 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
   <div class="section-head"><h2>Notes</h2>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <input class="fld" id="noteSearch" placeholder="Search notes&hellip;" style="max-width:220px" oninput="renderNotes()">
+      <button class="btn soft" onclick="openLabels()">Labels</button>
       <button class="btn soft" id="archToggle" onclick="toggleArchivedView()">Show archived</button>
     </div>
   </div>
   <div class="card" style="margin-bottom:18px"><textarea class="fld" id="newNote" placeholder="Write a note&hellip;" rows="3"></textarea>
+    <input class="fld" id="newNoteLabels" placeholder="Labels (comma separated, e.g. Work, Idea)" style="margin-top:8px">
     <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn" onclick="addNote()">+ Add note</button></div></div>
+  <div class="lbl-filter" id="lblFilter"></div>
   <div class="notes-masonry" id="notesList"></div>
 </div>
 
@@ -1102,6 +1139,7 @@ function fill(d){
   var _ids=d.settings.statuses.map(function(x){return x.id;});
   (d.tasks||[]).forEach(function(t){ if(!t.status)t.status=(t.done?"done":_ids[0]); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
   if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
+  (d.notes||[]).forEach(function(n){ if(!Array.isArray(n.labels)) n.labels=[]; });
   return d;
 }
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
@@ -1380,15 +1418,16 @@ function delTask(id){ data.tasks=(data.tasks||[]).filter(function(x){return x.id
 /* ---- Notes ---- */
 var notesShowArchived=false;
 function toggleArchivedView(){ notesShowArchived=!notesShowArchived; var b=document.getElementById("archToggle"); if(b){ b.textContent=notesShowArchived?"Hide archived":"Show archived"; b.classList.toggle("on",notesShowArchived);} renderNotes(); }
-function addNote(){ const el=document.getElementById("newNote"); const v=el.value.trim(); if(!v) return; data.notes.unshift({id:uid(),body:v,ts:Date.now(),updated:Date.now(),pinned:false,archived:false}); el.value=""; save(); renderNotes(); toast("Note added"); }
+function addNote(){ const el=document.getElementById("newNote"); const v=el.value.trim(); if(!v) return; var li=document.getElementById("newNoteLabels"); var lab=parseLabels(li?li.value:""); data.notes.unshift({id:uid(),body:v,labels:lab,ts:Date.now(),updated:Date.now(),pinned:false,archived:false}); el.value=""; if(li)li.value=""; save(); renderNotes(); toast("Note added"); }
 function delNote(id){ data.notes=data.notes.filter(function(n){return n.id!==id;}); save(); renderNotes(); }
 function pinNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.pinned=!n.pinned; save(); renderNotes(); } }
 function archiveNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.archived=!n.archived; save(); renderNotes(); toast(n.archived?"Archived":"Restored"); } }
-function editNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(!n) return; showModal('<h4>Edit note</h4><textarea class="fld" id="enBody" rows="6">'+esc(n.body)+'</textarea><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNoteEdit(\''+id+'\')">Save</button></div>'); setTimeout(function(){ var e=document.getElementById("enBody"); if(e) e.focus(); },30); }
-function saveNoteEdit(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.body=document.getElementById("enBody").value; n.updated=Date.now(); save(); closeModal(); renderNotes(); toast("Note updated"); } }
+function editNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(!n) return; showModal('<h4>Edit note</h4><textarea class="fld" id="enBody" rows="6">'+esc(n.body)+'</textarea><label class="setlbl" style="display:block;margin-top:12px">Labels</label><input class="fld" id="enLabels" value="'+esc((n.labels||[]).join(", "))+'" placeholder="e.g. Work, Idea, Travel" style="margin-top:6px">'+labelSuggest("enLabels")+'<div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNoteEdit(\''+id+'\')">Save</button></div>'); setTimeout(function(){ var e=document.getElementById("enBody"); if(e) e.focus(); },30); }
+function saveNoteEdit(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.body=document.getElementById("enBody").value; var li=document.getElementById("enLabels"); n.labels=parseLabels(li?li.value:""); n.updated=Date.now(); save(); closeModal(); renderNotes(); toast("Note updated"); } }
 function noteCard(n){
   return '<div class="card note-card'+(n.pinned?' pinned':'')+'">'+(n.pinned?'<span class="npin">'+IC.pin+'</span>':'')
     +'<div class="nbody">'+esc(n.body)+'</div>'
+    +((n.labels&&n.labels.length)?'<div class="note-labels">'+n.labels.map(function(l){return '<span class="nlabel">'+esc(l)+'</span>';}).join("")+'</div>':'')
     +'<div class="ndate"><span>'+new Date(n.ts).toLocaleDateString()+(n.updated&&n.updated>(n.ts||0)+2000?' &middot; edited':'')+'</span>'
     +'<div class="nact">'
       +'<button class="icon-btn'+(n.pinned?' on':'')+'" title="Pin" onclick="pinNote(\''+n.id+'\')">'+IC.pin+'</button>'
@@ -1399,10 +1438,12 @@ function noteCard(n){
 }
 function renderNotes(){
   const q=((document.getElementById("noteSearch")&&document.getElementById("noteSearch").value)||"").toLowerCase();
-  const list=(data.notes||[]).filter(function(n){return (!!n.archived===notesShowArchived)&&(!q||(n.body||"").toLowerCase().indexOf(q)>=0);});
+  const list=(data.notes||[]).filter(function(n){return (!!n.archived===notesShowArchived)&&(!q||(n.body||"").toLowerCase().indexOf(q)>=0)&&(!notesFilterLabel||((n.labels||[]).indexOf(notesFilterLabel)>=0));});
   list.sort(function(a,b){return ((b.pinned?1:0)-(a.pinned?1:0))||((b.ts||0)-(a.ts||0));});
+  var lf=document.getElementById("lblFilter");
+  if(lf){ var ls=noteLabels(); lf.innerHTML=ls.length?('<span class="lbl-chip'+(!notesFilterLabel?" on":"")+'" onclick="setNoteFilter(\'\')">All</span>'+ls.map(function(l){return '<span class="lbl-chip'+(notesFilterLabel===l?" on":"")+'" onclick="setNoteFilter(\''+esc(l).replace(/\x27/g,"")+'\')">'+esc(l)+'</span>';}).join("")):''; }
   const host=document.getElementById("notesList"); if(!host) return;
-  host.innerHTML = list.length? list.map(noteCard).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h6"/></svg></div><p>'+(notesShowArchived?'No archived notes.':(q?'No notes match your search.':'No notes yet.'))+'</p></div>';
+  host.innerHTML = list.length? list.map(noteCard).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h6"/></svg></div><p>'+(notesShowArchived?'No archived notes.':(notesFilterLabel?'No notes with this label.':(q?'No notes match your search.':'No notes yet.')))+'</p></div>';
 }
 
 /* ---- Links ---- */
@@ -1971,9 +2012,21 @@ function renderRecentNotes(){
   var el=document.getElementById("rnBody"); if(!el) return;
   var notes=(data.notes||[]).filter(function(n){return !n.archived;}).slice(0,5);
   if(!notes.length){ el.innerHTML='<div class="muted" style="font-size:.86rem;padding:10px 0">No notes yet. Add your first below.</div>'; return; }
-  el.innerHTML=notes.map(function(n){ var body=(n.body||"").trim(); var first=body.split("\n")[0]||"(empty note)"; var rest=body.slice(first.length).replace(/^\s+/,"").split("\n")[0]; var when=n.updated||n.ts; return '<div class="rn-row" onclick="editNote(\''+n.id+'\')"><div class="rn-top"><span class="rn-title">'+esc(first)+'</span><span class="rn-time">'+esc(relTime(when))+'</span></div>'+(rest?'<div class="rn-prev">'+esc(rest)+'</div>':'')+'</div>'; }).join("");
+  el.innerHTML=notes.map(function(n){ var body=(n.body||"").trim(); var first=body.split("\n")[0]||"(empty note)"; var rest=body.slice(first.length).replace(/^\s+/,"").split("\n")[0]; var when=n.updated||n.ts; var labs=(n.labels&&n.labels.length)?'<div class="rn-labels">'+n.labels.slice(0,4).map(function(l){return '<span class="nlabel">'+esc(l)+'</span>';}).join("")+'</div>':''; return '<div class="rn-row" onclick="editNote(\''+n.id+'\')"><div class="rn-top"><span class="rn-title">'+esc(first)+'</span><span class="rn-time">'+esc(relTime(when))+'</span></div>'+labs+(rest?'<div class="rn-prev">'+esc(rest)+'</div>':'')+'</div>'; }).join("");
 }
 function quickNoteFromDash(){ go("notes"); setTimeout(function(){ var el=document.getElementById("newNote"); if(el){ el.focus(); el.scrollIntoView({block:"center"}); } },60); }
+
+/* ===== batch v13 additions: note labels ===== */
+var notesFilterLabel="";
+function parseLabels(str){ return (str||"").split(",").map(function(x){return x.trim();}).filter(Boolean).filter(function(x,i,a){return a.indexOf(x)===i;}); }
+function noteLabels(){ var set={}; (data.notes||[]).forEach(function(n){ (n.labels||[]).forEach(function(l){ if(l) set[l]=1; }); }); return Object.keys(set).sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());}); }
+function setNoteFilter(l){ notesFilterLabel=(notesFilterLabel===l?"":l); renderNotes(); }
+function labelSuggest(inputId){ var ls=noteLabels(); if(!ls.length) return ""; return '<div class="lbl-filter" style="margin-top:8px">'+ls.map(function(l){return '<span class="lbl-chip" onclick="addLabelTo(\''+inputId+'\',\''+esc(l).replace(/'/g,"")+'\')">+ '+esc(l)+'</span>';}).join("")+'</div>'; }
+function addLabelTo(inputId,l){ var i=document.getElementById(inputId); if(!i) return; var cur=parseLabels(i.value); if(cur.indexOf(l)<0) cur.push(l); i.value=cur.join(", "); }
+function openLabels(){ var ls=noteLabels(); var html='<h4>Manage labels</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Rename or delete labels across all notes.</p>'+(ls.length?'<div id="lblMgr">'+ls.map(lblRow).join("")+'</div>':'<p class="muted" style="font-size:.86rem">No labels yet. Add labels when writing or editing a note.</p>')+'<div class="row"><button class="btn soft" onclick="closeModal()">Close</button></div>'; showModal(html); }
+function lblRow(l){ return '<div class="st-row" data-l="'+esc(l)+'"><input class="fld lbl-name" value="'+esc(l)+'"><button type="button" class="st-mini" title="Rename" onclick="renameLabel(this)">'+IC.edit+'</button><button type="button" class="st-mini" title="Delete" onclick="deleteLabel(this)">'+IC.trash+'</button></div>'; }
+function renameLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var oldL=row.dataset.l; var newL=row.querySelector(".lbl-name").value.trim(); if(!newL||newL===oldL) return; (data.notes||[]).forEach(function(n){ if(n.labels&&n.labels.length){ n.labels=n.labels.map(function(x){return x===oldL?newL:x;}).filter(function(x,i,a){return a.indexOf(x)===i;}); } }); if(notesFilterLabel===oldL) notesFilterLabel=newL; save(); renderNotes(); toast("Label renamed"); openLabels(); }
+function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var l=row.dataset.l; (data.notes||[]).forEach(function(n){ if(n.labels) n.labels=n.labels.filter(function(x){return x!==l;}); }); if(notesFilterLabel===l) notesFilterLabel=""; save(); renderNotes(); toast("Label deleted"); openLabels(); }
 
 /* ============ Boot ============ */
 render();
