@@ -819,6 +819,64 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 #dashMain{flex:1!important}
 #dashRail{flex:1!important}
 
+
+/* ===== batch v11: hero redesign + full-width stack ===== */
+.welcome-hero{padding:30px 34px}
+.welcome-hero .whero{grid-template-columns:minmax(0,1.3fr) minmax(440px,1fr)!important;gap:30px;align-items:center}
+.wboxes{grid-template-columns:repeat(3,1fr)!important;gap:14px;align-items:stretch}
+.wbox{min-height:128px;padding:18px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.wbox-lbl{font-size:.62rem;letter-spacing:.12em;margin-bottom:0}
+.wbox .wtime{font-size:2.7rem;line-height:1}
+.wbox-val{font-size:1rem;white-space:normal;line-height:1.25}
+.wbox .whijri{font-size:.7rem;margin-top:3px}
+.wx-box{display:flex;align-items:center;gap:12px}
+.wx-box .wx-ic{width:42px;height:42px;flex:none;display:grid;place-items:center}
+.wx-box .wx-ic svg{width:42px;height:42px}
+.wx-box .wx-t{font-size:1.8rem;font-family:'Marcellus',serif;line-height:1}
+.wx-box .muted{font-size:.74rem;color:rgba(255,255,255,.72)}
+@media(max-width:760px){.welcome-hero .whero{grid-template-columns:1fr!important}.wboxes{gap:8px}.wbox{min-height:92px;padding:12px}.wbox .wtime{font-size:1.7rem}.wx-box .wx-ic,.wx-box .wx-ic svg{width:32px;height:32px}.wx-box .wx-t{font-size:1.4rem}}
+/* compact, subtle upcoming */
+.up-item{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.88rem;font-weight:500}
+.up-dot{width:7px;height:7px;border-radius:50%;flex:none}
+.up-dot.k-task{background:var(--lavender)}.up-dot.k-event{background:var(--peach)}.up-dot.k-zakat{background:var(--green)}
+.up-date{font-weight:700;font-size:.74rem;min-width:48px;opacity:.85}
+.up-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* full-width stacked composition */
+#dashStack{display:flex;flex-direction:column;gap:18px}
+#dashStack .dash-widget{width:auto;margin:0}
+#dashStack .dash-widget>.card{height:auto!important}
+.dash-row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+@media(max-width:900px){.dash-row2{grid-template-columns:1fr}}
+.dash-row2 .dash-widget{min-width:0}
+.dash-row2 .dash-widget>.card{height:100%!important}
+/* prayer full width: even tiles, no overflow */
+.prayer-card .prow{grid-template-columns:repeat(5,1fr)}
+@media(max-width:620px){.prayer-card .prow{grid-template-columns:repeat(auto-fit,minmax(78px,1fr))}}
+.dash-widget.w-hidden{display:none}
+.dash-edit .dash-widget.w-hidden{display:block;opacity:.4}
+
+
+/* ===== batch v12: Tasks Overview + Recent Notes ===== */
+.to-sec{margin-bottom:13px}
+.to-sec:last-child{margin-bottom:0}
+.to-h{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.to-h span{background:rgba(138,100,200,.18);color:var(--lavender);border-radius:99px;padding:0 7px;font-size:.66rem;font-weight:800}
+.to-h.to-over{color:var(--red)}
+.to-h.to-over span{background:rgba(214,85,76,.16);color:var(--red)}
+.to-row{display:flex;align-items:center;gap:9px;padding:6px 0;cursor:pointer;font-size:.88rem;border-bottom:1px solid var(--border)}
+.to-row:last-child{border-bottom:none}
+.to-row:hover .to-title{color:var(--lavender)}
+.to-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.to-due{font-size:.73rem;color:var(--muted);flex:none}
+.to-due.over{color:var(--red);font-weight:700}
+.rn-row{padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.rn-row:last-child{border-bottom:none}
+.rn-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.rn-title{font-weight:600;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-time{font-size:.72rem;color:var(--muted);flex:none}
+.rn-prev{font-size:.8rem;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-row:hover .rn-title{color:var(--lavender)}
+
 </style>
 </head>
 <body>
@@ -855,40 +913,56 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 
 <!-- HOME -->
 <div class="tab active" id="tab-home">
-  <!-- WELCOME HERO -->
+  <!-- HERO -->
   <div class="hero welcome-hero">
     <div class="whero">
       <div class="whero-left">
         <div class="eyebrow" id="greetEyebrow">Welcome back</div>
         <h1 class="marc" style="margin:6px 0 0"><span id="greetLine">Good day</span>, <span id="userName">there</span></h1>
-        <div id="dailySummary" style="margin-top:16px"></div>
+        <div class="wsummary" id="welcomeSummary" style="margin-top:14px"></div>
+        <div id="dailySummary" style="margin-top:10px"></div>
         <div class="wsum-h">Upcoming</div><div id="upcomingList"></div>
       </div>
       <div class="wboxes">
         <div class="wbox"><div class="wbox-lbl">Time</div><div class="wtime" id="clockTime">--:--</div></div>
         <div class="wbox"><div class="wbox-lbl">Date</div><div class="wbox-val" id="dateLine">&mdash;</div><div class="whijri" id="hijriLine"></div></div>
-        <div class="wbox" id="weatherTile"><div class="wbox-lbl">Weather</div><div class="wbox-val" id="ambient">&mdash;</div></div>
+        <div class="wbox"><div class="wbox-lbl">Weather</div><div id="ambient">&mdash;</div></div>
       </div>
     </div>
   </div>
 
-  <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Use the arrows to reorder, or hide what you don&rsquo;t need.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
+  <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Toggle the eye to hide a section.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
 
-  <div id="dashGrid">
-    <div id="dashMain">
-      <!-- TASKS -->
+  <div id="dashStack">
+    <!-- PRAYER (full width) -->
+    <div class="dash-widget" data-w="prayer">
+      <div class="card prayer-card" id="prayerCard">
+        <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
+        <div class="prayer-next" id="prayerNext"></div>
+        <div class="prow" id="prayersRow"></div>
+      </div>
+    </div>
+
+    <!-- TASKS OVERVIEW + RECENT NOTES (side by side, equal height) -->
+    <div class="dash-row2">
       <div class="dash-widget" data-w="tasks">
         <div class="card">
-          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Today&rsquo;s tasks <span class="cnt" id="ovTaskCnt">0</span></h2><button class="btn soft" onclick="go('tasks')">All tasks</button></div>
-          <div id="ovTasks"></div>
-          <div style="display:flex;gap:8px;margin-top:12px"><input class="fld" id="ovQuickTask" placeholder="Quick add task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Tasks overview</h2><button class="btn soft" onclick="go('tasks')">View all</button></div>
+          <div id="toBody"></div>
+          <div style="display:flex;gap:8px;margin-top:14px"><input class="fld" id="ovQuickTask" placeholder="Add a task&hellip;" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn" onclick="quickAddTask()">Add</button></div>
         </div>
       </div>
-      <!-- GMAIL -->
-      <div class="dash-widget" data-w="gmail">
-        <div class="card" id="gmailCard"><div id="gmailBody"></div></div>
+      <div class="dash-widget" data-w="notes">
+        <div class="card">
+          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Recent notes</h2><button class="btn soft" onclick="go('notes')">View all</button></div>
+          <div id="rnBody"></div>
+          <div style="margin-top:14px"><button class="btn" onclick="quickNoteFromDash()">+ Add note</button></div>
+        </div>
       </div>
-      <!-- CALENDAR -->
+    </div>
+
+    <!-- CALENDAR + GMAIL (side by side, equal) -->
+    <div class="dash-row2">
       <div class="dash-widget" data-w="calendar">
         <div class="card" id="calCard">
           <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem">Calendar</h2>
@@ -905,39 +979,26 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
           <div id="calBody"></div>
         </div>
       </div>
-      <!-- NOTES / QUICK CAPTURE -->
-      <div class="dash-widget" data-w="notes">
-        <div class="card">
-          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick capture</h2><button class="btn soft" onclick="go('notes')">Notes</button></div>
-          <div class="qc-seg" id="qcSeg"><button class="on" data-m="note" onclick="qcMode('note')">Note</button><button data-m="task" onclick="qcMode('task')">Task</button></div>
-          <div style="display:flex;gap:8px"><input class="fld" id="qcInput" placeholder="Capture a note&hellip;" onkeydown="if(event.key==='Enter')qcAdd()"><button class="btn" onclick="qcAdd()">Add</button></div>
-          <div class="qc-cols"><div class="qc-col"><h4>Recent notes</h4><div id="qcNotes"></div></div><div class="qc-col"><h4>Recent tasks</h4><div id="qcTasks"></div></div></div>
-        </div>
-      </div>
-      <!-- PRAYER -->
-      <div class="dash-widget" data-w="prayer">
-        <div class="card prayer-card" id="prayerCard">
-          <h3>Prayer Times <span id="prayerCity" class="muted" style="text-transform:none;letter-spacing:0;font-weight:600"></span></h3>
-          <div class="prayer-next" id="prayerNext"></div>
-          <div class="prow" id="prayersRow"></div>
-        </div>
-      </div>
-      <!-- QUICK LINKS -->
-      <div class="dash-widget" data-w="links">
-        <div class="card">
-          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
-          <div id="homeLinks"></div>
-        </div>
-      </div>
-      <!-- APPS -->
-      <div class="dash-widget" data-w="apps">
-        <div class="card">
-          <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Your apps</h2></div>
-          <div class="grid apps" id="appCards"></div>
-        </div>
+      <div class="dash-widget" data-w="gmail">
+        <div class="card" id="gmailCard"><div id="gmailBody"></div></div>
       </div>
     </div>
-    <div id="dashRail"></div>
+
+    <!-- APPS (full width) -->
+    <div class="dash-widget" data-w="apps">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Your apps</h2></div>
+        <div class="grid apps" id="appCards"></div>
+      </div>
+    </div>
+
+    <!-- QUICK LINKS (full width) -->
+    <div class="dash-widget" data-w="links">
+      <div class="card">
+        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
+        <div id="homeLinks"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1105,7 +1166,7 @@ function renderHome(){
   renderAppCards("appCards");
   try{ renderDashboard(); }catch(e){} renderToday(); renderCalendar(); try{renderCalConn();renderGmail();}catch(e){}
   var hlk=document.getElementById("homeLinks"); if(hlk) hlk.innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
-  try{ loadWeather(); renderQuickCapture(); }catch(e){}
+  try{ loadWeather(); renderTasksOverview(); renderRecentNotes(); }catch(e){}
   var pc=document.getElementById("prayerCard"); if(pc) pc.style.display=(data.settings.showPrayer!==false)?"":"none";
   var pcty=document.getElementById("prayerCity"); if(pcty) pcty.textContent=data.settings.city?("· "+data.settings.city):"";
   if(data.settings.showPrayer!==false) loadPrayers();
@@ -1170,13 +1231,15 @@ function sumRow(ic,html){return '<div class="sum-row"><span class="si">'+ic+'</s
 function emptyTasks(){return '<div class="empty"><div class="glyph">'+IC.task+'</div><p>No tasks here yet.</p><div style="margin-top:12px"><button class="btn" onclick="openTask()">+ New task</button></div></div>';}
 function tickClock(){var el=document.getElementById("clockTime");if(!el)return;var n=new Date();function p(x){return String(x).padStart(2,"0");}var h=n.getHours();var mer=h<12?"AM":"PM";var h12=(h%12)||12;el.innerHTML=h12+":"+p(n.getMinutes())+'<span class="sec">'+p(n.getSeconds())+'</span><span class="mer">'+mer+'</span>';}
 function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;});}
-function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).length;var ev=todayEvents().length;var parts=[wsChip(IC.task,due+" task"+(due!==1?"s":"")+" due"),wsChip(IC.cal,ev+" event"+(ev!==1?"s":""))];if(financeStat)parts.push(wsChip(IC.money,financeStat));el.innerHTML=parts.join("");}
+var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
+function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var now=new Date(),nowS=now.getHours()*3600+now.getMinutes()*60; for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
+function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).length;var ev=todayEvents().length;var parts=[wsChip(IC.task,due+" due"),wsChip(IC.cal,ev+" meeting"+(ev!==1?"s":""))];var np=nextPrayerShort();if(np)parts.push(wsChip(IC.moon,np));if(gmailStats&&gmailStats.unread)parts.push(wsChip(MAIL_IC,gmailStats.unread+" unread"));else if(financeStat)parts.push(wsChip(IC.money,financeStat));el.innerHTML=parts.join("");}
 
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
 function renderOvTasks(){var el=document.getElementById("ovTasks");if(!el)return;var t=isoLocal(new Date());var due=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<=t;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});var c=document.getElementById("ovTaskCnt");if(c)c.textContent=due.length;el.innerHTML=due.length?due.map(function(x){var over=x.due<t;return '<div class="mini-item"><div class="chk" onclick="event.stopPropagation();toggleTask(\''+x.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0;cursor:pointer" onclick="openTask(\''+x.id+'\')"><div style="font-weight:600">'+esc(x.t)+'</div>'+(over?'<div class="kdue over" style="font-size:.72rem">Overdue &middot; '+esc(fmtShort(x.due))+'</div>':'')+'</div><span class="pdot p-'+(x.priority||"med")+'"></span></div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing due today &mdash; you are clear.</div>';}
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
-function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due>t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task"});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";if(w.slice(0,10)>t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat"});}items.sort(function(a,b){return a.date.localeCompare(b.date);});el.innerHTML=items.length?items.slice(0,6).map(function(it){return '<div class="mini-item"><div class="mini-time">'+esc(fmtShort(it.date))+'</div><div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+kindBadge(it.kind)+'</div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing upcoming.</div>';}
+function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due>t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task"});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";if(w.slice(0,10)>t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat"});}items.sort(function(a,b){return a.date.localeCompare(b.date);});el.innerHTML=items.length?items.slice(0,6).map(function(it){return '<div class="up-item"><span class="up-dot k-'+it.kind+'"></span><span class="up-date">'+esc(fmtShort(it.date))+'</span><span class="up-label">'+esc(it.label)+'</span></div>';}).join(""):'<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
@@ -1556,18 +1619,18 @@ async function loadWeather(){
   const box=document.getElementById("ambient"); if(!box) return;
   const city=data.settings.city||"Makkah";
   if(_wxCache[city]){ box.innerHTML=_wxCache[city]; return; }
-  box.innerHTML='<span class="skel skel-l" style="display:inline-block;width:52px;height:13px;vertical-align:middle"></span>';
+  box.innerHTML='<div class="wx-box"><div class="skel" style="width:42px;height:42px;border-radius:12px"></div><div><div class="skel skel-l" style="width:46px;height:20px"></div></div></div>';
   try{
     const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(function(r){return r.json();});
     const loc=g&&g.results&&g.results[0];
-    if(!loc){ box.innerHTML='<span class="muted" style="font-size:.7rem">Set city</span>'; return; }
+    if(!loc){ box.innerHTML='<span class="muted" style="font-size:.74rem">Set city in Preferences</span>'; return; }
     const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code").then(function(r){return r.json();});
     if(!w||!w.current) throw new Error("x");
     const temp=Math.round(w.current.temperature_2m), desc=wxDesc(w.current.weather_code);
-    const html='<b style="font-size:1.25rem">'+temp+'°</b><div class="whijri" style="opacity:.85">'+esc(desc)+'</div>';
+    const html='<div class="wx-box"><span class="wx-ic">'+wxIcon(w.current.weather_code)+'</span><div><div class="wx-t">'+temp+'°</div><div class="muted">'+esc(desc)+'</div></div></div>';
     _wxCache[city]=html; box.innerHTML=html;
   }catch(e){
-    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.72rem">Retry</button>';
+    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.74rem">Retry weather</button>';
   }
 }
 function retryWeather(){ var c=data.settings.city||"Makkah"; delete _wxCache[c]; loadWeather(); }
@@ -1856,9 +1919,9 @@ var DASH_KEYS=["tasks","calendar","gmail","notes","prayer","links","apps"];
 var DASH_COL={tasks:"main",gmail:"main",prayer:"main",calendar:"rail",notes:"rail",links:"rail",apps:"rail"};
 var dashDragK=null;
 function dashLayout(){ var l=data.settings.dashLayout; if(!Array.isArray(l)) l=[]; var seen={}; l=l.filter(function(w){ if(!w||!w.k||DASH_KEYS.indexOf(w.k)<0||seen[w.k]) return false; seen[w.k]=1; return true; }); DASH_KEYS.forEach(function(k){ if(!seen[k]) l.push({k:k,h:false}); }); data.settings.dashLayout=l; return l; }
-function renderDashboard(){ var main=document.getElementById("dashMain"), rail=document.getElementById("dashRail"); if(!main||!rail) return; dashLayout().forEach(function(w){ var el=document.querySelector('.dash-widget[data-w="'+w.k+'"]'); if(!el) return; el.classList.toggle("w-hidden",!!w.h); (DASH_COL[w.k]==="rail"?rail:main).appendChild(el); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
-function toggleDashEdit(){ var on=!document.body.classList.contains("dash-edit"); document.body.classList.toggle("dash-edit",on); var b=document.getElementById("dashEditBtn"); if(b) b.textContent=on?"Done":"Customize"; var h=document.getElementById("dashHint"); if(h) h.style.display=on?"":"none"; var host=document.getElementById("dashGrid"); if(on){ renderDashTools(); scheduleMasonry(); } else if(host){ host.querySelectorAll(".dash-tools").forEach(function(x){x.remove();}); host.querySelectorAll(".dash-widget").forEach(function(el){ el.removeAttribute("draggable"); el.ondragstart=el.ondragend=el.ondragover=el.ondragleave=el.ondrop=null; }); renderDashboard(); } }
-function renderDashTools(){ var host=document.getElementById("dashGrid"); if(!host) return; dashLayout().forEach(function(w){ var el=host.querySelector('[data-w="'+w.k+'"]'); if(!el) return; el.setAttribute("draggable","true"); var t=el.querySelector(":scope > .dash-tools"); if(!t){ t=document.createElement("div"); t.className="dash-tools"; el.appendChild(t); } t.innerHTML='<button title="Move up" onclick="dashMove(\''+w.k+'\',-1)">'+ST_UP+'</button><button title="Move down" onclick="dashMove(\''+w.k+'\',1)">'+ST_DN+'</button><button title="'+(w.h?"Show":"Hide")+'" onclick="dashHide(\''+w.k+'\')">'+(w.h?EYE_OFF:EYE)+'</button>'; el.ondragstart=function(e){ dashDragK=w.k; el.classList.add("dragging"); try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain",w.k); }catch(_){ } }; el.ondragend=function(){ el.classList.remove("dragging"); host.querySelectorAll(".dash-over").forEach(function(x){x.classList.remove("dash-over");}); }; el.ondragover=function(e){ e.preventDefault(); el.classList.add("dash-over"); }; el.ondragleave=function(){ el.classList.remove("dash-over"); }; el.ondrop=function(e){ e.preventDefault(); el.classList.remove("dash-over"); dashDropOn(w.k); }; }); }
+function renderDashboard(){ var stack=document.getElementById("dashStack"); if(!stack) return; var hide={}; dashLayout().forEach(function(w){ hide[w.k]=!!w.h; }); stack.querySelectorAll(".dash-widget").forEach(function(el){ el.classList.toggle("w-hidden",!!hide[el.dataset.w]); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
+function toggleDashEdit(){ var on=!document.body.classList.contains("dash-edit"); document.body.classList.toggle("dash-edit",on); var b=document.getElementById("dashEditBtn"); if(b) b.textContent=on?"Done":"Customize"; var h=document.getElementById("dashHint"); if(h) h.style.display=on?"":"none"; var host=document.getElementById("dashStack"); if(on){ renderDashTools(); scheduleMasonry(); } else if(host){ host.querySelectorAll(".dash-tools").forEach(function(x){x.remove();}); host.querySelectorAll(".dash-widget").forEach(function(el){ el.removeAttribute("draggable"); el.ondragstart=el.ondragend=el.ondragover=el.ondragleave=el.ondrop=null; }); renderDashboard(); } }
+function renderDashTools(){ var stack=document.getElementById("dashStack"); if(!stack) return; stack.querySelectorAll(".dash-widget").forEach(function(el){ var w=el.dataset.w; var t=el.querySelector(":scope > .dash-tools"); if(!t){ t=document.createElement("div"); t.className="dash-tools"; el.appendChild(t); } var hidden=el.classList.contains("w-hidden"); t.innerHTML='<button title="'+(hidden?"Show":"Hide")+'" onclick="dashHide(\''+w+'\')">'+(hidden?EYE_OFF:EYE)+'</button>'; }); }
 function dashMove(k,dir){ var l=dashLayout(); var i=l.findIndex(function(w){return w.k===k;}); if(i<0) return; var j=i+dir; if(j<0||j>=l.length) return; var tmp=l[i]; l[i]=l[j]; l[j]=tmp; data.settings.dashLayout=l; save(); renderDashboard(); }
 function dashHide(k){ var l=dashLayout(); var w=l.find(function(x){return x.k===k;}); if(w){ w.h=!w.h; data.settings.dashLayout=l; save(); renderDashboard(); } }
 function dashDropOn(targetK){ if(!dashDragK||dashDragK===targetK) return; var l=dashLayout(); var from=l.findIndex(function(w){return w.k===dashDragK;}); var to=l.findIndex(function(w){return w.k===targetK;}); if(from<0||to<0) return; var moved=l.splice(from,1)[0]; l.splice(to,0,moved); data.settings.dashLayout=l; dashDragK=null; save(); renderDashboard(); }
@@ -1888,8 +1951,30 @@ function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); if(!colDr
 var SPAN={calendar:2,gmail:2,apps:2,notes:2,briefing:1,weather:1,prayer:1,tasks:1,links:1};
 var _msnRAF=null;
 function scheduleMasonry(){ if(_msnRAF) cancelAnimationFrame(_msnRAF); _msnRAF=requestAnimationFrame(function(){ try{ layoutMasonry(); }catch(e){} }); }
-function layoutMasonry(){ var grid=document.getElementById("dashGrid"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
+function layoutMasonry(){ var grid=document.getElementById("dashStack"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
 window.addEventListener("resize",scheduleMasonry);
+/* ===== batch v12 additions: Tasks Overview + Recent Notes ===== */
+function toRow(x){ var today=isoLocal(new Date()); var over=x.due&&x.due<today; return '<div class="to-row" onclick="openTask(\''+x.id+'\')"><span class="pdot p-'+(x.priority||"med")+'" title="Priority"></span><span class="to-title">'+esc(x.t)+'</span>'+(x.due?'<span class="to-due'+(over?" over":"")+'">'+esc(fmtShort(x.due))+'</span>':'')+'</div>'; }
+function renderTasksOverview(){
+  var el=document.getElementById("toBody"); if(!el) return;
+  var t=isoLocal(new Date());
+  var wk=new Date(); wk.setDate(wk.getDate()+7); var weekEnd=isoLocal(wk);
+  var open=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});
+  var today=open.filter(function(x){return x.due&&x.due===t;});
+  var overdue=open.filter(function(x){return x.due&&x.due<t;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
+  var week=open.filter(function(x){return x.due&&x.due>t&&x.due<=weekEnd;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
+  function sec(title,arr,cls){ if(!arr.length) return ""; return '<div class="to-sec"><div class="to-h '+(cls||"")+'">'+title+' <span>'+arr.length+'</span></div>'+arr.slice(0,5).map(toRow).join("")+'</div>'; }
+  var html=sec("Overdue",overdue,"to-over")+sec("Due today",today,"")+sec("Due this week",week,"");
+  el.innerHTML=html||'<div class="muted" style="font-size:.86rem;padding:10px 0">Nothing due &mdash; you&rsquo;re all caught up.</div>';
+}
+function renderRecentNotes(){
+  var el=document.getElementById("rnBody"); if(!el) return;
+  var notes=(data.notes||[]).filter(function(n){return !n.archived;}).slice(0,5);
+  if(!notes.length){ el.innerHTML='<div class="muted" style="font-size:.86rem;padding:10px 0">No notes yet. Add your first below.</div>'; return; }
+  el.innerHTML=notes.map(function(n){ var body=(n.body||"").trim(); var first=body.split("\n")[0]||"(empty note)"; var rest=body.slice(first.length).replace(/^\s+/,"").split("\n")[0]; var when=n.updated||n.ts; return '<div class="rn-row" onclick="editNote(\''+n.id+'\')"><div class="rn-top"><span class="rn-title">'+esc(first)+'</span><span class="rn-time">'+esc(relTime(when))+'</span></div>'+(rest?'<div class="rn-prev">'+esc(rest)+'</div>':'')+'</div>'; }).join("");
+}
+function quickNoteFromDash(){ go("notes"); setTimeout(function(){ var el=document.getElementById("newNote"); if(el){ el.focus(); el.scrollIntoView({block:"center"}); } },60); }
+
 /* ============ Boot ============ */
 render();
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} } },1000);
@@ -1897,7 +1982,7 @@ setInterval(function(){ if(user&&supa&&document.visibilityState==="visible") loa
 document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&user&&supa) loadFinance(); });
 scheduleMasonry();
 setTimeout(scheduleMasonry,300); setTimeout(scheduleMasonry,1200);
-(function(){ var g=document.getElementById("dashGrid"); if(g&&window.MutationObserver){ try{ new MutationObserver(function(){ scheduleMasonry(); }).observe(g,{childList:true,subtree:true}); }catch(e){} } })();
+(function(){ var g=document.getElementById("dashStack"); if(g&&window.MutationObserver){ try{ new MutationObserver(function(){ scheduleMasonry(); }).observe(g,{childList:true,subtree:true}); }catch(e){} } })();
 (function waitG(n){ if(window.google&&google.accounts&&google.accounts.oauth2){ try{ gAutoConnect(); }catch(e){} } else if(n>0){ setTimeout(function(){ waitG(n-1); },400); } })(15);
 initAuth();
 (function(){ var s=document.getElementById("splash"); function go(){ setTimeout(()=>s.classList.add("hide"),600); setTimeout(()=>{ if(s.parentNode) s.parentNode.removeChild(s); },1400); } if(document.readyState==="complete") go(); else window.addEventListener("load",go); })();
