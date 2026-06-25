@@ -801,6 +801,24 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .prayer-next{flex-wrap:wrap;padding:14px 16px}
 .pn-count{font-size:1.05rem}
 
+
+/* ===== batch v10: hero box fixes + equal wide columns ===== */
+/* kill old absolute/hidden #ambient so weather sits inside its box */
+.wbox #ambient{position:static!important;top:auto!important;right:auto!important;display:block!important;text-align:left!important;font-size:inherit!important;opacity:1!important;line-height:1.2}
+.wbox #ambient b{font-size:1.5rem}
+/* bigger, wider hero utility boxes that fill the right side */
+.welcome-hero .whero{grid-template-columns:minmax(0,1.5fr) minmax(380px,0.95fr)!important}
+.wboxes{grid-template-columns:repeat(3,1fr)!important;align-items:stretch;gap:12px}
+.wbox{min-height:98px;padding:15px 16px}
+.wbox .wtime{font-size:2.15rem}
+.wbox-val{white-space:normal;font-size:.92rem;line-height:1.25}
+.wbox .whijri{white-space:normal;font-size:.66rem}
+.welcome-hero .whero-left #dailySummary,.welcome-hero .whero-left #upcomingList{max-width:560px}
+@media(max-width:760px){.welcome-hero .whero{grid-template-columns:1fr!important}.wboxes{grid-template-columns:repeat(3,1fr)!important}}
+/* equal-width 2-column dashboard so cards are wide and fill the space */
+#dashMain{flex:1!important}
+#dashRail{flex:1!important}
+
 </style>
 </head>
 <body>
@@ -1835,7 +1853,7 @@ function googleChip(extra,sub){ var email=data.settings.googleEmail||"Google acc
 function googleDisconnect(){ clearGToken("google"); clearGToken("gcal"); clearGToken("gmail"); calToken=null; gmailToken=null; calState="idle"; gmailState="idle"; calEvents=null; gmailStats=null; gmailMsgs=null; data.settings.calConnected=false; data.settings.gmailConnected=false; data.settings.googleEmail=""; data.settings.googlePhoto=""; data.settings.googleName=""; save(); try{ renderCalConn(); renderGmail(); renderCalendar(); renderToday(); renderWelcomeSummary(); }catch(e){} toast("Google disconnected"); }
 /* Dashboard customization */
 var DASH_KEYS=["tasks","calendar","gmail","notes","prayer","links","apps"];
-var DASH_COL={tasks:"main",gmail:"main",calendar:"rail",notes:"rail",prayer:"rail",links:"rail",apps:"rail"};
+var DASH_COL={tasks:"main",gmail:"main",prayer:"main",calendar:"rail",notes:"rail",links:"rail",apps:"rail"};
 var dashDragK=null;
 function dashLayout(){ var l=data.settings.dashLayout; if(!Array.isArray(l)) l=[]; var seen={}; l=l.filter(function(w){ if(!w||!w.k||DASH_KEYS.indexOf(w.k)<0||seen[w.k]) return false; seen[w.k]=1; return true; }); DASH_KEYS.forEach(function(k){ if(!seen[k]) l.push({k:k,h:false}); }); data.settings.dashLayout=l; return l; }
 function renderDashboard(){ var main=document.getElementById("dashMain"), rail=document.getElementById("dashRail"); if(!main||!rail) return; dashLayout().forEach(function(w){ var el=document.querySelector('.dash-widget[data-w="'+w.k+'"]'); if(!el) return; el.classList.toggle("w-hidden",!!w.h); (DASH_COL[w.k]==="rail"?rail:main).appendChild(el); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
