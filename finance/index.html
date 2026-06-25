@@ -693,6 +693,24 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
   #budgetTable{min-width:680px}
   #snapTable{min-width:640px}
 }
+
+/* HQ button + avatar menu (consistent with Hub) */
+.hq-btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;background:var(--grad-iri);color:#fff;border-radius:99px;padding:7px 14px;font-weight:800;font-size:.82rem;letter-spacing:.04em;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),var(--glow-lav);transition:transform .2s var(--ease),box-shadow .2s,filter .2s}
+.hq-btn svg{width:15px;height:15px}
+.hq-btn:hover{transform:translateY(-1.5px) scale(1.02);filter:brightness(1.05);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 12px 28px rgba(138,100,200,.45)}
+.hq-btn:active{transform:scale(.96)}
+.av-wrap{position:relative}
+#avatarChip{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:.9rem;font-weight:800;color:#fff;background:var(--grad-iri);box-shadow:var(--glow-lav);cursor:pointer}
+.av-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:222px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-2);padding:7px;display:none;z-index:200}
+.av-menu.show{display:block;animation:pop .2s var(--ease)}
+.av-menu .avm-head{padding:9px 11px 11px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.av-menu .avm-head b{font-size:.9rem;display:block}
+.av-menu .avm-head span{font-size:.74rem;color:var(--muted);display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av-menu button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--text);font-family:inherit;font-weight:600;font-size:.88rem;text-align:left;padding:9px 11px;border-radius:9px;cursor:pointer}
+.av-menu button:hover{background:rgba(138,100,200,.12)}
+.av-menu button svg{width:16px;height:16px;opacity:.8;flex:none}
+.av-menu button.danger-item{color:var(--red)}
+
 </style>
 </head>
 <body>
@@ -730,17 +748,16 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 <div class="content">
 <div class="topbar" id="topbar">
   <div class="tb-left">
-    <div class="tb-mark" aria-hidden="true"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
-    <svg class="top-logo" viewBox="375 170 200 200" fill="currentColor" aria-hidden="true"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg>
+    <a class="hq-btn" href="../" title="Back to your HQ" aria-label="Back to HQ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><b>HQ</b></a>
     <div class="tb-titles"><div class="crumb" id="crumb">Insights</div><h2 id="pageTitle">Overview</h2></div>
   </div>
   <div class="top-actions">
     <span class="note" id="syncStatus" style="margin:0"></span>
     <button class="btn soft tb-more" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light or dark theme" title="Toggle theme"><span id="themeIcon"></span></button>
-    <button class="btn soft" id="acctBtn" onclick="openAccount()">Account</button>
-    <button class="btn soft tb-more" onclick="openTopMenu()" aria-label="More actions" title="More actions">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-    </button>
+    <div class="av-wrap">
+      <div id="avatarChip" title="Account" onclick="toggleAvMenu(event)"></div>
+      <div class="av-menu" id="avMenu"></div>
+    </div>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
 </div>
@@ -2115,9 +2132,21 @@ async function saveNewPassword(){
   toast(error ? "Couldn't update password: "+error.message : "Password updated ✓");
 }
 function updateAcctBtn(){
-  const b = document.getElementById("acctBtn"); if(!b) return;
-  b.textContent = user ? (user.email||"Account").split("@")[0] : "Account";
+  const b = document.getElementById("acctBtn"); if(b) b.textContent = user ? (user.email||"Account").split("@")[0] : "Account";
+  const av=document.getElementById("avatarChip"); if(av){ var nm=(user&&user.email)||""; av.textContent = nm? nm.slice(0,2).toUpperCase() : "\u2022"; }
 }
+var _AVI={user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>',up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M7 13l5-5 5 5M5 3h14"/></svg>',prn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',rst:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>',out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'};
+function toggleAvMenu(e){ if(e)e.stopPropagation(); var m=document.getElementById("avMenu"); if(!m)return; if(m.classList.contains("show")){m.classList.remove("show");return;} m.innerHTML=avMenuHtml(); m.classList.add("show"); }
+function closeAvMenu(){ var m=document.getElementById("avMenu"); if(m)m.classList.remove("show"); }
+function avMenuHtml(){ var email=(user&&user.email)||""; var h='<div class="avm-head"><b>Finance Board</b><span>'+(email?esc(email):"Not signed in")+'</span></div>';
+  h+='<button onclick="closeAvMenu();openAccount()">'+_AVI.user+' Account</button>';
+  h+='<button onclick="closeAvMenu();exportData()">'+_AVI.down+' Export backup</button>';
+  h+='<button onclick="closeAvMenu();document.getElementById(\'importFile\').click()">'+_AVI.up+' Import backup</button>';
+  h+='<button onclick="closeAvMenu();window.print()">'+_AVI.prn+' Print statement</button>';
+  h+='<button class="danger-item" onclick="closeAvMenu();resetData()">'+_AVI.rst+' Reset data</button>';
+  h+=(user?'<button class="danger-item" onclick="closeAvMenu();doSignOut()">'+_AVI.out+' Sign out</button>':'<button onclick="closeAvMenu();openAccount()">'+_AVI.out+' Sign in</button>');
+  return h; }
+document.addEventListener("click",function(e){ if(!e.target.closest(".av-wrap")) closeAvMenu(); });
 function openAccount(){
   if(!supaReady){
     showModal(`<h4>Accounts not configured yet</h4>
