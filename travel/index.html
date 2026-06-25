@@ -1145,11 +1145,11 @@ function App(){
       <div className={`min-h-screen ${dark?'app-bg-dark text-lavender-50':'app-bg-light text-lavender-950'} font-sans transition-colors`} style={{paddingBottom:showBottomNav?'90px':'0'}}>
         <header className={`sticky top-0 z-40 frost ${dark?'glass-dark':'glass-light'} border-b`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-            <button onClick={()=>setView('trips')}><Logo logo={logo}/></button>
+            <a href="../" title="Back to your HQ" className="iridescent text-indigo2-950 rounded-full h-10 px-4 flex items-center gap-1.5 font-bold text-sm shadow-glow" style={{textDecoration:'none'}}>HQ</a>
             <nav className="hidden md:flex items-center gap-1">{TOPNAV.map(t=><button key={t.id} onClick={()=>setView(t.id)} className={`px-3.5 py-2 rounded-xl text-sm font-semibold transition ${view===t.id?'iridescent text-indigo2-950 shadow-glow':(dark?'text-lavender-200 hover:bg-white/5':'text-lavender-700 hover:bg-lavender-100')}`}>{t.label}</button>)}</nav>
             <div className="flex items-center gap-2">
               {currentTrip&&<select value={cur} onChange={e=>changeCurrency(e.target.value)} className="tp-soft rounded-full h-10 pl-3 pr-2 text-sm">{Object.entries(CURRENCIES).map(([k,v])=><option key={k} value={k}>{v.flag} {k}</option>)}</select>}
-              <button onClick={()=>setAuthOpen(true)} title={cloud.session?('Cloud synced · '+cloud.session.user.email):'Cloud sync — sign in'} className={`tp-soft rounded-full h-10 px-3.5 flex items-center gap-1.5 text-xs ${cloud.session?'!text-teal2-500':''}`}>☁️<span className="hidden sm:inline">{cloud.session?'Synced':'Sign in'}</span></button>
+              {cloud.session ? <button onClick={()=>setAuthOpen(true)} title={'Account · '+cloud.session.user.email} className="iridescent text-indigo2-950 rounded-full h-10 w-10 flex items-center justify-center font-bold text-sm shadow-glow">{(cloud.session.user.email||'?').slice(0,2).toUpperCase()}</button> : <button onClick={()=>setAuthOpen(true)} className="tp-soft rounded-full h-10 px-4 flex items-center text-sm font-semibold">Sign in</button>}
               <button onClick={()=>setDark(!dark)} aria-label="Toggle theme" title="Toggle theme" className="tp-soft tp-round text-base">{dark?'☀️':'🌙'}</button>
             </div>
           </div>
