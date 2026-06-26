@@ -1331,7 +1331,7 @@ html:not(.dark) .tlg-bar{background:#fff;box-shadow:0 4px 12px -6px rgba(67,49,9
       <div class="dash-widget" data-w="calendar">
         <div class="card" id="calCard">
           <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem">Calendar</h2>
-            <div style="display:flex;gap:8px;align-items:center"><button class="btn round" onclick="newEvent()" title="Create event" aria-label="Create event"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg></button><div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div></div>
+            <div style="display:flex;gap:8px;align-items:center"><button class="btn soft round" onclick="calSync()" title="Sync calendar" aria-label="Sync calendar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg></button><button class="btn round" onclick="newEvent()" title="Create event" aria-label="Create event"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg></button><div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div></div>
           </div>
           <div id="calConn" style="margin-bottom:12px"></div>
           <div class="cal-head" style="justify-content:flex-end">
@@ -1605,7 +1605,22 @@ var MM={built:false,sel:null,selEdge:null,connect:false,snap:true,drag:null,resi
 var MM_PAL=["#8a64c8","#f3b98e","#4ea8de","#7fd1c4","#e0746b","#d6a4e8","#86c06a","#f0c850","#9aa0b5","#2a1d44"];
 var MM_SH=["rect","round","circle","ellipse","diamond","hex"];
 function mmShIcon(s){var c='fill="none" stroke="currentColor" stroke-width="2"';return s==="rect"?'<rect x="3" y="6" width="18" height="12" rx="1" '+c+'/>':s==="round"?'<rect x="3" y="6" width="18" height="12" rx="5" '+c+'/>':s==="circle"?'<circle cx="12" cy="12" r="8" '+c+'/>':s==="ellipse"?'<ellipse cx="12" cy="12" rx="9" ry="6" '+c+'/>':s==="diamond"?'<path d="M12 3l9 9-9 9-9-9z" '+c+'/>':'<path d="M7 4h10l4 8-4 8H7l-4-8z" '+c+'/>';}
-function mmData(){ if(!data.mindmap||!Array.isArray(data.mindmap.nodes)){ data.mindmap={nodes:[],edges:[],view:{tx:0,ty:0,s:1}}; } if(!data.mindmap.view)data.mindmap.view={tx:0,ty:0,s:1}; return data.mindmap; }
+function mmStore(){ var m=data.mindmap;
+  if(!m||!Array.isArray(m.boards)){ var b={id:uid(),name:"My first map",nodes:(m&&m.nodes)||[],edges:(m&&m.edges)||[],view:(m&&m.view)||{tx:0,ty:0,s:1},updated:Date.now()}; data.mindmap={boards:[b],current:b.id}; m=data.mindmap; }
+  if(!m.boards.length){ var nb={id:uid(),name:"My first map",nodes:[],edges:[],view:{tx:0,ty:0,s:1},updated:Date.now()}; m.boards.push(nb); m.current=nb.id; }
+  if(!m.current||!m.boards.some(function(x){return x.id===m.current;})) m.current=m.boards[0].id;
+  return m; }
+function mmData(){ var m=mmStore(); var b=m.boards.find(function(x){return x.id===m.current;}); if(!b.view)b.view={tx:0,ty:0,s:1}; return b; }
+function mmNewBoard(){ var m=mmStore(); var b={id:uid(),name:"Map "+(m.boards.length+1),nodes:[],edges:[],view:{tx:0,ty:0,s:1},updated:Date.now()}; m.boards.push(b); m.current=b.id; MM.sel=MM.selEdge=null; MM.hist=[]; MM.future=[]; mmSave(); mmDraw(); mmClosePops(); }
+function mmSwitchBoard(id){ var m=mmStore(); m.current=id; MM.sel=MM.selEdge=null; MM.hist=[]; MM.future=[]; mmSave(); mmDraw(); mmClosePops(); }
+function mmRenameBoard(){ var b=mmData(); var nm=prompt("Rename mind map:", b.name); if(nm&&nm.trim()){ b.name=nm.trim(); b.updated=Date.now(); mmSave(); mmDraw(); } mmClosePops(); }
+function mmDeleteBoard(id){ var m=mmStore(); if(m.boards.length<=1){ toast("Keep at least one map"); return; } if(!confirm("Delete this mind map permanently?"))return; m.boards=m.boards.filter(function(x){return x.id!==id;}); if(m.current===id)m.current=m.boards[0].id; MM.sel=MM.selEdge=null; mmSave(); mmDraw(); mmClosePops(); }
+function mmClosePops(){ document.querySelectorAll(".mm-pop.show").forEach(function(p){p.classList.remove("show");}); }
+function mmBoardPopHtml(){ var m=mmStore(); return m.boards.map(function(b){ return '<button onclick="mmSwitchBoard(\''+b.id+'\')" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:9px">'+(b.id===m.current?'<svg viewBox="0 0 24 24" fill="none" stroke="var(--lavender)" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>':'<span style="width:14px"></span>')+esc(b.name)+'</span><span class="mm-bdel" onclick="event.stopPropagation();mmDeleteBoard(\''+b.id+'\')" style="opacity:.6;padding:2px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>'; }).join("")
+  +'<div style="height:1px;background:var(--border);margin:5px 2px"></div>'
+  +'<button onclick="mmNewBoard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New mind map</button>'
+  +'<button onclick="mmRenameBoard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Rename current</button>'; }
+function mmBoardMenu(btn){ var pop=document.getElementById("mmBoardPop"); pop.innerHTML=mmBoardPopHtml(); mmTogglePop(btn); }
 function mmSave(){ save(); }
 function mmPush(){ var d=mmData(); MM.hist.push(JSON.stringify({nodes:d.nodes,edges:d.edges})); if(MM.hist.length>60)MM.hist.shift(); MM.future=[]; }
 function mmUndo(){ if(!MM.hist.length)return; var d=mmData(); MM.future.push(JSON.stringify({nodes:d.nodes,edges:d.edges})); var s=JSON.parse(MM.hist.pop()); d.nodes=s.nodes; d.edges=s.edges; MM.sel=MM.selEdge=null; mmSave(); mmDraw(); }
@@ -1628,7 +1643,8 @@ function mmToolbarHtml(){
   var add='<div class="mm-menu"><button class="mm-tb" onclick="mmTogglePop(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add node</button><div class="mm-pop">'+MM_SH.map(function(s){var nm={rect:"Rectangle",round:"Rounded",circle:"Circle",ellipse:"Ellipse",diamond:"Diamond",hex:"Hexagon"}[s];return '<button onclick="mmAdd(\''+s+'\')"><svg viewBox="0 0 24 24">'+mmShIcon(s)+'</svg>'+nm+'</button>';}).join("")+'</div></div>';
   var layout='<div class="mm-menu"><button class="mm-tb" onclick="mmTogglePop(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 7v4M12 11H6v6M12 11h6v6"/></svg>Layout</button><div class="mm-pop"><button onclick="mmLayout(\'tree\')">Tree (top-down)</button><button onclick="mmLayout(\'radial\')">Radial mind map</button><button onclick="mmLayout(\'grid\')">Tidy grid</button></div></div>';
   var exp='<div class="mm-menu"><button class="mm-tb" onclick="mmTogglePop(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"/></svg>Export</button><div class="mm-pop"><button onclick="mmExport(\'png\')">PNG image</button><button onclick="mmExport(\'svg\')">SVG vector</button><button onclick="mmExport(\'json\')">JSON (project)</button><button onclick="document.getElementById(\'mmFile\').click()">Import JSON…</button></div></div>';
-  return add
+  var board='<div class="mm-menu"><button class="mm-tb" onclick="mmBoardMenu(this)" style="font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="mmBoardName">Map</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"/></svg></button><div class="mm-pop" id="mmBoardPop"></div></div><span class="mm-sep"></span>';
+  return board+add
     +'<button class="mm-tb" id="mmConnectBtn" onclick="mmToggleConnect()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 8l8 8"/></svg>Connect</button>'
     +'<span class="mm-sep"></span>'
     +'<button class="mm-tb icon" onclick="mmUndo()" title="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4M5 10h10a5 5 0 0 1 0 10h-3"/></svg></button>'
@@ -1672,7 +1688,9 @@ function mmAnchor(n,tx,ty){ var cx=n.x+n.w/2, cy=n.y+n.h/2; var dx=tx-cx, dy=ty-
 function mmEdgePath(e){ var a=mmNode(e.from),b=mmNode(e.to); if(!a||!b)return null; var bc={x:b.x+b.w/2,y:b.y+b.h/2}, ac={x:a.x+a.w/2,y:a.y+a.h/2}; var p1=mmAnchor(a,bc.x,bc.y), p2=mmAnchor(b,ac.x,ac.y); var st=e.style||"curved"; var d;
   if(st==="straight"){ d="M"+p1.x+","+p1.y+" L"+p2.x+","+p2.y; }
   else if(st==="ortho"){ var mx=(p1.x+p2.x)/2; d="M"+p1.x+","+p1.y+" L"+mx+","+p1.y+" L"+mx+","+p2.y+" L"+p2.x+","+p2.y; }
-  else { var dx=Math.abs(p2.x-p1.x)*0.5; d="M"+p1.x+","+p1.y+" C"+(p1.x+dx)+","+p1.y+" "+(p2.x-dx)+","+p2.y+" "+p2.x+","+p2.y; }
+  else { var ddx=p2.x-p1.x, ddy=p2.y-p1.y; var horiz=Math.abs(ddx)>=Math.abs(ddy); var k=Math.min(Math.max((horiz?Math.abs(ddx):Math.abs(ddy))*0.5,42),170);
+    var c1x,c1y,c2x,c2y; if(horiz){ c1x=p1.x+(ddx>=0?k:-k); c1y=p1.y; c2x=p2.x-(ddx>=0?k:-k); c2y=p2.y; } else { c1x=p1.x; c1y=p1.y+(ddy>=0?k:-k); c2x=p2.x; c2y=p2.y-(ddy>=0?k:-k); }
+    d="M"+p1.x+","+p1.y+" C"+c1x+","+c1y+" "+c2x+","+c2y+" "+p2.x+","+p2.y; }
   return {d:d,p1:p1,p2:p2}; }
 function mmArrow(p2,p1,col){ var ang=Math.atan2(p2.y-p1.y,p2.x-p1.x); var L=9; var a1=ang+Math.PI*0.86, a2=ang-Math.PI*0.86; return '<polygon points="'+p2.x+','+p2.y+' '+(p2.x+L*Math.cos(a1))+','+(p2.y+L*Math.sin(a1))+' '+(p2.x+L*Math.cos(a2))+','+(p2.y+L*Math.sin(a2))+'" fill="'+col+'"/>'; }
 function mmDraw(){
@@ -1687,20 +1705,32 @@ function mmDraw(){
     +'<g id="mmEdges">'+edgesHtml+'</g><g id="mmNodes">'+nodesHtml+'</g><g id="mmTemp"></g></g>';
   var hint=document.getElementById("mmHint"); if(hint) hint.style.display=d.nodes.length?"none":"";
   var zl=document.getElementById("mmZl"); if(zl) zl.textContent=Math.round(d.view.s*100)+"%";
+  var bn=document.getElementById("mmBoardName"); if(bn){ var cb=mmStore(); var cur=cb.boards.find(function(x){return x.id===cb.current;}); bn.textContent=cur?cur.name:"Map"; }
   mmPanel(); mmMini();
 }
 function mmToWorld(cx,cy){ var svg=document.getElementById("mmSvg"); var r=svg.getBoundingClientRect(); var d=mmData(); return {x:(cx-r.left-d.view.tx)/d.view.s, y:(cy-r.top-d.view.ty)/d.view.s}; }
 function mmBindSvg(){
   var svg=document.getElementById("mmSvg");
   svg.addEventListener("mousedown",function(e){
+    if(e.button!==0) return;
+    if(e.target.isContentEditable) return;
     var port=e.target.closest(".mm-port"); if(port){ e.preventDefault(); MM.draw={from:port.dataset.id}; return; }
-    var handle=e.target.closest(".mm-handle"); if(handle){ e.preventDefault(); var n=mmNode(handle.dataset.id); mmPush(); MM.resize={id:n.id,sx:e.clientX,sy:e.clientY,w0:n.w,h0:n.h}; return; }
+    var handle=e.target.closest(".mm-handle"); if(handle){ e.preventDefault(); var hn=mmNode(handle.dataset.id); mmPush(); MM.resize={id:hn.id,sx:e.clientX,sy:e.clientY,w0:hn.w,h0:hn.h}; return; }
     var node=e.target.closest(".mm-node");
+    var eh=e.target.closest(".mm-edge-hit");
+    var kid=node?node.dataset.id:(eh?("e:"+eh.dataset.id):"bg");
+    var nowt=Date.now(); var dbl=MM._ld&&(nowt-MM._ld.t<330)&&MM._ld.id===kid; MM._ld={t:nowt,id:kid};
+    if(dbl){ e.preventDefault(); MM._ld=null;
+      if(node){ var dv=node.querySelector(".mm-nt"); if(dv)mmEditText(dv); }
+      else if(eh){ var ed=mmData().edges.find(function(x){return x.id===eh.dataset.id;}); var lab=prompt("Connection label:",(ed||{}).label||""); if(lab!==null&&ed){ mmPush(); ed.label=lab; mmSave(); mmDraw(); } }
+      else { var w0=mmToWorld(e.clientX,e.clientY); mmPush(); var n0={id:uid(),x:mmSnap(w0.x-75),y:mmSnap(w0.y-32),w:150,h:64,shape:"round",text:"New idea",fill:"rgba(138,100,200,0.16)",stroke:"#8a64c8",textColor:"",fontSize:14,tag:""}; mmData().nodes.push(n0); MM.sel=n0.id; MM.selEdge=null; mmSave(); mmDraw(); setTimeout(function(){ var d2=document.querySelector('.mm-nt[data-id="'+n0.id+'"]'); if(d2)mmEditText(d2); },20); }
+      return;
+    }
     if(node){ var id=node.dataset.id;
       if(MM.connect){ if(!MM._cf){ MM._cf=id; MM.sel=id; mmDraw(); } else if(MM._cf!==id){ mmConnect(MM._cf,id); MM._cf=null; } return; }
       var nn=mmNode(id); MM.sel=id; MM.selEdge=null; var w=mmToWorld(e.clientX,e.clientY); mmPush(); MM.drag={id:id,ox:w.x-nn.x,oy:w.y-nn.y,moved:false}; mmDraw(); return;
     }
-    var eh=e.target.closest(".mm-edge-hit"); if(eh){ MM.selEdge=eh.dataset.id; MM.sel=null; mmDraw(); return; }
+    if(eh){ MM.selEdge=eh.dataset.id; MM.sel=null; mmDraw(); return; }
     MM.sel=null; MM.selEdge=null; var d=mmData(); MM.pan={sx:e.clientX,sy:e.clientY,tx:d.view.tx,ty:d.view.ty}; svg.classList.add("panning"); mmDraw();
   });
   document.addEventListener("mousemove",function(e){
@@ -1717,12 +1747,6 @@ function mmBindSvg(){
     if(MM.draw){ var t=e.target.closest(".mm-node"); if(t&&t.dataset.id!==MM.draw.from){ mmConnect(MM.draw.from,t.dataset.id); } var tmp=document.getElementById("mmTemp"); if(tmp)tmp.innerHTML=""; MM.draw=null; }
   });
   svg.addEventListener("wheel",function(e){ e.preventDefault(); var d=mmData(); var r=svg.getBoundingClientRect(); var mx=e.clientX-r.left,my=e.clientY-r.top; var ns=Math.min(2.5,Math.max(0.25, d.view.s*(e.deltaY<0?1.1:0.9))); d.view.tx=mx-(mx-d.view.tx)*(ns/d.view.s); d.view.ty=my-(my-d.view.ty)*(ns/d.view.s); d.view.s=ns; mmDraw(); },{passive:false});
-  svg.addEventListener("dblclick",function(e){
-    var nt=e.target.closest(".mm-nt"); if(nt){ mmEditText(nt); return; }
-    var node=e.target.closest(".mm-node"); if(node){ var div=node.querySelector(".mm-nt"); if(div)mmEditText(div); return; }
-    if(e.target.closest(".mm-edge-hit")){ var id=e.target.closest(".mm-edge-hit").dataset.id; var lab=prompt("Connection label:", (mmData().edges.find(function(x){return x.id===id;})||{}).label||""); if(lab!==null){ mmPush(); mmData().edges.find(function(x){return x.id===id;}).label=lab; mmSave(); mmDraw(); } return; }
-    var w=mmToWorld(e.clientX,e.clientY); mmPush(); var n={id:uid(),x:mmSnap(w.x-75),y:mmSnap(w.y-32),w:150,h:64,shape:"round",text:"New idea",fill:"rgba(138,100,200,0.16)",stroke:"#8a64c8",textColor:"",fontSize:14,tag:""}; mmData().nodes.push(n); MM.sel=n.id; mmSave(); mmDraw(); setTimeout(function(){ var div=document.querySelector('.mm-nt[data-id="'+n.id+'"]'); if(div)mmEditText(div); },30);
-  });
 }
 function mmEditText(div){ var id=div.dataset.id; div.setAttribute("contenteditable","true"); div.focus();
   var rng=document.createRange(); rng.selectNodeContents(div); var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(rng);
@@ -2217,11 +2241,11 @@ function renderCalConn(){
   var el=document.getElementById("calConn"); if(!el) return;
   var st=intState("cal");
   if(st==="connected"||st==="stale"){
-    el.innerHTML='<div class="cal-synced"><span class="gdot"></span>Calendar synced'+(data.settings.calLastSync?(" "+esc(relTime(data.settings.calLastSync))):"")+'<button class="lnk" style="margin-left:auto" onclick="calSync()">Sync</button></div>';
+    el.innerHTML=""; el.style.margin="0";
   } else if(st==="connecting"){
-    el.innerHTML='<div class="cal-synced"><span class="ispin"></span>Connecting to Google…</div>';
+    el.innerHTML='<div class="cal-synced"><span class="ispin"></span>Connecting to Google…</div>'; el.style.marginBottom="12px";
   } else {
-    el.innerHTML='<button class="btn soft" onclick="googleConnect()" style="width:100%;justify-content:center">Connect Google Calendar</button>'+(st==="error"?'<div class="cal-synced" style="margin-top:6px;color:var(--red)">Couldn&rsquo;t connect &mdash; check your Client ID in Preferences</div>':'');
+    el.innerHTML='<button class="btn soft" onclick="googleConnect()" style="width:100%;justify-content:center">Connect Google Calendar</button>'+(st==="error"?'<div class="cal-synced" style="margin-top:6px;color:var(--red)">Couldn&rsquo;t connect &mdash; check your Client ID in Preferences</div>':''); el.style.marginBottom="12px";
   }
 }
 function calConnect(){ googleConnect(); }
@@ -2260,7 +2284,7 @@ function renderGmail(){
   var list=(gmailMsgs&&gmailMsgs.length)? '<div class="gm-list">'+gmailMsgs.map(gmRow).join("")+'</div>' : '<div class="muted" style="padding:16px 2px;font-size:.86rem;text-align:center">Your inbox is all caught up.</div>';
   var I_PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   var actions='<div class="gm-actions"><button class="btn" onclick="openCompose()">'+I_PEN+' Compose</button><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
-  el.innerHTML=head+'<div class="iconn-substrip"><span class="muted" style="font-size:.76rem">Primary &middot; synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+list+actions;
+  el.innerHTML=head+list+actions;
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
@@ -2433,12 +2457,18 @@ async function loadFinance(){
 function openSettings(){
   var s=data.settings;
   function chk(id,on,lbl){ return '<label style="display:flex;align-items:center;gap:9px;font-size:.9rem;font-weight:600;margin:5px 0;cursor:pointer"><input type="checkbox" id="'+id+'" '+(on!==false?"checked":"")+' style="width:18px;height:18px;accent-color:var(--lavender)"> '+lbl+'</label>'; }
-  showModal('<h4>Profile &amp; settings</h4><div style="max-height:64vh;overflow:auto;padding-right:6px">'
-    +'<label class="setlbl">Name</label><input class="fld" id="setName" value="'+esc(data.profile.name||"")+'" style="margin:6px 0 10px">'
-    +'<label class="setlbl">City &mdash; prayer &amp; weather</label><div class="ac-wrap" style="margin:6px 0 10px"><input class="fld" id="setCity" autocomplete="off" value="'+esc(s.city||"Makkah")+'" placeholder="Start typing a city…" oninput="cityAC(this.value)" onfocus="cityAC(this.value)" onkeydown="cityACKey(event)"><div class="ac-list" id="cityAClist"></div></div>'
-    +'<label class="setlbl">Language</label><select class="fld" id="setLang" style="margin:6px 0 10px"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select>'
-    +'<label class="setlbl">Google Client ID &mdash; Calendar &amp; Gmail (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com" style="margin:6px 0 10px">'
-    +'<label class="setlbl" style="display:block;margin:4px 0 8px">Connected accounts</label><div style="margin-bottom:14px">'+(data.settings.googleEmail?googleChip('<button class="btn soft" onclick="googleConnect()" title="Reconnect">'+I_REFRESH+'</button>'):'<button class="btn soft" onclick="googleConnect()">Connect Google (Calendar &amp; Gmail)</button>')+'</div>'+'<label class="setlbl" style="display:block;margin-bottom:4px">Dashboard widgets</label>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")+chk("wGmail",s.showGmail,"Gmail")
+  var ICp='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+  var ICi='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
+  var ICw='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+  showModal('<h4>Profile &amp; settings</h4><div class="tm">'
+    +'<div class="tm-sec"><div class="tm-h">'+ICp+'Profile</div>'
+    +'<label class="setlbl">Name</label><input class="fld" id="setName" value="'+esc(data.profile.name||"")+'">'
+    +'<span class="setlbl" style="display:block;margin-top:12px">City — prayer &amp; weather</span><div class="ac-wrap"><input class="fld" id="setCity" autocomplete="off" value="'+esc(s.city||"Makkah")+'" placeholder="Start typing a city…" oninput="cityAC(this.value)" onfocus="cityAC(this.value)" onkeydown="cityACKey(event)"><div class="ac-list" id="cityAClist"></div></div>'
+    +'<span class="setlbl" style="display:block;margin-top:12px">Language</span><select class="fld" id="setLang"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select></div>'
+    +'<div class="tm-sec"><div class="tm-h">'+ICi+'Integrations</div>'
+    +'<label class="setlbl">Google Client ID — Calendar &amp; Gmail (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com">'
+    +'<span class="setlbl" style="display:block;margin-top:12px">Connected accounts</span><div>'+(data.settings.googleEmail?googleChip('<button class="btn soft" onclick="googleConnect()" title="Reconnect">'+I_REFRESH+'</button>'):'<button class="btn soft" onclick="googleConnect()">Connect Google (Calendar &amp; Gmail)</button>')+'</div></div>'
+    +'<div class="tm-sec"><div class="tm-h">'+ICw+'Dashboard widgets</div>'+chk("wPrayer",s.showPrayer,"Prayer times")+chk("wWeather",s.showWeather,"Weather")+chk("wCal",s.showCalendar,"Calendar")+chk("wGmail",s.showGmail,"Gmail")+'</div>'
     +'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSettings()">Save</button></div>');
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
 }
