@@ -1189,7 +1189,7 @@ html.dark .pflag.p-high{color:var(--peach)}
       <div class="dash-widget" data-w="calendar">
         <div class="card" id="calCard">
           <div class="section-head" style="margin:0 0 10px"><h2 style="font-size:.95rem">Calendar</h2>
-            <div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div>
+            <div style="display:flex;gap:8px;align-items:center"><button class="btn soft" onclick="newEvent()" title="Create event"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Event</button><div class="cal-views"><button id="calV-month" class="on" onclick="setCalView('month')">Month</button><button id="calV-agenda" onclick="setCalView('agenda')">Agenda</button></div></div>
           </div>
           <div id="calConn" style="margin-bottom:12px"></div>
           <div class="cal-head" style="justify-content:flex-end">
@@ -1504,11 +1504,11 @@ var calView="month",calCursor=new Date(),calSel=null;
 function setCalView(v){calView=v;var m=document.getElementById("calV-month"),a=document.getElementById("calV-agenda");if(m)m.classList.toggle("on",v==="month");if(a)a.classList.toggle("on",v==="agenda");renderCalendar();}
 function calStep(d){if(calView==="month"){calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth()+d,1);}else{calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth(),calCursor.getDate()+d*7);}renderCalendar();}
 function evTime(e){var dt=e&&e.start&&e.start.dateTime;return dt?new Date(dt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";}
-function calItemsByDate(){var map={};function add(date,label,kind,time,sk){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz"});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task");});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"");});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
+function calItemsByDate(){var map={};function add(date,label,kind,time,sk,id){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task");});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id);});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
 function evClass(k){return k==="event"?"ev-event":(k==="zakat"?"ev-zakat":"ev-task");}
 function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
-function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item">'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+(it.time?'<span class="agenda-time" style="min-width:auto;margin-left:8px;text-align:right">'+esc(it.time)+'</span>':'')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item">'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+(it.time?'<span class="agenda-time" style="min-width:auto;margin-left:8px;text-align:right">'+esc(it.time)+'</span>':'')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
+function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+(it.time?'<span class="agenda-time" style="min-width:auto;margin-left:8px;text-align:right">'+esc(it.time)+'</span>':'')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div>'+(it.time?'<span class="agenda-time" style="min-width:auto;margin-left:8px;text-align:right">'+esc(it.time)+'</span>':'')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
 function computeNudges(){
   var out=[], todayISO=new Date().toISOString().slice(0,10);
   var overdue=(data.tasks||[]).filter(function(t){return !t.done&&t.due&&t.due<todayISO;}).length;
@@ -1759,11 +1759,13 @@ function relTime(ts){ if(!ts) return ""; var d=(typeof ts==="number")?ts:Date.pa
 function istBadge(k){ var m={on:["is-on","Connected"],off:["is-off","Not Connected"],sync:["is-sync","Connecting"],err:["is-off","Error"]}; var x=m[k]||m.off; return '<span class="istate '+x[0]+'">'+(k==="sync"?'<span class="ispin"></span>':'<span class="idot"></span>')+x[1]+'</span>'; }
 function googleClientId(){ return (data.settings&&data.settings.gcalId)||""; }
 function intState(kind){ var st=kind==="cal"?calState:gmailState; if(st==="connecting")return"connecting"; if(st==="connected")return"connected"; if(st==="error")return"error"; var persisted=kind==="cal"?data.settings.calConnected:data.settings.gmailConnected; if(persisted&&data.settings.googleEmail)return"stale"; return"off"; }
-var CAL_SCOPE="https://www.googleapis.com/auth/calendar.readonly";
-var GMAIL_SCOPE="https://www.googleapis.com/auth/gmail.modify";
+var CAL_SCOPE="https://www.googleapis.com/auth/calendar.events";
+var GMAIL_SCOPE="https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send";
 function saveGToken(kind,token,expiresIn){ try{ localStorage.setItem("hub."+kind+".tok",token); localStorage.setItem("hub."+kind+".exp",String(Date.now()+((+expiresIn||3300)*1000))); }catch(e){} }
 function getGToken(kind){ try{ var t=localStorage.getItem("hub."+kind+".tok"); var e=+localStorage.getItem("hub."+kind+".exp")||0; if(t&&e>Date.now()+30000) return t; }catch(e){} return null; }
 function clearGToken(kind){ try{ localStorage.removeItem("hub."+kind+".tok"); localStorage.removeItem("hub."+kind+".exp"); }catch(e){} }
+/* scope upgraded to calendar.events + gmail.send -> force one re-consent */
+(function(){ try{ if(localStorage.getItem("hub.gscope")!=="2"){ clearGToken("google"); clearGToken("gmail"); localStorage.setItem("hub.gscope","2"); } }catch(e){} })();
 function gGetToken(kind,scope,cb,silent){
   var cached=getGToken(kind); if(cached){ cb(cached); return true; }
   var cid=googleClientId(); if(!cid){ if(!silent){ toast("Add your Google Client ID in Settings"); openSettings(); } return false; }
@@ -1833,19 +1835,20 @@ function renderGmail(){
   }
   var g=gmailStats;
   var list=(gmailMsgs&&gmailMsgs.length)? '<div class="gm-list">'+gmailMsgs.map(gmRow).join("")+'</div>' : '<div class="muted" style="padding:16px 2px;font-size:.86rem;text-align:center">Your inbox is all caught up.</div>';
-  var actions='<div class="gm-actions"><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
+  var I_PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  var actions='<div class="gm-actions"><button class="btn" onclick="openCompose()">'+I_PEN+' Compose</button><button class="btn soft" onclick="gmailSync()">'+I_REFRESH+' Sync</button><button class="btn soft" onclick="gmailOpenInbox()">'+I_OPEN+' Open Gmail</button></div>';
   el.innerHTML=head+'<div class="iconn-substrip"><span class="muted" style="font-size:.76rem">Primary &middot; synced '+(data.settings.gmailLastSync?esc(relTime(data.settings.gmailLastSync)):"now")+'</span></div>'+list+actions;
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
-  return '<div class="gm-item'+(m.unread?' unread':'')+'"><div class="gm-av">'+esc(initials)+'</div><div class="gm-main" onclick="gmOpen(\''+m.id+'\')"><div class="gm-row1"><span class="gm-from">'+esc(m.fromName||m.from||"Unknown")+'</span><span class="gm-time">'+esc(m.time)+'</span></div><div class="gm-subj">'+esc(m.subject||"(no subject)")+'</div></div><div class="gm-acts"><button class="icon-btn'+(m.starred?' on':'')+'" title="'+(m.starred?'Unstar':'Star')+'" onclick="gmStar(\''+m.id+'\','+(m.starred?'true':'false')+')">'+I_STAR+'</button>'+(m.unread?'<button class="icon-btn" title="Mark read" onclick="gmMarkRead(\''+m.id+'\')">'+I_CHECK+'</button>':'')+'<button class="icon-btn" title="Archive" onclick="gmArchive(\''+m.id+'\')">'+I_ARCH+'</button></div></div>';
+  return '<div class="gm-item'+(m.unread?' unread':'')+'"><div class="gm-av">'+esc(initials)+'</div><div class="gm-main" onclick="gmOpen(\''+m.id+'\')"><div class="gm-row1"><span class="gm-from">'+esc(m.fromName||m.from||"Unknown")+'</span><span class="gm-time">'+esc(m.time)+'</span></div><div class="gm-subj">'+esc(m.subject||"(no subject)")+'</div></div><div class="gm-acts"><button class="icon-btn" title="Reply" onclick="replyTo(\''+m.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1"/></svg></button><button class="icon-btn'+(m.starred?' on':'')+'" title="'+(m.starred?'Unstar':'Star')+'" onclick="gmStar(\''+m.id+'\','+(m.starred?'true':'false')+')">'+I_STAR+'</button>'+(m.unread?'<button class="icon-btn" title="Mark read" onclick="gmMarkRead(\''+m.id+'\')">'+I_CHECK+'</button>':'')+'<button class="icon-btn" title="Archive" onclick="gmArchive(\''+m.id+'\')">'+I_ARCH+'</button></div></div>';
 }
 function gmailConnect(){ googleConnect(); }
 async function gmailApi(path,method,body){
   var opt={method:method||"GET",headers:{Authorization:"Bearer "+gmailToken}};
   if(body){ opt.headers["Content-Type"]="application/json"; opt.body=JSON.stringify(body); }
   var r=await fetch("https://gmail.googleapis.com/gmail/v1/users/me/"+path,opt);
-  if(r.status===401){ clearGToken("gmail"); gmailToken=null; throw new Error("gmail 401"); }
+  if(r.status===401||r.status===403){ clearGToken("gmail"); clearGToken("google"); gmailToken=null; throw new Error("gmail "+r.status); }
   if(!r.ok) throw new Error("gmail http "+r.status);
   return r.json();
 }
@@ -2086,6 +2089,103 @@ async function initAuth(){
   if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); loadTravel(); pullHub(); }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
+
+/* ============ Calendar write (create / edit / delete events) ============ */
+async function calApi(path,method,body,query){
+  var tok=getGToken("google")||calToken;
+  var url="https://www.googleapis.com/calendar/v3/calendars/primary/"+path+(query?("?"+query):"");
+  var opt={method:method||"GET",headers:{Authorization:"Bearer "+tok}};
+  if(body){ opt.headers["Content-Type"]="application/json"; opt.body=JSON.stringify(body); }
+  var r=await fetch(url,opt);
+  if(r.status===401||r.status===403){ clearGToken("google"); calToken=null; throw new Error("cal "+r.status); }
+  if(!r.ok) throw new Error("cal http "+r.status);
+  return r.status===204?{}:r.json();
+}
+function newEvent(){ var t=getGToken("google")||calToken; if(!t){ googleConnect(); return; } openEventModal(null); }
+function openEventEdit(id){ var ev=(calEvents||[]).find(function(e){return e.id===id;}); openEventModal(ev||null); }
+function openEventModal(ev){
+  var isNew=!ev;
+  var allDay = ev ? !!(ev.start&&ev.start.date&&!ev.start.dateTime) : false;
+  var dateV, startT="", endT="", title="", loc="", desc="", guests="";
+  if(ev){
+    title=ev.summary||""; loc=ev.location||""; desc=ev.description||"";
+    guests=((ev.attendees||[]).map(function(a){return a.email;}).filter(Boolean)).join(", ");
+    if(allDay){ dateV=(ev.start.date||"").slice(0,10); }
+    else { var sd=ev.start&&ev.start.dateTime?new Date(ev.start.dateTime):null; var ed=ev.end&&ev.end.dateTime?new Date(ev.end.dateTime):null; dateV=sd?isoLocal(sd):isoLocal(new Date()); startT=sd?(_pad2(sd.getHours())+":"+_pad2(sd.getMinutes())):""; endT=ed?(_pad2(ed.getHours())+":"+_pad2(ed.getMinutes())):""; }
+  } else {
+    dateV=calSel||isoLocal(new Date()); var h=new Date().getHours()+1; startT=_pad2(Math.min(h,22))+":00"; endT=_pad2(Math.min(h+1,23))+":00";
+  }
+  var html='<h4>'+(isNew?"New event":"Edit event")+'</h4>'
+   +'<label class="setlbl">Title</label><input class="fld" id="evTitle" value="'+esc(title)+'" placeholder="Add title" style="margin:6px 0 12px">'
+   +'<label class="setlbl" style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:.86rem"><input type="checkbox" id="evAllDay" '+(allDay?"checked":"")+' onchange="evToggleAllDay()" style="accent-color:var(--lavender);width:16px;height:16px"> All-day event</label>'
+   +'<div style="margin-top:10px"><label class="setlbl">Date</label><input class="fld" id="evDate" type="date" value="'+esc(dateV)+'" style="margin-top:6px"></div>'
+   +'<div class="f2" id="evTimesWrap" style="margin-top:10px'+(allDay?";display:none":"")+'"><div><label class="setlbl">Start time</label><input class="fld" id="evStart" type="time" value="'+esc(startT)+'" style="margin-top:6px"></div><div><label class="setlbl">End time</label><input class="fld" id="evEnd" type="time" value="'+esc(endT)+'" style="margin-top:6px"></div></div>'
+   +'<div style="margin-top:10px"><label class="setlbl">Location</label><input class="fld" id="evLoc" value="'+esc(loc)+'" placeholder="Add location or meeting link" style="margin-top:6px"></div>'
+   +'<div style="margin-top:10px"><label class="setlbl">Guests (comma-separated emails)</label><input class="fld" id="evGuests" value="'+esc(guests)+'" placeholder="name@email.com, friend@email.com" style="margin-top:6px"></div>'
+   +'<div style="margin-top:10px"><label class="setlbl">Description</label><textarea class="fld" id="evDesc" rows="3" placeholder="Notes, agenda&hellip;" style="margin-top:6px">'+esc(desc)+'</textarea></div>'
+   +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="deleteEvent(\''+esc(ev.id)+'\')">Delete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" id="evSaveBtn" onclick="saveEvent(\''+(isNew?"":esc(ev.id))+'\')">'+(isNew?"Create event":"Save")+'</button></div>';
+  showModal(html,"wide");
+  try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
+  setTimeout(function(){ var e=document.getElementById("evTitle"); if(e) e.focus(); },30);
+}
+function evToggleAllDay(){ var w=document.getElementById("evTimesWrap"); var c=document.getElementById("evAllDay"); if(w) w.style.display=(c&&c.checked)?"none":""; }
+async function saveEvent(id){
+  var title=(document.getElementById("evTitle").value||"").trim(); if(!title){ toast("Title is required"); return; }
+  var allDay=document.getElementById("evAllDay").checked;
+  var date=document.getElementById("evDate").value; if(!date){ toast("Pick a date"); return; }
+  var loc=(document.getElementById("evLoc").value||"").trim();
+  var desc=(document.getElementById("evDesc").value||"").trim();
+  var guests=(document.getElementById("evGuests").value||"").split(",").map(function(x){return x.trim();}).filter(function(x){return /.+@.+\..+/.test(x);});
+  var body={summary:title,location:loc,description:desc};
+  if(guests.length) body.attendees=guests.map(function(e){return {email:e};});
+  if(allDay){
+    var nd=new Date(date+"T00:00:00"); nd.setDate(nd.getDate()+1);
+    body.start={date:date}; body.end={date:isoLocal(nd)};
+  } else {
+    var st=document.getElementById("evStart").value||"09:00";
+    var et=document.getElementById("evEnd").value||st;
+    if(et<=st){ var pp=st.split(":"); var mm=(+pp[0])*60+(+pp[1])+60; et=_pad2(Math.floor(mm/60)%24)+":"+_pad2(mm%60); }
+    var tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||"UTC";
+    body.start={dateTime:date+"T"+st+":00",timeZone:tz};
+    body.end={dateTime:date+"T"+et+":00",timeZone:tz};
+  }
+  var btn=document.getElementById("evSaveBtn"); if(btn){ btn.disabled=true; btn.textContent="Saving…"; }
+  try{
+    if(id) await calApi("events/"+encodeURIComponent(id),"PATCH",body,"sendUpdates=all");
+    else await calApi("events","POST",body,"sendUpdates=all");
+    closeModal(); toast(id?"Event updated ✓":"Event created ✓");
+    var t=getGToken("google")||calToken; if(t) await loadCalEvents(t);
+  }catch(e){ if(btn){ btn.disabled=false; btn.textContent=id?"Save":"Create event"; } toast("Couldn't save event — reconnect Google"); }
+}
+async function deleteEvent(id){
+  if(!confirm("Delete this event? Guests will be notified.")) return;
+  try{ await calApi("events/"+encodeURIComponent(id),"DELETE",null,"sendUpdates=all"); closeModal(); toast("Event deleted"); var t=getGToken("google")||calToken; if(t) await loadCalEvents(t); }
+  catch(e){ toast("Couldn't delete event"); }
+}
+/* ============ Gmail compose / send ============ */
+function _b64url(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function openCompose(to,subject){
+  var t=getGToken("google")||gmailToken; if(!t){ gmailConnect(); return; }
+  var html='<h4>New email</h4>'
+   +'<label class="setlbl">To</label><input class="fld" id="cmTo" value="'+esc(to||"")+'" placeholder="name@email.com" style="margin:6px 0 10px">'
+   +'<label class="setlbl">Subject</label><input class="fld" id="cmSubj" value="'+esc(subject||"")+'" placeholder="Subject" style="margin:6px 0 10px">'
+   +'<label class="setlbl">Message</label><textarea class="fld" id="cmBody" rows="8" placeholder="Write your message&hellip;" style="margin-top:6px"></textarea>'
+   +'<div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" id="cmSendBtn" onclick="sendEmail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Send</button></div>';
+  showModal(html,"wide");
+  setTimeout(function(){ var e=document.getElementById(to?"cmBody":"cmTo"); if(e) e.focus(); },30);
+}
+async function sendEmail(){
+  var to=(document.getElementById("cmTo").value||"").trim();
+  var subj=(document.getElementById("cmSubj").value||"").trim();
+  var bodyTxt=document.getElementById("cmBody").value||"";
+  if(!/.+@.+\..+/.test(to)){ toast("Enter a valid recipient"); return; }
+  var headers=["To: "+to,"Subject: "+subj,"MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8"];
+  var raw=headers.join("\r\n")+"\r\n\r\n"+bodyTxt;
+  var btn=document.getElementById("cmSendBtn"); if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
+  try{ await gmailApi("messages/send","POST",{raw:_b64url(raw)}); closeModal(); toast("Email sent ✓"); }
+  catch(e){ if(btn){ btn.disabled=false; btn.textContent="Send"; } toast("Couldn't send — reconnect Gmail"); }
+}
+function replyTo(id){ var m=(gmailMsgs||[]).find(function(x){return x.id===id;}); if(!m){ openCompose(); return; } var em=((/<([^>]+)>/.exec(m.from||"")||[])[1])||m.from||""; var s=m.subject||""; if(s&&!/^re:/i.test(s)) s="Re: "+s; openCompose(em,s); }
 
 /* ============ Custom date picker + select (Travel Planner / Finance parity) ============ */
 function _pad2(n){return (n<10?"0":"")+n;}
