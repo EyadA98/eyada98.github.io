@@ -1140,10 +1140,22 @@ html.dark .pflag.p-high{color:var(--peach)}
 .sum-card .sc-ic{position:absolute;top:12px;right:12px;opacity:.25}.sum-card .sc-ic svg{width:20px;height:20px}
 .sum-card.acc-red .sc-n{color:var(--red)}.sum-card.acc-peach .sc-n{color:var(--peach-deep)}.sum-card.acc-green .sc-n{color:var(--green)}.sum-card.acc-lav .sc-n{color:var(--lavender)}
 .rt-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.rt-cat{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:700;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:6px 13px;cursor:pointer;transition:all .15s}
+.rt-cat{display:inline-flex;align-items:center;gap:7px;font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:.84rem;font-weight:600;letter-spacing:0;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:99px;padding:7px 14px;cursor:pointer;transition:all .15s}
 .rt-cat svg{width:14px;height:14px}
 .rt-cat:hover{border-color:var(--lavender);color:var(--text)}
 .rt-cat.on{background:var(--grad-iri);color:#fff;border-color:transparent}
+.rday-row{display:flex;gap:6px;flex-wrap:wrap}
+.rday{flex:1;min-width:44px;padding:9px 4px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);border-radius:10px;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;transition:all .15s}
+html:not(.dark) .rday{background:#fff}
+.rday:hover{border-color:var(--lavender);color:var(--text)}
+.rday.on{background:var(--grad-iri);color:#fff;border-color:transparent}
+.rday-quick{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.rday-quick button{font-size:.74rem;font-weight:700;font-family:inherit;background:rgba(138,100,200,.1);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 12px;cursor:pointer}
+.rday-quick button:hover{border-color:var(--lavender);color:var(--lavender)}
+.rt-checkcard{margin-top:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:13px;padding:13px}
+html:not(.dark) .rt-checkcard{background:rgba(255,255,255,.5)}
+.rt-next{margin-top:11px;font-size:.8rem;color:var(--muted);background:rgba(138,100,200,.08);border:1px solid var(--border);border-radius:10px;padding:9px 13px;line-height:1.4}
+.rt-next b{color:var(--lavender);font-weight:700}.rt-next-l{font-weight:700;color:var(--text)}
 /* routine cards */
 .rt-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
 .rt-card{border:1px solid var(--border);border-radius:16px;background:var(--card);box-shadow:var(--sh-1);padding:16px;transition:transform .22s var(--ease),box-shadow .22s,border-color .22s;border-left:4px solid var(--lavender)}
@@ -1695,6 +1707,7 @@ var TL_NM={task:"Task",event:"Event",trip:"Trip"};
 function emptyTimeline(){ return '<div class="card" style="text-align:center;padding:56px 22px;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:46px;height:46px;opacity:.5"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><p style="margin:12px auto 0;max-width:360px;line-height:1.55">Nothing scheduled yet. Add tasks with dates, connect your calendar, or plan a trip — everything you have will flow onto this timeline.</p></div>'; }
 function renderTimeline(){
   var host=document.getElementById("tlBody"); if(!host) return;
+  tlHideHint();
   var items=timelineItems();
   if(!items.length){ host.innerHTML=emptyTimeline(); return; }
   items.sort(function(a,b){return a.s-b.s || a.e-b.e;});
@@ -1731,6 +1744,7 @@ function renderTimeline(){
 function tlToday(){ renderTimeline(); }
 function tlHideHint(){ var h=document.getElementById("tlHint"); if(h)h.classList.remove("show"); }
 function tlShowHint(bar){
+  var tab=document.getElementById("tab-timeline"); if(!tab||!tab.classList.contains("active")) return;
   var hint=document.getElementById("tlHint"); if(!hint){ hint=document.createElement("div"); hint.id="tlHint"; hint.className="tl-hint"; document.body.appendChild(hint); }
   var ty=bar.getAttribute("data-type"); var nm={task:"Task",event:"Event",trip:"Trip"}[ty]||ty; var col={task:"#9b78d8",event:"#4ea8de",trip:"#dd824b"}[ty]||"#8a64c8"; var done=bar.getAttribute("data-done");
   var dsc=bar.getAttribute("data-desc")||"";
@@ -1743,6 +1757,7 @@ function tlShowHint(bar){
 document.addEventListener("mouseover",function(e){ var bar=e.target.closest&&e.target.closest(".tlg-bar"); if(bar)tlShowHint(bar); });
 document.addEventListener("mouseout",function(e){ var bar=e.target.closest&&e.target.closest(".tlg-bar"); if(bar){ var rel=e.relatedTarget; if(!rel||!rel.closest||!rel.closest(".tlg-bar"))tlHideHint(); } });
 document.addEventListener("mousedown",tlHideHint);
+window.addEventListener("scroll",tlHideHint,true);
 
 /* ============ Routines ============ */
 var RICON={
@@ -1761,11 +1776,12 @@ function rtCatsInit(){ if(!Array.isArray(data.routineCats)||!data.routineCats.le
 function rtCats(){ rtCatsInit(); return data.routineCats; }
 function rtCat(id){ return rtCats().find(function(c){return c.id===id;})||{id:"custom",name:"Custom",color:"#9aa0b5",icon:"custom"}; }
 function rtColor(r){ return r.color||rtCat(r.catId).color; }
-function rtIcon(r){ if(r.icon&&RICON[r.icon])return RICON[r.icon]; var c=rtCat(r.catId); return RICON[c.icon]||RICON[c.id]||RICON.custom; }
+function rtIcon(r){ if(r.iconSvg)return r.iconSvg; if(r.icon&&RICON[r.icon])return RICON[r.icon]; var c=rtCat(r.catId); if(c.iconSvg)return c.iconSvg; return RICON[c.icon]||RICON[c.id]||RICON.custom; }
 function openRtCats(){ rtCatsInit(); showModal('<h4>Manage categories</h4><div class="tm"><p class="muted" style="font-size:.8rem;margin:-4px 0 12px">Add, rename, recolor or remove categories. Pick an icon for each.</p><div id="rtCatRows">'+data.routineCats.map(rtCatRow).join("")+'</div><button type="button" class="btn soft sm" style="margin-top:8px" onclick="rtCatAdd()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg> Add category</button></div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveRtCats()">Save</button></div>'); }
-function rtCatRow(c){ var ICONS=Object.keys(RICON); return '<div class="rtcat-row" data-id="'+(c.id||"")+'" style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><input type="color" class="rc-color" value="'+(c.color||"#8a64c8")+'" style="width:36px;height:34px;border:1px solid var(--border);border-radius:8px;padding:0;cursor:pointer;flex:none"><input class="fld rc-name" value="'+esc(c.name||"")+'" placeholder="Category name" style="flex:1;min-width:0"><select class="fld rc-icon" style="max-width:118px">'+ICONS.map(function(k){return '<option value="'+k+'" '+((c.icon||"custom")===k?"selected":"")+'>'+k.charAt(0).toUpperCase()+k.slice(1)+'</option>';}).join("")+'</select><button type="button" class="icon-btn danger" title="Remove" onclick="this.closest(\'.rtcat-row\').remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'; }
+function rtCatRow(c){ var prev=c.iconSvg?c.iconSvg:(RICON[c.icon]||RICON[c.id]||RICON.custom); return '<div class="rtcat-row" data-id="'+(c.id||"")+'" data-iconkey="'+(c.icon||"custom")+'" style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><input type="color" class="rc-color" value="'+(c.color||"#8a64c8")+'" style="width:36px;height:34px;border:1px solid var(--border);border-radius:8px;padding:0;cursor:pointer;flex:none"><input class="fld rc-name" value="'+esc(c.name||"")+'" placeholder="Category name" style="flex:1;min-width:0"><span class="rc-iconprev" style="width:34px;height:34px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;flex:none;color:'+(c.color||"#8a64c8")+'">'+prev+'</span><label class="btn soft sm" style="cursor:pointer;flex:none" title="Upload SVG icon">Icon<input type="file" accept=".svg,image/svg+xml" style="display:none" onchange="rtCatIcon(this)"></label><button type="button" class="icon-btn danger" title="Remove" onclick="this.closest(\'.rtcat-row\').remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'; }
+function rtCatIcon(input){ var f=input.files&&input.files[0]; if(!f)return; if(f.size>60000){ toast("SVG too large (max 60 KB)"); input.value=""; return; } var rd=new FileReader(); rd.onload=function(){ var m=String(rd.result).match(/<svg[\s\S]*?<\/svg>/i); if(!m){ toast("Not a valid SVG file"); return; } var svg=m[0].replace(/<script[\s\S]*?<\/script>/gi,""); var row=input.closest(".rtcat-row"); row.dataset.iconsvg=svg; var pv=row.querySelector(".rc-iconprev"); if(pv)pv.innerHTML=svg; toast("Icon set"); }; rd.readAsText(f); input.value=""; }
 function rtCatAdd(){ var host=document.getElementById("rtCatRows"); if(!host)return; var tmp=document.createElement("div"); tmp.innerHTML=rtCatRow({id:"",name:"",color:"#8a64c8",icon:"custom"}); host.appendChild(tmp.firstChild); var inp=host.lastChild.querySelector(".rc-name"); if(inp)inp.focus(); }
-function saveRtCats(){ var out=[]; document.querySelectorAll("#rtCatRows .rtcat-row").forEach(function(rw){ var nm=(rw.querySelector(".rc-name").value||"").trim(); if(!nm)return; var id=rw.getAttribute("data-id")||("cat_"+uid()); out.push({id:id,name:nm,color:rw.querySelector(".rc-color").value,icon:rw.querySelector(".rc-icon").value}); }); if(!out.length){ toast("Keep at least one category"); return; } data.routineCats=out; if(rtCatFilter&&!out.some(function(c){return c.id===rtCatFilter;}))rtCatFilter=""; save(); closeModal(); render(); toast("Categories saved"); }
+function saveRtCats(){ var out=[]; document.querySelectorAll("#rtCatRows .rtcat-row").forEach(function(rw){ var nm=(rw.querySelector(".rc-name").value||"").trim(); if(!nm)return; var id=rw.getAttribute("data-id")||("cat_"+uid()); var o={id:id,name:nm,color:rw.querySelector(".rc-color").value,icon:rw.getAttribute("data-iconkey")||"custom"}; if(rw.dataset.iconsvg)o.iconSvg=rw.dataset.iconsvg; out.push(o); }); if(!out.length){ toast("Keep at least one category"); return; } data.routineCats=out; if(rtCatFilter&&!out.some(function(c){return c.id===rtCatFilter;}))rtCatFilter=""; save(); closeModal(); render(); toast("Categories saved"); }
 function routinesInit(){
   rtCatsInit();
   if(Array.isArray(data.routines)) return;
@@ -1780,21 +1796,44 @@ function routinesInit(){
     {id:uid(),title:"Replace toothbrush",desc:"Swap to a fresh toothbrush.",catId:"health",tags:[],priority:"low",due:"",lastCompleted:ago(85),recur:{type:"everyMonths",n:3},links:[],checklist:[],history:[],created:Date.now()-90*86400000,updated:Date.now()}
   ];
 }
+var RDAYS=[["Mon",1],["Tue",2],["Wed",3],["Thu",4],["Fri",5],["Sat",6],["Sun",0]];
+var RDNAME=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var RMON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function normRecur(rc){ rc=rc||{}; var t=rc.type;
+  if(["once","daily","weekly","monthly","yearly","interval","usage","distance","customUnit"].indexOf(t)>=0) return rc;
+  if(t==="days"||t==="custom") return {type:"interval",n:rc.n||1,unit:"days"};
+  if(t==="weekly") return {type:"weekly",days:rc.days||[]};
+  if(t==="monthly") return {type:"monthly",monthDay:rc.monthDay||1};
+  if(t==="everyMonths") return {type:"interval",n:rc.n||1,unit:"months"};
+  if(t==="yearly") return {type:"yearly",yearMonth:(rc.yearMonth!=null?rc.yearMonth:0),yearDay:rc.yearDay||1};
+  if(t==="km") return {type:"distance",n:rc.kmInterval||rc.n||0,kmInterval:rc.kmInterval,unit:"km"};
+  if(t==="manual") return {type:"once"};
+  return {type:"once"}; }
 function rtNext(r){
-  var rc=r.recur||{}; var ty=rc.type;
-  if(ty==="km"||ty==="manual") return r.due||null;
-  var baseStr=r.lastCompleted||r.due||isoLocal(new Date(r.created||Date.now()));
-  var d=new Date(baseStr+"T00:00:00"); if(isNaN(d)) d=new Date(); var n=+rc.n||1;
+  var rc=normRecur(r.recur||{}); var ty=rc.type;
+  if(ty==="once"||ty==="usage"||ty==="distance"||ty==="customUnit") return r.due||null;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var baseStr=r.lastCompleted||r.due||isoLocal(today);
+  var base=new Date(baseStr+"T00:00:00"); if(isNaN(base)) base=new Date(today); base.setHours(0,0,0,0);
   if(!r.lastCompleted&&r.due) return r.due;
-  if(ty==="days"||ty==="custom") d.setDate(d.getDate()+n);
-  else if(ty==="weekly") d.setDate(d.getDate()+7*(n||1));
-  else if(ty==="monthly") d.setMonth(d.getMonth()+1);
-  else if(ty==="everyMonths") d.setMonth(d.getMonth()+n);
-  else if(ty==="yearly") d.setFullYear(d.getFullYear()+(n||1));
-  else d.setDate(d.getDate()+n);
-  return isoLocal(d);
+  if(ty==="daily"){ base.setDate(base.getDate()+1); return isoLocal(base); }
+  if(ty==="interval"){ var n=+rc.n||1, u=rc.unit||"days"; if(u==="days")base.setDate(base.getDate()+n); else if(u==="weeks")base.setDate(base.getDate()+7*n); else if(u==="months")base.setMonth(base.getMonth()+n); else if(u==="years")base.setFullYear(base.getFullYear()+n); else base.setDate(base.getDate()+n); return isoLocal(base); }
+  if(ty==="weekly"){ var days=(rc.days&&rc.days.length)?rc.days.slice():[base.getDay()]; var ref=r.lastCompleted?base:today; var startI=r.lastCompleted?1:0; for(var i=startI;i<=7;i++){ var nd=new Date(ref); nd.setDate(ref.getDate()+i); if(days.indexOf(nd.getDay())>=0) return isoLocal(nd); } var x=new Date(ref); x.setDate(x.getDate()+7); return isoLocal(x); }
+  if(ty==="monthly"){ var md=+rc.monthDay||1; var ref2=r.lastCompleted?base:today; var cand; if(r.lastCompleted){ cand=new Date(ref2.getFullYear(),ref2.getMonth()+1,1); } else { cand=new Date(ref2.getFullYear(),ref2.getMonth(),1); } cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); if(!r.lastCompleted&&cand<today){ cand=new Date(today.getFullYear(),today.getMonth()+1,1); cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); } return isoLocal(cand); }
+  if(ty==="yearly"){ var ym=(rc.yearMonth!=null?rc.yearMonth:0), yd=+rc.yearDay||1; var ref3=r.lastCompleted?base:today; var c; if(r.lastCompleted){ c=new Date(ref3.getFullYear()+1,ym,1); } else { c=new Date(today.getFullYear(),ym,1); } c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); if(!r.lastCompleted&&c<today){ c=new Date(today.getFullYear()+1,ym,1); c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); } return isoLocal(c); }
+  return null;
 }
-function rtRecurLabel(r){ var rc=r.recur||{}; var n=+rc.n||1; switch(rc.type){ case"days":return"Every "+n+" day"+(n>1?"s":""); case"weekly":return n>1?("Every "+n+" weeks"):"Weekly"; case"monthly":return"Monthly"; case"everyMonths":return"Every "+n+" months"; case"yearly":return n>1?("Every "+n+" years"):"Yearly"; case"custom":return"Every "+n+" days"; case"km":return"Every "+(rc.kmInterval||0).toLocaleString()+" km"; case"manual":return"Manual"; default:return"Recurring"; } }
+function rtRecurLabel(r){ var rc=normRecur(r.recur||{}); switch(rc.type){
+  case"once":return"One-time"; case"daily":return"Every day";
+  case"weekly":{ var ds=(rc.days||[]).slice().sort(function(a,b){return a-b;}); if(!ds.length)return"Weekly"; if(ds.join()==="1,2,3,4,5")return"Every weekday"; if(ds.join()==="0,6")return"Every weekend"; if(ds.length===7)return"Every day"; return "Every "+ds.map(function(x){return RDNAME[x];}).join(", "); }
+  case"monthly":return"Monthly · day "+(rc.monthDay||1);
+  case"yearly":return"Yearly · "+RMON[rc.yearMonth||0]+" "+(rc.yearDay||1);
+  case"interval":return"Every "+(rc.n||1)+" "+(rc.unit||"days");
+  case"usage":return"Every "+(rc.n||1)+" uses";
+  case"distance":return"Every "+(+(rc.n||rc.kmInterval)||0).toLocaleString()+" "+(rc.unit||"km");
+  case"customUnit":return"Every "+(rc.n||1)+" "+(rc.customUnit||"units");
+  default:return"Recurring"; } }
 function rtCountdown(iso){ if(!iso) return {cls:"none",txt:"No date"}; var today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00"); var d=new Date(iso+"T00:00:00"); var n=Math.round((d-today)/86400000); if(n<0) return {cls:"over",txt:(-n)+"d overdue"}; if(n===0) return {cls:"today",txt:"Due today"}; if(n===1) return {cls:"up",txt:"Tomorrow"}; if(n<=14) return {cls:"up",txt:"In "+n+" days"}; return {cls:"none",txt:fmtShort(iso)}; }
 function rtStatus(r){ var nx=rtNext(r); if(!nx) return "none"; var c=rtCountdown(nx).cls; return c==="over"?"overdue":c==="today"?"today":(c==="up"?"upcoming":"later"); }
 function rtList(){
@@ -1851,8 +1890,9 @@ function rtCard(r){
 }
 function rtToggleCheck(id,i){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r||!r.checklist[i])return; r.checklist[i].done=!r.checklist[i].done; r.updated=Date.now(); save(); renderRoutines(); }
 function rtComplete(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return;
-  var kmField=(r.recur&&r.recur.type==="km")?'<div style="margin-top:10px"><label class="setlbl">Current odometer (km)</label><input class="fld" id="rtcKm" type="number" placeholder="e.g. 85000" value="'+(r.recur.lastKm||"")+'"></div>':'';
-  var dueField=(r.recur&&(r.recur.type==="km"||r.recur.type==="manual"))?'<div style="margin-top:10px"><label class="setlbl">Next due date (optional)</label><input class="fld" id="rtcDue" type="date" value=""></div>':'';
+  var rty=(normRecur(r.recur||{})).type;
+  var kmField=(rty==="distance")?'<div style="margin-top:10px"><label class="setlbl">Current odometer ('+((r.recur&&r.recur.unit)||"km")+')</label><input class="fld" id="rtcKm" type="number" placeholder="e.g. 85000" value="'+(r.recur.lastKm||"")+'"></div>':'';
+  var dueField=(rty==="once"||rty==="usage"||rty==="distance"||rty==="customUnit")?'<div style="margin-top:10px"><label class="setlbl">Next due date (optional)</label><input class="fld" id="rtcDue" type="date" value=""></div>':'';
   showModal('<h4>Complete &middot; '+esc(r.title)+'</h4><div class="tm"><label class="setlbl">Note (optional)</label><textarea class="fld" id="rtcNote" rows="3" placeholder="Add a note for the history log…"></textarea>'+kmField+dueField+'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="rtDoComplete(\''+id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:15px;height:15px"><path d="M5 12l5 5L20 7"/></svg>Mark complete</button></div>');
   try{ enhanceDatePickers(); }catch(e){}
 }
@@ -1860,48 +1900,73 @@ function rtDoComplete(id){ var r=(data.routines||[]).find(function(x){return x.i
   var note=(document.getElementById("rtcNote")||{}).value||""; r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:note.trim()});
   r.lastCompleted=isoLocal(new Date()); (r.checklist||[]).forEach(function(c){c.done=false;});
   var km=document.getElementById("rtcKm"); if(km&&r.recur){ r.recur.lastKm=+km.value||r.recur.lastKm; }
-  var dd=document.getElementById("rtcDue"); if(dd&&dd.value){ r.due=dd.value; } else if(r.recur&&(r.recur.type==="km"||r.recur.type==="manual")){ r.due=""; }
+  var dd=document.getElementById("rtcDue"); var rty2=(normRecur(r.recur||{})).type; if(dd&&dd.value){ r.due=dd.value; } else if(rty2==="once"||rty2==="usage"||rty2==="distance"||rty2==="customUnit"){ r.due=""; }
   r.updated=Date.now(); save(); closeModal(); render(); toast("Routine completed ✓");
 }
 function rtHistory(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return; var h=r.history||[];
   showModal('<h4>History &middot; '+esc(r.title)+'</h4><div class="tm">'+(h.length?h.map(function(x){return '<div style="display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:6px;flex:none"></div><div style="flex:1"><div style="font-weight:600;font-size:.86rem">'+esc(new Date(x.ts).toLocaleString())+'</div>'+(x.note?'<div class="muted" style="font-size:.84rem;margin-top:2px">'+esc(x.note)+'</div>':'')+'</div></div>';}).join(""):'<p class="muted" style="padding:14px 0">No completions logged yet.</p>')+'</div><div class="row"><button class="btn soft" onclick="closeModal()">Close</button></div>');
 }
 function rtDelete(id){ if(!confirm("Delete this routine and its history?"))return; data.routines=(data.routines||[]).filter(function(x){return x.id!==id;}); save(); render(); toast("Routine deleted"); }
-var _rtCheckSeed=[];
+var _rDays=[];
 function openRoutine(id){
   var r=id?(data.routines||[]).find(function(x){return x.id===id;}):null; var isNew=!r;
-  if(isNew) r={id:"",title:"",desc:"",catId:"personal",tags:[],priority:"med",due:"",lastCompleted:"",recur:{type:"everyMonths",n:1,kmInterval:10000},links:[],checklist:[],history:[]};
-  var rc=r.recur||{type:"everyMonths",n:1};
-  function opt(v,o){return o.map(function(x){return '<option value="'+x[0]+'" '+(v===x[0]?"selected":"")+'>'+x[1]+'</option>';}).join("");}
-  var ICc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
-  var ICr='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/></svg>';
-  var ICl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+  if(isNew) r={id:"",title:"",desc:"",catId:"personal",tags:[],priority:"med",due:"",lastCompleted:"",recur:{type:"weekly",days:[]},links:[],checklist:[],history:[]};
+  var rc=normRecur(r.recur||{type:"weekly",days:[]}); _rDays=(rc.days||[]).slice();
+  function opt(v,o){return o.map(function(x){return '<option value="'+x[0]+'" '+(String(v)===String(x[0])?"selected":"")+'>'+x[1]+'</option>';}).join("");}
   var html='<h4>'+(isNew?"New routine":"Edit routine")+'</h4><div class="tm">'
+    +'<div class="tm-sec"><div class="tm-h">Basic info</div>'
     +'<input class="fld tm-title" id="rTitle" value="'+esc(r.title)+'" placeholder="Routine title">'
-    +'<textarea class="fld" id="rDesc" rows="2" placeholder="Description…" style="margin-top:10px">'+esc(r.desc||"")+'</textarea>'
-    +'<div class="tm-sec"><div class="tm-h">'+ICc+'Category &amp; priority</div><div class="f2"><div><label class="setlbl">Category</label><select class="fld" id="rCat">'+rtCats().map(function(c){return '<option value="'+c.id+'" '+(r.catId===c.id?"selected":"")+'>'+esc(c.name)+'</option>';}).join("")+'<option value="__new">+ New category…</option></select></div>'
+    +'<textarea class="fld" id="rDesc" rows="2" placeholder="Description (optional)" style="margin-top:10px">'+esc(r.desc||"")+'</textarea>'
+    +'<div class="f2" style="margin-top:12px"><div><label class="setlbl">Category</label><select class="fld" id="rCat">'+rtCats().map(function(c){return '<option value="'+c.id+'" '+(r.catId===c.id?"selected":"")+'>'+esc(c.name)+'</option>';}).join("")+'</select></div>'
     +'<div><label class="setlbl">Priority</label><select class="fld" id="rPrio">'+opt(r.priority||"med",[["high","High"],["med","Medium"],["low","Low"]])+'</select></div></div></div>'
-    +'<div class="tm-sec"><div class="tm-h">'+ICr+'Recurrence</div><div class="f3"><div><label class="setlbl">Repeat</label><select class="fld" id="rRecur">'+opt(rc.type,[["days","Every X days"],["weekly","Weekly"],["monthly","Monthly"],["everyMonths","Every X months"],["yearly","Yearly"],["custom","Custom (X days)"],["km","Every X km"],["manual","Manual"]])+'</select></div>'
-    +'<div><label class="setlbl">Interval (X)</label><input class="fld" id="rN" type="number" min="1" value="'+(rc.n||1)+'"></div>'
-    +'<div><label class="setlbl">Km interval</label><input class="fld" id="rKm" type="number" min="0" value="'+(rc.kmInterval||"")+'" placeholder="10000"></div></div>'
-    +'<div class="f2" style="margin-top:10px"><div><label class="setlbl">Due date (optional)</label><input class="fld" id="rDue" type="date" value="'+esc(r.due||"")+'"></div><div><label class="setlbl">Last completed (optional)</label><input class="fld" id="rLast" type="date" value="'+esc(r.lastCompleted||"")+'"></div></div></div>'
-    +'<div class="tm-sec"><div class="tm-h">'+ICl+'Details</div><div class="f2"><div><label class="setlbl">Tags (comma)</label><input class="fld" id="rTags" value="'+esc((r.tags||[]).join(", "))+'" placeholder="vet, urgent"></div><div><label class="setlbl">Links (comma)</label><input class="fld" id="rLinks" value="'+esc((r.links||[]).join(", "))+'" placeholder="https://…"></div></div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px"><span class="setlbl" style="margin:0">Checklist</span><button type="button" class="btn soft sm" onclick="rAddCheck(\'\',false)">+ Add item</button></div><div id="rChecks" style="margin-top:9px"></div></div>'
+    +'<div class="tm-sec"><div class="tm-h">Schedule</div>'
+    +'<label class="setlbl">Repeat type</label><select class="fld" id="rType" onchange="rTypeChange()">'+opt(rc.type,[["once","One-time"],["daily","Daily"],["weekly","Weekly / specific days"],["monthly","Monthly"],["yearly","Yearly"],["interval","Custom interval"],["usage","Usage-based"],["distance","Distance-based"],["customUnit","Custom unit"]])+'</select>'
+    +'<div id="rSched" style="margin-top:12px"></div>'
+    +'<div class="f2" style="margin-top:12px"><div><label class="setlbl">Last completed</label><input class="fld" id="rLast" type="date" value="'+esc(r.lastCompleted||"")+'" onchange="rNextPreview()"></div><div><label class="setlbl">Next due</label><input class="fld" id="rDue" type="date" value="'+esc(r.due||"")+'" onchange="rNextPreview()"></div></div>'
+    +'<div class="rt-next" id="rNextHint"></div></div>'
+    +'<div class="tm-sec"><div class="tm-h">Details</div><div class="f2"><div><label class="setlbl">Tags (comma)</label><input class="fld" id="rTags" value="'+esc((r.tags||[]).join(", "))+'" placeholder="vet, urgent"></div><div><label class="setlbl">Links (comma)</label><input class="fld" id="rLinks" value="'+esc((r.links||[]).join(", "))+'" placeholder="https://…"></div></div>'
+    +'<div class="rt-checkcard"><div style="display:flex;align-items:center;justify-content:space-between"><span class="setlbl" style="margin:0">Checklist</span><button type="button" class="btn soft sm" onclick="rAddCheck(\'\',false)">+ Add item</button></div><div id="rChecks" style="margin-top:9px"></div></div></div>'
     +'</div>'
     +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="rtDelete(\''+r.id+'\');closeModal()">Delete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveRoutine(\''+(r.id||"")+'\')">'+(isNew?"Create routine":"Save")+'</button></div>';
   showModal(html);
+  rTypeChange(rc);
   (r.checklist||[]).forEach(function(c){ rAddCheck(c.t,c.done); });
   try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
 }
+function rSchedFields(type,rc){
+  function opt(v,o){return o.map(function(x){return '<option value="'+x[0]+'" '+(String(v)===String(x[0])?"selected":"")+'>'+x[1]+'</option>';}).join("");}
+  if(type==="once") return '<p class="muted" style="font-size:.82rem;line-height:1.5">A single reminder on the “Next due” date below.</p>';
+  if(type==="daily") return '<p class="muted" style="font-size:.82rem;line-height:1.5">Repeats every day.</p>';
+  if(type==="weekly") return '<label class="setlbl">Select days</label><div class="rday-row">'+RDAYS.map(function(d){return '<button type="button" class="rday'+(_rDays.indexOf(d[1])>=0?" on":"")+'" data-d="'+d[1]+'" onclick="rToggleDay('+d[1]+')">'+d[0]+'</button>';}).join("")+'</div><div class="rday-quick"><button type="button" onclick="rQuick(\'weekday\')">Weekdays</button><button type="button" onclick="rQuick(\'weekend\')">Weekend</button><button type="button" onclick="rQuick(\'all\')">Every day</button></div>';
+  if(type==="monthly") return '<label class="setlbl">Repeat on day of month</label><input class="fld" id="rMonthDay" type="number" min="1" max="31" value="'+(rc.monthDay||1)+'" style="max-width:130px" oninput="rNextPreview()">';
+  if(type==="yearly") return '<div class="f2"><div><label class="setlbl">Month</label><select class="fld" id="rYearMonth" onchange="rNextPreview()">'+opt(rc.yearMonth!=null?rc.yearMonth:0,RMON.map(function(m,i){return [i,m];}))+'</select></div><div><label class="setlbl">Day</label><input class="fld" id="rYearDay" type="number" min="1" max="31" value="'+(rc.yearDay||1)+'" oninput="rNextPreview()"></div></div>';
+  if(type==="interval") return '<div style="display:flex;gap:8px;align-items:flex-end"><div style="flex:0 0 120px"><label class="setlbl">Repeat every</label><input class="fld" id="rN" type="number" min="1" value="'+(rc.n||1)+'" oninput="rNextPreview()"></div><div style="flex:1"><label class="setlbl">Unit</label><select class="fld" id="rUnit" onchange="rNextPreview()">'+opt(rc.unit||"months",[["days","Days"],["weeks","Weeks"],["months","Months"],["years","Years"]])+'</select></div></div>';
+  if(type==="usage") return '<label class="setlbl">Repeat every</label><div style="display:flex;gap:9px;align-items:center"><input class="fld" id="rN" type="number" min="1" value="'+(rc.n||1)+'" style="max-width:120px"><span class="muted" style="font-weight:600">uses</span></div>';
+  if(type==="distance") return '<div style="display:flex;gap:8px;align-items:flex-end"><div style="flex:0 0 140px"><label class="setlbl">Repeat every</label><input class="fld" id="rN" type="number" min="1" value="'+(rc.n||rc.kmInterval||10000)+'"></div><div style="flex:0 0 120px"><label class="setlbl">Unit</label><select class="fld" id="rUnit">'+opt(rc.unit||"km",[["km","km"],["mi","miles"]])+'</select></div></div>';
+  if(type==="customUnit") return '<div style="display:flex;gap:8px;align-items:flex-end"><div style="flex:0 0 120px"><label class="setlbl">Repeat every</label><input class="fld" id="rN" type="number" min="1" value="'+(rc.n||1)+'"></div><div style="flex:1"><label class="setlbl">Unit</label><input class="fld" id="rCustomUnit" value="'+esc(rc.customUnit||"")+'" placeholder="hours, sessions…"></div></div>';
+  return "";
+}
+function rTypeChange(rcArg){ var sel=document.getElementById("rType"); if(!sel)return; var type=sel.value; var host=document.getElementById("rSched"); if(host) host.innerHTML=rSchedFields(type,rcArg||{}); try{ enhanceSelects(); }catch(e){} rNextPreview(); }
+function rToggleDay(d){ var i=_rDays.indexOf(d); if(i>=0)_rDays.splice(i,1); else _rDays.push(d); var b=document.querySelector('.rday[data-d="'+d+'"]'); if(b)b.classList.toggle("on"); rNextPreview(); }
+function rQuick(which){ _rDays=which==="weekday"?[1,2,3,4,5]:which==="weekend"?[0,6]:[0,1,2,3,4,5,6]; document.querySelectorAll(".rday").forEach(function(b){ b.classList.toggle("on",_rDays.indexOf(+b.dataset.d)>=0); }); rNextPreview(); }
+function rReadRecur(){ var type=(document.getElementById("rType")||{}).value||"weekly"; var rec={type:type}; var gv=function(id){var e=document.getElementById(id);return e?e.value:"";};
+  if(type==="weekly") rec.days=_rDays.slice();
+  else if(type==="monthly") rec.monthDay=+gv("rMonthDay")||1;
+  else if(type==="yearly"){ rec.yearMonth=+gv("rYearMonth")||0; rec.yearDay=+gv("rYearDay")||1; }
+  else if(type==="interval"){ rec.n=+gv("rN")||1; rec.unit=gv("rUnit")||"months"; }
+  else if(type==="usage"){ rec.n=+gv("rN")||1; }
+  else if(type==="distance"){ rec.n=+gv("rN")||0; rec.unit=gv("rUnit")||"km"; }
+  else if(type==="customUnit"){ rec.n=+gv("rN")||1; rec.customUnit=gv("rCustomUnit")||"units"; }
+  return rec; }
+function rNextPreview(){ var el=document.getElementById("rNextHint"); if(!el)return; var temp={recur:rReadRecur(),lastCompleted:(document.getElementById("rLast")||{}).value||"",due:(document.getElementById("rDue")||{}).value||"",created:Date.now()}; var nx=rtNext(temp); var lab=esc(rtRecurLabel(temp)); el.innerHTML=nx?('<span class="rt-next-l">'+lab+'</span> · Next due <b>'+esc(fmtFull(nx))+'</b>'):('<span class="rt-next-l">'+lab+'</span> · set a “Next due” date to schedule it'); }
 function rAddCheck(text,done){ var host=document.getElementById("rChecks"); if(!host)return; var row=document.createElement("div"); row.className="sub-row"; row.innerHTML='<span class="chk sub-chk'+(done?" done":"")+'" onclick="this.classList.toggle(\'done\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span><input class="fld sub-in" placeholder="Checklist item…" value="'+esc(text||"")+'"><button type="button" class="sub-del" onclick="this.parentNode.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'; host.appendChild(row); if(!text){var i=row.querySelector(".sub-in"); if(i)i.focus();} }
 function saveRoutine(id){
   var title=(document.getElementById("rTitle").value||"").trim(); if(!title){ toast("Title is required"); return; }
-  var catSel=document.getElementById("rCat"); var catId=catSel.value;
-  if(catId==="__new"){ var nm=prompt("New category name:"); if(!nm){ return; } var ncat={id:uid(),name:nm.trim(),color:"#9aa0b5"}; data.routineCats=data.routineCats||[]; data.routineCats.push(ncat); catId=ncat.id; }
+  var catId=document.getElementById("rCat").value;
   var checks=[]; document.querySelectorAll("#rChecks .sub-row").forEach(function(rw){ var v=(rw.querySelector(".sub-in").value||"").trim(); if(v) checks.push({t:v,done:rw.querySelector(".sub-chk").classList.contains("done")}); });
-  var rec={type:document.getElementById("rRecur").value,n:+document.getElementById("rN").value||1,kmInterval:+document.getElementById("rKm").value||0};
+  var rec=rReadRecur();
   var f={title:title,desc:(document.getElementById("rDesc").value||"").trim(),catId:catId,priority:document.getElementById("rPrio").value,due:document.getElementById("rDue").value,lastCompleted:document.getElementById("rLast").value,recur:rec,tags:(document.getElementById("rTags").value||"").split(",").map(function(x){return x.trim();}).filter(Boolean),links:(document.getElementById("rLinks").value||"").split(",").map(function(x){return x.trim();}).filter(Boolean),checklist:checks};
-  if(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(r){ if(rec.type==="km"&&r.recur)f.recur.lastKm=r.recur.lastKm||0; Object.assign(r,f); r.updated=Date.now(); } }
+  if(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(r){ if(r.recur&&r.recur.lastKm!=null)f.recur.lastKm=r.recur.lastKm; Object.assign(r,f); r.updated=Date.now(); } }
   else { data.routines=data.routines||[]; data.routines.unshift(Object.assign({id:uid(),history:[],created:Date.now(),updated:Date.now()},f)); }
   save(); closeModal(); render(); toast(id?"Routine saved":"Routine created");
 }
@@ -2035,18 +2100,20 @@ function buildDigest(){
        +stat(totalTasks,"Tasks")+stat(d.events.length,"Events")+stat(d.routines.length,"Routines")+stat(d.overdue.length,"Overdue")+stat(prog+"%","Done")
        +'</tr></table>')
     : '<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:44px 20px"><div style="font:400 40px Arial,sans-serif">🎉</div><div style="font:600 18px Georgia,serif;color:'+INK+';margin-top:10px">You\'re all caught up.</div><div style="font:400 14px Arial,sans-serif;color:'+MUT+';margin-top:4px">Nothing due today — enjoy your day!</div></td></tr></table>';
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"></head>'
+  var LOGO='<svg width="38" height="38" viewBox="375 170 200 200" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg>';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></head>'
    +'<body style="margin:0;padding:0;background:'+BG+';-webkit-font-smoothing:antialiased">'
    +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:'+BG+'"><tr><td align="center" style="padding:28px 14px">'
    +'<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid '+LINE+'">'
-   +'<tr><td style="background:'+PUR2+';background-image:linear-gradient(120deg,'+PUR+','+PUR2+');padding:26px 32px"><div style="font:700 13px Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7)">Daily Briefing</div><div style="font:400 26px Georgia,serif;color:#ffffff;margin-top:6px">Eyad\'s HQ</div></td></tr>'
+   +'<tr><td style="background:'+PUR2+';background-image:linear-gradient(120deg,'+PUR+','+PUR2+');padding:24px 32px"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:middle;width:48px">'+LOGO+'</td><td style="vertical-align:middle;padding-left:13px"><div style="font:700 12px Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.72)">Daily Briefing</div><div style="font:400 25px Georgia,serif;color:#ffffff;margin-top:3px">Eyad\'s HQ</div></td></tr></table></td></tr>'
    +'<tr><td style="padding:30px 32px 8px"><div style="font:400 17px Arial,sans-serif;color:'+INK+'">Hi '+esc(name)+',</div><div style="font:600 13px Arial,sans-serif;color:'+MUT+';margin-top:6px">'+esc(dateStr)+'</div>'
    +'<div style="font:400 24px Georgia,serif;color:'+INK+';margin-top:14px;line-height:1.3">Here\'s your plan for today.</div>'
    +'<div style="margin-top:20px"><a href="'+url+'" style="display:inline-block;background:'+PUR+';background-image:linear-gradient(120deg,'+PUR+',#a081d6 60%,'+PEACH+');color:#ffffff;font:700 14px Arial,sans-serif;text-decoration:none;padding:13px 26px;border-radius:10px">Open Dashboard →</a></div></td></tr>'
    +'<tr><td style="padding:6px 32px 30px">'+body+'</td></tr>'
    +'<tr><td style="background:'+BG+';padding:20px 32px;border-top:1px solid '+LINE+'"><table width="100%" role="presentation"><tr><td style="font:700 15px Georgia,serif;color:'+PUR2+'">Eyad\'s HQ</td><td align="right" style="font:400 12px Arial,sans-serif;color:'+MUT+'"><a href="'+url+'" style="color:'+MUT+';text-decoration:none">eyadalfi.com</a></td></tr></table><div style="font:400 11px Arial,sans-serif;color:'+MUT+';margin-top:10px">Your automated daily briefing · 8:00 AM Riyadh</div></td></tr>'
    +'</table></td></tr></table></body></html>';
-  return {subject:"Your "+wd+" plan — eyadalfi.com",html:html,empty:!any};
+  html=html.replace(/Arial,sans-serif/g,"'Plus Jakarta Sans',Arial,sans-serif").replace(/Georgia,serif/g,"'Marcellus',Georgia,serif");
+  return {subject:"Your "+wd+" Tasks Plan",html:html,empty:!any};
 }
 async function sendHtmlEmail(to,subject,html){
   var t=getGToken("google")||gmailToken; if(!t) throw new Error("no gmail");
@@ -2158,7 +2225,13 @@ function mmNodeHtml(n,matchQ){
     +'<foreignObject x="'+n.x+'" y="'+n.y+'" width="'+n.w+'" height="'+n.h+'"><div xmlns="http://www.w3.org/1999/xhtml" class="mm-nt" data-id="'+n.id+'" style="font-size:'+(n.fontSize||14)+'px;'+tcol+'">'+(n.text||"")+'</div></foreignObject>'
     +ports+handle+'</g>';
 }
-function mmAnchor(n,tx,ty){ var cx=n.x+n.w/2, cy=n.y+n.h/2; var dx=tx-cx, dy=ty-cy; if(dx===0&&dy===0)return{x:cx,y:cy,side:"b"}; var hw=n.w/2,hh=n.h/2; var sx=dx?hw/Math.abs(dx):Infinity, sy=dy?hh/Math.abs(dy):Infinity; var sc=Math.min(sx,sy); var side=(sx<sy)?(dx>0?"r":"l"):(dy>0?"b":"t"); return {x:cx+dx*sc,y:cy+dy*sc,side:side}; }
+function mmAnchor(n,tx,ty){ var cx=n.x+n.w/2, cy=n.y+n.h/2; var dx=tx-cx, dy=ty-cy; if(dx===0&&dy===0)return{x:cx,y:cy,side:"b"}; var hw=n.w/2,hh=n.h/2;
+  var side=(Math.abs(dx)/hw>=Math.abs(dy)/hh)?(dx>0?"r":"l"):(dy>0?"b":"t");
+  var sc;
+  if(n.shape==="circle"||n.shape==="ellipse"){ sc=1/Math.sqrt((dx*dx)/(hw*hw)+(dy*dy)/(hh*hh)); }
+  else if(n.shape==="diamond"){ sc=1/((Math.abs(dx)/hw)+(Math.abs(dy)/hh)); }
+  else { var s1=dx?hw/Math.abs(dx):Infinity, s2=dy?hh/Math.abs(dy):Infinity; sc=Math.min(s1,s2); }
+  return {x:cx+dx*sc,y:cy+dy*sc,side:side}; }
 function mmDir(side,k){ return side==="l"?[-k,0]:side==="r"?[k,0]:side==="t"?[0,-k]:[0,k]; }
 function mmEdgePath(e){ var a=mmNode(e.from),b=mmNode(e.to); if(!a||!b)return null; var bc={x:b.x+b.w/2,y:b.y+b.h/2}, ac={x:a.x+a.w/2,y:a.y+a.h/2}; var p1=mmAnchor(a,bc.x,bc.y), p2=mmAnchor(b,ac.x,ac.y); var st=e.style||"curved"; var d, af=p1;
   if(st==="straight"){ d="M"+p1.x+","+p1.y+" L"+p2.x+","+p2.y; af=p1; }
