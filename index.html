@@ -1124,40 +1124,40 @@ html.dark .pflag.p-high{color:var(--peach)}
 .logo b,#brandName,.topbar h2,#pageTitle{font-family:'Marcellus',Georgia,serif!important;font-weight:400!important;letter-spacing:.01em!important}
 /* date value -> Marcellus */
 .wbox-val,#dateLine{font-family:'Marcellus',Georgia,serif!important}
-/* ===== Timeline / Gantt ===== */
-.tl-zoom{display:flex;gap:2px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:99px;padding:3px}
-.tl-zoom button{border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.76rem;padding:5px 12px;border-radius:99px;cursor:pointer}
-.tl-zoom button.on{background:var(--grad-iri);color:#fff}
-.tl-wrap{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--sh-1)}
-.tl-scroll{overflow-x:auto;position:relative}
-.tl-inner{position:relative;min-width:max-content}
-.tl-row{display:flex;align-items:stretch;min-height:42px}
-.tl-lbl{position:sticky;left:0;z-index:3;flex:none;width:190px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center;gap:3px;background:var(--card);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
-.tl-lbl .tl-name{font-weight:600;font-size:.85rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:capitalize}
-.tl-track{position:relative;flex:none;border-bottom:1px solid var(--border)}
-.tl-head .tl-lbl,.tl-head .tl-track{border-bottom:1px solid var(--border);background:rgba(138,100,200,.06)}
-.tl-head{position:sticky;top:0;z-index:6}
-.tl-head .tl-lbl{z-index:7;font-family:'Marcellus',serif;font-size:.95rem;font-weight:400}
-.tl-months{display:flex;height:24px}
-.tl-mo{font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:5px 0 0 8px;border-left:1px solid var(--border);white-space:nowrap;overflow:hidden}
-.tl-days{display:flex;height:26px}
-.tl-day{font-size:.62rem;color:var(--muted);text-align:center;padding-top:5px;border-left:1px solid rgba(138,100,200,.08);box-sizing:border-box}
-.tl-day.wk{background:rgba(138,100,200,.05)}
-.tl-day.tdy{color:#fff;font-weight:800}.tl-day.tdy b{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--grad-iri)}
-.tl-grp .tl-lbl{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--lavender);background:var(--card)}
-.tl-grp{min-height:30px}
-.tl-grp .tl-track{background:rgba(138,100,200,.03)}
-.tl-bar{position:absolute;top:50%;transform:translateY(-50%);height:26px;border-radius:8px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:.76rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.25);overflow:hidden;white-space:nowrap;transition:transform .15s,box-shadow .2s;min-width:18px}
-.tl-bar:hover{transform:translateY(-50%) scale(1.015);box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:2}
-.tl-bar.done{opacity:.5}
-.tl-bar .tl-ic{flex:none;width:13px;height:13px;opacity:.92}
-.tl-bar .tl-bt{overflow:hidden;text-overflow:ellipsis}
-.tl-nowline{position:absolute;top:50px;bottom:0;width:2px;background:linear-gradient(var(--peach),var(--peach-deep));z-index:4;pointer-events:none;box-shadow:0 0 8px rgba(243,185,142,.6)}
-.tl-empty{text-align:center;padding:54px 20px;color:var(--muted)}
-.tl-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:.78rem;color:var(--muted)}
-.tl-legend span{display:inline-flex;align-items:center;gap:6px}
-.tl-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
-@media(max-width:600px){.tl-lbl{width:128px;padding:6px 10px}.tl-head .tl-lbl{font-size:.82rem}}
+/* ===== Timeline (vertical) ===== */
+.tl2-filter{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tl2-chip{font-size:.78rem;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:6px 14px;cursor:pointer;transition:all .15s;font-family:inherit}
+html:not(.dark) .tl2-chip{background:#fff}
+.tl2-chip:hover{border-color:var(--lavender);color:var(--lavender)}
+.tl2-chip.on{background:var(--grad-iri);color:#fff;border-color:transparent}
+.tl2{max-width:780px;margin:6px auto 0}
+.tl2-month{font-family:'Marcellus',Georgia,serif;font-size:1.12rem;color:var(--text);margin:26px 0 4px;padding-left:94px}
+.tl2-month:first-child{margin-top:4px}
+.tl2-item{display:grid;grid-template-columns:80px 32px 1fr;align-items:start}
+.tl2-date{text-align:right;padding:22px 14px 0 0;font-size:.74rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.tl2-rail{position:relative;display:flex;justify-content:center;align-self:stretch}
+.tl2-rail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--border)}
+.tl2-item:first-of-type .tl2-rail::before{top:24px}
+.tl2-item:last-child .tl2-rail::before{bottom:auto;height:24px}
+.tl2-node{position:absolute;top:22px;width:15px;height:15px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1px var(--border);z-index:1}
+.tl2-card{margin:11px 0;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--lavender);border-radius:14px;padding:13px 16px;box-shadow:var(--sh-1);transition:transform .2s var(--ease),box-shadow .2s,border-color .2s;cursor:pointer}
+.tl2-card.nolink{cursor:default}
+.tl2-card:hover{transform:translateX(4px);box-shadow:0 16px 32px -18px rgba(138,100,200,.55)}
+.tl2-card.nolink:hover{transform:none}
+.tl2-top{display:flex;align-items:center;gap:11px}
+.tl2-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
+.tl2-ic svg{width:17px;height:17px}
+.tl2-title{font-weight:700;font-size:.97rem;text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.tl2-card.done .tl2-title{text-decoration:line-through;opacity:.55}
+.tl2-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-left:43px}
+.tl2-range{font-size:.76rem;color:var(--muted);font-weight:600}
+.tl2-now{align-items:center}
+.tl2-now .tl2-date{color:var(--peach-deep);padding-top:0}
+.tl2-now .tl2-rail{align-self:stretch}
+.tl2-now .tl2-node{position:static;width:13px;height:13px;background:var(--peach);border-color:var(--bg);box-shadow:0 0 0 1px var(--peach-deep),0 0 10px rgba(243,185,142,.6)}
+.tl2-nowbar{margin:5px 0;height:2px;background:linear-gradient(90deg,var(--peach),transparent);border-radius:2px;display:flex;align-items:center}
+.tl2-nowlbl{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--peach-deep);background:rgba(243,185,142,.16);border-radius:99px;padding:3px 11px;white-space:nowrap}
+@media(max-width:600px){.tl2-month{padding-left:62px;font-size:1rem}.tl2-item{grid-template-columns:54px 26px 1fr}.tl2-date{padding:20px 8px 0 0;font-size:.67rem}.tl2-meta{padding-left:0}}
 /* ===== mobile polish pass (new components) ===== */
 @media(max-width:600px){
   .modal{padding:18px 16px;max-width:94vw;border-radius:18px}
@@ -1335,8 +1335,11 @@ html.dark .pflag.p-high{color:var(--peach)}
 <!-- TIMELINE -->
 <div class="tab" id="tab-timeline">
   <div class="section-head"><div><h2>Timeline</h2><p class="muted" style="font-size:.85rem;margin-top:3px">A visual journey of everything you have — tasks, events and trips on one canvas.</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <div class="tl-zoom"><button id="tlz-0" onclick="setTlZoom(0)">Compact</button><button id="tlz-1" class="on" onclick="setTlZoom(1)">Normal</button><button id="tlz-2" onclick="setTlZoom(2)">Wide</button></div>
+    <div class="tl2-filter">
+      <button class="tl2-chip on" id="tlf-all" onclick="setTlFilter('all')">All</button>
+      <button class="tl2-chip" id="tlf-task" onclick="setTlFilter('task')">Tasks</button>
+      <button class="tl2-chip" id="tlf-event" onclick="setTlFilter('event')">Events</button>
+      <button class="tl2-chip" id="tlf-trip" onclick="setTlFilter('trip')">Trips</button>
       <button class="btn soft" onclick="tlToday()">Today</button>
     </div>
   </div>
@@ -1473,8 +1476,8 @@ function render(){ applyLang();
 function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
 /* ============ Timeline / Gantt ============ */
-var tlZoom=1; var TL_DW=[14,26,44];
-function setTlZoom(z){ tlZoom=z; ["0","1","2"].forEach(function(i){var b=document.getElementById("tlz-"+i); if(b)b.classList.toggle("on",+i===z);}); renderTimeline(); }
+var tlFilter="all";
+function setTlFilter(f){ tlFilter=f; ["all","task","event","trip"].forEach(function(k){var b=document.getElementById("tlf-"+k); if(b)b.classList.toggle("on",k===f);}); renderTimeline(); }
 function priColor(p){ return p==="high"?"#e0746b":(p==="low"?"#74c4b6":"#9b78d8"); }
 function tlParse(s){ if(!s) return null; var p=String(s).slice(0,10).split("-"); if(p.length<3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d)?null:d; }
 function tlDayIdx(d,start){ return Math.round((d-start)/86400000); }
@@ -1485,40 +1488,35 @@ function timelineItems(){
   (travelAll&&travelAll.length?travelAll:(travelTrips||[])).forEach(function(tr){ var s=tlParse(tr.departDate), e=tlParse(tr.returnDate||tr.departDate); if(!s) return; if(!e)e=s; if(e<s)e=s; items.push({type:"trip",title:tr.name||"Trip",s:s,e:e,color:"#dd824b",click:""}); });
   return items;
 }
+var TL_IC={task:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l5 5L20 7"/></svg>',event:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',trip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>'};
+var TL_NM={task:"Task",event:"Event",trip:"Trip"};
+function emptyTimeline(){ return '<div class="card" style="text-align:center;padding:56px 22px;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:46px;height:46px;opacity:.5"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><p style="margin:12px auto 0;max-width:360px;line-height:1.55">Nothing scheduled yet. Add tasks with dates, connect your calendar, or plan a trip — everything you have will flow onto this timeline.</p></div>'; }
 function renderTimeline(){
   var host=document.getElementById("tlBody"); if(!host) return;
-  var items=timelineItems();
-  if(!items.length){ host.innerHTML='<div class="tl-wrap"><div class="tl-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:44px;height:44px;opacity:.5"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><p style="margin-top:10px;max-width:340px;margin-left:auto;margin-right:auto">Nothing scheduled yet. Add tasks with dates, connect your calendar, or plan a trip — they\'ll all appear on this timeline.</p></div></div>'; return; }
-  var dw=TL_DW[tlZoom]||26;
+  var items=timelineItems(); if(tlFilter!=="all") items=items.filter(function(x){return x.type===tlFilter;});
+  if(!items.length){ host.innerHTML=emptyTimeline(); return; }
+  items.sort(function(a,b){return a.s-b.s || a.e-b.e;});
   var today=new Date(); today.setHours(0,0,0,0);
-  var minD=items.reduce(function(m,it){return it.s<m?it.s:m;},items[0].s);
-  var maxD=items.reduce(function(m,it){return it.e>m?it.e:m;},items[0].e);
-  var start=new Date(Math.min(minD.getTime(),today.getTime())); start.setHours(0,0,0,0); start.setDate(start.getDate()-3);
-  var end=new Date(Math.max(maxD.getTime(),today.getTime())); end.setHours(0,0,0,0); end.setDate(end.getDate()+4);
-  var totalDays=tlDayIdx(end,start)+1; if(totalDays>500){ totalDays=500; end=new Date(start.getTime()+499*86400000); }
-  var chartW=totalDays*dw;
-  var months={}, daysHtml="";
-  for(var i=0;i<totalDays;i++){ var d=new Date(start.getTime()+i*86400000); var dow=d.getDay(); var isToday=d.getTime()===today.getTime(); var mk=d.getFullYear()+"-"+d.getMonth(); months[mk]=(months[mk]||0)+1;
-    daysHtml+='<div class="tl-day'+((dow===5||dow===6)?' wk':'')+(isToday?' tdy':'')+'" style="width:'+dw+'px">'+(isToday?'<b>'+d.getDate()+'</b>':(dw<18&&d.getDate()%2===0?'':d.getDate()))+'</div>'; }
-  var moHtml=""; Object.keys(months).forEach(function(mk){ var p=mk.split("-"); var nm=new Date(+p[0],+p[1],1).toLocaleDateString(undefined,{month:"long",year:"numeric"}); moHtml+='<div class="tl-mo" style="width:'+(months[mk]*dw)+'px">'+esc(nm)+'</div>'; });
-  var TIC={task:'<svg class="tl-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l5 5L20 7"/></svg>',event:'<svg class="tl-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',trip:'<svg class="tl-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>'};
-  var groups=[["task","Tasks"],["event","Events"],["trip","Trips"]], rowsHtml="";
-  groups.forEach(function(g){ var gi=items.filter(function(x){return x.type===g[0];}); if(!gi.length) return; gi.sort(function(a,b){return a.s-b.s;});
-    rowsHtml+='<div class="tl-row tl-grp"><div class="tl-lbl">'+g[1]+' ('+gi.length+')</div><div class="tl-track" style="width:'+chartW+'px"></div></div>';
-    gi.forEach(function(it){ var left=tlDayIdx(it.s,start)*dw; var w=Math.max((tlDayIdx(it.e,start)-tlDayIdx(it.s,start)+1)*dw-4,18);
-      var range=fmtShort(isoLocal(it.s))+(tlDayIdx(it.e,start)>tlDayIdx(it.s,start)?(' → '+fmtShort(isoLocal(it.e))):'');
-      rowsHtml+='<div class="tl-row"><div class="tl-lbl"><span class="tl-name">'+esc(it.title)+'</span><span class="muted" style="font-size:.68rem">'+esc(range)+'</span></div><div class="tl-track" style="width:'+chartW+'px"><div class="tl-bar'+(it.done?' done':'')+'" style="left:'+(left+2)+'px;width:'+w+'px;background:'+it.color+'" '+(it.click?'onclick="'+it.click+'"':'')+' title="'+esc(it.title)+' · '+esc(range)+'">'+TIC[it.type]+'<span class="tl-bt">'+esc(it.title)+'</span></div></div></div>';
-    });
+  var entries=items.map(function(it){return {d:it.s,it:it};}); entries.push({d:today,today:true});
+  entries.sort(function(a,b){return a.d-b.d || ((a.today?1:0)-(b.today?1:0));});
+  var curMonth="", html='<div class="tl2">';
+  entries.forEach(function(en){
+    var mk=en.d.getFullYear()+"-"+en.d.getMonth();
+    if(mk!==curMonth){ curMonth=mk; html+='<div class="tl2-month">'+esc(en.d.toLocaleDateString(undefined,{month:"long",year:"numeric"}))+'</div>'; }
+    if(en.today){ html+='<div class="tl2-item tl2-now"><div class="tl2-date">Today</div><div class="tl2-rail"><span class="tl2-node"></span></div><div class="tl2-nowbar"><span class="tl2-nowlbl">Today &middot; '+esc(fmtShort(isoLocal(today)))+'</span></div></div>'; return; }
+    var it=en.it; var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' → '+fmtShort(isoLocal(it.e))):'');
+    var bcls=it.type==="task"?"b-todo":it.type==="event"?"b-doing":"b-done";
+    html+='<div class="tl2-item"><div class="tl2-date">'+esc(fmtShort(isoLocal(it.s)))+'</div>'
+      +'<div class="tl2-rail"><span class="tl2-node" style="background:'+it.color+'"></span></div>'
+      +'<div class="tl2-card'+(it.done?' done':'')+(it.click?'':' nolink')+'" style="border-left-color:'+it.color+'"'+(it.click?' onclick="'+it.click+'"':'')+'>'
+        +'<div class="tl2-top"><span class="tl2-ic" style="background:'+it.color+'">'+TL_IC[it.type]+'</span><span class="tl2-title">'+esc(it.title)+'</span></div>'
+        +'<div class="tl2-meta"><span class="badge '+bcls+'">'+TL_NM[it.type]+'</span><span class="tl2-range">'+esc(range)+'</span></div>'
+      +'</div></div>';
   });
-  var todayX=190+tlDayIdx(today,start)*dw+dw/2;
-  host.innerHTML='<div class="tl-wrap"><div class="tl-scroll" id="tlScroll"><div class="tl-inner">'
-    +'<div class="tl-row tl-head"><div class="tl-lbl">Timeline</div><div class="tl-track tl-axis" style="width:'+chartW+'px"><div class="tl-months">'+moHtml+'</div><div class="tl-days">'+daysHtml+'</div></div></div>'
-    +rowsHtml+'<div class="tl-nowline" style="left:'+todayX+'px"></div>'
-    +'</div></div></div>'
-    +'<div class="tl-legend"><span><i style="background:#9b78d8"></i>Tasks</span><span><i style="background:#8a64c8"></i>Events</span><span><i style="background:#dd824b"></i>Trips</span><span><i style="background:var(--peach)"></i>Today</span></div>';
-  var sc=document.getElementById("tlScroll"); if(sc){ sc.scrollLeft=Math.max(0, tlDayIdx(today,start)*dw - sc.clientWidth*0.32); }
+  html+='</div>';
+  host.innerHTML=html;
 }
-function tlToday(){ renderTimeline(); }
+function tlToday(){ var n=document.querySelector(".tl2-now"); if(n) n.scrollIntoView({behavior:"smooth",block:"center"}); else renderTimeline(); }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function hijri(d){ try{ var x=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d); return /AH/i.test(x)?x:(x+" AH"); }catch(e){ return ""; } }
