@@ -424,16 +424,15 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
 .gm-prev{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .gm-acts{display:flex;gap:0;flex:none}
 .gm-actions{display:flex;gap:8px;margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
-.tp-grid{display:flex;gap:16px;margin-top:6px;align-items:stretch}
-.tp-feat{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center}
-.tp-feat-nm{font-weight:700;font-size:.9rem;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tp-feat-dt{font-size:.78rem;margin-top:1px}
-.tp-rest{flex:0 0 auto;width:clamp(180px,44%,250px);min-width:0;display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--border);padding-left:16px}
-.tp-rrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--border);font-size:.82rem}
-.tp-rrow:last-child{border-bottom:none}
-.tp-rnm{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tp-rcd{flex:none;font-weight:800;font-size:.7rem;color:var(--peach-deep);white-space:nowrap}
-@media(max-width:560px){.tp-grid{flex-direction:column;gap:10px}.tp-rest{border-left:none;border-top:1px solid var(--border);padding-left:0;padding-top:8px}}
+.tp-trips{display:flex;gap:10px;margin-top:9px}
+.tp-trip{flex:1 1 0;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:11px 13px}
+html:not(.dark) .tp-trip{background:rgba(255,255,255,.6)}
+.tp-trip.feat{border-color:rgba(138,100,200,.42);background:rgba(138,100,200,.12)}
+.tp-cd{font-weight:800;font-size:.8rem;color:var(--peach-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-trip.feat .tp-cd{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.5rem;line-height:1.15;background:var(--grad-iri-rev);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:2px}
+.tp-trip-nm{font-weight:700;font-size:.9rem;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tp-trip-dt{font-size:.76rem;color:var(--muted);margin-top:1px}
+@media(max-width:560px){.tp-trips{flex-direction:column}}
 .live-tag{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;color:var(--green);font-weight:700;margin-top:7px}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:livep 2s infinite}
 @keyframes livep{0%{box-shadow:0 0 0 0 rgba(127,209,196,.5)}70%{box-shadow:0 0 0 6px rgba(127,209,196,0)}100%{box-shadow:0 0 0 0 rgba(127,209,196,0)}}
@@ -878,8 +877,8 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .up-item{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.88rem;font-weight:500}
 .up-dot{width:7px;height:7px;border-radius:50%;flex:none}
 .up-dot.k-task{background:var(--lavender)}.up-dot.k-event{background:var(--peach)}.up-dot.k-zakat{background:var(--green)}
-.up-date{font-weight:700;font-size:.74rem;min-width:48px;opacity:.85}
-.up-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;font-weight:600}
+.up-date{font-weight:700;font-size:.74rem;min-width:46px;opacity:.85;white-space:nowrap;flex:none}
+.up-label{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-weight:600}
 /* full-width stacked composition */
 #dashStack{display:flex;flex-direction:column;gap:18px}
 #dashStack .dash-widget{width:auto;margin:0}
@@ -1419,17 +1418,11 @@ function travelCardHtml(a){
   var trips=travelTrips||[]; var top=trips[0];
   var live = trips.length ? `<div class="live-tag"><span class="live-dot"></span>Live${travelUpdated?` &middot; updated ${esc(relTime(travelUpdated))}`:""}</div>` : "";
   var body;
-  if(top){
-    var feat = `<div class="tp-feat"><div class="big">${esc(tripCountdown(top.departDate))}</div>`
-      + `<div class="tp-feat-nm">${esc(top.name||"Trip")}</div>`
-      + `<div class="muted tp-feat-dt">${top.departDate?esc(fmtShort(top.departDate)):""}</div></div>`;
-    var rest=trips.slice(1,5);
-    if(rest.length){
-      var rows=rest.map(function(t){ return `<div class="tp-rrow"><span class="tp-rnm">${esc(t.name||"Trip")}</span><span class="tp-rcd">${esc(tripCountdown(t.departDate))}</span></div>`; }).join("");
-      body = `<div class="tp-grid">${feat}<div class="tp-rest">${rows}</div></div>`;
-    } else {
-      body = feat;
-    }
+  if(trips.length){
+    var cards=trips.slice(0,3).map(function(t,i){
+      return `<div class="tp-trip${i===0?' feat':''}"><div class="tp-cd">${esc(tripCountdown(t.departDate))}</div><div class="tp-trip-nm">${esc(t.name||"Trip")}</div><div class="tp-trip-dt">${t.departDate?esc(fmtShort(t.departDate)):""}</div></div>`;
+    }).join("");
+    body = `<div class="tp-trips">${cards}</div>`;
   } else {
     body = `<div class="muted" style="font-size:.86rem">${esc(a.desc)}</div>`;
   }
@@ -1677,7 +1670,7 @@ function archiveNote(id){ var n=data.notes.find(function(x){return x.id===id;});
 function editNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(!n) return; showModal('<h4>Edit note</h4><textarea class="fld" id="enBody" rows="6">'+esc(n.body)+'</textarea><label class="setlbl" style="display:block;margin-top:12px">Labels</label><input class="fld" id="enLabels" value="'+esc((n.labels||[]).join(", "))+'" placeholder="e.g. Work, Idea, Travel" style="margin-top:6px">'+labelSuggest("enLabels")+'<div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNoteEdit(\''+id+'\')">Save</button></div>'); setTimeout(function(){ var e=document.getElementById("enBody"); if(e) e.focus(); },30); }
 function saveNoteEdit(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.body=document.getElementById("enBody").value; var li=document.getElementById("enLabels"); n.labels=parseLabels(li?li.value:""); n.updated=Date.now(); save(); closeModal(); renderNotes(); toast("Note updated"); } }
 function noteCard(n){
-  return '<div class="card note-card'+(n.pinned?' pinned':'')+'">'+(n.pinned?'<span class="npin">'+IC.pin+'</span>':'')
+  return '<div class="card note-card'+(n.pinned?' pinned':'')+'" style="cursor:pointer" onclick="if(!event.target.closest(\'.nact\')&&!event.target.closest(\'.npin\'))editNote(\''+n.id+'\')">'+(n.pinned?'<span class="npin">'+IC.pin+'</span>':'')
     +'<div class="nbody">'+esc(n.body)+'</div>'
     +((n.labels&&n.labels.length)?'<div class="note-labels">'+n.labels.map(function(l){return '<span class="nlabel">'+esc(l)+'</span>';}).join("")+'</div>':'')
     +'<div class="ndate"><span>'+new Date(n.ts).toLocaleDateString()+(n.updated&&n.updated>(n.ts||0)+2000?' &middot; edited':'')+'</span>'
@@ -2126,14 +2119,20 @@ function openEventModal(ev){
   } else {
     dateV=calSel||isoLocal(new Date()); var h=new Date().getHours()+1; startT=_pad2(Math.min(h,22))+":00"; endT=_pad2(Math.min(h+1,23))+":00";
   }
-  var html='<h4>'+(isNew?"New event":"Edit event")+'</h4>'
-   +'<label class="setlbl">Title</label><input class="fld" id="evTitle" value="'+esc(title)+'" placeholder="Add title" style="margin:6px 0 12px">'
-   +'<label class="setlbl" style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:.86rem"><input type="checkbox" id="evAllDay" '+(allDay?"checked":"")+' onchange="evToggleAllDay()" style="accent-color:var(--lavender);width:16px;height:16px"> All-day event</label>'
-   +'<div style="margin-top:10px"><label class="setlbl">Date</label><input class="fld" id="evDate" type="date" value="'+esc(dateV)+'" style="margin-top:6px"></div>'
-   +'<div class="f2" id="evTimesWrap" style="margin-top:10px'+(allDay?";display:none":"")+'"><div><label class="setlbl">Start time</label><input class="fld" id="evStart" type="time" value="'+esc(startT)+'" style="margin-top:6px"></div><div><label class="setlbl">End time</label><input class="fld" id="evEnd" type="time" value="'+esc(endT)+'" style="margin-top:6px"></div></div>'
-   +'<div style="margin-top:10px"><label class="setlbl">Location</label><input class="fld" id="evLoc" value="'+esc(loc)+'" placeholder="Add location or meeting link" style="margin-top:6px"></div>'
-   +'<div style="margin-top:10px"><label class="setlbl">Guests (comma-separated emails)</label><input class="fld" id="evGuests" value="'+esc(guests)+'" placeholder="name@email.com, friend@email.com" style="margin-top:6px"></div>'
-   +'<div style="margin-top:10px"><label class="setlbl">Description</label><textarea class="fld" id="evDesc" rows="3" placeholder="Notes, agenda&hellip;" style="margin-top:6px">'+esc(desc)+'</textarea></div>'
+  var ICsch='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var ICdet='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+  var html='<h4>'+(isNew?"New event":"Edit event")+'</h4><div class="tm">'
+   +'<input class="fld tm-title" id="evTitle" value="'+esc(title)+'" placeholder="Event title">'
+   +'<div class="tm-sec"><div class="tm-h">'+ICsch+'Schedule</div>'
+   +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.86rem;font-weight:600;margin-bottom:13px"><input type="checkbox" id="evAllDay" '+(allDay?"checked":"")+' onchange="evToggleAllDay()" style="accent-color:var(--lavender);width:16px;height:16px"> All-day event</label>'
+   +'<div><label class="setlbl">Date</label><input class="fld" id="evDate" type="date" value="'+esc(dateV)+'"></div>'
+   +'<div class="f2" id="evTimesWrap" style="margin-top:12px'+(allDay?";display:none":"")+'"><div><label class="setlbl">Start time</label><input class="fld" id="evStart" type="time" value="'+esc(startT)+'"></div><div><label class="setlbl">End time</label><input class="fld" id="evEnd" type="time" value="'+esc(endT)+'"></div></div>'
+   +'</div>'
+   +'<div class="tm-sec"><div class="tm-h">'+ICdet+'Details</div>'
+   +'<div><label class="setlbl">Location</label><input class="fld" id="evLoc" value="'+esc(loc)+'" placeholder="Add location or meeting link"></div>'
+   +'<div style="margin-top:12px"><label class="setlbl">Guests (comma-separated emails)</label><input class="fld" id="evGuests" value="'+esc(guests)+'" placeholder="name@email.com, friend@email.com"></div>'
+   +'<div style="margin-top:12px"><label class="setlbl">Description</label><textarea class="fld" id="evDesc" rows="3" placeholder="Notes, agenda&hellip;">'+esc(desc)+'</textarea></div>'
+   +'</div></div>'
    +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="deleteEvent(\''+esc(ev.id)+'\')">Delete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" id="evSaveBtn" onclick="saveEvent(\''+(isNew?"":esc(ev.id))+'\')">'+(isNew?"Create event":"Save")+'</button></div>';
   showModal(html,"wide");
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
