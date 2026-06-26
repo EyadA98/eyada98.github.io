@@ -261,8 +261,8 @@ html:not(.dark) .kcard{background:#fff}
 .gv-head{display:flex;align-items:center;gap:12px;padding-bottom:13px;border-bottom:1px solid var(--border)}
 .gv-av{width:40px;height:40px;border-radius:50%;background:var(--grad-iri);color:#fff;display:grid;place-items:center;font-weight:800;flex:none;box-shadow:var(--glow-lav)}
 .gv-subj{font-family:'Marcellus',Georgia,serif;font-size:1.22rem;margin:14px 0 12px;line-height:1.28}
-.gv-frame{width:100%;height:48vh;max-height:520px;border:1px solid var(--border);border-radius:12px;background:#fff}
-.gv-body{max-height:48vh;overflow:auto;font-size:.92rem;line-height:1.6;color:var(--text);padding:2px 2px 4px}
+.gv-frame{width:100%;height:62vh;max-height:680px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.gv-body{max-height:62vh;overflow:auto;font-size:.95rem;line-height:1.65;color:var(--text);padding:2px 2px 4px}
 .kcard.done .ktitle{text-decoration:line-through;opacity:.5}
 .kmeta{display:flex;align-items:center;gap:7px;margin-top:0;flex-wrap:wrap}
 .kproj{font-size:.68rem;font-weight:700;background:rgba(138,100,200,.16);color:var(--lavender);border-radius:6px;padding:2px 7px}
@@ -382,6 +382,7 @@ html:not(.dark) .tlist .tli{background:rgba(255,255,255,.5)}
 .ac-item small{color:var(--muted);font-weight:500}
 /* Task detail modal */
 .modal.wide{max-width:560px}
+.modal.xwide{max-width:780px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:560px){.f3{grid-template-columns:1fr}}
@@ -1124,40 +1125,44 @@ html.dark .pflag.p-high{color:var(--peach)}
 .logo b,#brandName,.topbar h2,#pageTitle{font-family:'Marcellus',Georgia,serif!important;font-weight:400!important;letter-spacing:.01em!important}
 /* date value -> Marcellus */
 .wbox-val,#dateLine{font-family:'Marcellus',Georgia,serif!important}
-/* ===== Timeline (vertical) ===== */
-.tl2-filter{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.tl2-chip{font-size:.78rem;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:6px 14px;cursor:pointer;transition:all .15s;font-family:inherit}
-html:not(.dark) .tl2-chip{background:#fff}
-.tl2-chip:hover{border-color:var(--lavender);color:var(--lavender)}
-.tl2-chip.on{background:var(--grad-iri);color:#fff;border-color:transparent}
-.tl2{max-width:780px;margin:6px auto 0}
-.tl2-month{font-family:'Marcellus',Georgia,serif;font-size:1.12rem;color:var(--text);margin:26px 0 4px;padding-left:94px}
-.tl2-month:first-child{margin-top:4px}
-.tl2-item{display:grid;grid-template-columns:80px 32px 1fr;align-items:start}
-.tl2-date{text-align:right;padding:22px 14px 0 0;font-size:.74rem;font-weight:700;color:var(--muted);white-space:nowrap}
-.tl2-rail{position:relative;display:flex;justify-content:center;align-self:stretch}
-.tl2-rail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--border)}
-.tl2-item:first-of-type .tl2-rail::before{top:24px}
-.tl2-item:last-child .tl2-rail::before{bottom:auto;height:24px}
-.tl2-node{position:absolute;top:22px;width:15px;height:15px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1px var(--border);z-index:1}
-.tl2-card{margin:11px 0;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--lavender);border-radius:14px;padding:13px 16px;box-shadow:var(--sh-1);transition:transform .2s var(--ease),box-shadow .2s,border-color .2s;cursor:pointer}
-.tl2-card.nolink{cursor:default}
-.tl2-card:hover{transform:translateX(4px);box-shadow:0 16px 32px -18px rgba(138,100,200,.55)}
-.tl2-card.nolink:hover{transform:none}
-.tl2-top{display:flex;align-items:center;gap:11px}
-.tl2-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
-.tl2-ic svg{width:17px;height:17px}
-.tl2-title{font-weight:700;font-size:.97rem;text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
-.tl2-card.done .tl2-title{text-decoration:line-through;opacity:.55}
-.tl2-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-left:43px}
-.tl2-range{font-size:.76rem;color:var(--muted);font-weight:600}
-.tl2-now{align-items:center}
-.tl2-now .tl2-date{color:var(--peach-deep);padding-top:0}
-.tl2-now .tl2-rail{align-self:stretch}
-.tl2-now .tl2-node{position:static;width:13px;height:13px;background:var(--peach);border-color:var(--bg);box-shadow:0 0 0 1px var(--peach-deep),0 0 10px rgba(243,185,142,.6)}
-.tl2-nowbar{margin:5px 0;height:2px;background:linear-gradient(90deg,var(--peach),transparent);border-radius:2px;display:flex;align-items:center}
-.tl2-nowlbl{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--peach-deep);background:rgba(243,185,142,.16);border-radius:99px;padding:3px 11px;white-space:nowrap}
-@media(max-width:600px){.tl2-month{padding-left:62px;font-size:1rem}.tl2-item{grid-template-columns:54px 26px 1fr}.tl2-date{padding:20px 8px 0 0;font-size:.67rem}.tl2-meta{padding-left:0}}
+/* ===== Timeline (gantt cards) ===== */
+.tlg-view{display:flex;gap:2px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:99px;padding:3px}
+html:not(.dark) .tlg-view{background:#fff}
+.tlg-view button{border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.78rem;padding:6px 16px;border-radius:99px;cursor:pointer}
+.tlg-view button.on{background:var(--grad-iri);color:#fff}
+.tlg-wrap{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--card);box-shadow:var(--sh-1)}
+.tlg-scroll{overflow-x:auto;position:relative}
+.tlg-inner{position:relative;min-width:max-content}
+.tlg-axis{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--border)}
+.tlg-months{display:flex;height:30px;align-items:flex-end}
+.tlg-mo{font-family:'Marcellus',Georgia,serif;font-size:.92rem;color:var(--text);padding:0 0 5px 10px;border-left:1px solid var(--border);white-space:nowrap;overflow:hidden}
+.tlg-days{display:flex;height:36px}
+.tlg-d{display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px solid rgba(138,100,200,.10);box-sizing:border-box;line-height:1.15}
+.tlg-d .dl{font-size:.56rem;color:var(--muted);font-weight:700;text-transform:uppercase}
+.tlg-d .dn{font-weight:800;font-size:.72rem;color:var(--text)}
+.tlg-d.wk{background:rgba(138,100,200,.05)}
+.tlg-d.tdy .dn{color:#fff;background:var(--grad-iri);width:19px;height:19px;border-radius:50%;display:grid;place-items:center}
+.tlg-d.tdy .dl{color:var(--lavender)}
+.tlg-body{position:relative}
+.tlg-row{position:relative;height:60px;border-bottom:1px solid var(--border)}
+.tlg-row:last-child{border-bottom:none}
+.tlg-bar{position:absolute;top:6px;height:47px;border-radius:13px;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--lavender);box-shadow:0 4px 14px -7px rgba(0,0,0,.5);padding:6px 14px;display:flex;flex-direction:column;justify-content:center;gap:2px;cursor:pointer;overflow:hidden;transition:transform .15s,box-shadow .2s;z-index:1}
+html:not(.dark) .tlg-bar{background:#fff;box-shadow:0 4px 12px -6px rgba(67,49,99,.25)}
+.tlg-bar.nolink{cursor:default}
+.tlg-bar:hover{transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(138,100,200,.55);z-index:3}
+.tlg-bar.nolink:hover{transform:none}
+.tlg-bar.grad{background:var(--grad-iri);border:none;color:#fff;box-shadow:0 12px 26px -8px rgba(138,100,200,.6)}
+.tlg-bar.grad .s{color:rgba(255,255,255,.88)}
+.tlg-bar.done{opacity:.5}
+.tlg-bar .t{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:capitalize;line-height:1.2}
+.tlg-bar .s{font-size:.71rem;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tlg-bar .s svg{width:11px;height:11px;flex:none;opacity:.9}
+.tlg-now{position:absolute;top:0;bottom:0;width:2px;background:var(--lavender);z-index:4;pointer-events:none}
+.tlg-now::before{content:"";position:absolute;top:-2px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--lavender);box-shadow:0 0 8px rgba(138,100,200,.85)}
+.tlg-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:.78rem;color:var(--muted)}
+.tlg-legend span{display:inline-flex;align-items:center;gap:6px}
+.tlg-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+@media(max-width:600px){.tlg-view button{padding:6px 12px}}
 /* ===== mobile polish pass (new components) ===== */
 @media(max-width:600px){
   .modal{padding:18px 16px;max-width:94vw;border-radius:18px}
@@ -1335,11 +1340,8 @@ html:not(.dark) .tl2-chip{background:#fff}
 <!-- TIMELINE -->
 <div class="tab" id="tab-timeline">
   <div class="section-head"><div><h2>Timeline</h2><p class="muted" style="font-size:.85rem;margin-top:3px">A visual journey of everything you have — tasks, events and trips on one canvas.</p></div>
-    <div class="tl2-filter">
-      <button class="tl2-chip on" id="tlf-all" onclick="setTlFilter('all')">All</button>
-      <button class="tl2-chip" id="tlf-task" onclick="setTlFilter('task')">Tasks</button>
-      <button class="tl2-chip" id="tlf-event" onclick="setTlFilter('event')">Events</button>
-      <button class="tl2-chip" id="tlf-trip" onclick="setTlFilter('trip')">Trips</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="tlg-view"><button id="tlv-day" onclick="setTlView('day')">Day</button><button id="tlv-week" class="on" onclick="setTlView('week')">Week</button><button id="tlv-month" onclick="setTlView('month')">Month</button></div>
       <button class="btn soft" onclick="tlToday()">Today</button>
     </div>
   </div>
@@ -1476,8 +1478,8 @@ function render(){ applyLang();
 function applyLang(){ var ar=(data.settings.lang==="ar"); document.documentElement.lang=ar?"ar":"en"; document.documentElement.dir=ar?"rtl":"ltr"; }
 
 /* ============ Timeline / Gantt ============ */
-var tlFilter="all";
-function setTlFilter(f){ tlFilter=f; ["all","task","event","trip"].forEach(function(k){var b=document.getElementById("tlf-"+k); if(b)b.classList.toggle("on",k===f);}); renderTimeline(); }
+var tlView="week"; var TLG_DW={day:64,week:38,month:16};
+function setTlView(v){ tlView=v; ["day","week","month"].forEach(function(k){var b=document.getElementById("tlv-"+k); if(b)b.classList.toggle("on",k===v);}); renderTimeline(); }
 function priColor(p){ return p==="high"?"#e0746b":(p==="low"?"#74c4b6":"#9b78d8"); }
 function tlParse(s){ if(!s) return null; var p=String(s).slice(0,10).split("-"); if(p.length<3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d)?null:d; }
 function tlDayIdx(d,start){ return Math.round((d-start)/86400000); }
@@ -1493,30 +1495,40 @@ var TL_NM={task:"Task",event:"Event",trip:"Trip"};
 function emptyTimeline(){ return '<div class="card" style="text-align:center;padding:56px 22px;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:46px;height:46px;opacity:.5"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><p style="margin:12px auto 0;max-width:360px;line-height:1.55">Nothing scheduled yet. Add tasks with dates, connect your calendar, or plan a trip — everything you have will flow onto this timeline.</p></div>'; }
 function renderTimeline(){
   var host=document.getElementById("tlBody"); if(!host) return;
-  var items=timelineItems(); if(tlFilter!=="all") items=items.filter(function(x){return x.type===tlFilter;});
+  var items=timelineItems();
   if(!items.length){ host.innerHTML=emptyTimeline(); return; }
   items.sort(function(a,b){return a.s-b.s || a.e-b.e;});
+  var dw=TLG_DW[tlView]||38;
   var today=new Date(); today.setHours(0,0,0,0);
-  var entries=items.map(function(it){return {d:it.s,it:it};}); entries.push({d:today,today:true});
-  entries.sort(function(a,b){return a.d-b.d || ((a.today?1:0)-(b.today?1:0));});
-  var curMonth="", html='<div class="tl2">';
-  entries.forEach(function(en){
-    var mk=en.d.getFullYear()+"-"+en.d.getMonth();
-    if(mk!==curMonth){ curMonth=mk; html+='<div class="tl2-month">'+esc(en.d.toLocaleDateString(undefined,{month:"long",year:"numeric"}))+'</div>'; }
-    if(en.today){ html+='<div class="tl2-item tl2-now"><div class="tl2-date">Today</div><div class="tl2-rail"><span class="tl2-node"></span></div><div class="tl2-nowbar"><span class="tl2-nowlbl">Today &middot; '+esc(fmtShort(isoLocal(today)))+'</span></div></div>'; return; }
-    var it=en.it; var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' → '+fmtShort(isoLocal(it.e))):'');
-    var bcls=it.type==="task"?"b-todo":it.type==="event"?"b-doing":"b-done";
-    html+='<div class="tl2-item"><div class="tl2-date">'+esc(fmtShort(isoLocal(it.s)))+'</div>'
-      +'<div class="tl2-rail"><span class="tl2-node" style="background:'+it.color+'"></span></div>'
-      +'<div class="tl2-card'+(it.done?' done':'')+(it.click?'':' nolink')+'" style="border-left-color:'+it.color+'"'+(it.click?' onclick="'+it.click+'"':'')+'>'
-        +'<div class="tl2-top"><span class="tl2-ic" style="background:'+it.color+'">'+TL_IC[it.type]+'</span><span class="tl2-title">'+esc(it.title)+'</span></div>'
-        +'<div class="tl2-meta"><span class="badge '+bcls+'">'+TL_NM[it.type]+'</span><span class="tl2-range">'+esc(range)+'</span></div>'
-      +'</div></div>';
+  var minD=items.reduce(function(m,it){return it.s<m?it.s:m;},items[0].s);
+  var maxD=items.reduce(function(m,it){return it.e>m?it.e:m;},items[0].e);
+  var start=new Date(Math.min(minD.getTime(),today.getTime())); start.setHours(0,0,0,0); start.setDate(start.getDate()-2);
+  var end=new Date(Math.max(maxD.getTime(),today.getTime())); end.setHours(0,0,0,0); end.setDate(end.getDate()+3);
+  var totalDays=tlDayIdx(end,start)+1; if(totalDays>900){ totalDays=900; }
+  var chartW=totalDays*dw;
+  var months={}, daysHtml="", DLT=["S","M","T","W","T","F","S"];
+  var every=dw<14?7:(dw<22?2:1);
+  for(var i=0;i<totalDays;i++){ var d=new Date(start.getTime()+i*86400000); var dow=d.getDay(); var isToday=d.getTime()===today.getTime(); var mk=d.getFullYear()+"-"+d.getMonth(); months[mk]=(months[mk]||0)+1;
+    var show=(i%every===0)||isToday;
+    daysHtml+='<div class="tlg-d'+((dow===5||dow===6)?' wk':'')+(isToday?' tdy':'')+'" style="width:'+dw+'px">'+(show?('<span class="dl">'+DLT[dow]+'</span><span class="dn">'+d.getDate()+'</span>'):'')+'</div>'; }
+  var moHtml=""; Object.keys(months).forEach(function(mk){ var p=mk.split("-"); var nm=new Date(+p[0],+p[1],1).toLocaleDateString(undefined,{month:"long",year:"numeric"}); moHtml+='<div class="tlg-mo" style="width:'+(months[mk]*dw)+'px">'+esc(nm)+'</div>'; });
+  var rowsHtml="";
+  items.forEach(function(it){
+    var left=tlDayIdx(it.s,start)*dw; var span=tlDayIdx(it.e,it.s)+1; var w=Math.max(span*dw-6,150);
+    var active=(it.s<=today && today<=it.e);
+    var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' → '+fmtShort(isoLocal(it.e))):'');
+    rowsHtml+='<div class="tlg-row"><div class="tlg-bar'+(active?' grad':'')+(it.done?' done':'')+(it.click?'':' nolink')+'" style="left:'+(left+3)+'px;width:'+w+'px'+(active?'':';border-left-color:'+it.color)+'"'+(it.click?' onclick="'+it.click+'"':'')+' title="'+esc(it.title)+' · '+esc(range)+'"><div class="t">'+esc(it.title)+'</div><div class="s">'+TL_IC[it.type]+esc(TL_NM[it.type])+' &middot; '+esc(range)+'</div></div></div>';
   });
-  html+='</div>';
-  host.innerHTML=html;
+  var todayX=tlDayIdx(today,start)*dw+dw/2;
+  host.innerHTML='<div class="tlg-wrap"><div class="tlg-scroll" id="tlScroll"><div class="tlg-inner" style="width:'+chartW+'px">'
+    +'<div class="tlg-axis"><div class="tlg-months">'+moHtml+'</div><div class="tlg-days">'+daysHtml+'</div></div>'
+    +'<div class="tlg-body" style="background-image:repeating-linear-gradient(90deg,rgba(138,100,200,.08) 0px,rgba(138,100,200,.08) 1px,transparent 1px,transparent '+dw+'px)">'+rowsHtml
+    +'<div class="tlg-now" style="left:'+todayX+'px"></div>'
+    +'</div></div></div></div>'
+    +'<div class="tlg-legend"><span><i style="background:#9b78d8"></i>Tasks</span><span><i style="background:#8a64c8"></i>Events</span><span><i style="background:#dd824b"></i>Trips</span><span><i style="background:var(--lavender)"></i>Now</span></div>';
+  var sc=document.getElementById("tlScroll"); if(sc){ sc.scrollLeft=Math.max(0, todayX - sc.clientWidth*0.3); }
 }
-function tlToday(){ var n=document.querySelector(".tl2-now"); if(n) n.scrollIntoView({behavior:"smooth",block:"center"}); else renderTimeline(); }
+function tlToday(){ renderTimeline(); }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function hijri(d){ try{ var x=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d); return /AH/i.test(x)?x:(x+" AH"); }catch(e){ return ""; } }
@@ -2037,7 +2049,7 @@ async function gmView(id){
       +'<div class="gv-subj">'+esc(subj)+'</div>'
       +bodyMarkup
       +'<div class="row"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn soft" onclick="gmOpen(\''+id+'\')">Open in Gmail</button><button class="btn" onclick="closeModal();replyTo(\''+id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1"/></svg>Reply</button></div>';
-    showModal(html,"wide");
+    showModal(html,"xwide");
     if(b.html){ var f=document.getElementById("gvFrame"); if(f) f.srcdoc=b.html; }
     var mm=gmailMsgs&&gmailMsgs.find(function(x){return x.id===id;}); if(mm&&mm.unread) gmMarkReadSilent(id);
   }catch(e){ showModal('<h4>Couldn’t load email</h4><p class="muted" style="font-size:.9rem">Try reconnecting Gmail and opening it again.</p><div class="row"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn" onclick="closeModal();gmOpen(\''+id+'\')">Open in Gmail</button></div>'); }
