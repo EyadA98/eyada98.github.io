@@ -1026,7 +1026,13 @@ html:not(.dark) .lbl-chip{background:#fff}
 .dash-row2 #gmailCard>#gmailBody{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 .dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:none!important;overflow:auto}
 .dash-row2 #gmailBody .gm-actions{margin-top:auto}
-.dash-row2 .dash-widget[data-w="gmail"]{min-height:0}
+@media(min-width:901px){
+  .dash-row2 .dash-widget[data-w="gmail"]{position:relative;min-height:0}
+  .dash-row2 .dash-widget[data-w="gmail"]>#gmailCard{position:absolute;top:0;left:0;right:0;bottom:0}
+}
+@media(max-width:900px){
+  .dash-row2 #gmailBody .gm-list{max-height:440px!important}
+}
 /* Tasks overview: colored priority labels */
 .pflag{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;flex:none;min-width:40px;text-align:center}
 .pflag.p-high{background:rgba(221,130,75,.22);color:var(--peach-deep)}
