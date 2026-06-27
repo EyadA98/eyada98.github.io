@@ -1022,14 +1022,10 @@ html:not(.dark) .lbl-chip{background:#fff}
 .wx-box .wx-t{font-size:1.95rem}
 @media(max-width:760px){.wbox{min-height:96px}.wbox .wtime{font-size:1.9rem}}
 /* Gmail: list fills the equal-height card, Sync/Open Gmail pinned to bottom */
-.dash-row2 #gmailCard{display:flex;flex-direction:column;overflow:hidden}
+.dash-row2 #gmailCard{display:flex;flex-direction:column;overflow:hidden;min-height:0}
 .dash-row2 #gmailCard>#gmailBody{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
-.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:none!important;overflow:auto}
+.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:620px!important;overflow:auto}
 .dash-row2 #gmailBody .gm-actions{margin-top:auto}
-@media(min-width:901px){
-  .dash-row2 .dash-widget[data-w="gmail"]{position:relative;min-height:0}
-  .dash-row2 .dash-widget[data-w="gmail"]>#gmailCard{position:absolute;top:0;left:0;right:0;bottom:0}
-}
 @media(max-width:900px){
   .dash-row2 #gmailBody .gm-list{max-height:440px!important}
 }
@@ -2436,7 +2432,27 @@ function renderHome(){
   var pc=document.getElementById("prayerCard"); if(pc) pc.style.display=(data.settings.showPrayer!==false)?"":"none";
   var pcty=document.getElementById("prayerCity"); if(pcty) pcty.textContent=data.settings.city?("· "+data.settings.city):"";
   if(data.settings.showPrayer!==false) loadPrayers();
+  requestAnimationFrame(syncDashHeights);
 }
+function syncDashHeights(){
+  var cal=document.getElementById("calCard"), gmCard=document.getElementById("gmailCard"), gmBody=document.getElementById("gmailBody");
+  if(!cal||!gmCard||!gmBody) return;
+  var list=gmBody.querySelector(".gm-list"); if(!list) return;
+  if(window.innerWidth<901){ list.style.removeProperty("max-height"); return; }
+  var row=cal.closest(".dash-row2");
+  if(!row||!row.contains(gmCard)||cal.style.display==="none"||gmCard.style.display==="none"){ list.style.removeProperty("max-height"); return; }
+  var prevAlign=row.style.alignItems;
+  row.style.alignItems="flex-start";
+  cal.style.setProperty("height","auto","important");
+  gmCard.style.setProperty("height","auto","important");
+  list.style.setProperty("max-height","none","important");
+  var calH=cal.offsetHeight, chrome=gmCard.offsetHeight-list.offsetHeight;
+  cal.style.removeProperty("height"); gmCard.style.removeProperty("height");
+  row.style.alignItems=prevAlign;
+  var cap=Math.max(160,Math.round(calH-chrome));
+  list.style.setProperty("max-height",cap+"px","important");
+}
+var _sdhT; window.addEventListener("resize",function(){ clearTimeout(_sdhT); _sdhT=setTimeout(syncDashHeights,150); });
 function appDef(){
   return [
     {key:"finance",nm:"Finance Board",tile:"tile-lav",url:data.settings.financeUrl,desc:"Net worth, budget, portfolio & zakat",
@@ -2885,6 +2901,7 @@ function renderGmail(){
     +istBadge(st==="connected"?"on":st==="connecting"?"sync":"off")+'</div>';
   var headC='<div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Inbox</h2>'+iconRow+'</div>';
   el.innerHTML=headC+list;
+  requestAnimationFrame(syncDashHeights);
 }
 function gmRow(m){
   var initials=((m.fromName||m.from||"?").trim().charAt(0)||"?").toUpperCase();
