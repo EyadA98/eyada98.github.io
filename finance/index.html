@@ -730,6 +730,16 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 .bi-form{display:grid;gap:4px}
 .bi-l{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:8px}
 .bi-i{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem}
+.sysel{position:relative}
+.sysel-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer}
+.sysel-cur{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sysel-cv{width:14px;height:14px;opacity:.6;flex:none;transition:transform .2s}
+.sysel.open .sysel-cv{transform:rotate(180deg)}
+.sysel-list{display:none;position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:5;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:5px;max-height:230px;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.sysel.open .sysel-list{display:block}
+.sysel-opt{padding:9px 11px;border-radius:8px;font-size:.88rem;color:var(--text);cursor:pointer}
+.sysel-opt:hover{background:rgba(138,100,200,.16)}
+.sysel-opt.on{background:linear-gradient(120deg,rgba(138,100,200,.32),rgba(243,185,142,.2));font-weight:700}
 .acc-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .acc-lbl{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--muted)}
 .acc-total{font-size:2.2rem;line-height:1.05;margin-top:4px;color:var(--text)}
@@ -1653,6 +1663,13 @@ const ACC_META={
   "Receivable":{c:"#e0a0d8",g:"Receivables",ic:ICONS.clock}
 };
 function hexA(h,a){ h=String(h).replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return `rgba(${r},${g},${b},${a})`; }
+function sysSelect(id,opts,val){
+  return `<div class="sysel" id="${id}" data-val="${esc(val)}">`
+    +`<button type="button" class="bi-i sysel-btn" onclick="syselToggle('${id}')"><span class="sysel-cur">${esc(val)}</span><svg class="sysel-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>`
+    +`<div class="sysel-list">${opts.map(o=>`<div class="sysel-opt${o===val?' on':''}" data-v="${esc(o)}" onclick="syselPick('${id}',this)">${esc(o)}</div>`).join("")}</div></div>`;
+}
+function syselToggle(id){ document.querySelectorAll('.sysel.open').forEach(function(e){ if(e.id!==id) e.classList.remove('open'); }); var el=document.getElementById(id); if(el) el.classList.toggle('open'); }
+function syselPick(id,opt){ var el=document.getElementById(id); if(!el) return; var v=opt.getAttribute('data-v'); el.dataset.val=v; var cur=el.querySelector('.sysel-cur'); if(cur) cur.textContent=v; el.querySelectorAll('.sysel-opt').forEach(function(o){ o.classList.toggle('on',o===opt); }); el.classList.remove('open'); }
 function renderAccounts(){
   const accs=data.accounts||[];
   const total=accs.reduce((s,a)=>s+(+a.balance||0),0);
@@ -1675,7 +1692,7 @@ function renderAccounts(){
     html+=`<div class="acc-sec"><span class="acc-ic" style="background:${hexA(m.c,.16)};color:${m.c}">${m.ic||ICONS.wallet}</span><span>${esc(m.g||t)}</span><span class="acc-cnt">${items.length}</span><span class="acc-ssub">${sar(sub)}</span></div>`;
     html+=`<div class="acc-grid">`+items.map(o=>{
       const bal=+o.a.balance||0, pc=total>0?bal/total*100:0, w=maxBal>0?bal/maxBal*100:0, zero=bal<=0;
-      return `<div class="acc-card${zero?' zero':''}" onclick="openAccount(${o.i})"><div class="acc-ct"><span class="acc-nm">${esc(o.a.name)}</span><span class="acc-chip" style="background:${hexA(m.c,.16)};color:${m.c}">${esc(o.a.type)}</span></div>`
+      return `<div class="acc-card${zero?' zero':''}" onclick="editAccount(${o.i})"><div class="acc-ct"><span class="acc-nm">${esc(o.a.name)}</span><span class="acc-chip" style="background:${hexA(m.c,.16)};color:${m.c}">${esc(o.a.type)}</span></div>`
         +`<div class="acc-bal marc">${fmt(bal)}</div>`
         +`<div class="acc-track"><div style="width:${w}%;background:${m.c}"></div></div>`
         +`<div class="acc-pc">${zero?'no balance':fmt(pc)+'% of total'}</div></div>`;
@@ -1683,17 +1700,17 @@ function renderAccounts(){
   });
   view.innerHTML=html||'<div class="be-empty" style="padding:14px 2px">No accounts yet. Tap &ldquo;+ Add account&rdquo; to start.</div>';
 }
-function openAccount(i){
+function editAccount(i){
   const a=data.accounts[i]; if(!a) return;
   showModal(`<h4>Edit account</h4><div class="bi-form">`
     +`<label class="bi-l">Name</label><input id="acName" class="bi-i" value="${esc(a.name)}">`
-    +`<label class="bi-l">Type</label><select id="acType" class="bi-i">${ACCOUNT_TYPES.map(tp=>`<option ${tp===a.type?"selected":""}>${tp}</option>`).join("")}</select>`
+    +`<label class="bi-l">Type</label>${sysSelect('acType',ACCOUNT_TYPES,a.type)}`
     +`<label class="bi-l">Balance</label><input id="acBal" class="bi-i" type="number" step="0.01" value="${a.balance}"></div>`
     +`<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" style="background:var(--red)" onclick="delAccount(${i})">Delete</button><div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveAccount(${i})">Save</button></div></div>`);
 }
-function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").value; a.balance=+document.getElementById("acBal").value||0; save(); closeModal(); render(); toast("Saved"); }
+function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").dataset.val||a.type; a.balance=+document.getElementById("acBal").value||0; save(); closeModal(); render(); toast("Saved"); }
 function delAccount(i){ data.accounts.splice(i,1); save(); closeModal(); render(); toast("Account removed"); }
-function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); openAccount(data.accounts.length-1); }
+function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); editAccount(data.accounts.length-1); }
 let accDragSrc=null;
 function accDragStart(e,i){ accDragSrc=i; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(_){}; const tr=e.target.closest("tr"); if(tr) tr.classList.add("bud-dragging"); }
 function accDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; const tr=e.target.closest("tr"); if(tr&&!tr.classList.contains("bud-dragging")){ document.querySelectorAll("#accountsTable .bud-over").forEach(x=>x.classList.remove("bud-over")); tr.classList.add("bud-over"); } }
@@ -1824,7 +1841,7 @@ function openBudgetItem(i){
   const act=data.actuals[month]||{}; const av=act[p.cat];
   showModal(`<h4>Edit budget item</h4><div class="bi-form">`
     +`<label class="bi-l">Category</label><input id="biCat" class="bi-i" value="${esc(p.cat)}">`
-    +`<label class="bi-l">Group</label><select id="biGroup" class="bi-i">${["Income","Fixed","Variable"].map(g=>`<option ${g===p.group?"selected":""}>${g}</option>`).join("")}</select>`
+    +`<label class="bi-l">Group</label>${sysSelect('biGroup',["Income","Fixed","Variable"],p.group)}`
     +`<label class="bi-l">Planned</label><input id="biPlan" class="bi-i" type="number" step="0.01" value="${p.amt}">`
     +`<label class="bi-l">Actual &middot; ${esc(month)}</label><input id="biAct" class="bi-i" type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${p.group==='Income'?fmt(p.amt):'0'}"></div>`
     +`<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" style="background:var(--red)" onclick="delBudgetItem(${i})">Delete</button><div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveBudgetItem(${i})">Save</button></div></div>`);
@@ -1833,7 +1850,7 @@ function saveBudgetItem(i){
   const p=data.plan[i]; if(!p) return;
   const month=document.getElementById("monthSel").value||Object.keys(data.actuals).sort().pop();
   const oldCat=p.cat; const newCat=(document.getElementById("biCat").value||"").trim()||oldCat;
-  p.group=document.getElementById("biGroup").value; p.amt=+document.getElementById("biPlan").value||0;
+  p.group=document.getElementById("biGroup").dataset.val||p.group; p.amt=+document.getElementById("biPlan").value||0;
   if(newCat!==oldCat){ Object.keys(data.actuals).forEach(m=>{ const mm=data.actuals[m]; if(mm&&mm[oldCat]!==undefined){ mm[newCat]=mm[oldCat]; delete mm[oldCat]; } }); }
   p.cat=newCat;
   const av=document.getElementById("biAct").value;
