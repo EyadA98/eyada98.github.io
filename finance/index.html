@@ -105,6 +105,13 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
 @keyframes floatA{from{transform:translate(0,0) scale(1)}to{transform:translate(-44px,28px) scale(1.08)}}
 @keyframes floatB{from{transform:translate(0,0) scale(1)}to{transform:translate(52px,-26px) scale(1.06)}}
 .hero>*{position:relative;z-index:1}
+.hero .hero-stars,.hero .hero-moon{display:none}
+.hero>.hero-stars,.hero>.hero-moon{z-index:0}
+.hero.tr-morning{background:radial-gradient(75% 60% at 18% 18%,rgba(123,90,210,.55),transparent 60%),radial-gradient(65% 55% at 82% 28%,rgba(95,200,165,.45),transparent 60%),radial-gradient(90% 70% at 62% 100%,rgba(255,190,130,.4),transparent 55%),linear-gradient(160deg,#241b48,#161033)}
+.hero.tr-afternoon{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(243,185,142,.55),transparent 70%),radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.5),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
+.hero.tr-evening{background:radial-gradient(60% 50% at 78% 22%,rgba(130,95,210,.4),transparent 60%),radial-gradient(50% 42% at 28% 62%,rgba(70,120,205,.28),transparent 60%),linear-gradient(160deg,#0e0b24,#07060f)}
+.hero.tr-evening .hero-stars{display:block;position:absolute;inset:0;background-image:radial-gradient(1.2px 1.2px at 12% 28%,#fff,transparent),radial-gradient(1px 1px at 30% 52%,rgba(255,255,255,.8),transparent),radial-gradient(1.1px 1.1px at 47% 24%,#fff,transparent),radial-gradient(1px 1px at 66% 44%,rgba(255,255,255,.75),transparent),radial-gradient(1.2px 1.2px at 82% 30%,#fff,transparent),radial-gradient(1px 1px at 91% 60%,rgba(255,255,255,.7),transparent);background-repeat:no-repeat}
+.hero.tr-evening .hero-moon{display:block;position:absolute;top:16px;left:54%;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#efeaff,#b9aede);box-shadow:0 0 22px rgba(200,190,255,.5)}
 .hero .eyebrow{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.65;font-weight:700;animation:fadeUp .55s var(--ease) .26s backwards}
 .hero .amount{font-size:clamp(1.9rem,3.3vw,3.2rem);font-weight:900;letter-spacing:-.03em;margin:5px 0 6px;animation:fadeUp .6s var(--ease) .34s backwards}
 .hero .delta{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:5px 14px;border-radius:99px;background:rgba(255,255,255,.14);backdrop-filter:blur(4px);animation:fadeUp .6s var(--ease) .44s backwards}
@@ -694,6 +701,63 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
   #roiTable{min-width:720px}
   #zakaTable{min-width:720px}
   #budgetTable{min-width:680px}
+}
+.bud-flow-h{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.bud-flow-bar{display:flex;height:14px;gap:3px;margin-top:9px}
+.bud-flow-bar>div{border-radius:6px}
+.bud-flow-leg{display:flex;flex-wrap:wrap;gap:14px;margin-top:9px;font-size:.76rem;color:var(--muted)}
+.bud-flow-leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.bud-sec{display:flex;align-items:center;gap:10px;margin:18px 0 4px;font-weight:800;font-size:.95rem;color:var(--text)}
+.bud-sec .be-ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none}
+.bud-sec .be-ic svg{width:16px;height:16px}
+.bud-sec .be-sub{margin-left:auto;font-family:'Marcellus',serif;font-weight:400;font-size:1.05rem}
+.bud-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:12px;margin-top:4px}
+.bud-env{border-radius:14px;padding:14px 15px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.bud-env:hover{transform:translateY(-2px);box-shadow:var(--sh-1)}
+.bud-env.t-under{background:linear-gradient(160deg,rgba(93,204,165,.13),transparent);border-color:rgba(93,204,165,.3)}
+.bud-env.t-over{background:linear-gradient(160deg,rgba(240,144,128,.14),transparent);border-color:rgba(240,144,128,.32)}
+.bud-env.t-on{background:linear-gradient(160deg,rgba(138,100,200,.13),transparent);border-color:rgba(138,100,200,.3)}
+.be-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.be-nm{font-weight:700;font-size:.95rem;color:var(--text)}
+.be-grp{font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(138,100,200,.16);color:var(--muted)}
+.be-amt{margin-top:9px}
+.be-a{font-family:'Marcellus',serif;font-size:1.35rem;color:var(--text)}
+.be-p{font-size:.72rem;color:var(--muted)}
+.be-track{height:9px;border-radius:5px;background:rgba(130,130,150,.2);margin-top:11px;overflow:hidden}
+.be-track>div{height:100%;border-radius:5px}
+.be-diff{font-size:.72rem;font-weight:700;margin-top:9px}
+.be-empty{grid-column:1/-1;color:var(--muted);font-size:.85rem;padding:6px 2px}
+.bi-form{display:grid;gap:4px}
+.bi-l{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:8px}
+.bi-i{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem}
+.acc-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.acc-lbl{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.acc-total{font-size:2.2rem;line-height:1.05;margin-top:4px;color:var(--text)}
+.acc-sub{font-size:.74rem;color:var(--muted);margin-top:4px}
+.acc-allocwrap{flex:1;min-width:240px}
+.acc-alloc{display:flex;height:14px;gap:3px;border-radius:7px;overflow:hidden}
+.acc-alloc>div{min-width:2px}
+.acc-legend{display:flex;flex-wrap:wrap;gap:13px;margin-top:11px;font-size:.74rem;color:var(--muted)}
+.acc-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.acc-sec{display:flex;align-items:center;gap:10px;margin:20px 0 6px;font-weight:800;font-size:.92rem;color:var(--text)}
+.acc-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+.acc-ic svg{width:16px;height:16px}
+.acc-cnt{font-size:.72rem;color:var(--muted);font-weight:600}
+.acc-ssub{margin-left:auto;font-family:'Marcellus',serif;font-weight:400;font-size:1.1rem}
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px}
+.acc-card{border:1px solid var(--border);background:var(--card);border-radius:14px;padding:14px 15px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.acc-card:hover{transform:translateY(-3px);box-shadow:var(--sh-1)}
+.acc-card.zero{opacity:.5}
+.acc-ct{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.acc-nm{font-weight:700;font-size:.92rem;color:var(--text)}
+.acc-chip{font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.acc-bal{font-size:1.5rem;margin-top:9px;color:var(--text)}
+.acc-track{height:6px;border-radius:4px;background:rgba(130,130,150,.2);margin-top:10px;overflow:hidden}
+.acc-track>div{height:100%;border-radius:4px}
+.acc-pc{font-size:.68rem;color:var(--muted);margin-top:6px}
+@media(max-width:560px){.acc-grid{grid-template-columns:1fr}.acc-head{flex-direction:column;align-items:stretch}.acc-allocwrap{min-width:0}}
+@media(max-width:560px){.bud-grid{grid-template-columns:1fr}
+  /*keepclose*/
   #snapTable{min-width:640px}
 }
 
@@ -774,7 +838,8 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
     </linearGradient>
   </defs></svg>
 
-  <div class="hero">
+  <div class="hero" id="ovHero">
+    <div class="hero-stars"></div><div class="hero-moon"></div>
     <div>
       <div class="greet">
         <h2><span id="greetLine">Welcome back</span>, <span id="userName">Eyad</span> 👋
@@ -825,12 +890,12 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 <div class="tab" id="tab-accounts">
   <div class="section-head"><h2>Accounts &amp; Balances <span class="pill">SAR</span></h2>
     <button class="btn" onclick="addAccount()">+ Add account</button></div>
-  <div class="card"><table id="accountsTable">
-    <thead><tr><th class="bud-dragh"></th><th>Name</th><th>Type</th><th class="num">Balance</th><th></th></tr></thead>
-    <tbody></tbody>
-    <tfoot><tr><td class="bud-dragh"></td><td>Total</td><td></td><td class="num" id="accountsTotal" data-foot="sum"></td><td></td></tr></tfoot>
-  </table></div>
-  <p class="note">Edits save automatically and update net worth everywhere.</p>
+  <div class="card acc-head">
+    <div class="acc-hl"><div class="acc-lbl">Total balance</div><div class="acc-total marc" id="accTotalBig">—</div><div class="acc-sub" id="accMeta"></div></div>
+    <div class="acc-allocwrap"><div class="acc-alloc" id="accAlloc"></div><div class="acc-legend" id="accLegend"></div></div>
+  </div>
+  <div id="accountsView"></div>
+  <p class="note">Tap a card to edit it. Changes save automatically and update net worth everywhere.</p>
 </div>
 
 <div class="tab" id="tab-portfolio">
@@ -873,7 +938,8 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
         <button class="btn soft" onclick="deleteMonth()" style="color:var(--red)">Delete month</button>
       </div>
     </div>
-    <table id="budgetTable"><thead><tr><th class="bud-dragh" aria-hidden="true"></th><th>Category</th><th>Group</th><th class="num">Planned</th><th class="num">Actual</th><th class="num">Diff</th><th></th></tr></thead><tbody></tbody></table>
+    <div id="budgetFlow" style="margin:2px 0 14px"></div>
+    <div id="budgetEnvs" class="bud-envs"></div>
     <p class="note">Planned = your monthly budget · Actual = what really happened in the selected month. Income rows appear first; leave Actual blank to keep the planned figure.</p>
   </div>
   <div class="card chart-card" style="margin-top:18px"><h3>Planned vs Actual</h3><div class="chart-sub">Where the month went vs the plan</div><canvas id="budgetChart"></canvas></div>
@@ -1252,6 +1318,7 @@ function goTab(name){
   const p = PAGES[name]||["",""];
   document.getElementById("crumb").textContent = p[0];
   document.getElementById("pageTitle").textContent = p[1];
+  try{ localStorage.setItem("financeBoard.view", name); }catch(e){}
   render();
   window.scrollTo({top:0});
 }
@@ -1466,6 +1533,7 @@ function renderGreeting(){
   const h = new Date().getHours();
   const g = h<12? "Good morning" : h<17? "Good afternoon" : "Good evening";
   document.getElementById("greetLine").textContent = g;
+  try{ var ksaH; try{ ksaH=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',hour12:false}).format(new Date()); }catch(_){ ksaH=h; } ksaH=ksaH%24; var slot=(ksaH>=4&&ksaH<11)?"morning":(ksaH>=11&&ksaH<16)?"afternoon":"evening"; var heroEl=document.getElementById("ovHero"); if(heroEl){ heroEl.classList.remove("tr-morning","tr-afternoon","tr-evening"); heroEl.classList.add("tr-"+slot); } }catch(e){}
   document.getElementById("userName").textContent = data.userName || "there";
   const t = totals();
   const prev = prevSnapshot();
@@ -1575,17 +1643,57 @@ function renderKPIs(){
 }
 
 /* ---------- Accounts ---------- */
+const ACC_META={
+  "Bank Account":{c:"#8a64c8",g:"Banks",ic:ICONS.coins},
+  "Savings":{c:"#9a78d4",g:"Savings",ic:ICONS.piggy},
+  "Investment Account":{c:"#6da8ff",g:"Investments",ic:ICONS.chart},
+  "Wallet":{c:"#f3b98e",g:"Wallets",ic:ICONS.wallet},
+  "Cash":{c:"#5dcca5",g:"Cash",ic:ICONS.coins},
+  "Credit Account":{c:"#e58fb6",g:"Credit",ic:ICONS.cart},
+  "Receivable":{c:"#e0a0d8",g:"Receivables",ic:ICONS.clock}
+};
+function hexA(h,a){ h=String(h).replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return `rgba(${r},${g},${b},${a})`; }
 function renderAccounts(){
-  document.querySelector("#accountsTable tbody").innerHTML = data.accounts.map((a,i)=>`<tr ondragover="accDragOver(event)" ondrop="accDrop(event,${i})">
-    <td class="bud-drag" draggable="true" ondragstart="accDragStart(event,${i})" ondragend="accDragEnd(event)" title="Drag to reorder" aria-label="Drag to reorder">⠿</td>
-    <td><input value="${esc(a.name)}" onchange="upd('accounts',${i},'name',this.value)" aria-label="Account name"></td>
-    <td><select onchange="upd('accounts',${i},'type',this.value)" aria-label="Account type">
-      ${ACCOUNT_TYPES.map(tp=>`<option ${tp===a.type?"selected":""}>${tp}</option>`).join("")}</select></td>
-    <td class="num"><input type="number" step="0.01" value="${a.balance}" onchange="upd('accounts',${i},'balance',+this.value)" aria-label="Balance"></td>
-    <td><button class="btn danger" onclick="del('accounts',${i})" aria-label="Delete account">✕</button></td></tr>`).join("");
-  document.getElementById("accountsTotal").textContent = sar(totals().acc);
+  const accs=data.accounts||[];
+  const total=accs.reduce((s,a)=>s+(+a.balance||0),0);
+  const bigEl=document.getElementById("accTotalBig"); if(bigEl) bigEl.textContent=sar(total);
+  const metaEl=document.getElementById("accMeta"); if(metaEl){ const types=new Set(accs.map(a=>a.type)).size; metaEl.textContent=`${accs.length} account${accs.length!==1?"s":""} · ${types} type${types!==1?"s":""}`; }
+  const byType={}; accs.forEach(a=>{ byType[a.type]=(byType[a.type]||0)+(+a.balance||0); });
+  const present=ACCOUNT_TYPES.filter(t=>(byType[t]||0)>0);
+  const allocEl=document.getElementById("accAlloc");
+  if(allocEl) allocEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||{c:"#8a64c8"}; const w=total>0?byType[t]/total*100:0; return `<div style="width:${w}%;background:${m.c}"></div>`; }).join("")||'<div style="width:100%;background:rgba(130,130,150,.25)"></div>';
+  const legEl=document.getElementById("accLegend");
+  if(legEl) legEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||{c:"#8a64c8",g:t}; const pc=total>0?byType[t]/total*100:0; return `<span><i style="background:${m.c}"></i>${esc(m.g||t)} · ${fmt(pc)}%</span>`; }).join("");
+  const view=document.getElementById("accountsView"); if(!view) return;
+  const maxBal=Math.max.apply(null, accs.map(a=>+a.balance||0).concat([1]));
+  let html="";
+  ACCOUNT_TYPES.forEach(t=>{
+    const items=accs.map((a,i)=>({a,i})).filter(o=>o.a.type===t);
+    if(!items.length) return;
+    const m=ACC_META[t]||{c:"#8a64c8",g:t,ic:ICONS.wallet};
+    const sub=items.reduce((s,o)=>s+(+o.a.balance||0),0);
+    html+=`<div class="acc-sec"><span class="acc-ic" style="background:${hexA(m.c,.16)};color:${m.c}">${m.ic||ICONS.wallet}</span><span>${esc(m.g||t)}</span><span class="acc-cnt">${items.length}</span><span class="acc-ssub">${sar(sub)}</span></div>`;
+    html+=`<div class="acc-grid">`+items.map(o=>{
+      const bal=+o.a.balance||0, pc=total>0?bal/total*100:0, w=maxBal>0?bal/maxBal*100:0, zero=bal<=0;
+      return `<div class="acc-card${zero?' zero':''}" onclick="openAccount(${o.i})"><div class="acc-ct"><span class="acc-nm">${esc(o.a.name)}</span><span class="acc-chip" style="background:${hexA(m.c,.16)};color:${m.c}">${esc(o.a.type)}</span></div>`
+        +`<div class="acc-bal marc">${fmt(bal)}</div>`
+        +`<div class="acc-track"><div style="width:${w}%;background:${m.c}"></div></div>`
+        +`<div class="acc-pc">${zero?'no balance':fmt(pc)+'% of total'}</div></div>`;
+    }).join("")+`</div>`;
+  });
+  view.innerHTML=html||'<div class="be-empty" style="padding:14px 2px">No accounts yet. Tap &ldquo;+ Add account&rdquo; to start.</div>';
 }
-function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); }
+function openAccount(i){
+  const a=data.accounts[i]; if(!a) return;
+  showModal(`<h4>Edit account</h4><div class="bi-form">`
+    +`<label class="bi-l">Name</label><input id="acName" class="bi-i" value="${esc(a.name)}">`
+    +`<label class="bi-l">Type</label><select id="acType" class="bi-i">${ACCOUNT_TYPES.map(tp=>`<option ${tp===a.type?"selected":""}>${tp}</option>`).join("")}</select>`
+    +`<label class="bi-l">Balance</label><input id="acBal" class="bi-i" type="number" step="0.01" value="${a.balance}"></div>`
+    +`<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" style="background:var(--red)" onclick="delAccount(${i})">Delete</button><div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveAccount(${i})">Save</button></div></div>`);
+}
+function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").value; a.balance=+document.getElementById("acBal").value||0; save(); closeModal(); render(); toast("Saved"); }
+function delAccount(i){ data.accounts.splice(i,1); save(); closeModal(); render(); toast("Account removed"); }
+function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); openAccount(data.accounts.length-1); }
 let accDragSrc=null;
 function accDragStart(e,i){ accDragSrc=i; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(_){}; const tr=e.target.closest("tr"); if(tr) tr.classList.add("bud-dragging"); }
 function accDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; const tr=e.target.closest("tr"); if(tr&&!tr.classList.contains("bud-dragging")){ document.querySelectorAll("#accountsTable .bud-over").forEach(x=>x.classList.remove("bud-over")); tr.classList.add("bud-over"); } }
@@ -1684,7 +1792,57 @@ function renderBudget(){
     kpi("Planned Remaining", `<span class="${(incPlanned-expPlanned)>=0?"pos":"neg"}">${sar(incPlanned-expPlanned)}</span>`, `${fmt(incPlanned?(incPlanned-expPlanned)/incPlanned*100:0)}% planned savings`, "tile-lav", ICONS.piggy) +
     kpi(`Actual Saved · ${month}`, `<span class="${(incActual-actExp)>=0?"pos":"neg"}">${sar(incActual-actExp)}</span>`, `Spent ${fmt(actExp)} · ${fmt(incActual?(incActual-actExp)/incActual*100:0)}% saved`, "tile-peach", ICONS.chart);
 
-  document.querySelector("#budgetTable tbody").innerHTML = data.plan.map((p,i)=>{
+  const onPlan=Math.min(actExp,expPlanned), over=Math.max(0,actExp-expPlanned), unspent=Math.max(0,incActual-actExp), base=Math.max(incActual,actExp,1);
+  const fb=document.getElementById("budgetFlow");
+  if(fb) fb.innerHTML=`<div class="bud-flow-h"><span>Income flow &middot; ${esc(month)}</span><span>${incActual?fmt(actExp/incActual*100):0}% spent</span></div>`
+    +`<div class="bud-flow-bar"><div style="width:${onPlan/base*100}%;background:linear-gradient(90deg,#8a64c8,#cbb0f7)"></div><div style="width:${over/base*100}%;background:#f0a08e"></div><div style="width:${unspent/base*100}%;background:#5dcca5"></div></div>`
+    +`<div class="bud-flow-leg"><span><i style="background:#8a64c8"></i>On-plan ${fmt(onPlan)}</span><span><i style="background:#f0a08e"></i>Overspend ${fmt(over)}</span><span><i style="background:#5dcca5"></i>Unspent ${fmt(unspent)}</span></div>`;
+  const incIdx=[],expIdx=[]; data.plan.forEach((p,i)=>{ (p.group==="Income"?incIdx:expIdx).push(i); });
+  const envs=document.getElementById("budgetEnvs");
+  if(envs) envs.innerHTML=
+    `<div class="bud-sec"><span class="be-ic" style="background:rgba(93,204,165,.18);color:#5dcca5">${ICONS.wallet}</span><span>Income</span><span class="be-sub">${sar(incActual)}</span></div>`
+    +`<div class="bud-grid">${incIdx.map(i=>budCard(i,month,act)).join("")||'<div class="be-empty">No income items yet.</div>'}</div>`
+    +`<div class="bud-sec"><span class="be-ic" style="background:rgba(243,185,142,.2);color:#f3b98e">${ICONS.cart}</span><span>Expenses</span><span class="be-sub">${sar(actExp)}</span></div>`
+    +`<div class="bud-grid">${expIdx.map(i=>budCard(i,month,act)).join("")||'<div class="be-empty">No expense items yet.</div>'}</div>`;
+}
+function budCard(i,month,act){
+  const p=data.plan[i]; const isInc=p.group==="Income"; const planned=+p.amt||0;
+  const av=act[p.cat]; const aNum=av!==undefined?(+av||0):(isInc?planned:0);
+  let cls,color,diffTxt;
+  if(isInc){ if(aNum>=planned){ cls='t-under'; color='#5dcca5'; diffTxt=aNum>planned?('+'+fmt(aNum-planned)+' extra'):'received in full'; } else { cls='t-over'; color='#f0a08e'; diffTxt=fmt(planned-aNum)+' short'; } }
+  else { if(aNum>planned){ cls='t-over'; color='#f0a08e'; diffTxt='+'+fmt(aNum-planned)+' over'; } else if(aNum<planned){ cls='t-under'; color='#5dcca5'; diffTxt=fmt(planned-aNum)+' left'; } else { cls='t-on'; color='#cbb0f7'; diffTxt='on budget'; } }
+  const fillPct=planned>0?Math.min(aNum/planned*100,100):(aNum>0?100:0);
+  const dc=cls==='t-over'?'#f3a895':(cls==='t-under'?'#7fe3c0':'#cbb0f7');
+  return `<div class="bud-env ${cls}" onclick="openBudgetItem(${i})"><div class="be-top"><span class="be-nm">${esc(p.cat)}</span><span class="be-grp">${esc(p.group)}</span></div>`
+    +`<div class="be-amt"><span class="be-a">${fmt(aNum)}</span><span class="be-p"> / ${fmt(planned)} ${isInc?'expected':'planned'}</span></div>`
+    +`<div class="be-track"><div style="width:${fillPct}%;background:${color}"></div></div>`
+    +`<div class="be-diff" style="color:${dc}">${diffTxt}</div></div>`;
+}
+function openBudgetItem(i){
+  const p=data.plan[i]; if(!p) return;
+  const month=document.getElementById("monthSel").value||Object.keys(data.actuals).sort().pop();
+  const act=data.actuals[month]||{}; const av=act[p.cat];
+  showModal(`<h4>Edit budget item</h4><div class="bi-form">`
+    +`<label class="bi-l">Category</label><input id="biCat" class="bi-i" value="${esc(p.cat)}">`
+    +`<label class="bi-l">Group</label><select id="biGroup" class="bi-i">${["Income","Fixed","Variable"].map(g=>`<option ${g===p.group?"selected":""}>${g}</option>`).join("")}</select>`
+    +`<label class="bi-l">Planned</label><input id="biPlan" class="bi-i" type="number" step="0.01" value="${p.amt}">`
+    +`<label class="bi-l">Actual &middot; ${esc(month)}</label><input id="biAct" class="bi-i" type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${p.group==='Income'?fmt(p.amt):'0'}"></div>`
+    +`<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" style="background:var(--red)" onclick="delBudgetItem(${i})">Delete</button><div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveBudgetItem(${i})">Save</button></div></div>`);
+}
+function saveBudgetItem(i){
+  const p=data.plan[i]; if(!p) return;
+  const month=document.getElementById("monthSel").value||Object.keys(data.actuals).sort().pop();
+  const oldCat=p.cat; const newCat=(document.getElementById("biCat").value||"").trim()||oldCat;
+  p.group=document.getElementById("biGroup").value; p.amt=+document.getElementById("biPlan").value||0;
+  if(newCat!==oldCat){ Object.keys(data.actuals).forEach(m=>{ const mm=data.actuals[m]; if(mm&&mm[oldCat]!==undefined){ mm[newCat]=mm[oldCat]; delete mm[oldCat]; } }); }
+  p.cat=newCat;
+  const av=document.getElementById("biAct").value;
+  if(!data.actuals[month]) data.actuals[month]={};
+  if(av===""||av==null) delete data.actuals[month][newCat]; else data.actuals[month][newCat]=+av;
+  save(); closeModal(); render(); toast("Saved");
+}
+function delBudgetItem(i){ data.plan.splice(i,1); save(); closeModal(); render(); toast("Item removed"); }
+function _budgetTableLegacy(month,act){ return data.plan.map((p,i)=>{
     const isInc = p.group==="Income";
     const av = act[p.cat];
     const aNum = av!==undefined?(+av||0):(isInc?(+p.amt||0):0);
@@ -1711,7 +1869,7 @@ async function deleteMonth(){
     delete data.actuals[m]; save(); renderMonthSel(); render(); toast("Deleted "+m);
   }
 }
-function addPlanItem(){ data.plan.push({cat:"New item",group:"Variable",amt:0}); save(); render(); }
+function addPlanItem(){ data.plan.push({cat:"New item",group:"Variable",amt:0}); save(); render(); openBudgetItem(data.plan.length-1); }
 async function addMonth(){
   const m = await promptModal("Add month", "Format: YYYY-MM", new Date().toISOString().slice(0,7));
   if(m && /^\d{4}-\d{2}$/.test(m.trim())){ const k=m.trim(); if(!data.actuals[k]) data.actuals[k]={}; save(); renderMonthSel(k); render(); }
@@ -2212,12 +2370,11 @@ async function initAuth(){
 
 /* ---------- Render ---------- */
 /* ---------- Table enhancements: sort, search, mobile cards ---------- */
-const SEARCHABLE=["accountsTable","holdingsTable","purchTable","roiTable","assetsTable","zakaTable","snapTable"];
+const SEARCHABLE=["holdingsTable","purchTable","roiTable","assetsTable","zakaTable","snapTable"];
 const tblState={};
 const FILTERS={
   purchTable:[{col:1,label:"Item"},{col:4,label:"Year",year:true}],
   holdingsTable:[{col:1,label:"Type"}],
-  accountsTable:[{col:1,label:"Type"}],
   roiTable:[{col:1,label:"Type"},{col:2,label:"Year",year:true}],
   zakaTable:[{col:0,label:"Year",year:true}],
   snapTable:[{col:0,label:"Year",year:true}]
@@ -2392,6 +2549,7 @@ function render(){
   try{ enhanceTables(); }catch(e){}
 }
 render();
+try{ var _fv=localStorage.getItem("financeBoard.view"); if(_fv&&_fv!=="overview"&&PAGES[_fv]&&document.getElementById("tab-"+_fv)) goTab(_fv); }catch(e){}
 animateNumbers();                 // count-up entrance on first load
 initAuth();                       // restore session -> load cloud data -> THEN fetch live prices
 
