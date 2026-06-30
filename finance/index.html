@@ -111,7 +111,7 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
 .hero.tr-afternoon{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(243,185,142,.55),transparent 70%),radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.5),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
 .hero.tr-evening{background:radial-gradient(60% 50% at 78% 22%,rgba(130,95,210,.4),transparent 60%),radial-gradient(50% 42% at 28% 62%,rgba(70,120,205,.28),transparent 60%),linear-gradient(160deg,#0e0b24,#07060f)}
 .hero.tr-evening .hero-stars{display:block;position:absolute;inset:0;background-image:radial-gradient(1.2px 1.2px at 12% 28%,#fff,transparent),radial-gradient(1px 1px at 30% 52%,rgba(255,255,255,.8),transparent),radial-gradient(1.1px 1.1px at 47% 24%,#fff,transparent),radial-gradient(1px 1px at 66% 44%,rgba(255,255,255,.75),transparent),radial-gradient(1.2px 1.2px at 82% 30%,#fff,transparent),radial-gradient(1px 1px at 91% 60%,rgba(255,255,255,.7),transparent);background-repeat:no-repeat}
-.hero.tr-evening .hero-moon{display:block;position:absolute;top:16px;left:54%;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#efeaff,#b9aede);box-shadow:0 0 22px rgba(200,190,255,.5)}
+.hero.tr-evening .hero-moon{display:block;position:absolute;top:16px;right:18px;left:auto;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#efeaff,#b9aede);box-shadow:0 0 22px rgba(200,190,255,.5)}
 .hero .eyebrow{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.65;font-weight:700;animation:fadeUp .55s var(--ease) .26s backwards}
 .hero .amount{font-size:clamp(1.9rem,3.3vw,3.2rem);font-weight:900;letter-spacing:-.03em;margin:5px 0 6px;animation:fadeUp .6s var(--ease) .34s backwards}
 .hero .delta{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:5px 14px;border-radius:99px;background:rgba(255,255,255,.14);backdrop-filter:blur(4px);animation:fadeUp .6s var(--ease) .44s backwards}
@@ -1006,8 +1006,8 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 
 <nav class="bottombar" id="bottomBar" role="navigation" aria-label="Mobile navigation">
   <button data-tab="overview" class="active" aria-label="Overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Home</button>
-  <button data-tab="portfolio" aria-label="Portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6.2"/></svg>Portfolio</button>
   <button data-tab="budget" aria-label="Budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h.01"/></svg>Budget</button>
+  <button data-tab="portfolio" aria-label="Portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6.2"/></svg>Portfolio</button>
   <button data-tab="zaka" aria-label="Zakat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 3a8.7 8.7 0 1 0 8 12A10 10 0 0 1 13 3z"/></svg>Zakat</button>
   <button onclick="openMore()" aria-label="More tabs"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>More</button>
 </nav>
@@ -1182,11 +1182,11 @@ function promptModal(title, msg, val){
 }
 function openMore(){
   showModal(`<h4>More</h4><div class="modal-list">
+    <button class="btn soft" onclick="closeModal();goTab('snapshots')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> Trend &amp; Snapshots</button>
     <button class="btn soft" onclick="closeModal();goTab('accounts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M3 21h18M4 10h16L12 3 4 10zM6 10v8M10 10v8M14 10v8M18 10v8"/></svg> Accounts</button>
     <button class="btn soft" onclick="closeModal();goTab('purchases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h10L20 8H6"/></svg> Purchases</button>
     <button class="btn soft" onclick="closeModal();goTab('roi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M3 17l6-6 4 4 7-7M14 8h6v6"/></svg> ROI Tracker</button>
     <button class="btn soft" onclick="closeModal();goTab('assets')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8zM3 8l9 5 9-5M12 21v-8"/></svg> Assets</button>
-    <button class="btn soft" onclick="closeModal();goTab('snapshots')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> Snapshots</button>
   </div>`);
 }
 
