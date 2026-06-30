@@ -680,6 +680,9 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 .bud-drag:active{cursor:grabbing}
 .bud-dragging{opacity:.45}
 .bud-over td{box-shadow:inset 0 2px 0 0 var(--lavender)}
+.bud-section td{padding:15px 8px 5px;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:none;background:none!important}
+.bud-section.inc td{color:var(--green)}
+.bud-section td:first-child{padding-right:0}
 @media(max-width:640px){.bud-drag,.bud-dragh{display:none!important}}
 /* === Tablet/iPad: keep wide tables scrolling inside their card === */
 .card:has(table){overflow-x:auto;overflow-y:visible}
@@ -823,9 +826,9 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
   <div class="section-head"><h2>Accounts &amp; Balances <span class="pill">SAR</span></h2>
     <button class="btn" onclick="addAccount()">+ Add account</button></div>
   <div class="card"><table id="accountsTable">
-    <thead><tr><th>Name</th><th>Type</th><th class="num">Balance</th><th></th></tr></thead>
+    <thead><tr><th class="bud-dragh"></th><th>Name</th><th>Type</th><th class="num">Balance</th><th></th></tr></thead>
     <tbody></tbody>
-    <tfoot><tr><td>Total</td><td></td><td class="num" id="accountsTotal" data-foot="sum"></td><td></td></tr></tfoot>
+    <tfoot><tr><td class="bud-dragh"></td><td>Total</td><td></td><td class="num" id="accountsTotal" data-foot="sum"></td><td></td></tr></tfoot>
   </table></div>
   <p class="note">Edits save automatically and update net worth everywhere.</p>
 </div>
@@ -1573,7 +1576,8 @@ function renderKPIs(){
 
 /* ---------- Accounts ---------- */
 function renderAccounts(){
-  document.querySelector("#accountsTable tbody").innerHTML = data.accounts.map((a,i)=>`<tr>
+  document.querySelector("#accountsTable tbody").innerHTML = data.accounts.map((a,i)=>`<tr ondragover="accDragOver(event)" ondrop="accDrop(event,${i})">
+    <td class="bud-drag" draggable="true" ondragstart="accDragStart(event,${i})" ondragend="accDragEnd(event)" title="Drag to reorder" aria-label="Drag to reorder">⠿</td>
     <td><input value="${esc(a.name)}" onchange="upd('accounts',${i},'name',this.value)" aria-label="Account name"></td>
     <td><select onchange="upd('accounts',${i},'type',this.value)" aria-label="Account type">
       ${ACCOUNT_TYPES.map(tp=>`<option ${tp===a.type?"selected":""}>${tp}</option>`).join("")}</select></td>
@@ -1582,6 +1586,12 @@ function renderAccounts(){
   document.getElementById("accountsTotal").textContent = sar(totals().acc);
 }
 function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); }
+let accDragSrc=null;
+function accDragStart(e,i){ accDragSrc=i; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(_){}; const tr=e.target.closest("tr"); if(tr) tr.classList.add("bud-dragging"); }
+function accDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; const tr=e.target.closest("tr"); if(tr&&!tr.classList.contains("bud-dragging")){ document.querySelectorAll("#accountsTable .bud-over").forEach(x=>x.classList.remove("bud-over")); tr.classList.add("bud-over"); } }
+function accDrop(e,target){ e.preventDefault(); let src=accDragSrc; if(src==null){ const d=+e.dataTransfer.getData("text/plain"); src=isNaN(d)?null:d; } if(src==null||src===target){ _accClean(); accDragSrc=null; return; } const item=data.accounts.splice(src,1)[0]; data.accounts.splice(target>src?target-1:target,0,item); accDragSrc=null; save(); render(); }
+function accDragEnd(){ _accClean(); accDragSrc=null; }
+function _accClean(){ document.querySelectorAll("#accountsTable .bud-over,#accountsTable .bud-dragging").forEach(x=>x.classList.remove("bud-over","bud-dragging")); }
 
 /* ---------- Portfolio (derived) + Watchlist ---------- */
 function renderHoldings(){
@@ -1590,7 +1600,7 @@ function renderHoldings(){
     const ld = priceLoading && liveable(h);
     const fl = flashSet.has(h.name);
     return `<tr>
-    <td style="font-weight:700">${esc(h.name)} ${h.live?'<span class="pill live">LIVE</span>':""}</td>
+    <td style="font-weight:700"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:5px">${esc(h.name)}${h.live?'<span class="pill live" style="margin-inline-start:0">LIVE</span>':""}</div></td>
     <td><select onchange="updMeta('${esc(h.name)}','assetType',this.value)" aria-label="Asset type">
       ${ASSET_TYPES.map(tp=>`<option ${tp===h.assetType?"selected":""}>${tp}</option>`).join("")}</select></td>
     <td><input value="${esc(h.symbol)}" placeholder="e.g. 2222.SR" style="width:110px" onchange="updMeta('${esc(h.name)}','symbol',this.value.trim())" aria-label="Ticker symbol"></td>
@@ -1679,7 +1689,10 @@ function renderBudget(){
     const av = act[p.cat];
     const aNum = av!==undefined?(+av||0):(isInc?(+p.amt||0):0);
     const d = isInc ? (aNum-(+p.amt||0)) : ((+p.amt||0)-aNum);
-    return `<tr${isInc?' class="bud-income"':''} ondragover="budDragOver(event)" ondrop="budDrop(event,${i})">
+    const sec = isInc?'income':'expense';
+    const prevSec = i>0 ? (data.plan[i-1].group==="Income"?'income':'expense') : null;
+    const hdr = (sec!==prevSec) ? `<tr class="bud-section ${isInc?'inc':'exp'}"><td class="bud-dragh"></td><td colspan="6">${isInc?'Income':'Expenses'}</td></tr>` : '';
+    return hdr + `<tr${isInc?' class="bud-income"':''} ondragover="budDragOver(event)" ondrop="budDrop(event,${i})">
       <td class="bud-drag" draggable="true" ondragstart="budDragStart(event,${i})" ondragend="budDragEnd(event)" title="Drag to reorder" aria-label="Drag to reorder">⠿</td>
       <td><input value="${esc(p.cat)}" onchange="upd('plan',${i},'cat',this.value)" aria-label="Category"></td>
       <td><select onchange="upd('plan',${i},'group',this.value)" aria-label="Group">${["Income","Fixed","Variable"].map(g=>`<option ${g===p.group?"selected":""}>${g}</option>`).join("")}</select></td>
