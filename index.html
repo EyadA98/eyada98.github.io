@@ -412,7 +412,7 @@ html:not(.dark) .tlist .tli{background:rgba(255,255,255,.5)}
 .ac-item small{color:var(--muted);font-weight:500}
 /* Task detail modal */
 .modal.wide{max-width:680px}
-.modal.xwide{max-width:780px}
+.modal.xwide{max-width:min(940px,94vw)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:560px){.f3{grid-template-columns:1fr}}
@@ -1242,6 +1242,14 @@ html:not(.dark) .td-side{background:rgba(0,0,0,.02)}
 .td-cmt-b{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;padding:8px 11px;flex:1;min-width:0}
 html:not(.dark) .td-cmt-b{background:rgba(0,0,0,.025)}
 .td-cmt-au{font-weight:700;font-size:.8rem;display:flex;align-items:center;gap:8px}
+.td-cmt-actions{margin-left:auto;display:inline-flex;gap:2px;opacity:0;transition:opacity .15s}
+.td-cmt:hover .td-cmt-actions{opacity:1}
+.td-cmt-ic{background:none;border:none;cursor:pointer;color:var(--muted);padding:3px;border-radius:7px;display:inline-flex;line-height:0}
+.td-cmt-ic:hover{background:rgba(255,255,255,.08);color:var(--text)}
+.td-cmt-ic svg{width:14px;height:14px}
+.td-cmt-edit{width:100%;min-height:54px;resize:vertical;font-size:.85rem}
+.td-cmt-eact{display:flex;justify-content:flex-end;gap:8px;margin-top:7px}
+@media(hover:none){.td-cmt-actions{opacity:1}}
 .td-cmt-tm{font-weight:500;font-size:.66rem;color:var(--muted)}
 .td-cmt-tx{font-size:.85rem;color:var(--text);margin-top:2px;word-wrap:break-word}
 .td-cmt-add{display:flex;gap:8px;align-items:center;margin-top:6px}
@@ -1809,6 +1817,7 @@ function go(name){
   const p=PAGES[name]||["",""]; document.getElementById("crumb").textContent=p[0]; document.getElementById("pageTitle").textContent=p[1];
   if(name==="home"&&user&&supa){ try{ loadFinance(); loadTravel(); }catch(e){} }
   if(name==="mindmap"){ try{ initMindMap(); }catch(e){ console.error(e); } }
+  try{ localStorage.setItem("hubView",name); }catch(e){}
   window.scrollTo({top:0}); render();
 }
 function openMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s)s.classList.add("show"); }
@@ -2812,9 +2821,9 @@ function openTask(id,presetStatus){
     +(isNew?'':'<div class="muted" style="font-size:.72rem;margin-top:16px">Created '+new Date(t.created||Date.now()).toLocaleDateString()+(t.updated?(' &middot; updated '+new Date(t.updated).toLocaleDateString()):'')+'</div>')
     +'</div>'
     +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="delTask(\''+t.id+'\');closeModal()">Delete</button>')+(isNew?'':'<button class="btn" style="background:linear-gradient(120deg,#1E915F,#6fcfb6);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 8px 20px rgba(30,145,95,.3)" onclick="completeTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:15px;height:15px"><path d="M5 12l5 5L20 7"/></svg>Mark complete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveTask(\''+(t.id||"")+'\')">'+(isNew?"Create task":"Save")+'</button></div>';
-  showModal(html,"wide");
+  showModal(html,"xwide");
   (t.subs||[]).forEach(function(s){ addSubRow(s.t,s.done); });
-  if(!isNew) tdRenderComments(t.id);
+  _tdEditCid=null; if(!isNew) tdRenderComments(t.id);
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
   setTimeout(function(){ var e=document.getElementById("tdTitle"); if(e) e.focus(); },30);
 }
@@ -2822,15 +2831,36 @@ function tdRenderComments(id){
   var el=document.getElementById("tdComments"); if(!el) return;
   var t=(data.tasks||[]).find(function(x){return x.id===id;}); var cs=(t&&t.comments)||[];
   var who=(data.profile&&data.profile.name)||"You"; var ini=(who.charAt(0)||"Y").toUpperCase();
-  var list=cs.map(function(c){ var a=esc(c.author||"You"); return '<div class="td-cmt"><span class="av">'+esc(((c.author||"Y").charAt(0)||"Y").toUpperCase())+'</span><div class="td-cmt-b"><div class="td-cmt-au">'+a+'<span class="td-cmt-tm">'+relTime(c.ts)+'</span></div><div class="td-cmt-tx">'+esc(c.text)+'</div></div></div>'; }).join("");
+  var list=cs.map(function(c){
+    var a=esc(c.author||"You"); var av=esc(((c.author||"Y").charAt(0)||"Y").toUpperCase());
+    var meta='<span class="td-cmt-tm">'+relTime(c.ts)+(c.edited?' &middot; edited':'')+'</span>';
+    if(_tdEditCid===c.id){
+      return '<div class="td-cmt"><span class="av">'+av+'</span><div class="td-cmt-b"><textarea class="fld td-cmt-edit" id="tdCmtEdit" rows="2">'+esc(c.text)+'</textarea><div class="td-cmt-eact"><button type="button" class="btn soft sm" onclick="_tdEditCid=null;tdRenderComments(\''+id+'\')">Cancel</button><button type="button" class="btn sm" onclick="tdSaveComment(\''+id+'\',\''+c.id+'\')">Save</button></div></div></div>';
+    }
+    return '<div class="td-cmt"><span class="av">'+av+'</span><div class="td-cmt-b"><div class="td-cmt-au">'+a+meta+'<span class="td-cmt-actions"><button type="button" class="td-cmt-ic" title="Edit" onclick="tdEditComment(\''+id+'\',\''+c.id+'\')">'+IC.edit+'</button><button type="button" class="td-cmt-ic" title="Delete" onclick="tdDelComment(\''+id+'\',\''+c.id+'\')">'+IC.trash+'</button></span></div><div class="td-cmt-tx">'+esc(c.text)+'</div></div></div>';
+  }).join("");
   if(!cs.length) list='<div class="muted" style="font-size:.8rem;padding:4px 0 2px">No comments yet.</div>';
   el.innerHTML='<div class="td-cmt-l">'+list+'</div><div class="td-cmt-add"><span class="av">'+esc(ini)+'</span><input class="fld" id="tdCmtIn" placeholder="Write a comment&hellip;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();tdAddComment(\''+id+'\');}"><button type="button" class="btn sm" onclick="tdAddComment(\''+id+'\')">Send</button></div>';
 }
+var _tdEditCid=null;
 function tdAddComment(id){
   var inp=document.getElementById("tdCmtIn"); if(!inp) return; var v=inp.value.trim(); if(!v) return;
   var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
   t.comments=t.comments||[]; t.comments.push({id:uid(),text:v,ts:Date.now(),author:(data.profile&&data.profile.name)||"You"}); t.updated=Date.now();
   save(); tdRenderComments(id);
+}
+function tdEditComment(id,cid){ _tdEditCid=cid; tdRenderComments(id); setTimeout(function(){ var e=document.getElementById("tdCmtEdit"); if(e){ e.focus(); try{ e.setSelectionRange(e.value.length,e.value.length); }catch(_){} } },20); }
+function tdSaveComment(id,cid){
+  var e=document.getElementById("tdCmtEdit"); if(!e) return; var v=e.value.trim();
+  var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
+  var c=(t.comments||[]).find(function(x){return x.id===cid;});
+  if(c){ if(!v){ t.comments=t.comments.filter(function(x){return x.id!==cid;}); } else { c.text=v; c.edited=Date.now(); } t.updated=Date.now(); }
+  _tdEditCid=null; save(); tdRenderComments(id);
+}
+function tdDelComment(id,cid){
+  var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
+  t.comments=(t.comments||[]).filter(function(x){return x.id!==cid;}); t.updated=Date.now();
+  if(_tdEditCid===cid) _tdEditCid=null; save(); tdRenderComments(id);
 }
 function addSubRow(text,done){
   var host=document.getElementById("tdSubs"); if(!host) return;
@@ -3782,6 +3812,7 @@ function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var 
 function priFlag(p){ var m={high:"High",med:"Med",low:"Low"}; p=p||"med"; return '<span class="pflag p-'+p+'">'+(m[p]||"Med")+'</span>'; }
 /* ============ Boot ============ */
 render();
+try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
 setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); } },30000);
 setInterval(function(){ try{ updateNotifBadge(); }catch(e){} },60000);
