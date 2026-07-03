@@ -107,7 +107,7 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
 .hero>*{position:relative;z-index:1}
 .hero .hero-stars,.hero .hero-moon{display:none}
 .hero>.hero-stars,.hero>.hero-moon{z-index:0}
-.hero.tr-morning{background:radial-gradient(75% 60% at 18% 18%,rgba(123,90,210,.55),transparent 60%),radial-gradient(65% 55% at 82% 28%,rgba(95,200,165,.45),transparent 60%),radial-gradient(90% 70% at 62% 100%,rgba(255,190,130,.4),transparent 55%),linear-gradient(160deg,#241b48,#161033)}
+.hero.tr-morning{background:radial-gradient(55% 60% at 82% 20%,rgba(255,205,120,.55),transparent 60%),radial-gradient(70% 65% at 16% 34%,rgba(110,165,255,.55),transparent 65%),linear-gradient(160deg,#25336b,#141d47)}
 .hero.tr-afternoon{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(243,185,142,.55),transparent 70%),radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.5),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
 .hero.tr-evening{background:radial-gradient(60% 50% at 78% 22%,rgba(130,95,210,.4),transparent 60%),radial-gradient(50% 42% at 28% 62%,rgba(70,120,205,.28),transparent 60%),linear-gradient(160deg,#0e0b24,#07060f)}
 .hero.tr-evening .hero-stars{display:block;position:absolute;inset:0;background-image:radial-gradient(1.2px 1.2px at 12% 28%,#fff,transparent),radial-gradient(1px 1px at 30% 52%,rgba(255,255,255,.8),transparent),radial-gradient(1.1px 1.1px at 47% 24%,#fff,transparent),radial-gradient(1px 1px at 66% 44%,rgba(255,255,255,.75),transparent),radial-gradient(1.2px 1.2px at 82% 30%,#fff,transparent),radial-gradient(1px 1px at 91% 60%,rgba(255,255,255,.7),transparent);background-repeat:no-repeat}
@@ -1211,6 +1211,9 @@ function finMoreGo(name){ closeFinMore(); goTab(name); }
 
 /* ---------- Live prices ---------- */
 const OZ_GRAMS = 31.1034768, USD_SAR = 3.75;
+/* FX→SAR rates for non-Tadawul quotes. A holding can set meta.priceCur (e.g. "USD","AED");
+   unset defaults to USD to preserve prior behaviour. */
+const FX_SAR = {SAR:1, USD:3.75, AED:1.021, EUR:4.06, GBP:4.77, KWD:12.2};
 let priceLoading = false, flashSet = new Set();
 function relTime(d){
   const s = Math.round((Date.now()-d.getTime())/1000);
@@ -1271,8 +1274,9 @@ async function refreshPrices(manual){
         const j = await fetchJSON("https://api.gold-api.com/price/"+sym);
         const usdOz = +(j && (j.price ?? j.Price));
         if(!isFinite(usdOz) || usdOz<=0) throw new Error("bad gold payload");
-        m.price = usdOz * USD_SAR / OZ_GRAMS;     // USD/oz → SAR/gram (24k)
-        m.live = true; ok.push(h.name);
+        var _gp = usdOz * USD_SAR / OZ_GRAMS;     // USD/oz → SAR/gram (24k)
+        if(m.price>0 && (_gp>m.price*10 || _gp<m.price/10)) throw new Error("implausible gold move");
+        m.price = _gp; m.live = true; ok.push(h.name);
       } else if(m.symbol){
         const y = "https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(m.symbol)+"?interval=1d&range=1d";
         const j = await fetchJSON(y);
@@ -1280,7 +1284,8 @@ async function refreshPrices(manual){
         let p = meta && (meta.regularMarketPrice ?? meta.previousClose);
         if(!isFinite(+p) || +p<=0) throw new Error("bad quote payload");
         p = +p;
-        if(!/\.SR$/i.test(m.symbol)) p *= USD_SAR; // non-Tadawul quotes assumed USD
+        if(!/\.SR$/i.test(m.symbol)) p *= (m.priceCur && FX_SAR[m.priceCur]!=null ? FX_SAR[m.priceCur] : USD_SAR); // FX→SAR (defaults USD)
+        if(m.price>0 && (p>m.price*10 || p<m.price/10)) throw new Error("implausible price move");
         m.price = p; m.live = true; ok.push(h.name);
       }
     }catch(e){
@@ -2083,129 +2088,11 @@ async function resetData(){
   }
 }
 
-/* ---------- Cloud sync (jsonblob.com · zero-signup · last-write-wins) ---------- */
-const SYNC_KEY = "financeBoard.sync";
-const BLOB_API = "https://jsonblob.com/api/jsonBlob";
-let syncCfg = null; try{ syncCfg = JSON.parse(localStorage.getItem(SYNC_KEY)||"null"); }catch(e){}
-let syncTimer = null;
-function setSyncState(s){
-  const el = document.getElementById("syncStatus"); if(!el) return;
-  const map = {off:"", idle:"\u2601 ready", busy:"\u2601 syncing\u2026", synced:"\u2601 synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}), error:"\u2601 sync error"};
-  el.textContent = map[s]||"";
-  el.style.color = s==="error" ? "var(--red)" : "";
-}
-function scheduleSync(){ if(!syncCfg) return; clearTimeout(syncTimer); syncTimer = setTimeout(pushSync, 1500); }
-async function pushSync(){
-  if(!syncCfg) return;
-  try{
-    setSyncState("busy");
-    const r = await fetch(BLOB_API+"/"+encodeURIComponent(syncCfg.id),
-      {method:"PUT", headers:{"Content-Type":"application/json","Accept":"application/json"}, body:JSON.stringify(data)});
-    if(!r.ok) throw new Error(r.status);
-    setSyncState("synced");
-  }catch(e){ setSyncState("error"); }
-}
-async function pullSync(){
-  if(!syncCfg){ setSyncState("off"); return; }
-  try{
-    setSyncState("busy");
-    const r = await fetch(BLOB_API+"/"+encodeURIComponent(syncCfg.id), {headers:{"Accept":"application/json"}});
-    if(!r.ok) throw new Error(r.status);
-    const rec = await r.json();
-    if(rec && rec.accounts){
-      if(!data.updatedAt || (rec.updatedAt && rec.updatedAt > data.updatedAt)){
-        data = fill(migrate(rec));
-        localStorage.setItem(KEY, JSON.stringify(data));
-        render();
-        toast("\u2601 Loaded latest data from cloud");
-      } else if(data.updatedAt && (!rec.updatedAt || data.updatedAt > rec.updatedAt)){
-        return pushSync();   // local is newer \u2192 upload it
-      }
-    } else {
-      return pushSync();     // empty space \u2192 first upload
-    }
-    setSyncState("synced");
-  }catch(e){ setSyncState("error"); }
-}
-async function createSyncSpace(){
-  closeModal(); toast("\u2601 Creating your private sync space\u2026");
-  let id = null;
-  try{
-    const r = await fetch(BLOB_API, {method:"POST", headers:{"Content-Type":"application/json","Accept":"application/json"}, body:JSON.stringify(data)});
-    if(r.ok) id = (r.headers.get("Location")||r.headers.get("location")||"").split("/").pop() || null;
-  }catch(e){}
-  if(!id){
-    try{   // retry through a proxy that exposes the Location header
-      const r2 = await fetch("https://corsproxy.io/?url="+encodeURIComponent(BLOB_API),
-        {method:"POST", headers:{"Content-Type":"application/json","Accept":"application/json"}, body:JSON.stringify(data)});
-      if(r2.ok) id = (r2.headers.get("Location")||r2.headers.get("location")||"").split("/").pop() || null;
-    }catch(e){}
-  }
-  if(id && /^[A-Za-z0-9-]{8,}$/.test(id)){
-    syncCfg = {id};
-    localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg));
-    setSyncState("synced");
-    toast("\u2601 Sync space created");
-    pushSync();
-    openSync();
-    return;
-  }
-  setSyncState("error");
-  manualCreateModal();
-}
-function manualCreateModal(){
-  showModal(`<h4>One small manual step</h4>
-    <p>Your browser blocked automatic creation. Doing it by hand takes about 20 seconds:</p>
-    <p style="margin-bottom:14px;line-height:1.9">
-      <b>1.</b> Open <a href="https://jsonblob.com" target="_blank" rel="noopener" style="color:var(--violet);font-weight:700">jsonblob.com</a> in a new tab<br>
-      <b>2.</b> Click the <b>save</b> \ud83d\udcbe icon there<br>
-      <b>3.</b> Copy the long code from the address bar (everything after jsonblob.com/)<br>
-      <b>4.</b> Paste it below</p>
-    <input id="sId" placeholder="Paste the code or full URL here" onkeydown="if(event.key==='Enter')connectExisting()">
-    <div class="row">
-      <button class="btn soft" onclick="closeModal()">Cancel</button>
-      <button class="btn" onclick="connectExisting()">Connect</button>
-    </div>`);
-}
-function openSync(){
-  if(syncCfg){
-    const link = location.protocol.startsWith("http") ? location.origin+location.pathname+"#sync="+syncCfg.id : "";
-    showModal(`<h4>Cloud Sync \u2014 connected</h4>
-      <p>This device syncs automatically. To connect your other devices${link?", just open this link there once":""}:</p>
-      ${link? `<input value="${esc(link)}" readonly onclick="this.select()" style="margin-bottom:10px">` : ""}
-      <p style="margin-bottom:8px">Or paste this sync code into \u2601 Sync on the other device:</p>
-      <input value="${esc(syncCfg.id)}" readonly onclick="this.select()">
-      <div class="row">
-        <button class="btn danger" style="margin-right:auto" onclick="closeModal();disconnectSync()">Disconnect</button>
-        <button class="btn soft" onclick="closeModal()">Close</button>
-        <button class="btn" onclick="if(navigator.clipboard)navigator.clipboard.writeText(${link? "'"+esc(link)+"'" : "'"+esc(syncCfg.id)+"'"});toast('Copied')">Copy ${link? "link":"code"}</button>
-      </div>`);
-  } else {
-    showModal(`<h4>Cloud Sync</h4>
-      <p>Sync your data across phone and computer automatically \u2014 no account, no signup. One tap creates a private sync space with an unguessable code; your devices share it.</p>
-      <input id="sId" placeholder="Have a code from another device? Paste it here" onkeydown="if(event.key==='Enter')connectExisting()">
-      <div class="row">
-        <button class="btn soft" onclick="closeModal()">Cancel</button>
-        <button class="btn soft" onclick="connectExisting()">Connect with code</button>
-        <button class="btn" onclick="createSyncSpace()">Create sync space</button>
-      </div>`);
-  }
-}
-function connectExisting(){
-  const id = (document.getElementById("sId").value.trim().split("#sync=").pop()||"").split("/").pop();
-  closeModal();
-  if(!id){ toast("Paste the sync code first"); return; }
-  syncCfg = {id};
-  localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg));
-  toast("\u2601 Connected \u2014 syncing\u2026");
-  pullSync();
-}
-function disconnectSync(){ syncCfg = null; localStorage.removeItem(SYNC_KEY); setSyncState("off"); toast("Sync disconnected"); }
+/* Legacy jsonblob.com sync removed for security (unauthenticated third-party store). */
 
 /* ============================================================
-   ACCOUNTS & CLOUD DATA (Supabase, free tier)
-   Overrides the legacy sync above: setSyncState/scheduleSync are
-   redefined here, so saves now push to the signed-in user's row.
+   ACCOUNTS & CLOUD DATA (Supabase, free tier) — sole cloud backend.
+   Saves push to the signed-in user's row; pulls merge (see mergeFinance).
    ============================================================ */
 const SUPABASE_URL = "https://vulzuubswllmeypxwznq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bHp1dWJzd2xsbWV5cHh3em5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyOTY2MjYsImV4cCI6MjA5Nzg3MjYyNn0.Lmrf-2I-jFaof--__snquTrpa-992y7S1hBhowQtvFY";
@@ -2243,6 +2130,27 @@ function mergeSnaps(primary, extra){
     else if((s.ts&&(!ex.ts||s.ts>ex.ts)) || (!ex.ts&&Object.keys(s).length>Object.keys(ex).length)){ map[s.date]=s; } });
   return Object.keys(map).map(function(k){return map[k];}).sort(function(x,y){return String(x.date).localeCompare(String(y.date));});
 }
+function _mergeMap(a,b){ var o=Object.assign({}, a||{}); var src=b||{}; Object.keys(src).forEach(function(k){ o[k]=src[k]; }); return o; }
+/* Safe cross-device merge for the (id-less, index-addressed) finance model:
+   never let a populated list be wiped by an empty one; union the key-addressed
+   maps (meta, actuals) and date-keyed snapshots; for two populated lists the
+   newer document wins (true item-level merge would need stable record ids). */
+function mergeFinance(local, cloud){
+  if(!cloud) return local; if(!local) return cloud;
+  var lu=local.updatedAt||"", cu=cloud.updatedAt||"";
+  var newer=(lu>=cu)?local:cloud, older=(lu>=cu)?cloud:local;
+  var out=Object.assign({}, older, newer);
+  ["accounts","purchases","plan","roi","assetsInv","zaka","watchlist"].forEach(function(k){
+    var ln=Array.isArray(local[k])?local[k]:[], cn=Array.isArray(cloud[k])?cloud[k]:[];
+    if(ln.length && !cn.length) out[k]=ln;
+    else if(cn.length && !ln.length) out[k]=cn;
+    else out[k]=(newer[k]!=null?newer[k]:older[k]);
+  });
+  out.snapshots=mergeSnaps(local.snapshots, cloud.snapshots);
+  out.meta=_mergeMap(older.meta, newer.meta);
+  out.actuals=_mergeMap(older.actuals, newer.actuals);
+  return out;
+}
 async function pullCloud(){
   if(!user) return;
   try{
@@ -2251,13 +2159,12 @@ async function pullCloud(){
     if(error) throw error;
     const rec = rows && rows[0] && rows[0].data;
     if(rec && rec.accounts){
-      if(!data.updatedAt || (rec.updatedAt && rec.updatedAt > data.updatedAt)){
-        const localSnaps = (data.snapshots||[]).slice();
-        data = fill(migrate(rec));
-        data.snapshots = mergeSnaps(data.snapshots, localSnaps);
-        try{ localStorage.setItem(KEY+":"+user.id, JSON.stringify(data)); }catch(e){}
-        render();
-      } else if(data.updatedAt > (rec.updatedAt||"")) return pushCloud();
+      const merged = fill(migrate(mergeFinance(data, rec)));
+      const changed = JSON.stringify(merged) !== JSON.stringify(data);
+      data = merged;
+      try{ localStorage.setItem(KEY+":"+user.id, JSON.stringify(data)); }catch(e){}
+      if(changed) render();
+      pushCloud();   // write the merged result back so both devices converge
     } else return pushCloud();   // first login on this account: upload current data
     setSyncState("synced");
   }catch(e){ _syncFail(e); }
