@@ -3084,8 +3084,8 @@ function renderCalConn(){
 function calConnect(){ googleConnect(); }
 async function loadCalEvents(token){
   try{
-    var tMin=new Date(); tMin.setHours(0,0,0,0); var tMax=new Date(); tMax.setDate(tMax.getDate()+30);
-    var url="https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=30&timeMin="+tMin.toISOString()+"&timeMax="+tMax.toISOString();
+    var tMin=new Date(); tMin.setDate(tMin.getDate()-60); tMin.setHours(0,0,0,0); var tMax=new Date(); tMax.setDate(tMax.getDate()+120);
+    var url="https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin="+tMin.toISOString()+"&timeMax="+tMax.toISOString();
     var r=await fetch(url,{headers:{Authorization:"Bearer "+token}});
     if(!r.ok) throw new Error("cal http "+r.status);
     var j=await r.json();
@@ -3430,11 +3430,11 @@ async function initAuth(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
-    if(signedIn){ closeAuth(); const d=loadLocal(KEY+":"+u.id); if(d){ data=d; } render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back ✓"); }
+    if(signedIn){ closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back ✓"); }
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); loadTravel(); pullHub(); }
+  if(session){ user=session.user; accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
