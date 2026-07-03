@@ -1795,8 +1795,10 @@ function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setI
 let _hubTimer=null;
 function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
 async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){ console.error("Hub sync failed:",(e&&e.message)||e); } }
-function _mergeArr(a,b){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0, cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); ["notes","tasks","routines","links","goals"].forEach(function(k){ base[k]=_mergeArr(local[k],cloud[k]); }); return base; }
+function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
+function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
+function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; if(tomb[id]!=null&&(+tomb[id]||0)>=xu) return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
+function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||(+ld[k]||0)>(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; ["notes","tasks","routines","links","goals"].forEach(function(k){ base[k]=_mergeArr(local[k],cloud[k],tomb); }); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -2063,7 +2065,7 @@ function rtDoComplete(id){ var r=(data.routines||[]).find(function(x){return x.i
 function rtHistory(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return; var h=r.history||[];
   showModal('<h4>History &middot; '+esc(r.title)+'</h4><div class="tm">'+(h.length?h.map(function(x){return '<div style="display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:6px;flex:none"></div><div style="flex:1"><div style="font-weight:600;font-size:.86rem">'+esc(new Date(x.ts).toLocaleString())+'</div>'+(x.note?'<div class="muted" style="font-size:.84rem;margin-top:2px">'+esc(x.note)+'</div>':'')+'</div></div>';}).join(""):'<p class="muted" style="padding:14px 0">No completions logged yet.</p>')+'</div><div class="row"><button class="btn soft" onclick="closeModal()">Close</button></div>');
 }
-function rtDelete(id){ if(!confirm("Delete this routine and its history?"))return; data.routines=(data.routines||[]).filter(function(x){return x.id!==id;}); save(); render(); toast("Routine deleted"); }
+function rtDelete(id){ if(!confirm("Delete this routine and its history?"))return; tombstone({id:id}); data.routines=(data.routines||[]).filter(function(x){return x.id!==id;}); save(); render(); toast("Routine deleted"); }
 var _rDays=[];
 function openRoutine(id){
   var r=id?(data.routines||[]).find(function(x){return x.id===id;}):null; var isNew=!r;
@@ -2885,13 +2887,13 @@ function saveTask(id){
   save(); closeModal(); render(); toast(id?"Task updated":"Task created");
 }
 function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ if(t.status==="done"){ t.status="backlog"; t.done=false; } else { t.status="done"; t.done=true; } t.updated=Date.now(); save(); render(); } }
-function delTask(id){ data.tasks=(data.tasks||[]).filter(function(x){return x.id!==id;}); save(); render(); }
+function delTask(id){ tombstone({id:id}); data.tasks=(data.tasks||[]).filter(function(x){return x.id!==id;}); save(); render(); }
 
 /* ---- Notes ---- */
 var notesShowArchived=false;
 function toggleArchivedView(){ notesShowArchived=!notesShowArchived; var b=document.getElementById("archToggle"); if(b){ b.textContent=notesShowArchived?"Hide archived":"Show archived"; b.classList.toggle("on",notesShowArchived);} renderNotes(); }
 function addNote(){ noteModal(""); }
-function delNote(id){ data.notes=data.notes.filter(function(n){return n.id!==id;}); save(); renderNotes(); }
+function delNote(id){ tombstone({id:id}); data.notes=data.notes.filter(function(n){return n.id!==id;}); save(); renderNotes(); }
 function pinNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.pinned=!n.pinned; save(); renderNotes(); } }
 function archiveNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.archived=!n.archived; save(); renderNotes(); toast(n.archived?"Archived":"Restored"); } }
 function migrateNotes(){
@@ -2984,7 +2986,7 @@ async function addLink(){
   const group=await promptModal("Add a quick link","Group (e.g. Daily, Build)","Links")||"Links";
   data.links.push({group:group.trim()||"Links",label:label.trim(),url:url.trim()}); save(); render(); toast("Link added");
 }
-function delLink(i){ data.links.splice(i,1); save(); render(); }
+function delLink(i){ var l=data.links[i]; if(l) tombstone(l); data.links.splice(i,1); save(); render(); }
 
 /* ---- Travel countdown ---- */
 function travelStat(){ var d=data.settings.nextTripDate; if(!d) return ""; var diff=Math.ceil((new Date(d+"T00:00:00")-new Date(new Date().toISOString().slice(0,10)+"T00:00:00"))/86400000); if(isNaN(diff)||diff<0) return ""; var dest=data.settings.nextTripDest||"your trip"; return diff===0?("Today · "+dest):(diff+"d · "+dest); }
@@ -3016,7 +3018,7 @@ async function addGoal(){
   data.goals.push({id:uid(),name:name.trim(),target:+target||0,current:0,unit:unit.trim(),linkNet:/net.?worth/i.test(name)}); save(); render(); toast("Goal added");
 }
 async function updGoal(i){ var g=data.goals[i]; if(!g) return; var v=await promptModal("Update progress",g.name,String(g.current||0)); if(v===null) return; g.current=+v||0; save(); render(); }
-function delGoal(i){ data.goals.splice(i,1); save(); render(); }
+function delGoal(i){ var g=data.goals[i]; if(g) tombstone(g); data.goals.splice(i,1); save(); render(); }
 
 /* ============ Google integrations (Calendar + Gmail) ============ */
 var financeUpdated="";
