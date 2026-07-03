@@ -1457,7 +1457,7 @@ html:not(.dark) .tlg-bar{background:#fff;box-shadow:0 4px 12px -6px rgba(67,49,9
 .hx-ribbon{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
 .hx-ribbon:empty{display:none}
 /* backgrounds per time slot */
-.hero-morning .hx-bg{background:radial-gradient(75% 60% at 18% 18%,rgba(123,90,210,.55),transparent 60%),radial-gradient(65% 55% at 82% 28%,rgba(95,200,165,.45),transparent 60%),radial-gradient(90% 70% at 62% 100%,rgba(255,190,130,.4),transparent 55%),linear-gradient(160deg,#241b48,#161033)}
+.hero-morning .hx-bg{background:radial-gradient(55% 60% at 82% 20%,rgba(255,205,120,.55),transparent 60%),radial-gradient(70% 65% at 16% 34%,rgba(110,165,255,.55),transparent 65%),linear-gradient(160deg,#25336b,#141d47)}
 .hero-afternoon .hx-bg{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(243,185,142,.55),transparent 70%),radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.5),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
 .hero-evening .hx-bg{background:radial-gradient(60% 50% at 78% 22%,rgba(130,95,210,.4),transparent 60%),radial-gradient(50% 42% at 28% 62%,rgba(70,120,205,.28),transparent 60%),linear-gradient(160deg,#0e0b24,#07060f)}
 .hx-stars,.hx-moon{display:none}
@@ -3042,17 +3042,44 @@ function getGToken(kind){ try{ var t=localStorage.getItem("hub."+kind+".tok"); v
 function clearGToken(kind){ try{ localStorage.removeItem("hub."+kind+".tok"); localStorage.removeItem("hub."+kind+".exp"); }catch(e){} }
 /* scope upgraded to calendar.events + gmail.send -> force one re-consent */
 (function(){ try{ if(localStorage.getItem("hub.gscope")!=="2"){ clearGToken("google"); clearGToken("gmail"); localStorage.setItem("hub.gscope","2"); } }catch(e){} })();
+var GT_URL=SUPABASE_URL+"/functions/v1/google-token";
+function gRedirectUri(){ return location.origin+location.pathname; }
+async function gxJwt(){ try{ var r=await supa.auth.getSession(); return r&&r.data&&r.data.session&&r.data.session.access_token||null; }catch(e){ return null; } }
+async function gxCallFn(payload){
+  var jwt=await gxJwt(); if(!jwt) return {error:"no_session"};
+  try{ var r=await fetch(GT_URL,{method:"POST",headers:{Authorization:"Bearer "+jwt,"Content-Type":"application/json"},body:JSON.stringify(payload||{})}); var j=await r.json().catch(function(){return{};}); if(r.ok&&j.access_token){ saveGToken("google",j.access_token,j.expires_in); } return j; }
+  catch(e){ return {error:String(e)}; }
+}
+function googleAuthStart(){
+  var cid=googleClientId(); if(!cid){ toast("Add your Google Client ID in Settings"); openSettings(); return; }
+  if(!user||!supa){ toast("Sign in to your Hub account first, then connect Google"); authUI("in"); return; }
+  try{ localStorage.setItem("hub.gpending","1"); }catch(e){}
+  var p={client_id:cid,redirect_uri:gRedirectUri(),response_type:"code",scope:COMBINED_SCOPE+" https://www.googleapis.com/auth/userinfo.email openid email",access_type:"offline",prompt:"consent",include_granted_scopes:"true"};
+  var qs=Object.keys(p).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(p[k]);}).join("&");
+  location.href="https://accounts.google.com/o/oauth2/v2/auth?"+qs;
+}
+async function gxHandleReturn(){
+  var pend=false; try{ pend=localStorage.getItem("hub.gpending")==="1"; }catch(e){}
+  var params=new URLSearchParams(location.search); var code=params.get("code");
+  if(!code||!pend) return false;
+  try{ localStorage.removeItem("hub.gpending"); }catch(e){}
+  var j=await gxCallFn({code:code,redirect_uri:gRedirectUri()});
+  // clean the ?code from the URL
+  try{ history.replaceState({},"",location.origin+location.pathname); }catch(e){}
+  if(j&&j.access_token){ data.settings.calConnected=true; data.settings.gmailConnected=true; save(); calToken=j.access_token; gmailToken=j.access_token; calState="connected"; gmailState="connected"; try{ data.settings.googleEmail=await gFetchEmail(j.access_token); save(); }catch(e){} loadCalEvents(j.access_token); renderCalConn(); gmailLoad().then(function(){renderGmail();}); renderGmail(); toast("Google connected ✓"); }
+  else { toast("Google connect failed — try again"); }
+  return true;
+}
 function gGetToken(kind,scope,cb,silent){
-  var cached=getGToken(kind); if(cached){ cb(cached); return true; }
+  var cached=getGToken("google"); if(cached){ cb(cached); return true; }
+  if(!user||!supa){ if(!silent){ toast("Sign in to your Hub account first"); authUI("in"); } return false; }
   var cid=googleClientId(); if(!cid){ if(!silent){ toast("Add your Google Client ID in Settings"); openSettings(); } return false; }
-  if(!window.google||!google.accounts||!google.accounts.oauth2){ if(!silent) toast("Google not ready — try again in a moment"); return false; }
-  try{
-    var tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:scope+" https://www.googleapis.com/auth/userinfo.email",
-      callback:function(resp){ if(resp&&resp.access_token){ saveGToken(kind,resp.access_token,resp.expires_in); cb(resp.access_token); } else { cb(null,resp); } },
-      error_callback:function(err){ cb(null,err); }});
-    tc.requestAccessToken(silent?{prompt:""}:{});
-    return true;
-  }catch(e){ if(!silent) toast("Couldn't start Google sign-in"); return false; }
+  gxCallFn({}).then(function(j){
+    if(j&&j.access_token){ cb(j.access_token); return; }
+    if(silent){ cb(null,j); return; }
+    googleAuthStart();
+  });
+  return true;
 }
 function gAutoConnect(){
   if(!googleClientId()) return;
@@ -3426,11 +3453,11 @@ async function initAuth(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
-    if(signedIn){ closeAuth(); const d=loadLocal(KEY+":"+u.id); if(d){ data=d; } render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back ✓"); }
+    if(signedIn){ closeAuth(); const d=loadLocal(KEY+":"+u.id); if(d){ data=d; } render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back ✓"); gxHandleReturn().then(function(h){ if(!h){ try{ gAutoConnect(); }catch(e){} } }); }
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); loadTravel(); pullHub(); }
+  if(session){ user=session.user; accountInit(); const d=loadLocal(KEY+":"+user.id); if(d) data=d; render(); loadFinance(); loadTravel(); pullHub(); var _h=await gxHandleReturn(); if(!_h){ try{ gAutoConnect(); }catch(e){} } }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
