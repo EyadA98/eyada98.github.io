@@ -1017,7 +1017,7 @@ function useCloud(trips,setTrips){
   const upsert=async(t)=>{ if(!sb.current||!session)return; const uid=session.user.id; const {error}=await sb.current.from('trips').upsert({id:t.id,user_id:uid,data:t,updated_at:new Date(t.updatedAt||Date.now()).toISOString()}); if(!error) synced.current[t.id]=t.updatedAt||Date.now(); return error; };
   const del=async(id)=>{ if(!sb.current||!session)return; await sb.current.from('trips').delete().eq('id',id); delete synced.current[id]; };
   useEffect(()=>{ if(!sb.current||!session)return; let cancel=false; (async()=>{ setStatus('Syncing…'); try{
-    const {data:rows,error}=await sb.current.from('trips').select('id,data,updated_at'); if(error)throw error; if(cancel)return;
+    const {data:rows,error}=await sb.current.from('trips').select('id,data,updated_at').eq('user_id',session.user.id); if(error)throw error; if(cancel)return;
     const remote={}; (rows||[]).forEach(r=>remote[r.id]=r); const local=tref.current; const updates={}; const toPush=[];
     Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
     Object.values(local).forEach(l=>{ const r=remote[l.id]; const ru=r?new Date(r.updated_at).getTime():0; if(!r||(l.updatedAt||0)>ru){ toPush.push(l); } });
