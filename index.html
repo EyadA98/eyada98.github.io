@@ -1799,8 +1799,25 @@ async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; if(tv>0&&((x.id!=null)||tv>=xu)) return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; ["notes","tasks","routines","links","goals","routineCats"].forEach(function(k){ base[k]=_mergeArr(local[k],cloud[k],tomb); }); var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((local.settings&&local.settings.statuses)||[], (cloud.settings&&cloud.settings.statuses)||[], tomb); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} return base; }
+function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; ["notes","tasks","routines","links","goals","routineCats"].forEach(function(k){ base[k]=_mergeArr(local[k],cloud[k],tomb); }); var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((local.settings&&local.settings.statuses)||[], (cloud.settings&&cloud.settings.statuses)||[], tomb); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
+/* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
+   Keeps additions from both devices and honours per-item deletions via composite
+   tombstones (#parent/type::key), so concurrent edits to the SAME item don't lose data. */
+function _nHashT(s){ s=String(s==null?"":s); var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return (h>>>0).toString(36); }
+function _subKey(x){ return "$"+_nHashT(x&&x.t); }
+function _cmtKey(x){ return "#"+(x&&x.id); }
+function _byIdN(arr){ var m={}; (Array.isArray(arr)?arr:[]).forEach(function(x){ if(x&&x.id!=null) m["#"+x.id]=x; }); return m; }
+function _mergeNestedList(win,oth,tomb,pfx,keyFn){ win=Array.isArray(win)?win:[]; oth=Array.isArray(oth)?oth:[]; tomb=tomb||{}; var seen={},out=[]; function ins(x){ if(x==null)return; var k=pfx+"::"+keyFn(x); if((+tomb[k]||0)>0)return; if(!seen[k]){ seen[k]=1; out.push(x); } } win.forEach(ins); oth.forEach(ins); return out; }
+function _unionHist(a,b){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; var seen={},out=[]; function ins(x){ if(x==null)return; var k=String(x.ts)+"|"+String(x.note==null?"":x.note); if(!seen[k]){ seen[k]=1; out.push(x); } } a.forEach(ins); b.forEach(ins); out.sort(function(x,y){ return (+y.ts||0)-(+x.ts||0); }); return out; }
+function _nestedDiff(pfx, oldArr, newArr, keyFn){ oldArr=Array.isArray(oldArr)?oldArr:[]; newArr=Array.isArray(newArr)?newArr:[]; data.deleted=data.deleted||{}; var nk={}; newArr.forEach(function(x){ nk[keyFn(x)]=1; }); oldArr.forEach(function(x){ var k=keyFn(x); if(!nk[k]) data.deleted[pfx+"::"+k]=Date.now(); }); newArr.forEach(function(x){ var kk=pfx+"::"+keyFn(x); if(data.deleted[kk]!=null&&data.deleted[kk]>0) data.deleted[kk]=-Date.now(); }); }
+function _reconcileNested(base, local, cloud, tomb){ try{
+  function recon(field, nested){ var L=_byIdN(local&&local[field]), C=_byIdN(cloud&&cloud[field]); ((base&&base[field])||[]).forEach(function(it){ if(!it||it.id==null)return; var lv=L["#"+it.id], cv=C["#"+it.id]; if(!lv||!cv)return; var other=(it===lv)?cv:lv; nested.forEach(function(nf){ it[nf[0]]=_mergeNestedList(it[nf[0]], other[nf[0]], tomb, "#"+it.id+nf[1], nf[2]); }); }); }
+  recon("tasks",[["subs","/s",_subKey],["comments","/c",_cmtKey]]);
+  recon("routines",[["checklist","/k",_subKey]]);
+  recon("notes",[["checklist","/k",_subKey]]);
+  var Lr=_byIdN(local&&local.routines), Cr=_byIdN(cloud&&cloud.routines); ((base&&base.routines)||[]).forEach(function(r){ if(!r||r.id==null)return; var lv=Lr["#"+r.id], cv=Cr["#"+r.id]; if(lv&&cv) r.history=_unionHist(lv.history,cv.history); });
+}catch(e){} }
 function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/`/g,"&#96;"); }
 
@@ -1942,16 +1959,18 @@ function rtCatAdd(){ var host=document.getElementById("rtCatRows"); if(!host)ret
 function saveRtCats(){ var out=[]; document.querySelectorAll("#rtCatRows .rtcat-row").forEach(function(rw){ var nm=(rw.querySelector(".rc-name").value||"").trim(); if(!nm)return; var id=rw.getAttribute("data-id")||("cat_"+uid()); var o={id:id,name:nm,color:rw.querySelector(".rc-color").value,icon:rw.getAttribute("data-iconkey")||"custom",updated:Date.now()}; if(rw.dataset.iconsvg)o.iconSvg=rw.dataset.iconsvg; out.push(o); }); if(!out.length){ toast("Keep at least one category"); return; } var _keep={}; out.forEach(function(c){_keep[c.id]=1;}); (data.routineCats||[]).forEach(function(c){ if(c&&c.id!=null&&!_keep[c.id]) tombstone({id:c.id}); }); data.routineCats=out; if(rtCatFilter&&!out.some(function(c){return c.id===rtCatFilter;}))rtCatFilter=""; save(); closeModal(); render(); toast("Categories saved"); }
 function routinesInit(){
   rtCatsInit();
-  if(Array.isArray(data.routines)) return;
+  if(Array.isArray(data.routines)){ data.routinesSeeded=true; return; }   // has a list already → mark seeded, never re-inject demos
+  if(data.routinesSeeded){ data.routines=[]; return; }   // seeded before on another device → don't re-inject
+  data.routinesSeeded=true;
   var t=isoLocal(new Date());
   function ago(days){ var d=new Date(); d.setDate(d.getDate()-days); return isoLocal(d); }
   data.routines=[
-    {id:uid(),title:"Cat vet visit",desc:"Routine wellness checkup at the clinic.",catId:"pets",tags:["vet"],priority:"high",due:"",lastCompleted:ago(150),recur:{type:"everyMonths",n:6},links:[],checklist:[{t:"Book appointment",done:false},{t:"Prepare carrier",done:false},{t:"Bring vaccination record",done:false},{t:"Buy medication",done:false}],history:[{ts:Date.now()-150*86400000,note:"All healthy"}],created:Date.now()-200*86400000,updated:Date.now()},
-    {id:uid(),title:"Cat vaccinations",desc:"Annual vaccination booster.",catId:"pets",tags:["vet"],priority:"med",due:"",lastCompleted:ago(300),recur:{type:"yearly",n:1},links:[],checklist:[],history:[],created:Date.now()-300*86400000,updated:Date.now()},
-    {id:uid(),title:"Oil change",desc:"Engine oil & filter service.",catId:"car",tags:["maintenance"],priority:"high",due:ago(-5),lastCompleted:"",recur:{type:"km",kmInterval:10000,lastKm:0},links:[],checklist:[{t:"Check oil level",done:false},{t:"Replace filter",done:false}],history:[],created:Date.now()-40*86400000,updated:Date.now()},
-    {id:uid(),title:"Replace AC filter",desc:"Swap the home AC filter.",catId:"home",tags:["maintenance"],priority:"med",due:"",lastCompleted:ago(80),recur:{type:"everyMonths",n:3},links:[],checklist:[],history:[],created:Date.now()-90*86400000,updated:Date.now()},
-    {id:uid(),title:"Water plants",desc:"Water all indoor plants.",catId:"home",tags:["weekly"],priority:"low",due:"",lastCompleted:ago(6),recur:{type:"weekly",n:1},links:[],checklist:[],history:[],created:Date.now()-30*86400000,updated:Date.now()},
-    {id:uid(),title:"Replace toothbrush",desc:"Swap to a fresh toothbrush.",catId:"health",tags:[],priority:"low",due:"",lastCompleted:ago(85),recur:{type:"everyMonths",n:3},links:[],checklist:[],history:[],created:Date.now()-90*86400000,updated:Date.now()}
+    {id:"seed-catvet",title:"Cat vet visit",desc:"Routine wellness checkup at the clinic.",catId:"pets",tags:["vet"],priority:"high",due:"",lastCompleted:ago(150),recur:{type:"everyMonths",n:6},links:[],checklist:[{t:"Book appointment",done:false},{t:"Prepare carrier",done:false},{t:"Bring vaccination record",done:false},{t:"Buy medication",done:false}],history:[{ts:Date.now()-150*86400000,note:"All healthy"}],created:Date.now()-200*86400000,updated:Date.now()},
+    {id:"seed-catvac",title:"Cat vaccinations",desc:"Annual vaccination booster.",catId:"pets",tags:["vet"],priority:"med",due:"",lastCompleted:ago(300),recur:{type:"yearly",n:1},links:[],checklist:[],history:[],created:Date.now()-300*86400000,updated:Date.now()},
+    {id:"seed-oil",title:"Oil change",desc:"Engine oil & filter service.",catId:"car",tags:["maintenance"],priority:"high",due:ago(-5),lastCompleted:"",recur:{type:"km",kmInterval:10000,lastKm:0},links:[],checklist:[{t:"Check oil level",done:false},{t:"Replace filter",done:false}],history:[],created:Date.now()-40*86400000,updated:Date.now()},
+    {id:"seed-acfilter",title:"Replace AC filter",desc:"Swap the home AC filter.",catId:"home",tags:["maintenance"],priority:"med",due:"",lastCompleted:ago(80),recur:{type:"everyMonths",n:3},links:[],checklist:[],history:[],created:Date.now()-90*86400000,updated:Date.now()},
+    {id:"seed-plants",title:"Water plants",desc:"Water all indoor plants.",catId:"home",tags:["weekly"],priority:"low",due:"",lastCompleted:ago(6),recur:{type:"weekly",n:1},links:[],checklist:[],history:[],created:Date.now()-30*86400000,updated:Date.now()},
+    {id:"seed-toothbrush",title:"Replace toothbrush",desc:"Swap to a fresh toothbrush.",catId:"health",tags:[],priority:"low",due:"",lastCompleted:ago(85),recur:{type:"everyMonths",n:3},links:[],checklist:[],history:[],created:Date.now()-90*86400000,updated:Date.now()}
   ];
 }
 var RDAYS=[["Mon",1],["Tue",2],["Wed",3],["Thu",4],["Fri",5],["Sat",6],["Sun",0]];
@@ -2127,7 +2146,7 @@ function saveRoutine(id){
   var checks=[]; document.querySelectorAll("#rChecks .sub-row").forEach(function(rw){ var v=(rw.querySelector(".sub-in").value||"").trim(); if(v) checks.push({t:v,done:rw.querySelector(".sub-chk").classList.contains("done")}); });
   var rec=rReadRecur();
   var f={title:title,desc:(document.getElementById("rDesc").value||"").trim(),catId:catId,priority:document.getElementById("rPrio").value,due:document.getElementById("rDue").value,lastCompleted:document.getElementById("rLast").value,recur:rec,tags:(document.getElementById("rTags").value||"").split(",").map(function(x){return x.trim();}).filter(Boolean),links:(document.getElementById("rLinks").value||"").split(",").map(function(x){return x.trim();}).filter(Boolean),checklist:checks};
-  if(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(r){ if(r.recur&&r.recur.lastKm!=null)f.recur.lastKm=r.recur.lastKm; Object.assign(r,f); r.updated=Date.now(); } }
+  if(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(r){ _nestedDiff("#"+id+"/k", r.checklist, checks, _subKey); if(r.recur&&r.recur.lastKm!=null)f.recur.lastKm=r.recur.lastKm; Object.assign(r,f); r.updated=Date.now(); } }
   else { data.routines=data.routines||[]; data.routines.unshift(Object.assign({id:uid(),history:[],created:Date.now(),updated:Date.now()},f)); }
   save(); closeModal(); render(); toast(id?"Routine saved":"Routine created");
 }
@@ -2858,12 +2877,12 @@ function tdSaveComment(id,cid){
   var e=document.getElementById("tdCmtEdit"); if(!e) return; var v=e.value.trim();
   var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
   var c=(t.comments||[]).find(function(x){return x.id===cid;});
-  if(c){ if(!v){ t.comments=t.comments.filter(function(x){return x.id!==cid;}); } else { c.text=v; c.edited=Date.now(); } t.updated=Date.now(); }
+  if(c){ if(!v){ data.deleted=data.deleted||{}; data.deleted["#"+id+"/c::#"+cid]=Date.now(); t.comments=t.comments.filter(function(x){return x.id!==cid;}); } else { c.text=v; c.edited=Date.now(); } t.updated=Date.now(); }
   _tdEditCid=null; save(); tdRenderComments(id);
 }
 function tdDelComment(id,cid){
   var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
-  t.comments=(t.comments||[]).filter(function(x){return x.id!==cid;}); t.updated=Date.now();
+  data.deleted=data.deleted||{}; data.deleted["#"+id+"/c::#"+cid]=Date.now(); t.comments=(t.comments||[]).filter(function(x){return x.id!==cid;}); t.updated=Date.now();
   if(_tdEditCid===cid) _tdEditCid=null; save(); tdRenderComments(id);
 }
 function addSubRow(text,done){
@@ -2883,7 +2902,7 @@ function saveTask(id){
   var tm=document.getElementById("tdTime");
   var f={t:title,desc:document.getElementById("tdDesc").value.trim(),status:document.getElementById("tdStatus").value,priority:document.getElementById("tdPrio").value,start:document.getElementById("tdStart").value,due:document.getElementById("tdDue").value,time:tm?tm.value:"",assignee:document.getElementById("tdAssignee").value.trim(),tags:document.getElementById("tdTags").value.split(",").map(function(x){return x.trim();}).filter(Boolean),subs:subs};
   f.done=(f.status==="done");
-  if(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ Object.assign(t,f); t.updated=Date.now(); } }
+  if(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ _nestedDiff("#"+id+"/s", t.subs, subs, _subKey); Object.assign(t,f); t.updated=Date.now(); } }
   else { data.tasks.push(Object.assign({id:uid(),project:"",created:Date.now(),updated:Date.now()},f)); }
   save(); closeModal(); render(); toast(id?"Task updated":"Task created");
 }
@@ -2938,7 +2957,7 @@ function saveNoteEdit(id){
   var chk=[]; document.querySelectorAll("#enChk .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(v) chk.push({t:v,done:r.querySelector(".sub-chk").classList.contains("done")}); });
   var li=document.getElementById("enLabels"); var labels=parseLabels(li?li.value:"");
   if(!title&&!desc.trim()&&!chk.length){ toast("Add a title or some content"); return; }
-  if(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.title=title; n.desc=desc; n.checklist=chk; n.labels=labels; n.updated=Date.now(); } }
+  if(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ _nestedDiff("#"+id+"/k", n.checklist, chk, _subKey); n.title=title; n.desc=desc; n.checklist=chk; n.labels=labels; n.updated=Date.now(); } }
   else { data.notes.unshift({id:uid(),title:title,desc:desc,checklist:chk,labels:labels,ts:Date.now(),updated:Date.now(),pinned:false,archived:false}); }
   save(); closeModal(); if(document.getElementById("notesList")) renderNotes(); renderRecentNotes(); toast(id?"Note updated":"Note added");
 }
