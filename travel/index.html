@@ -198,7 +198,7 @@ function segId(a,b){ return a+'>'+b; }
 function mapsHref(q){ if(!q)return null; if(/^https?:\/\//i.test(q)) return q; return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q); }
 function mapsEmbed(q){ if(!q)return null; let query=q; const m=q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/); if(m){query=m[1]+','+m[2];} else if(/^https?:\/\//i.test(q)){ const qm=q.match(/[?&]q=([^&]+)/); query=qm?decodeURIComponent(qm[1]):q.replace(/^https?:\/\//,''); } return 'https://maps.google.com/maps?q='+encodeURIComponent(query)+'&z=14&output=embed'; }
 /* migrate trips to city-scoped v5 model */
-function migrateTrip(t){ if(t.__v5) return t; let nt={...t};
+function migrateTrip(t){ if(t.__deleted||t.__v5) return t; let nt={...t};
   if(!nt.nodes){ const nodes=[];
     if(nt.origin!==undefined||nt.destination!==undefined||nt.cities){ nodes.push({id:uid(),name:nt.origin||'',anchor:'start'}); (nt.cities||[]).forEach(c=>nodes.push({id:c.id||uid(),name:c.name||''})); nodes.push({id:uid(),name:nt.destination||'',anchor:'end'}); }
     else { nodes.push({id:uid(),name:'',anchor:'start'},{id:uid(),name:'',anchor:'end'}); }
@@ -966,7 +966,7 @@ function tripTotals(t0){ const trip=migrateTrip(t0);
   return {grand:accommodation+transport+sp+misc,days:daysBetween(trip.departDate,trip.returnDate),cities:tripNodes(trip).filter(n=>n.name).length}; }
 
 function TripsView({trips,onNew,onEdit,onAction}){ const {dark}=useContext(Theme); const [sort,setSort]=useState('updated'); const [filter,setFilter]=useState('all');
-  let list=Object.values(trips);
+  let list=Object.values(trips).filter(t=>t&&!t.__deleted);
   if(filter!=='all') list=list.filter(t=>(t.status||'draft')===filter);
   list.sort((a,b)=>{ if(sort==='updated')return (b.updatedAt||0)-(a.updatedAt||0); if(sort==='cost')return tripTotals(b).grand-tripTotals(a).grand; if(sort==='date')return (a.departDate||'').localeCompare(b.departDate||''); if(sort==='status')return (a.status||'').localeCompare(b.status||''); return 0; });
   return (<div className="space-y-5">
@@ -1019,15 +1019,17 @@ function useCloud(trips,setTrips){
   useEffect(()=>{ if(!sb.current||!session)return; let cancel=false; (async()=>{ setStatus('Syncing…'); try{
     const {data:rows,error}=await sb.current.from('trips').select('id,data,updated_at').eq('user_id',session.user.id); if(error)throw error; if(cancel)return;
     const remote={}; (rows||[]).forEach(r=>remote[r.id]=r); const local=tref.current; const updates={}; const toPush=[];
-    Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
-    Object.values(local).forEach(l=>{ const r=remote[l.id]; const ru=r?new Date(r.updated_at).getTime():0; if(!r||(l.updatedAt||0)>ru){ toPush.push(l); } });
+    Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); const rDel=!!(r.data&&r.data.__deleted), lDel=!!(l&&l.__deleted); if(rDel){ if(!lDel) updates[id]=r.data; } else if(lDel){ /* local delete is sticky: keep the tombstone, don't accept a live remote copy */ } else if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
+    Object.values(local).forEach(l=>{ if(updates[l.id]&&updates[l.id].__deleted) return; /* we're accepting a delete for this id — don't push our stale live copy back */ const r=remote[l.id]; const ru=r?new Date(r.updated_at).getTime():0; const rDel=!!(r&&r.data&&r.data.__deleted); if(l.__deleted&&!rDel){ toPush.push(l); } else if(!r||(l.updatedAt||0)>ru){ toPush.push(l); } });
     if(Object.keys(updates).length) setTrips(ts=>({...ts,...updates}));
     for(const t of toPush){ await upsert(t); }
     if(!cancel){ setStatus('Synced ✓'); setTimeout(()=>setStatus(s=>s==='Synced ✓'?'':s),1800); }
   }catch(e){ if(!cancel) setStatus('Sync error: '+(e.message||e)); } })(); return ()=>{cancel=true;}; },[session]);
   useEffect(()=>{ if(!sb.current||!session)return; const h=setTimeout(async()=>{ try{ const local=tref.current;
     for(const id in local){ if(synced.current[id]!==(local[id].updatedAt||0)){ await upsert(local[id]); } }
-    for(const id in synced.current){ if(!local[id]){ await del(id); } }
+    /* Deletions are represented as tombstone trips ({__deleted:true}) that sync like any
+       other trip via last-write-wins, so we no longer infer deletes from local absence
+       (which resurrected trips and could wipe a peer's freshly-created trip). */
   }catch(e){} },1200); return ()=>clearTimeout(h); },[JSON.stringify(trips),session]);
   const signUp=async(email,pw)=>{ if(!sb.current)return; setStatus('Creating account…'); const {error}=await sb.current.auth.signUp({email,password:pw}); setStatus(error?('Error: '+error.message):'Account created. If email confirmation is on, confirm then sign in.'); };
   const signIn=async(email,pw)=>{ if(!sb.current)return; setStatus('Signing in…'); const {error}=await sb.current.auth.signInWithPassword({email,password:pw}); setStatus(error?('Error: '+error.message):''); };
@@ -1123,20 +1125,20 @@ function App(){
   useEffect(()=>{ const s=document.getElementById('splash'); if(s){ setTimeout(()=>s.classList.add('hide'),650); setTimeout(()=>s.remove(),1400);} },[]);
   useEffect(()=>{ const f=document.getElementById('favicon'); if(f&&logo) f.href=logo; },[logo]);
   // migrate legacy trips to node graph
-  useEffect(()=>{ setTrips(ts=>{ let changed=false; const out={}; for(const k in ts){ const m=migrateTrip(ts[k]); if(m!==ts[k])changed=true; out[k]=m; } return changed?out:ts; }); },[]);
+  useEffect(()=>{ setTrips(ts=>{ let changed=false; const out={}; for(const k in ts){ const m=(ts[k]&&ts[k].__deleted)?ts[k]:migrateTrip(ts[k]); if(m!==ts[k])changed=true; out[k]=m; } return changed?out:ts; }); },[]);
 
-  const currentTrip=currentId&&trips[currentId]?migrateTrip(trips[currentId]):null;
+  const currentTrip=currentId&&trips[currentId]&&!trips[currentId].__deleted?migrateTrip(trips[currentId]):null;
   const cur=currentTrip?currentTrip.baseCurrency||'SAR':'SAR';
   useEffect(()=>{ prevCur.current=cur; },[currentId]);
 
-  const setTrip=useCallback((updater)=>{ setTrips(ts=>{ const cur=ts[currentId]; if(!cur)return ts; const base=migrateTrip(cur); const next=typeof updater==='function'?updater(base):updater; return {...ts,[currentId]:{...next,updatedAt:Date.now()}}; }); },[currentId,setTrips]);
+  const setTrip=useCallback((updater)=>{ setTrips(ts=>{ const cur=ts[currentId]; if(!cur||cur.__deleted)return ts; const base=migrateTrip(cur); const next=typeof updater==='function'?updater(base):updater; return {...ts,[currentId]:{...next,updatedAt:Date.now()}}; }); },[currentId,setTrips]);
 
   const showToast=(m)=>{ setToast(m); setTimeout(()=>setToast(null),2200); };
   const newTrip=()=>{ const t=blankTrip(); setTrips(ts=>({...ts,[t.id]:t})); setCurrentId(t.id); prevCur.current=t.baseCurrency; setView('plan'); };
   const editTrip=(id)=>{ setCurrentId(id); prevCur.current=(trips[id]&&trips[id].baseCurrency)||'SAR'; setView('plan'); };
   const saveTrip=()=>{ setTrips(ts=>{ const t=ts[currentId]; if(!t)return ts; return {...ts,[currentId]:{...t,status:t.status==='draft'?'active':t.status,updatedAt:Date.now()}}; }); showToast('Trip saved ✓'); setView('trips'); };
-  const action=(kind,id)=>{ if(kind==='delete'){ if(!confirm('Delete this trip permanently?'))return; setTrips(ts=>{ const n={...ts}; delete n[id]; return n; }); if(currentId===id)setCurrentId(null); return; }
-    if(kind==='duplicate'){ const src=trips[id]; const copy={...JSON.parse(JSON.stringify(src)),id:uid(),name:(src.name||'Trip')+' (copy)',status:'draft',createdAt:Date.now(),updatedAt:Date.now()}; setTrips(ts=>({...ts,[copy.id]:copy})); showToast('Duplicated'); return; }
+  const action=(kind,id)=>{ if(kind==='delete'){ if(!confirm('Delete this trip permanently?'))return; setTrips(ts=>{ if(!ts[id])return ts; return {...ts,[id]:{id:id,__deleted:true,updatedAt:Date.now()}}; }); if(currentId===id)setCurrentId(null); return; }
+    if(kind==='duplicate'){ const src=trips[id]; if(!src||src.__deleted)return; const copy={...JSON.parse(JSON.stringify(src)),id:uid(),name:(src.name||'Trip')+' (copy)',status:'draft',createdAt:Date.now(),updatedAt:Date.now()}; setTrips(ts=>({...ts,[copy.id]:copy})); showToast('Duplicated'); return; }
     setTrips(ts=>{ const t=ts[id]; if(!t)return ts; const status=kind==='complete'?'completed':kind==='archive'?'archived':kind==='activate'?'active':t.status; return {...ts,[id]:{...t,status,updatedAt:Date.now()}}; }); };
 
   function changeCurrency(next){ const from=prevCur.current||cur; if(from===next||!currentTrip)return;
@@ -1180,7 +1182,7 @@ function App(){
             view==='map'&&currentTrip? <MapView trip={currentTrip} cur={cur}/> :
             view==='budget'&&currentTrip? <BudgetView trip={currentTrip} cur={cur}/> :
             view==='timeline'&&currentTrip? <TimelineView trip={currentTrip} cur={cur}/> :
-            view==='settings'? <SettingsView dark={dark} setDark={setDark} logo={logo} setLogo={setLogo} cloud={cloud} onResetAll={()=>{ if(confirm('Delete ALL trips and data?')){ setTrips({}); setCurrentId(null); showToast('All data cleared'); } }}/> : null}
+            view==='settings'? <SettingsView dark={dark} setDark={setDark} logo={logo} setLogo={setLogo} cloud={cloud} onResetAll={()=>{ if(confirm('Delete ALL trips and data?')){ setTrips(ts=>{ const n={}; for(const k in ts){ n[k]={id:k,__deleted:true,updatedAt:Date.now()}; } return n; }); setCurrentId(null); showToast('All data cleared'); } }}/> : null}
         </div></main>
 
         {showBottomNav&&<nav className="md:hidden fixed left-3 right-3 z-40 rounded-[28px] tp-bottombar" style={{bottom:'calc(10px + env(safe-area-inset-bottom))'}}>
