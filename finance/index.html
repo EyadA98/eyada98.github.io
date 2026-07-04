@@ -1152,7 +1152,7 @@ function load(){
     const old = localStorage.getItem("financeBoard.v3") || localStorage.getItem("financeBoard.v2") || localStorage.getItem("financeBoard.v1");
     if(old) return fill(migrate(JSON.parse(old)));
   }catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  var _seed=JSON.parse(JSON.stringify(DEFAULT_DATA)); _seed.__seed=true; return _seed;
 }
 function migrate(d){
   if(Array.isArray(d.accounts)) d.accounts.forEach(a=>{ a.type = TYPE_MAP[a.type] || (ACCOUNT_TYPES.includes(a.type)?a.type:a.type==="Cash"?"Cash":"Bank Account"); });
@@ -1166,9 +1166,18 @@ function migrate(d){
 }
 function fill(d){
   for(const k of Object.keys(DEFAULT_DATA)) if(d[k]===undefined) d[k]=JSON.parse(JSON.stringify(DEFAULT_DATA[k]));
-  return d;
+  return ensureIds(d);
 }
-function save(silent){ try{ data.updatedAt = new Date().toISOString(); try{var _nt=totals(); if(_nt&&isFinite(_nt.net)){ data.netWorth=_nt.net; data.netWorthAt=Date.now(); }}catch(_){} localStorage.setItem(user? KEY+":"+user.id : KEY, JSON.stringify(data)); if(!silent) toast("Saved"); }catch(e){} scheduleSync(); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+/* Deterministic id for records that predate the _id system, so two devices migrating
+   the SAME legacy data derive the SAME id (prevents duplicate rows after a merge). */
+function _hashId(x){ try{ var c={},k; for(k in x){ if(k!=="_id"&&k!=="_u"&&Object.prototype.hasOwnProperty.call(x,k)) c[k]=x[k]; } var s=Object.keys(c).sort().map(function(kk){return kk+":"+JSON.stringify(c[kk]);}).join("|"); var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return "h"+(h>>>0).toString(36); }catch(e){ return uid(); } }
+var _FIN_LISTS=["accounts","purchases","plan","roi","assetsInv","zaka"];
+/* Assign ids deterministically; identical-content rows get a stable per-occurrence
+   suffix so two devices agree AND duplicates aren't collapsed into one. */
+function ensureIds(d){ if(d) _FIN_LISTS.forEach(function(k){ if(Array.isArray(d[k])){ var used={}; d[k].forEach(function(x){ if(!x) return; if(x._id==null){ var base=_hashId(x); var n=used[base]||0; used[base]=n+1; x._id=n?(base+"_"+n):base; } else { used[x._id]=(used[x._id]||0)+1; } }); } }); return d; }
+function ftomb(x){ if(!x) return; data.deleted=data.deleted||{}; if(x._id!=null){ data.deleted["#"+x._id]=Date.now(); } else if(x.date!=null){ data.deleted["~"+x.date]=Date.now(); } }
+function save(silent){ try{ ensureIds(data); if(!silent&&data.__seed) delete data.__seed; data.updatedAt = new Date().toISOString(); try{var _nt=totals(); if(_nt&&isFinite(_nt.net)){ data.netWorth=_nt.net; data.netWorthAt=Date.now(); }}catch(_){} localStorage.setItem(user? KEY+":"+user.id : KEY, JSON.stringify(data)); if(!silent) toast("Saved"); }catch(e){} scheduleSync(); }
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("show");
@@ -1733,9 +1742,9 @@ function editAccount(i){
     +`<label class="bi-l">Balance</label><input id="acBal" class="bi-i" type="number" step="0.01" value="${a.balance}"></div>`
     +`<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" style="background:var(--red)" onclick="delAccount(${i})">Delete</button><div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveAccount(${i})">Save</button></div></div>`);
 }
-function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").dataset.val||a.type; a.balance=+document.getElementById("acBal").value||0; save(); closeModal(); render(); toast("Saved"); }
-function delAccount(i){ data.accounts.splice(i,1); save(); closeModal(); render(); toast("Account removed"); }
-function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0}); save(); render(); editAccount(data.accounts.length-1); }
+function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").dataset.val||a.type; a.balance=+document.getElementById("acBal").value||0; a._u=Date.now(); save(); closeModal(); render(); toast("Saved"); }
+function delAccount(i){ var _a=data.accounts[i]; if(_a) ftomb(_a); data.accounts.splice(i,1); save(); closeModal(); render(); toast("Account removed"); }
+function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0,_id:uid(),_u:Date.now()}); save(); render(); editAccount(data.accounts.length-1); }
 let accDragSrc=null;
 function accDragStart(e,i){ accDragSrc=i; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(_){}; const tr=e.target.closest("tr"); if(tr) tr.classList.add("bud-dragging"); }
 function accDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; const tr=e.target.closest("tr"); if(tr&&!tr.classList.contains("bud-dragging")){ document.querySelectorAll("#accountsTable .bud-over").forEach(x=>x.classList.remove("bud-over")); tr.classList.add("bud-over"); } }
@@ -1779,7 +1788,7 @@ function renderHoldings(){
     luEl.title = d.toLocaleString();
   } else { luEl.textContent = "Prices not updated yet"; luEl.title = ""; }
   document.getElementById("watchChips").innerHTML = data.watchlist.map((w,i)=>
-    `<span class="chip">${esc(w)}<button onclick="data.watchlist.splice(${i},1);save();render()" aria-label="Remove from watchlist">✕</button></span>`).join("") || '<span class="note">Empty watchlist</span>';
+    `<span class="chip">${esc(w)}<button onclick="delWatch(${i})" aria-label="Remove from watchlist">✕</button></span>`).join("") || '<span class="note">Empty watchlist</span>';
 }
 function updMeta(item,field,val){
   if(!data.meta[item]) data.meta[item]={assetType:"Stock",price:0};
@@ -1789,8 +1798,9 @@ function updMeta(item,field,val){
 }
 async function addWatch(){
   const n = await promptModal("Add to watchlist", "Stock or material name.", "");
-  if(n && n.trim()){ data.watchlist.push(n.trim()); save(); render(); }
+  if(n && n.trim()){ var v=n.trim(); if(data.deleted&&data.deleted["$"+JSON.stringify(v)]!=null) data.deleted["$"+JSON.stringify(v)]=-Date.now(); data.watchlist.push(v); save(); render(); }
 }
+function delWatch(i){ var v=data.watchlist[i]; if(v!=null){ data.deleted=data.deleted||{}; data.deleted["$"+JSON.stringify(v)]=Date.now(); } data.watchlist.splice(i,1); save(); render(); }
 
 /* ---------- Purchases ---------- */
 function renderPurchases(){
@@ -1808,7 +1818,7 @@ function renderPurchases(){
   document.getElementById("purchTotal").textContent = fmt(data.purchases.filter(p=>p.status==="Owned").reduce((s,p)=>s+(p.qty||0)*(p.unit||0),0));
 }
 function addPurchase(){
-  data.purchases.push({item:"",qty:0,unit:0,date:new Date().toISOString().slice(0,10),status:"Owned"});
+  data.purchases.push({item:"",qty:0,unit:0,date:new Date().toISOString().slice(0,10),status:"Owned",_id:uid(),_u:Date.now()});
   save(); render();
 }
 
@@ -1881,9 +1891,10 @@ function saveBudgetItem(i){
   const av=document.getElementById("biAct").value;
   if(!data.actuals[month]) data.actuals[month]={};
   if(av===""||av==null) delete data.actuals[month][newCat]; else data.actuals[month][newCat]=+av;
+  p._u=Date.now();
   save(); closeModal(); render(); toast("Saved");
 }
-function delBudgetItem(i){ data.plan.splice(i,1); save(); closeModal(); render(); toast("Item removed"); }
+function delBudgetItem(i){ var _p=data.plan[i]; if(_p) ftomb(_p); data.plan.splice(i,1); save(); closeModal(); render(); toast("Item removed"); }
 function _budgetTableLegacy(month,act){ return data.plan.map((p,i)=>{
     const isInc = p.group==="Income";
     const av = act[p.cat];
@@ -1908,13 +1919,13 @@ async function deleteMonth(){
   const m=document.getElementById("monthSel").value; if(!m) return;
   if(Object.keys(data.actuals).length<=1){ toast("Keep at least one month"); return; }
   if(await confirmModal("Delete "+m+"?","This removes all actual entries for "+m+". This cannot be undone.")){
-    delete data.actuals[m]; save(); renderMonthSel(); render(); toast("Deleted "+m);
+    data.deleted=data.deleted||{}; data.deleted["@"+m]=Date.now(); delete data.actuals[m]; save(); renderMonthSel(); render(); toast("Deleted "+m);
   }
 }
-function addPlanItem(){ data.plan.push({cat:"New item",group:"Variable",amt:0}); save(); render(); openBudgetItem(data.plan.length-1); }
+function addPlanItem(){ data.plan.push({cat:"New item",group:"Variable",amt:0,_id:uid(),_u:Date.now()}); save(); render(); openBudgetItem(data.plan.length-1); }
 async function addMonth(){
   const m = await promptModal("Add month", "Format: YYYY-MM", new Date().toISOString().slice(0,7));
-  if(m && /^\d{4}-\d{2}$/.test(m.trim())){ const k=m.trim(); if(!data.actuals[k]) data.actuals[k]={}; save(); renderMonthSel(k); render(); }
+  if(m && /^\d{4}-\d{2}$/.test(m.trim())){ const k=m.trim(); if(data.deleted&&data.deleted["@"+k]!=null) data.deleted["@"+k]=-Date.now(); if(!data.actuals[k]) data.actuals[k]={}; save(); renderMonthSel(k); render(); }
   else if(m!==null) toast("Use the format YYYY-MM");
 }
 function renderMonthSel(selected){
@@ -1945,7 +1956,7 @@ function renderRoi(){
   document.getElementById("roiProfitTotal").textContent = fmt(prof);
   document.getElementById("roiPctTotal").textContent = amt? pct(prof/amt) : "—";
 }
-function addRoi(){ data.roi.push({name:"",type:"Investment Account",start:"",end:"",amount:0,profit:0,notes:""}); save(); render(); }
+function addRoi(){ data.roi.push({name:"",type:"Investment Account",start:"",end:"",amount:0,profit:0,notes:"",_id:uid(),_u:Date.now()}); save(); render(); }
 
 /* ---------- Assets Inventory ---------- */
 function renderAssetsInv(){
@@ -1966,7 +1977,7 @@ function renderAssetsInv(){
   d.textContent = (sell-cost>=0?"+":"")+fmt(sell-cost);
   d.className = "num "+(sell-cost>=0?"pos":"neg");
 }
-function addAsset(){ data.assetsInv.push({desc:"New asset",qty:1,cost:0,selling:0,sold:false}); save(); render(); }
+function addAsset(){ data.assetsInv.push({desc:"New asset",qty:1,cost:0,selling:0,sold:false,_id:uid(),_u:Date.now()}); save(); render(); }
 
 /* ---------- Zaka ---------- */
 function renderZaka(){
@@ -1989,7 +2000,7 @@ function renderZaka(){
     <td class="num">${fmt((x.before||0)-(x.paid||0))}</td>
     <td><button class="btn danger" onclick="del('zaka',${i})" aria-label="Delete year">✕</button></td></tr>`).join("");
 }
-function addZaka(){ data.zaka.push({year:String(new Date().getFullYear()),dateG:"",dateH:"",before:totals().net,paid:0}); save(); render(); }
+function addZaka(){ data.zaka.push({year:String(new Date().getFullYear()),dateG:"",dateH:"",before:totals().net,paid:0,_id:uid(),_u:Date.now()}); save(); render(); }
 
 /* ---------- Snapshots & milestones ---------- */
 function renderSnapshots(){
@@ -2039,6 +2050,7 @@ function takeSnapshot(){
   const exists = data.snapshots.some(s=>s.date===snap.date);
   const wasATH = snap.net > Math.max(...data.snapshots.filter(s=>s.date!==snap.date).map(s=>+s.value||0), 0);
   data.snapshots = data.snapshots.filter(s=>s.date!==snap.date);
+  if(data.deleted&&data.deleted["~"+snap.date]!=null) data.deleted["~"+snap.date]=-Date.now();
   data.snapshots.push(snap);
   save(true);
   if(user && typeof pushCloud==="function"){ try{ pushCloud(); }catch(e){} }
@@ -2047,10 +2059,11 @@ function takeSnapshot(){
 }
 
 /* ---------- Shared: edit, delete + undo ---------- */
-function upd(arr,i,field,val){ data[arr][i][field]=val; save(); render(); }
+function upd(arr,i,field,val){ var o=data[arr][i]; if(o){ o[field]=val; o._u=Date.now(); } save(); render(); }
 let lastDel = null;
 function del(arr,i){
   lastDel = {arr, i, item: data[arr][i]};
+  ftomb(data[arr][i]);
   data[arr].splice(i,1);
   save(true); render();
   const t = document.getElementById("toast");
@@ -2061,6 +2074,7 @@ function del(arr,i){
 }
 function undoDel(){
   if(!lastDel) return;
+  if(lastDel.item&&lastDel.item._id!=null&&data.deleted){ delete data.deleted["#"+lastDel.item._id]; }
   data[lastDel.arr].splice(lastDel.i, 0, lastDel.item);
   lastDel = null;
   save(true); render();
@@ -2123,32 +2137,37 @@ async function pushCloud(){
     _syncWarned=false; setSyncState("synced");
   }catch(e){ _syncFail(e); }
 }
-function mergeSnaps(primary, extra){
-  var map={}; (primary||[]).forEach(function(s){ if(s&&s.date) map[s.date]=s; });
-  (extra||[]).forEach(function(s){ if(!s||!s.date) return; var ex=map[s.date];
+function mergeSnaps(primary, extra, tomb){ tomb=tomb||{};
+  var map={}; (primary||[]).forEach(function(s){ if(s&&s.date&&(+tomb["~"+s.date]||0)<=0) map[s.date]=s; });
+  (extra||[]).forEach(function(s){ if(!s||!s.date||(+tomb["~"+s.date]||0)>0) return; var ex=map[s.date];
     if(!ex){ map[s.date]=s; }
     else if((s.ts&&(!ex.ts||s.ts>ex.ts)) || (!ex.ts&&Object.keys(s).length>Object.keys(ex).length)){ map[s.date]=s; } });
   return Object.keys(map).map(function(k){return map[k];}).sort(function(x,y){return String(x.date).localeCompare(String(y.date));});
 }
 function _mergeMap(a,b){ var o=Object.assign({}, a||{}); var src=b||{}; Object.keys(src).forEach(function(k){ o[k]=src[k]; }); return o; }
-/* Safe cross-device merge for the (id-less, index-addressed) finance model:
-   never let a populated list be wiped by an empty one; union the key-addressed
-   maps (meta, actuals) and date-keyed snapshots; for two populated lists the
-   newer document wins (true item-level merge would need stable record ids). */
+/* Item-level cross-device merge: each record is unioned by stable _id, deletions are
+   tombstoned (data.deleted), edits win by _u timestamp. This fixes deletion resurrection
+   and concurrent-edit loss. Watchlist (strings) and actuals (month keys) tombstone by value. */
+function _finKey(x){ if(x==null) return "$null"; if(x._id!=null) return "#"+x._id; return "#"+_hashId(x); }
+function _mergeFinArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null)return; var id=_finKey(x); var xu=+x._u||0; var tv=+tomb[id]||0; if(tv>0&&((x._id!=null)||tv>=xu))return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+cur._u||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
+function _mergeWatch(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var seen={},out=[]; function add(s){ if(s==null)return; var id="$"+JSON.stringify(s); if((+tomb[id]||0)>0)return; if(!seen[id]){ seen[id]=1; out.push(s); } } a.forEach(add); b.forEach(add); return out; }
+function _mergeActuals(a,b,tomb){ a=a||{}; b=b||{}; tomb=tomb||{}; var out={},keys={}; Object.keys(a).forEach(function(k){keys[k]=1;}); Object.keys(b).forEach(function(k){keys[k]=1;}); Object.keys(keys).forEach(function(m){ if((+tomb["@"+m]||0)>0) return; out[m]=Object.assign({}, a[m]||{}, b[m]||{}); }); return out; }
 function mergeFinance(local, cloud){
   if(!cloud) return local; if(!local) return cloud;
+  if(local.__seed) return cloud;   // local is untouched seed data → take cloud wholesale (no seed duplication)
+  if(cloud.__seed) return local;
+  ensureIds(local); ensureIds(cloud);
   var lu=local.updatedAt||"", cu=cloud.updatedAt||"";
   var newer=(lu>=cu)?local:cloud, older=(lu>=cu)?cloud:local;
   var out=Object.assign({}, older, newer);
-  ["accounts","purchases","plan","roi","assetsInv","zaka","watchlist"].forEach(function(k){
-    var ln=Array.isArray(local[k])?local[k]:[], cn=Array.isArray(cloud[k])?cloud[k]:[];
-    if(ln.length && !cn.length) out[k]=ln;
-    else if(cn.length && !ln.length) out[k]=cn;
-    else out[k]=(newer[k]!=null?newer[k]:older[k]);
-  });
-  out.snapshots=mergeSnaps(local.snapshots, cloud.snapshots);
-  out.meta=_mergeMap(older.meta, newer.meta);
-  out.actuals=_mergeMap(older.actuals, newer.actuals);
+  var tomb=Object.assign({}, cloud.deleted||{}); var ld=local.deleted||{};
+  Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; });
+  out.deleted=tomb;
+  _FIN_LISTS.forEach(function(k){ out[k]=_mergeFinArr(local[k],cloud[k],tomb); });
+  out.watchlist=_mergeWatch(local.watchlist,cloud.watchlist,tomb);
+  out.snapshots=mergeSnaps(local.snapshots,cloud.snapshots,tomb);
+  out.meta=_mergeMap(older.meta,newer.meta);
+  out.actuals=_mergeActuals(local.actuals,cloud.actuals,tomb);
   return out;
 }
 async function pullCloud(){
