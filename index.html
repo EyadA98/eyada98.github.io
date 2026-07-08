@@ -365,7 +365,7 @@ html:not(.dark) .pw-bar{background:rgba(90,70,150,.16)}
 .pw-col.on .pw-nm{color:#f3b98e;font-weight:700}
 .pw-tm{display:block;font-size:1rem;font-weight:700;margin-top:4px}
 .pw-col.on .pw-tm{color:#f3b98e}
-@media(max-width:560px){.pw-wrap{flex-direction:column;align-items:stretch;gap:14px}.pw-ring{width:116px;height:116px;margin:0 auto}.pw-nn{font-size:1.45rem}.pw-nt{font-size:1.02rem}.pw-tm{font-size:.9rem}.pw-nm{font-size:.66rem}.pw-strip{gap:1px}}
+@media(max-width:560px){.pw-wrap{flex-direction:column;align-items:stretch;gap:14px}.pw-ring{width:140px;height:140px;margin:0 auto}.pw-ringc b{font-size:1.18rem}.pw-ringc span{font-size:.64rem;margin-top:2px}.pw-nn{font-size:1.45rem}.pw-nt{font-size:1.02rem}.pw-tm{font-size:.9rem}.pw-nm{font-size:.66rem}.pw-strip{gap:1px}}
 /* Prayer standalone card (legacy) */
 .prayer-card .prow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 @media(max-width:620px){.prayer-card .prow{grid-template-columns:repeat(2,1fr)}}
@@ -836,7 +836,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .overlay{align-items:flex-end;padding:0}
   .modal,.modal.wide,.modal.xwide{max-width:none;width:100%;border-radius:22px 22px 0 0;max-height:92vh;overflow:auto;animation:sheetUp .3s var(--ease);padding:22px 18px calc(18px + env(safe-area-inset-bottom))}
   .f2{grid-template-columns:1fr}
-  .av-menu{position:fixed;left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));min-width:0}
+  .av-menu{position:fixed;left:12px;right:12px;top:auto;bottom:calc(90px + env(safe-area-inset-bottom));min-width:0;z-index:120;max-height:calc(100dvh - 150px);overflow:auto}
   /* larger touch targets */
   .icon-btn{padding:9px}
   .btn{padding:11px 18px;font-size:.9rem}
@@ -2003,7 +2003,7 @@ async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; if(tv>0&&((x.id!=null)||tv>=xu)) return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; ["notes","tasks","routines","links","goals","routineCats"].forEach(function(k){ base[k]=_mergeArr(local[k],cloud[k],tomb); }); var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((local.settings&&local.settings.statuses)||[], (cloud.settings&&cloud.settings.statuses)||[], tomb); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
+function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","tasks","routines","links","goals","routineCats"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb); }); if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
@@ -2949,9 +2949,9 @@ var capMode="task";
 function renderCapModes(){ var el=document.getElementById("capModes"); if(!el) return; el.innerHTML=[["task","Task"],["note","Note"],["link","Link"]].map(function(m){return '<button class="cap-mode '+(capMode===m[0]?"on":"")+'" onclick="setCapMode(\''+m[0]+'\')">'+m[1]+'</button>';}).join(""); }
 function setCapMode(m){ capMode=m; renderCapModes(); }
 function capture(){ var el=document.getElementById("capInput"); var v=el.value.trim(); if(!v) return; var mode=capMode; if(/^https?:\/\//i.test(v)) mode="link";
-  if(mode==="link") data.links.push({group:"Inbox",label:v.replace(/^https?:\/\//,"").slice(0,42),url:v});
+  if(mode==="link") data.links.push({id:uid(),group:"Inbox",label:v.replace(/^https?:\/\//,"").slice(0,42),url:v,updated:Date.now()});
   else if(mode==="note") data.notes.unshift({id:uid(),body:v,ts:Date.now()});
-  else data.tasks.push({id:uid(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now()});
+  else data.tasks.push({id:uid(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now(),updated:Date.now()});
   el.value=""; save(); render(); toast(mode==="link"?"Link saved":mode==="note"?"Note saved":"Task added");
 }
 /* ---- Tasks: multi-view (board / cards / list / table) ---- */
@@ -3420,7 +3420,7 @@ async function addLink(){
   const url=await promptModal("Add a quick link","URL (https://…)","https://");
   if(!url) return;
   const group=await promptModal("Add a quick link","Group (e.g. Daily, Build)","Links")||"Links";
-  var _lk={group:group.trim()||"Links",label:label.trim(),url:url.trim()}; if(data.deleted&&data.deleted[tombKey(_lk)]!=null) data.deleted[tombKey(_lk)]=-Date.now(); data.links.push(_lk); save(); render(); toast("Link added");
+  var _lk={id:uid(),group:group.trim()||"Links",label:label.trim(),url:url.trim(),updated:Date.now()}; if(data.deleted&&data.deleted[tombKey(_lk)]!=null) data.deleted[tombKey(_lk)]=-Date.now(); data.links.push(_lk); save(); render(); toast("Link added");
 }
 function delLink(i){ var l=data.links[i]; if(l) tombstone(l); data.links.splice(i,1); save(); render(); }
 
@@ -3451,7 +3451,7 @@ async function addGoal(){
   var target=await promptModal("New goal","Target (number)","");
   if(target===null) return;
   var unit=await promptModal("New goal","Unit (optional: SAR, trips, books…)","")||"";
-  data.goals.push({id:uid(),name:name.trim(),target:+target||0,current:0,unit:unit.trim(),linkNet:/net.?worth/i.test(name)}); save(); render(); toast("Goal added");
+  data.goals.push({id:uid(),name:name.trim(),target:+target||0,current:0,unit:unit.trim(),linkNet:/net.?worth/i.test(name),updated:Date.now()}); save(); render(); toast("Goal added");
 }
 async function updGoal(i){ var g=data.goals[i]; if(!g) return; var v=await promptModal("Update progress",g.name,String(g.current||0)); if(v===null) return; g.current=+v||0; g.updated=Date.now(); save(); render(); }
 function delGoal(i){ var g=data.goals[i]; if(g) tombstone(g); data.goals.splice(i,1); save(); render(); }
