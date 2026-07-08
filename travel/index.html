@@ -99,6 +99,9 @@
   html:not(.dark) .text-lavender-300\/50,
   html:not(.dark) .text-lavender-300\/45,
   html:not(.dark) .text-lavender-300\/30{color:#6f6490!important}
+  html:not(.dark) .text-lavender-700{color:#5b4a86!important}
+  /* Iridescent value text is too pale on white cards in light mode — deepen it */
+  html:not(.dark) .iridescent-text{background:linear-gradient(110deg,#6f49b4 0%,#8f5fc0 42%,#cf6f24 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .glass-dark .tp-brand{color:#f1ecff}
 .glass-light .tp-brand{color:#2a1d44}
 </style>
@@ -272,7 +275,7 @@ function Btn({children,onClick,variant='primary',className='',type='button',titl
   const s={primary:'iridescent text-indigo2-950 shadow-glow hover:brightness-105',ghost:'bg-white/5 border border-white/10 text-lavender-100 hover:bg-white/10',soft:'bg-lavender-500/15 border border-lavender-400/25 text-lavender-100 hover:bg-lavender-500/25',danger:'bg-peach-500/15 text-peach-400 border border-peach-500/30 hover:bg-peach-500/25'};
   return <button type={type} title={title} onClick={onClick} className={`${base} ${s[variant]} ${className}`}>{children}</button>; }
 function Empty({text}){ const {dark}=useContext(Theme); return <div className={`rounded-xl border border-dashed py-8 text-center text-sm ${dark?'border-white/10 text-lavender-300/50':'border-lavender-300 text-lavender-500'}`}>{text}</div>; }
-function Pill({status}){ const m=STATUS_META[status]||STATUS_META.draft; return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{color:m.c,background:m.c+'22',border:'1px solid '+m.c+'55'}}>{m.label}</span>; }
+function Pill({status}){ const m=STATUS_META[status]||STATUS_META.draft; return <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{color:'#fff',background:'rgba(24,18,40,.74)',border:'1px solid '+m.c+'cc',backdropFilter:'blur(3px)',WebkitBackdropFilter:'blur(3px)'}}><i style={{width:6,height:6,borderRadius:'99px',background:m.c,display:'inline-block',boxShadow:'0 0 6px '+m.c}}/>{m.label}</span>; }
 function SectionTitle({step,kicker,title,children}){ const {dark}=useContext(Theme); return (
   <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
     <div className="flex items-end gap-3">
@@ -1186,7 +1189,20 @@ function App(){
         </div></main>
 
         {showBottomNav&&<nav className="md:hidden fixed left-3 right-3 z-40 rounded-[28px] tp-bottombar" style={{bottom:'calc(10px + env(safe-area-inset-bottom))'}}>
-          <div className="flex gap-1 px-[7px] py-[7px]">{NAV.map(t=>{ const on=view===t.id; return (<button key={t.id} onClick={()=>setView(t.id)} style={on?{background:'linear-gradient(140deg,#f3b98e 0%,#ec9d6a 45%,#dd824b 100%)',boxShadow:'0 6px 18px rgba(221,130,75,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:undefined} className={`flex-1 flex flex-col items-center gap-1 px-2 py-2 rounded-[18px] text-[10px] font-bold tracking-wide transition ${on?'text-white':'text-white/55 hover:text-white/80'}`}><NavIcon id={t.id} className={`w-[19px] h-[19px] transition ${on?'text-white':''}`}/>{t.label}</button>); })}</div>
+          <div className="flex gap-1 px-[7px] py-[7px]">{NAV.map(t=>{ const on=view===t.id; return (<button key={t.id} onClick={()=>setView(t.id)} style={on?{background:'linear-gradient(140deg,#f3b98e 0%,#ec9d6a 45%,#dd824b 100%)',boxShadow:'0 6px 18px rgba(221,130,75,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:undefined} className={`flex-1 flex flex-col items-center gap-1 px-2 py-2 rounded-[18px] text-[10px] font-bold tracking-wide transition ${on?'text-white':'text-white/55 hover:text-white/80'}`}><NavIcon id={t.id} className={`w-[19px] h-[19px] transition`}/>{t.label}</button>); })}</div>
+        </nav>}
+
+        {toast&&<div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl iridescent text-indigo2-950 text-sm font-semibold shadow-glow fade-in">{toast}</div>}
+        {authOpen&&<AuthModal cloud={cloud} onClose={()=>setAuthOpen(false)} onSettings={()=>{setAuthOpen(false);setView('settings');}}/>}
+      </div>
+    </Theme.Provider>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
+ansition ${on?'text-white':''}`}/>{t.label}</button>); })}</div>
         </nav>}
 
         {toast&&<div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl iridescent text-indigo2-950 text-sm font-semibold shadow-glow fade-in">{toast}</div>}
