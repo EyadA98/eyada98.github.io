@@ -170,7 +170,10 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
   transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .card:hover{transform:translateY(-3px) scale(1.0045);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 18px 44px rgba(38,34,92,.14)}
 .card h3{font-size:.71rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.11em;margin-bottom:9px}
-.card .big{font-size:1.56rem;font-weight:800;letter-spacing:-.015em}
+.card .big{font-size:1.56rem;font-weight:800;letter-spacing:-.015em;white-space:nowrap}
+.cards .card{display:flex;flex-direction:column}
+.cards .card .kpi-head,.cards .card .sub{flex:none}
+.cards .card>.prog,.cards .card>.spark-mini{margin-top:auto}
 .card .sub{font-size:.81rem;color:var(--muted);margin-top:6px;font-weight:500}
 .kpi-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .icon-tile{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(38,34,92,.14)}
@@ -186,6 +189,7 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
 .prog span{display:block;height:100%;border-radius:99px;animation:growBar 1s var(--ease)}
 .prog-lav span{background:linear-gradient(90deg,var(--lavender),var(--violet))}
 .prog-green span{background:linear-gradient(90deg,#3FC98A,var(--green))}
+.prog-gold span{background:linear-gradient(90deg,#f3b98e,#dd9354)}
 .ring{transform:rotate(-90deg)}
 .ring .track{stroke:var(--lilac-soft)}
 .ring .val{stroke:url(#peachGrad);stroke-linecap:round;transition:stroke-dashoffset 1s var(--ease)}
@@ -755,7 +759,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 .sysel-opt.on{background:linear-gradient(120deg,rgba(138,100,200,.32),rgba(243,185,142,.2));font-weight:700}
 .acc-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .acc-lbl{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--muted)}
-.acc-total{font-size:2.2rem;line-height:1.05;margin-top:4px;color:var(--text)}
+.acc-total{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:2.2rem;line-height:1.05;margin-top:4px;color:var(--text)}
 .acc-sub{font-size:.74rem;color:var(--muted);margin-top:4px}
 .acc-allocwrap{flex:1;min-width:240px}
 .acc-alloc{display:flex;height:14px;gap:3px;border-radius:7px;overflow:hidden}
@@ -1043,6 +1047,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 
 <script>
 const ACCOUNT_TYPES = ["Bank Account","Savings","Investment Account","Wallet","Cash","Credit Account","Receivable"];
+const ROI_TYPES = ["Investment Account","Stocks","ETF / Fund","Real Estate","Crypto","Gold / Metals","Business","Bonds","Other"];
 const ASSET_TYPES = ["Precious Metals","Stock","Fund","Crypto","Real Estate","Other"];
 const PAGES = {
   overview:["Insights","Overview"], snapshots:["Insights","Trend & Snapshots"],
@@ -1556,12 +1561,7 @@ function computeInsights(){
 }
 function renderInsights(){
   const el = document.getElementById("insights");
-  el.innerHTML = computeInsights().map(i=>`
-    <div class="insight tone-${i.tone}">
-      <div class="ico">${i.ico}</div>
-      <div>${i.html}${i.act?`<div class="act"><button class="btn soft" style="padding:5px 13px;font-size:.76rem" onclick="${i.act.fn}">${i.act.label}</button></div>`:""}</div>
-      <button class="dismiss" onclick="dismissInsight('${i.id}')" aria-label="Dismiss insight">✕</button>
-    </div>`).join("");
+  if(el) el.innerHTML = "";
 }
 function dismissInsight(id){ (data.dismissed = data.dismissed||{})[id] = true; save(true); render(); }
 
@@ -1677,6 +1677,7 @@ function renderKPIs(){
             stroke-dasharray="${ringC.toFixed(1)}" stroke-dashoffset="${(ringC*(1-Math.min(goldPct,1))).toFixed(1)}"/>
         </svg></div>
       <div class="sub">${sar(goldVal)} in precious metals${goldPct>0.5?' · <b style="color:var(--peach-deep)">high concentration</b>':""}</div>
+      <div class="prog prog-gold"><span style="width:${Math.min(goldPct*100,100).toFixed(2)}%"></span></div>
     </div>
     <div class="card">
       <div class="kpi-head"><div><h3>Monthly Savings Plan</h3><div class="big" data-cnt="${pt.rem}" data-pre="SAR ">${sar(pt.rem)}</div></div>
@@ -1697,13 +1698,13 @@ const ACC_META={
   "Receivable":{c:"#e0a0d8",g:"Receivables",ic:ICONS.clock}
 };
 function hexA(h,a){ h=String(h).replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return `rgba(${r},${g},${b},${a})`; }
-function sysSelect(id,opts,val){
-  return `<div class="sysel" id="${id}" data-val="${esc(val)}">`
+function sysSelect(id,opts,val,cb){
+  return `<div class="sysel" id="${id}" data-val="${esc(val)}"${cb?` data-cb="${esc(cb)}"`:''}>`
     +`<button type="button" class="bi-i sysel-btn" onclick="syselToggle('${id}')"><span class="sysel-cur">${esc(val)}</span><svg class="sysel-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>`
     +`<div class="sysel-list">${opts.map(o=>`<div class="sysel-opt${o===val?' on':''}" data-v="${esc(o)}" onclick="syselPick('${id}',this)">${esc(o)}</div>`).join("")}</div></div>`;
 }
 function syselToggle(id){ document.querySelectorAll('.sysel.open').forEach(function(e){ if(e.id!==id) e.classList.remove('open'); }); var el=document.getElementById(id); if(el) el.classList.toggle('open'); }
-function syselPick(id,opt){ var el=document.getElementById(id); if(!el) return; var v=opt.getAttribute('data-v'); el.dataset.val=v; var cur=el.querySelector('.sysel-cur'); if(cur) cur.textContent=v; el.querySelectorAll('.sysel-opt').forEach(function(o){ o.classList.toggle('on',o===opt); }); el.classList.remove('open'); }
+function syselPick(id,opt){ var el=document.getElementById(id); if(!el) return; var v=opt.getAttribute('data-v'); el.dataset.val=v; var cur=el.querySelector('.sysel-cur'); if(cur) cur.textContent=v; el.querySelectorAll('.sysel-opt').forEach(function(o){ o.classList.toggle('on',o===opt); }); el.classList.remove('open'); var cb=el.getAttribute('data-cb'); if(cb && typeof window[cb]==='function'){ window[cb](id, v); } }
 function renderAccounts(){
   const accs=data.accounts||[];
   const total=accs.reduce((s,a)=>s+(+a.balance||0),0);
@@ -1744,7 +1745,20 @@ function editAccount(i){
 }
 function saveAccount(i){ const a=data.accounts[i]; if(!a) return; a.name=(document.getElementById("acName").value||"").trim()||a.name; a.type=document.getElementById("acType").dataset.val||a.type; a.balance=+document.getElementById("acBal").value||0; a._u=Date.now(); save(); closeModal(); render(); toast("Saved"); }
 function delAccount(i){ var _a=data.accounts[i]; if(_a) ftomb(_a); data.accounts.splice(i,1); save(); closeModal(); render(); toast("Account removed"); }
-function addAccount(){ data.accounts.push({name:"New account",type:"Bank Account",balance:0,_id:uid(),_u:Date.now()}); save(); render(); editAccount(data.accounts.length-1); }
+function addAccount(){
+  showModal(`<h4>Add account</h4><div class="bi-form">`
+    +`<label class="bi-l">Name</label><input id="acName" class="bi-i" value="New account">`
+    +`<label class="bi-l">Type</label>${sysSelect('acType',ACCOUNT_TYPES,'Bank Account')}`
+    +`<label class="bi-l">Balance</label><input id="acBal" class="bi-i" type="number" step="0.01" value="0"></div>`
+    +`<div class="row" style="justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNewAccount()">Add account</button></div>`);
+}
+function saveNewAccount(){
+  const nm=(document.getElementById("acName").value||"").trim()||"New account";
+  const ty=document.getElementById("acType").dataset.val||"Bank Account";
+  const bal=+document.getElementById("acBal").value||0;
+  data.accounts.push({name:nm,type:ty,balance:bal,_id:uid(),_u:Date.now()});
+  save(); closeModal(); render(); toast("Account added");
+}
 let accDragSrc=null;
 function accDragStart(e,i){ accDragSrc=i; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",String(i));}catch(_){}; const tr=e.target.closest("tr"); if(tr) tr.classList.add("bud-dragging"); }
 function accDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; const tr=e.target.closest("tr"); if(tr&&!tr.classList.contains("bud-dragging")){ document.querySelectorAll("#accountsTable .bud-over").forEach(x=>x.classList.remove("bud-over")); tr.classList.add("bud-over"); } }
@@ -1922,7 +1936,20 @@ async function deleteMonth(){
     data.deleted=data.deleted||{}; data.deleted["@"+m]=Date.now(); delete data.actuals[m]; save(); renderMonthSel(); render(); toast("Deleted "+m);
   }
 }
-function addPlanItem(){ data.plan.push({cat:"New item",group:"Variable",amt:0,_id:uid(),_u:Date.now()}); save(); render(); openBudgetItem(data.plan.length-1); }
+function addPlanItem(){
+  showModal(`<h4>Add budget item</h4><div class="bi-form">`
+    +`<label class="bi-l">Category</label><input id="biCat" class="bi-i" value="New item">`
+    +`<label class="bi-l">Group</label>${sysSelect('biGroup',["Income","Fixed","Variable"],"Variable")}`
+    +`<label class="bi-l">Planned</label><input id="biPlan" class="bi-i" type="number" step="0.01" value="0"></div>`
+    +`<div class="row" style="justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNewPlanItem()">Add item</button></div>`);
+}
+function saveNewPlanItem(){
+  const cat=(document.getElementById("biCat").value||"").trim()||"New item";
+  const group=document.getElementById("biGroup").dataset.val||"Variable";
+  const amt=+document.getElementById("biPlan").value||0;
+  data.plan.push({cat:cat,group:group,amt:amt,_id:uid(),_u:Date.now()});
+  save(); closeModal(); render(); toast("Item added");
+}
 async function addMonth(){
   const m = await promptModal("Add month", "Format: YYYY-MM", new Date().toISOString().slice(0,7));
   if(m && /^\d{4}-\d{2}$/.test(m.trim())){ const k=m.trim(); if(data.deleted&&data.deleted["@"+k]!=null) data.deleted["@"+k]=-Date.now(); if(!data.actuals[k]) data.actuals[k]={}; save(); renderMonthSel(k); render(); }
@@ -1941,7 +1968,7 @@ function renderRoi(){
     const p = +r.amount? (+r.profit||0)/+r.amount : 0;
     return `<tr>
     <td><input value="${esc(r.name)}" onchange="upd('roi',${i},'name',this.value)" aria-label="Asset name"></td>
-    <td><input value="${esc(r.type)}" onchange="upd('roi',${i},'type',this.value)" aria-label="Type"></td>
+    <td>${sysSelect('roiType'+i, ROI_TYPES, r.type||ROI_TYPES[0], 'roiTypeChange')}</td>
     <td><input type="date" value="${r.start||""}" onchange="upd('roi',${i},'start',this.value)" aria-label="Start date"></td>
     <td><input type="date" value="${r.end||""}" onchange="upd('roi',${i},'end',this.value)" aria-label="End date"></td>
     <td class="num"><input type="number" step="0.01" value="${r.amount}" onchange="upd('roi',${i},'amount',+this.value)" aria-label="Amount"></td>
@@ -1956,6 +1983,7 @@ function renderRoi(){
   document.getElementById("roiProfitTotal").textContent = fmt(prof);
   document.getElementById("roiPctTotal").textContent = amt? pct(prof/amt) : "—";
 }
+function roiTypeChange(id,val){ var i=+id.replace("roiType",""); if(data.roi[i]){ data.roi[i].type=val; data.roi[i]._u=Date.now(); save(true); } }
 function addRoi(){ data.roi.push({name:"",type:"Investment Account",start:"",end:"",amount:0,profit:0,notes:"",_id:uid(),_u:Date.now()}); save(); render(); }
 
 /* ---------- Assets Inventory ---------- */
@@ -2452,13 +2480,14 @@ function _dpOpen(inp,btn,relabel){
     html+='<div class="dp-grid dp-wd">'+["S","M","T","W","T","F","S"].map(function(w){return '<div class="dp-w">'+w+'</div>';}).join("")+'</div><div class="dp-grid">';
     for(var i=0;i<start;i++)html+='<div></div>';
     for(var d=1;d<=days;d++){var iso=cur.y+"-"+_pad2(cur.m+1)+"-"+_pad2(d);var sel=inp.value===iso,today=iso===todayISO;html+='<button type="button" class="dp-day'+(sel?" dp-sel":"")+(today&&!sel?" dp-today":"")+'" data-iso="'+iso+'">'+d+'</button>';}
-    html+='</div>'+(inp.value?'<div class="dp-foot"><button type="button" class="dp-clear">Clear date</button></div>':'');
+    html+='</div><div class="dp-foot" style="display:flex;gap:8px;justify-content:space-between"><button type="button" class="dp-clear dp-today-btn">Today</button>'+(inp.value?'<button type="button" class="dp-clear">Clear date</button>':'')+'</div>';
     pop.innerHTML=html;
   }
   draw();document.body.appendChild(pop);_dpPlace(pop,btn);
   pop.addEventListener("click",function(e){
     var nav=e.target.closest(".dp-nav");if(nav){cur.m+=+nav.dataset.n;if(cur.m<0){cur.m=11;cur.y--;}if(cur.m>11){cur.m=0;cur.y++;}draw();_dpPlace(pop,btn);return;}
     var day=e.target.closest(".dp-day");if(day){inp.value=day.dataset.iso;relabel();_dpClose();inp.dispatchEvent(new Event("change",{bubbles:true}));return;}
+    if(e.target.closest(".dp-today-btn")){var _n=new Date();inp.value=_n.getFullYear()+"-"+_pad2(_n.getMonth()+1)+"-"+_pad2(_n.getDate());relabel();_dpClose();inp.dispatchEvent(new Event("change",{bubbles:true}));return;}
     if(e.target.closest(".dp-clear")){inp.value="";relabel();_dpClose();inp.dispatchEvent(new Event("change",{bubbles:true}));return;}
   });
   _dp={pop:pop,btn:btn};
