@@ -2024,7 +2024,7 @@ function _reconcileNested(base, local, cloud, tomb){ try{
 }catch(e){} }
 function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
 /* Delete-with-undo: item is removed immediately; a 10-second toast can restore it (and clears the tombstone). */
-function undoToast(msg, restore){ var t=document.getElementById("toast"); if(!t) return; t.innerHTML=esc(msg)+' <button type="button" class="undo-b" style="background:none;border:none;color:var(--lavender);font-weight:700;font-size:.86rem;cursor:pointer;margin-left:14px;font-family:inherit">Undo</button>'; t.classList.add("show"); var b=t.querySelector(".undo-b"); if(b) b.onclick=function(){ try{ restore(); }catch(e){} t.classList.remove("show"); clearTimeout(t.__h); }; clearTimeout(t.__h); t.__h=setTimeout(function(){ t.classList.remove("show"); },10000); }
+function undoToast(msg, restore){ var t=document.getElementById("toast"); if(!t) return; t.innerHTML=esc(msg)+' <button type="button" class="undo-b" style="background:none;border:none;color:var(--lavender);font-weight:700;font-size:.86rem;cursor:pointer;margin-left:14px;font-family:inherit;pointer-events:auto">Undo</button>'; t.classList.add("show"); var b=t.querySelector(".undo-b"); if(b) b.onclick=function(){ try{ restore(); }catch(e){} t.classList.remove("show"); clearTimeout(t.__h); }; clearTimeout(t.__h); t.__h=setTimeout(function(){ t.classList.remove("show"); },10000); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/`/g,"&#96;"); }
 
 /* ============ Theme ============ */
