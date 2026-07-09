@@ -1008,7 +1008,7 @@ function trip_dates(t){ if(!t.departDate&&!t.returnDate)return 'Dates not set'; 
 
 /* ============================ CLOUD SYNC (Supabase) ============================ */
 var SESSION_MAX_MS=4*60*60*1000; /* shared 4 h session timeout, coordinated across apps via hub.authStart */
-function _markAuthStart(reset){ try{ if(reset||!localStorage.getItem('hub.authStart')) localStorage.setItem('hub.authStart',String(Date.now())); }catch(e){} }
+function _touchAuth(){ try{ localStorage.setItem('hub.authStart',String(Date.now())); }catch(e){} }
 function _sessionExpired(){ try{ var t=+localStorage.getItem('hub.authStart')||0; return t>0&&(Date.now()-t)>SESSION_MAX_MS; }catch(e){ return false; } }
 function useCloud(trips,setTrips){
   const [cfgLS,setCfg]=usePersist('tp_sb',{url:'',key:''}); const cfg={url:cfgLS.url||SUPABASE_URL,key:cfgLS.key||SUPABASE_KEY};
@@ -1038,9 +1038,9 @@ function useCloud(trips,setTrips){
        (which resurrected trips and could wipe a peer's freshly-created trip). */
   }catch(e){} },1200); return ()=>clearTimeout(h); },[JSON.stringify(trips),session]);
   const signUp=async(email,pw)=>{ if(!sb.current)return; setStatus('Creating account…'); const {error}=await sb.current.auth.signUp({email,password:pw}); setStatus(error?('Error: '+error.message):'Account created. If email confirmation is on, confirm then sign in.'); };
-  const signIn=async(email,pw)=>{ if(!sb.current)return; setStatus('Signing in…'); const {error}=await sb.current.auth.signInWithPassword({email,password:pw}); if(!error) _markAuthStart(true); setStatus(error?('Error: '+error.message):''); };
+  const signIn=async(email,pw)=>{ if(!sb.current)return; setStatus('Signing in…'); const {error}=await sb.current.auth.signInWithPassword({email,password:pw}); if(!error) _touchAuth(); setStatus(error?('Error: '+error.message):''); };
   const signOut=async()=>{ if(!sb.current)return; try{localStorage.removeItem('hub.authStart');}catch(e){} await sb.current.auth.signOut(); synced.current={}; setStatus(''); };
-  useEffect(()=>{ if(!session) return; _markAuthStart(false); const chk=async()=>{ if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} await signOut(); } }; chk(); const iv=setInterval(chk,60000); return ()=>clearInterval(iv); },[session]);
+  useEffect(()=>{ if(!session) return; if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); return; } _touchAuth(); const chk=()=>{ if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); } }; const iv=setInterval(chk,60000); var tt=0; const touch=()=>{ var n=Date.now(); if(n-tt>60000){ tt=n; _touchAuth(); } }; ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,touch,{passive:true})); return ()=>{ clearInterval(iv); ['click','keydown','touchstart'].forEach(e=>document.removeEventListener(e,touch)); }; },[session]);
   return {cfg,setCfg,session,status,ready:!!sb.current,signUp,signIn,signOut};
 }
 function CloudCard({cloud}){ const {dark}=useContext(Theme); const {cfg,setCfg,session,status,ready,signIn,signUp,signOut}=cloud;
