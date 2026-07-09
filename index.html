@@ -710,14 +710,23 @@ html:not(.dark) .att-row{background:#fff}
 .att-dl:hover{color:var(--lavender);background:rgba(138,100,200,.12)}
 .att-del:hover{color:var(--red);background:rgba(214,85,76,.12)}
 .att-empty{font-size:.8rem;color:var(--muted)}
-.modal.pdfv{max-width:min(1000px,96vw);width:96vw;padding:0;overflow:hidden}
+.att-up{display:flex;align-items:center;gap:10px;background:rgba(138,100,200,.09);border:1px solid rgba(138,100,200,.28);border-radius:12px;padding:9px 11px}
+.att-up-main{flex:1;min-width:0}
+.att-up-nm{font-size:.84rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att-up-bar{height:5px;border-radius:99px;background:rgba(138,100,200,.16);margin-top:6px;overflow:hidden}
+.att-up-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lavender),var(--peach));transition:width .18s}
+.att-up-pct{font-size:.72rem;font-weight:700;color:var(--lavender);flex:none;min-width:36px;text-align:right}
+.att-up.att-up-err{border-color:rgba(214,85,76,.5)}
+.att-up-err .att-up-pct{color:var(--red)}
+.overlay.pdfv{padding:0}
+.modal.pdfv{max-width:none;width:100vw;height:100vh;height:100dvh;max-height:100dvh;border-radius:0;padding:0;overflow:hidden;display:flex;flex-direction:column}
 .pdfv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
 .pdfv-head .pdfv-t{font-weight:700;font-size:.95rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pdfv-body{background:#525659;min-height:200px}
-.pdfv-frame{display:block;width:100%;height:78vh;border:none}
+.pdfv-body{background:#525659;flex:1;min-height:0}
+.pdfv-frame{display:block;width:100%;height:100%;border:none}
 .pdfv-ic{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;display:grid;place-items:center}
 .pdfv-ic:hover{color:var(--text);background:rgba(138,100,200,.14)}
-@media(max-width:600px){.modal.pdfv{width:100%;max-width:none;border-radius:18px 18px 0 0}.pdfv-frame{height:72vh}.pdfv-head{padding:11px 14px}}
+@media(max-width:600px){.pdfv-head{padding:11px 14px}}
 .lib-grid{display:flex;flex-direction:column;gap:9px}
 .lib-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px;transition:transform .15s,box-shadow .2s}
 .lib-row:hover{transform:translateY(-1px);box-shadow:0 10px 22px -12px rgba(138,100,200,.5)}
@@ -3397,22 +3406,44 @@ async function attPick(input,kind,id){
   if(!files.length) return;
   if(!supa||!user){ toast("Sign in to attach files"); return; }
   var arr=_attListOf(kind,id); if(!arr) return;
-  for(var k=0;k<files.length;k++){ await _attUploadOne(files[k],kind,id,arr); }
+  var host=document.getElementById(kind==="task"?"tdAttach":"enAttach");
+  for(var k=0;k<files.length;k++){ await _attUploadOne(files[k],kind,id,arr,host); }
 }
-async function _attUploadOne(f,kind,id,arr){
+async function _attUploadOne(f,kind,id,arr,host){
   if(f.size>50*1024*1024){ toast('"'+f.name+'" is over 50 MB'); return; }
   var aid=uid(); var safe=(f.name||"file").replace(/[^\w.\- ]+/g,"_").slice(-90);
   var path=user.id+"/"+kind+"_"+id+"/"+aid+"-"+safe;
-  toast("Uploading "+(f.name||"file")+"…");
+  var row=null;
+  if(host){ if(host.querySelector(".att-empty")) host.innerHTML=""; row=document.createElement("div"); row.className="att-up";
+    row.innerHTML=_attIcon(f)+'<div class="att-up-main"><div class="att-up-nm">'+esc(f.name||"file")+'</div><div class="att-up-bar"><i></i></div></div><span class="att-up-pct">0%</span>';
+    host.insertBefore(row,host.firstChild); }
   try{
-    var up=await supa.storage.from(ATTACH_BUCKET).upload(path,f,{contentType:f.type||"application/octet-stream",upsert:false});
-    if(up.error){ toast("Upload failed: "+up.error.message); return; }
+    await _attXhrUpload(f,path,function(pct){ if(!row) return; var fi=row.querySelector(".att-up-bar i"); if(fi) fi.style.width=pct+"%"; var pc=row.querySelector(".att-up-pct"); if(pc) pc.textContent=pct+"%"; });
     arr.push({id:aid,name:f.name||"file",size:f.size||0,type:f.type||"",path:path,uploadedAt:Date.now()});
     var it=_attOwner(kind,id); if(it) it.updated=Date.now();
     save();
     if(kind==="task") tdRenderAttach(id); else noteRenderAttach(id);
     toast("Attached "+(f.name||"file"));
-  }catch(e){ toast("Upload error"); }
+  }catch(e){ if(row){ row.classList.add("att-up-err"); var pc=row.querySelector(".att-up-pct"); if(pc) pc.textContent="failed"; } toast("Upload failed: "+((e&&e.message)||"error")); }
+}
+function _attXhrUpload(file,path,onProgress){
+  return new Promise(function(resolve,reject){
+    supa.auth.getSession().then(function(sess){
+      var jwt=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+      if(!jwt){ reject(new Error("not signed in")); return; }
+      var enc=path.split("/").map(encodeURIComponent).join("/");
+      var xhr=new XMLHttpRequest();
+      xhr.open("POST", SUPABASE_URL+"/storage/v1/object/"+ATTACH_BUCKET+"/"+enc);
+      xhr.setRequestHeader("Authorization","Bearer "+jwt);
+      xhr.setRequestHeader("apikey",SUPABASE_ANON_KEY);
+      xhr.setRequestHeader("x-upsert","false");
+      if(file.type) xhr.setRequestHeader("Content-Type",file.type);
+      xhr.upload.onprogress=function(e){ if(e.lengthComputable&&onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+      xhr.onload=function(){ if(xhr.status>=200&&xhr.status<300){ if(onProgress)onProgress(100); resolve(); } else { reject(new Error("HTTP "+xhr.status)); } };
+      xhr.onerror=function(){ reject(new Error("network")); };
+      xhr.send(file);
+    }, function(){ reject(new Error("auth")); });
+  });
 }
 async function _attSignedUrl(path,dl){
   try{ var opt=dl?{download:true}:undefined; var r=await supa.storage.from(ATTACH_BUCKET).createSignedUrl(path,3600,opt); return (r&&r.data&&r.data.signedUrl)||null; }catch(e){ return null; }
@@ -3609,7 +3640,8 @@ async function gServerToken(payload){
     if(!supa) return {error:"no_supa"};
     var sess=await supa.auth.getSession(); var jwt=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
     if(!jwt) return {error:"no_jwt"};
-    var r=await fetch(GT_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+jwt,"apikey":SUPABASE_ANON_KEY},body:JSON.stringify(payload||{})});
+    var url=GT_URL+"?apikey="+encodeURIComponent(SUPABASE_ANON_KEY);
+    var r=await fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(Object.assign({jwt:jwt},payload||{}))});
     return await r.json();
   }catch(e){ return {error:"unreachable"}; }
 }
@@ -4017,7 +4049,7 @@ async function doSignIn(){
   if(!email||!pass) return authErr("Enter your email and password.");
   authErr("Signing in…");
   const {error}=await supa.auth.signInWithPassword({email,password:pass});
-  if(error) authErr(error.message); else _markAuthStart(true);
+  if(error) authErr(error.message); else _touchAuth();
 }
 async function doSignUp(){
   if(!supaReady) return guestMode();
@@ -4027,7 +4059,7 @@ async function doSignUp(){
   authErr("Creating…");
   const {data:res,error}=await supa.auth.signUp({email,password:pass});
   if(error) return authErr(error.message);
-  if(res&&res.session){ _markAuthStart(true); return; } authErr("Check your email to confirm your account.",true);
+  if(res&&res.session){ _touchAuth(); return; } authErr("Check your email to confirm your account.",true);
 }
 async function doForgot(){
   const email=document.getElementById("aEmail").value.trim(); if(!email) return authErr("Enter your email first.");
@@ -4037,10 +4069,22 @@ async function doForgot(){
 async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");}catch(e){} if(supa) await supa.auth.signOut(); }
 /* ---- Session timeout: auto sign-out 4 h after login ---- */
 var SESSION_MAX_MS=4*60*60*1000;
-function _markAuthStart(reset){ try{ if(reset||!localStorage.getItem("hub.authStart")) localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
+function _touchAuth(){ try{ localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
 function _sessionExpired(){ try{ var t=+localStorage.getItem("hub.authStart")||0; return t>0&&(Date.now()-t)>SESSION_MAX_MS; }catch(e){ return false; } }
-async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await signOut(); } }
+async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await signOut(); } }
 setInterval(function(){ try{ _enforceSessionTimeout(); }catch(e){} },60000);
+var _authTouchT=0;
+["click","keydown","touchstart","mousedown"].forEach(function(ev){ try{ document.addEventListener(ev,function(){ if(!user) return; var n=Date.now(); if(n-_authTouchT>60000){ _authTouchT=n; _touchAuth(); } },{passive:true}); }catch(e){} });
+/* Enter to trigger a modal's primary (Save/Add/Create) button */
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Enter"||e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||e.isComposing) return;
+  var t=e.target; if(!t) return;
+  if(t.tagName==="TEXTAREA"||t.isContentEditable||t.tagName==="BUTTON"||t.tagName==="SELECT") return;
+  var modal=t.closest?t.closest(".modal"):null; if(!modal||modal.classList.contains("side")) return;
+  var btns=modal.querySelectorAll("button.btn"), primary=null;
+  for(var i=btns.length-1;i>=0;i--){ var b=btns[i]; if(!b.disabled&&!b.classList.contains("soft")&&!b.classList.contains("danger")){ primary=b; break; } }
+  if(primary){ e.preventDefault(); primary.click(); }
+});
 
 async function initAuth(){
   accountInit();
@@ -4053,7 +4097,7 @@ async function initAuth(){
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; _markAuthStart(false); if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
+  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
