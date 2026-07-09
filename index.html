@@ -696,6 +696,37 @@ html:not(.dark) .tp-trip{background:rgba(255,255,255,.6)}
 .av-menu button:hover{background:rgba(138,100,200,.12)}
 .av-menu button svg{width:16px;height:16px;opacity:.8}
 .av-menu button.danger-item{color:var(--red)}
+/* ---- Attachments + Library ---- */
+.att-list{display:flex;flex-direction:column;gap:7px}
+.att-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:9px 11px}
+html:not(.dark) .att-row{background:#fff}
+.att-ic{width:30px;height:30px;flex:none;border-radius:8px;display:grid;place-items:center;background:rgba(138,100,200,.16);color:var(--lavender)}
+.att-ic svg{width:16px;height:16px}
+.att-ic.pdf{background:rgba(224,116,107,.16);color:#e0746b}
+.att-nm{flex:1;min-width:0;text-align:left;background:none;border:none;color:var(--text);font-family:inherit;font-weight:600;font-size:.86rem;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0}
+.att-nm:hover{color:var(--lavender)}
+.att-sz{font-size:.72rem;color:var(--muted);flex:none}
+.att-dl,.att-del{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:7px;display:grid;place-items:center}
+.att-dl:hover{color:var(--lavender);background:rgba(138,100,200,.12)}
+.att-del:hover{color:var(--red);background:rgba(214,85,76,.12)}
+.att-empty{font-size:.8rem;color:var(--muted)}
+.modal.pdfv{max-width:min(1000px,96vw);width:96vw;padding:0;overflow:hidden}
+.pdfv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.pdfv-head .pdfv-t{font-weight:700;font-size:.95rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdfv-body{background:#525659;min-height:200px}
+.pdfv-frame{display:block;width:100%;height:78vh;border:none}
+.pdfv-ic{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;display:grid;place-items:center}
+.pdfv-ic:hover{color:var(--text);background:rgba(138,100,200,.14)}
+@media(max-width:600px){.modal.pdfv{width:100%;max-width:none;border-radius:18px 18px 0 0}.pdfv-frame{height:72vh}.pdfv-head{padding:11px 14px}}
+.lib-grid{display:flex;flex-direction:column;gap:9px}
+.lib-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px;transition:transform .15s,box-shadow .2s}
+.lib-row:hover{transform:translateY(-1px);box-shadow:0 10px 22px -12px rgba(138,100,200,.5)}
+.lib-main{flex:1;min-width:0}
+.lib-nm{font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:none;color:var(--text);font-family:inherit;cursor:pointer;padding:0;text-align:left;display:block;max-width:100%}
+.lib-nm:hover{color:var(--lavender)}
+.lib-src{font-size:.74rem;color:var(--muted);margin-top:2px}
+.lib-src b{color:var(--lavender);cursor:pointer;font-weight:700}
+
 
 
 /* ===== UI refresh batch (clock / prayer / calendar / pickers) ===== */
@@ -1713,7 +1744,7 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
   <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button class="nav" data-tab="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>Timeline</button>
   <button class="nav" data-tab="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="7" r="2.4"/><circle cx="7" cy="18" r="2.4"/><path d="M8 6.4h7.6M6.6 8.2 7 15.6M8.6 17l7.6-8"/></svg>Mind Map</button>
-  <button class="nav" data-tab="links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Quick Links</button>
+  <button class="nav" data-tab="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>Library</button>
   <div class="side-foot">Your private headquarters</div>
 </aside>
 
@@ -1750,7 +1781,6 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
     </div>
   </div>
 
-  <div class="dash-bar"><span class="dash-hint" id="dashHint" style="display:none">Toggle the eye to hide a section.</span><button class="btn soft" id="dashEditBtn" onclick="toggleDashEdit()">Customize</button></div>
 
   <div id="dashStack">
     <!-- PRAYER (full width) -->
@@ -1809,13 +1839,6 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
       </div>
     </div>
 
-    <!-- QUICK LINKS (full width) -->
-    <div class="dash-widget" data-w="links">
-      <div class="card">
-        <div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Quick links</h2><button class="btn soft" onclick="go('links')">Manage</button></div>
-        <div id="homeLinks"></div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -1913,10 +1936,11 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
 </div>
 
 <!-- LINKS -->
-<div class="tab" id="tab-links">
-  <div class="section-head"><h2>Quick Links</h2><button class="btn" onclick="addLink()">+ Add link</button></div>
-  <div class="card"><div id="linksList"></div></div>
+<div class="tab" id="tab-library">
+  <div class="section-head"><h2>Library <span id="libCount" class="muted" style="font-size:.8rem;font-weight:600"></span></h2></div>
+  <div class="card"><div id="libList"></div></div>
 </div>
+
 
 </main>
 </div>
@@ -1937,7 +1961,7 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
     <button data-tab="notifications" onclick="goMore('notifications')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Notifications</button>
     <button data-tab="timeline" onclick="goMore('timeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>Timeline</button>
     <button data-tab="mindmap" onclick="goMore('mindmap')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="7" r="2.4"/><circle cx="7" cy="18" r="2.4"/><path d="M8 6.4h7.6M6.6 8.2 7 15.6M8.6 17l7.6-8"/></svg>Mind Map</button>
-    <button data-tab="links" onclick="goMore('links')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7"/></svg>Quick Links</button>
+    <button data-tab="library" onclick="goMore('library')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>Library</button>
   </div>
 </div>
 
@@ -1983,7 +2007,7 @@ function fill(d){
   if(!Array.isArray(d.settings.statuses)||!d.settings.statuses.length) d.settings.statuses=JSON.parse(JSON.stringify(DEFAULT.settings.statuses));
   var _ids=d.settings.statuses.map(function(x){return x.id;});
   (d.tasks||[]).forEach(function(t){ if(!t.status)t.status=(t.done?"done":_ids[0]); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
-  if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps","links"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
+  if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
   (d.notes||[]).forEach(function(n){ if(!Array.isArray(n.labels)) n.labels=[]; });
   return d;
 }
@@ -2035,7 +2059,7 @@ function toggleTheme(){ const dark=!document.documentElement.classList.contains(
 updThemeIcon();
 
 /* ============ Navigation ============ */
-const PAGES={home:["Home","Dashboard"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],links:["Workspace","Quick Links"],goals:["Workspace","Goals & Habits"]};
+const PAGES={home:["Home","Dashboard"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"],goals:["Workspace","Goals & Habits"]};
 var BOTTOM_TABS=["home","tasks","routines","notes"];
 function go(name){
   document.querySelectorAll("aside button.nav,.bottombar button,.more-grid button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
@@ -2063,7 +2087,7 @@ function render(){ applyLang();
   try{ renderRoutines(); }catch(e){ console.error(e); }
   try{ renderNotifs(); }catch(e){ console.error(e); }
   try{ updateNotifBadge(); }catch(e){}
-  try{ renderLinks(); }catch(e){ console.error(e); }
+  try{ renderLibrary(); }catch(e){}
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
 }
@@ -2946,13 +2970,12 @@ function renderMomentum(){
 }
 /* ---- Capture (routes to task / note / link) ---- */
 var capMode="task";
-function renderCapModes(){ var el=document.getElementById("capModes"); if(!el) return; el.innerHTML=[["task","Task"],["note","Note"],["link","Link"]].map(function(m){return '<button class="cap-mode '+(capMode===m[0]?"on":"")+'" onclick="setCapMode(\''+m[0]+'\')">'+m[1]+'</button>';}).join(""); }
+function renderCapModes(){ var el=document.getElementById("capModes"); if(!el) return; el.innerHTML=[["task","Task"],["note","Note"]].map(function(m){return '<button class="cap-mode '+(capMode===m[0]?"on":"")+'" onclick="setCapMode(\''+m[0]+'\')">'+m[1]+'</button>';}).join(""); }
 function setCapMode(m){ capMode=m; renderCapModes(); }
-function capture(){ var el=document.getElementById("capInput"); var v=el.value.trim(); if(!v) return; var mode=capMode; if(/^https?:\/\//i.test(v)) mode="link";
-  if(mode==="link") data.links.push({id:uid(),group:"Inbox",label:v.replace(/^https?:\/\//,"").slice(0,42),url:v,updated:Date.now()});
-  else if(mode==="note") data.notes.unshift({id:uid(),body:v,ts:Date.now()});
+function capture(){ var el=document.getElementById("capInput"); var v=el.value.trim(); if(!v) return; var mode=capMode;
+  if(mode==="note") data.notes.unshift({id:uid(),body:v,ts:Date.now(),updated:Date.now()});
   else data.tasks.push({id:uid(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now(),updated:Date.now()});
-  el.value=""; save(); render(); toast(mode==="link"?"Link saved":mode==="note"?"Note saved":"Task added");
+  el.value=""; save(); render(); toast(mode==="note"?"Note saved":"Task added");
 }
 /* ---- Tasks: multi-view (board / cards / list / table) ---- */
 var KCOLS=[["todo","To Do"],["doing","In Progress"],["done","Done"]];
@@ -3075,6 +3098,7 @@ function openTask(id,presetStatus){
     +'</div>'
     +'<div class="tdp-sec"><div class="tdp-sechd">'+ICs+'Description</div><textarea class="fld" id="tdDesc" rows="3" style="margin-top:8px" placeholder="Add a description&hellip;">'+esc(t.desc||"")+'</textarea></div>'
     +'<div class="tdp-sec"><div class="tdp-sechd">'+ICsub+'Subtasks<button type="button" class="btn soft sm" style="margin-left:auto" onclick="addSubRow(\'\',false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>Add</button></div><div id="tdSubs" style="margin-top:9px"></div></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>Attachments<label class="btn soft sm" style="margin-left:auto;cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>Add<input type="file" multiple style="display:none" onchange="attPick(this,\'task\',\''+t.id+'\')"></label></div><div id="tdAttach" class="att-list" style="margin-top:9px"></div></div>'
     +'<div class="tdp-sec"><div class="tdp-sechd">'+ICcmt+'Comments</div><div id="tdComments" style="margin-top:9px"></div></div>'
     +'<div class="muted" style="font-size:.72rem;margin-top:14px">Created '+new Date(t.created||Date.now()).toLocaleDateString()+(t.updated?(' &middot; updated '+new Date(t.updated).toLocaleDateString()):'')+'</div>'
     +'</div>'
@@ -3083,6 +3107,7 @@ function openTask(id,presetStatus){
   showModal(html,"side");
   (t.subs||[]).forEach(function(s){ addSubRow(s.t,s.done); });
   _tdEditCid=null; tdRenderComments(t.id);
+  try{ tdRenderAttach(t.id); }catch(e){}
   try{ enhanceSelects(); }catch(e){}
   try{ tdRenderTags(); tdPills(); tdAsgLabel(); tdDateLabel(); }catch(e){}
   var _pnl=document.querySelector(".td-panel");
@@ -3349,15 +3374,108 @@ function noteModal(id){
     +'<label class="setlbl" style="margin-top:12px">Description</label><textarea class="fld" id="enDesc" rows="4" placeholder="Add a description&hellip;">'+esc(t.desc||"")+'</textarea>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px"><div class="tm-h" style="margin:0">'+ICchk+'Checklist</div><button type="button" class="btn soft sm" onclick="addNoteChkRow(\'\',false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>Add</button></div><div id="enChk" style="margin-top:10px"></div>'
     +'<div class="tm-sec"><div class="tm-h">'+IClbl+'Labels</div><input class="fld" id="enLabels" value="'+esc((t.labels||[]).join(", "))+'" placeholder="e.g. Work, Idea, Travel">'+labelSuggest("enLabels")+'</div>'
+    +(id?('<div class="tm-sec"><div style="display:flex;align-items:center;justify-content:space-between"><div class="tm-h" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>Attachments</div><label class="btn soft sm" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>Add<input type="file" multiple style="display:none" onchange="attPick(this,\'note\',\''+id+'\')"></label></div><div id="enAttach" class="att-list" style="margin-top:10px"></div></div>'):'<div class="tm-sec att-empty">Save the note first, then reopen it to add attachments.</div>')
     +'</div>'
     +'<div class="row" style="justify-content:space-between;gap:8px">'
     +(id?('<div style="display:flex;gap:8px"><button class="btn soft" onclick="archiveNote(\''+id+'\');closeModal()">'+(t.archived?"Unarchive":"Archive")+'</button><button class="btn soft" style="color:var(--red)" onclick="delNoteConfirm(\''+id+'\')">Delete</button></div>'):'<div></div>')
     +'<div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNoteEdit(\''+(id||"")+'\')">Save</button></div></div>';
   showModal(html,"wide");
   (t.checklist||[]).forEach(function(c){ addNoteChkRow(c.t,c.done); });
+  if(id){ try{ noteRenderAttach(id); }catch(e){} }
   setTimeout(function(){ var e=document.getElementById("enTitle"); if(e) e.focus(); },30);
 }
 function editNote(id){ noteModal(id); }
+/* ================= Attachments (Supabase Storage) ================= */
+var ATTACH_BUCKET="attachments";
+function _fmtSize(b){ b=+b||0; if(b<1024) return b+" B"; if(b<1048576) return (b/1024).toFixed(0)+" KB"; return (b/1048576).toFixed(1)+" MB"; }
+function _isPdf(a){ return /pdf$/i.test(a&&a.name||"")||/pdf/i.test(a&&a.type||""); }
+function _attIcon(a){ var cls=_isPdf(a)?" pdf":""; return '<span class="att-ic'+cls+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>'; }
+function _attOwner(kind,id){ return (kind==="task"?(data.tasks||[]):(data.notes||[])).find(function(x){return x.id===id;}); }
+function _attListOf(kind,id){ var it=_attOwner(kind,id); return it?(it.attachments=it.attachments||[]):null; }
+async function attPick(input,kind,id){
+  var files=input&&input.files?Array.prototype.slice.call(input.files):[]; input.value="";
+  if(!files.length) return;
+  if(!supa||!user){ toast("Sign in to attach files"); return; }
+  var arr=_attListOf(kind,id); if(!arr) return;
+  for(var k=0;k<files.length;k++){ await _attUploadOne(files[k],kind,id,arr); }
+}
+async function _attUploadOne(f,kind,id,arr){
+  if(f.size>50*1024*1024){ toast('"'+f.name+'" is over 50 MB'); return; }
+  var aid=uid(); var safe=(f.name||"file").replace(/[^\w.\- ]+/g,"_").slice(-90);
+  var path=user.id+"/"+kind+"_"+id+"/"+aid+"-"+safe;
+  toast("Uploading "+(f.name||"file")+"…");
+  try{
+    var up=await supa.storage.from(ATTACH_BUCKET).upload(path,f,{contentType:f.type||"application/octet-stream",upsert:false});
+    if(up.error){ toast("Upload failed: "+up.error.message); return; }
+    arr.push({id:aid,name:f.name||"file",size:f.size||0,type:f.type||"",path:path,uploadedAt:Date.now()});
+    var it=_attOwner(kind,id); if(it) it.updated=Date.now();
+    save();
+    if(kind==="task") tdRenderAttach(id); else noteRenderAttach(id);
+    toast("Attached "+(f.name||"file"));
+  }catch(e){ toast("Upload error"); }
+}
+async function _attSignedUrl(path,dl){
+  try{ var opt=dl?{download:true}:undefined; var r=await supa.storage.from(ATTACH_BUCKET).createSignedUrl(path,3600,opt); return (r&&r.data&&r.data.signedUrl)||null; }catch(e){ return null; }
+}
+async function attOpen(kind,id,aid){
+  if(!supa||!user){ toast("Sign in to view"); return; }
+  var arr=_attListOf(kind,id); var a=arr&&arr.find(function(x){return x.id===aid;}); if(!a) return;
+  if(_isPdf(a)){ openPdfViewer(a); return; }
+  var u=await _attSignedUrl(a.path,false); if(u) window.open(u,"_blank","noopener"); else toast("Couldn't open file");
+}
+async function attDownload(kind,id,aid){
+  var arr=_attListOf(kind,id); var a=arr&&arr.find(function(x){return x.id===aid;}); if(!a) return;
+  var u=await _attSignedUrl(a.path,true); if(u) window.open(u,"_blank","noopener"); else toast("Couldn't download");
+}
+async function attDelete(kind,id,aid){
+  var arr=_attListOf(kind,id); if(!arr) return; var a=arr.find(function(x){return x.id===aid;}); if(!a) return;
+  try{ if(supa&&user) await supa.storage.from(ATTACH_BUCKET).remove([a.path]); }catch(e){}
+  var it=_attOwner(kind,id); if(it){ it.attachments=(it.attachments||[]).filter(function(x){return x.id!==aid;}); it.updated=Date.now(); }
+  save();
+  if(kind==="task") tdRenderAttach(id); else noteRenderAttach(id);
+  try{ var lt=document.getElementById("tab-library"); if(lt&&lt.classList.contains("active")) renderLibrary(); }catch(e){}
+  toast("Attachment removed");
+}
+function _attRows(kind,id,arr){
+  return arr.map(function(a){
+    return '<div class="att-row">'+_attIcon(a)
+      +'<button type="button" class="att-nm" onclick="attOpen(\''+kind+'\',\''+id+'\',\''+a.id+'\')" title="'+esc(a.name)+'">'+esc(a.name)+'</button>'
+      +'<span class="att-sz">'+_fmtSize(a.size)+'</span>'
+      +'<button type="button" class="att-dl" title="Download" onclick="attDownload(\''+kind+'\',\''+id+'\',\''+a.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg></button>'
+      +'<button type="button" class="att-del" title="Remove" onclick="attDelete(\''+kind+'\',\''+id+'\',\''+a.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+      +'</div>';
+  }).join("");
+}
+function tdRenderAttach(id){ var host=document.getElementById("tdAttach"); if(!host) return; var arr=_attListOf("task",id)||[];
+  if(!supa||!user){ host.innerHTML='<div class="att-empty">Sign in to add or view attachments.</div>'; return; }
+  host.innerHTML=arr.length?_attRows("task",id,arr):'<div class="att-empty">No attachments yet.</div>'; }
+function noteRenderAttach(id){ var host=document.getElementById("enAttach"); if(!host) return; var arr=_attListOf("note",id)||[];
+  if(!supa||!user){ host.innerHTML='<div class="att-empty">Sign in to add or view attachments.</div>'; return; }
+  host.innerHTML=arr.length?_attRows("note",id,arr):'<div class="att-empty">No attachments yet.</div>'; }
+function openPdfViewer(a){
+  showModal('<div class="pdfv-head"><span class="att-ic pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span class="pdfv-t">'+esc(a.name)+'</span><button type="button" class="pdfv-ic" title="Open in new tab" onclick="attOpenTab(\''+esc(a.path)+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M7 17L17 7M9 7h8v8"/></svg></button><button type="button" class="pdfv-ic" title="Close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="pdfv-body"><div class="att-empty" style="padding:22px;color:#e6e1f5">Loading…</div></div>',"pdfv");
+  _attSignedUrl(a.path,false).then(function(u){ var b=document.querySelector(".modal.pdfv .pdfv-body"); if(!b) return; if(u){ b.innerHTML='<iframe class="pdfv-frame" src="'+u+'#toolbar=1&navpanes=0"></iframe>'; } else { b.innerHTML='<div class="att-empty" style="padding:22px;color:#e6e1f5">Couldn\'t load this PDF. Try Open in new tab.</div>'; } });
+}
+async function attOpenTab(path){ if(!supa||!user) return; var u=await _attSignedUrl(path,false); if(u) window.open(u,"_blank","noopener"); }
+function _allAttachments(){ var out=[];
+  (data.tasks||[]).forEach(function(t){ (t.attachments||[]).forEach(function(a){ out.push({a:a,kind:"task",id:t.id,src:(t.t||"Untitled task")}); }); });
+  (data.notes||[]).forEach(function(n){ (n.attachments||[]).forEach(function(a){ out.push({a:a,kind:"note",id:n.id,src:(n.title||"Untitled note")}); }); });
+  out.sort(function(x,y){ return (y.a.uploadedAt||0)-(x.a.uploadedAt||0); });
+  return out;
+}
+function renderLibrary(){ var host=document.getElementById("libList"); if(!host) return; var cnt=document.getElementById("libCount");
+  if(!supa||!user){ host.innerHTML='<div class="empty"><p>Sign in to see your attachment library.</p></div>'; if(cnt)cnt.textContent=""; return; }
+  var all=_allAttachments(); if(cnt) cnt.textContent=all.length?(all.length+" file"+(all.length>1?"s":"")):"";
+  if(!all.length){ host.innerHTML='<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg></div><p>No attachments yet. Add PDFs or files to any task or note.</p></div>'; return; }
+  host.innerHTML='<div class="lib-grid">'+all.map(function(r){ var openSrc=r.kind==="task"?("openTask(\''+r.id+'\')"):("editNote(\''+r.id+'\')");
+    return '<div class="lib-row">'+_attIcon(r.a)
+      +'<div class="lib-main"><button type="button" class="lib-nm" onclick="attOpen(\''+r.kind+'\',\''+r.id+'\',\''+r.a.id+'\')" title="'+esc(r.a.name)+'">'+esc(r.a.name)+'</button>'
+      +'<div class="lib-src">'+(r.kind==="task"?"Task":"Note")+' &middot; <b onclick="'+openSrc+'">'+esc(r.src)+'</b> &middot; '+_fmtSize(r.a.size)+'</div></div>'
+      +'<button type="button" class="att-dl" title="Download" onclick="attDownload(\''+r.kind+'\',\''+r.id+'\',\''+r.a.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg></button>'
+      +'</div>';
+  }).join("")+'</div>';
+}
+
 function addNoteChkRow(text,done){
   var host=document.getElementById("enChk"); if(!host) return;
   var row=document.createElement("div"); row.className="sub-row";
@@ -3485,17 +3603,52 @@ function getGToken(kind){ var o=_gTok[kind]; if(o&&o.t&&o.e>Date.now()+30000) re
 function clearGToken(kind){ delete _gTok[kind]; try{ localStorage.removeItem("hub."+kind+".tok"); localStorage.removeItem("hub."+kind+".exp"); }catch(e){} }
 /* scope upgraded to calendar.events + gmail.send -> force one re-consent */
 (function(){ try{ if(localStorage.getItem("hub.gscope")!=="2"){ clearGToken("google"); clearGToken("gmail"); localStorage.setItem("hub.gscope","2"); } }catch(e){} })();
-function gGetToken(kind,scope,cb,silent){
-  var cached=getGToken(kind); if(cached){ cb(cached); return true; }
-  var cid=googleClientId(); if(!cid){ if(!silent){ toast("Add your Google Client ID in Settings"); openSettings(); } return false; }
-  if(!window.google||!google.accounts||!google.accounts.oauth2){ if(!silent) toast("Google not ready — try again in a moment"); return false; }
+var GT_URL=SUPABASE_URL+"/functions/v1/google-token";
+async function gServerToken(payload){
+  try{
+    if(!supa) return {error:"no_supa"};
+    var sess=await supa.auth.getSession(); var jwt=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+    if(!jwt) return {error:"no_jwt"};
+    var r=await fetch(GT_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+jwt,"apikey":SUPABASE_ANON_KEY},body:JSON.stringify(payload||{})});
+    return await r.json();
+  }catch(e){ return {error:"unreachable"}; }
+}
+function gConnectCode(scope,cb){
+  var cid=googleClientId(); if(!cid){ toast("Add your Google Client ID in Settings"); openSettings(); if(cb)cb(null); return; }
+  if(!window.google||!google.accounts||!google.accounts.oauth2){ if(cb)cb(null); toast("Google not ready — try again in a moment"); return; }
+  try{
+    var cc=google.accounts.oauth2.initCodeClient({client_id:cid,scope:scope+" https://www.googleapis.com/auth/userinfo.email",ux_mode:"popup",
+      callback:async function(resp){
+        if(resp&&resp.code){ var r=await gServerToken({code:resp.code,redirect_uri:"postmessage"});
+          if(r&&r.access_token){ saveGToken("google",r.access_token,r.expires_in); if(cb)cb(r.access_token); }
+          else { toast("Google connect failed"); if(cb)cb(null,r); } }
+        else { if(cb)cb(null,resp); } }});
+    cc.requestCode();
+  }catch(e){ toast("Couldn't start Google sign-in"); if(cb)cb(null); }
+}
+function gImplicitToken(kind,scope,cb,silent){
+  var cid=googleClientId(); if(!cid){ if(!silent){ toast("Add your Google Client ID in Settings"); openSettings(); } if(cb)cb(null); return; }
+  if(!window.google||!google.accounts||!google.accounts.oauth2){ if(!silent) toast("Google not ready — try again in a moment"); if(cb)cb(null); return; }
   try{
     var tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:scope+" https://www.googleapis.com/auth/userinfo.email",
       callback:function(resp){ if(resp&&resp.access_token){ saveGToken(kind,resp.access_token,resp.expires_in); cb(resp.access_token); } else { cb(null,resp); } },
       error_callback:function(err){ cb(null,err); }});
     tc.requestAccessToken(silent?{prompt:""}:{});
-    return true;
-  }catch(e){ if(!silent) toast("Couldn't start Google sign-in"); return false; }
+  }catch(e){ if(!silent) toast("Couldn't start Google sign-in"); if(cb)cb(null); }
+}
+/* Connect once: server-side refresh token first; fall back to popup token flow. */
+function gGetToken(kind,scope,cb,silent){
+  var cached=getGToken(kind); if(cached){ cb(cached); return true; }
+  (async function(){
+    if(supa&&user){
+      var r=await gServerToken({});
+      if(r&&r.access_token){ saveGToken("google",r.access_token,r.expires_in); saveGToken(kind,r.access_token,r.expires_in); cb(r.access_token); return; }
+      if(r&&r.error==="no_refresh_token"){ if(silent){ cb(null,r); return; } gConnectCode(scope,cb); return; }
+      /* unreachable / not-deployed / other -> fall back to popup flow */
+    }
+    gImplicitToken(kind,scope,cb,silent);
+  })();
+  return true;
 }
 function gAutoConnect(){
   if(!googleClientId()) return;
@@ -3864,7 +4017,7 @@ async function doSignIn(){
   if(!email||!pass) return authErr("Enter your email and password.");
   authErr("Signing in…");
   const {error}=await supa.auth.signInWithPassword({email,password:pass});
-  if(error) authErr(error.message);
+  if(error) authErr(error.message); else _markAuthStart(true);
 }
 async function doSignUp(){
   if(!supaReady) return guestMode();
@@ -3874,14 +4027,20 @@ async function doSignUp(){
   authErr("Creating…");
   const {data:res,error}=await supa.auth.signUp({email,password:pass});
   if(error) return authErr(error.message);
-  if(res&&res.session) return; authErr("Check your email to confirm your account.",true);
+  if(res&&res.session){ _markAuthStart(true); return; } authErr("Check your email to confirm your account.",true);
 }
 async function doForgot(){
   const email=document.getElementById("aEmail").value.trim(); if(!email) return authErr("Enter your email first.");
   const {error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   authErr(error?error.message:"Reset link sent — check your inbox.",!error);
 }
-async function signOut(){ closeModal(); if(supa) await supa.auth.signOut(); }
+async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");}catch(e){} if(supa) await supa.auth.signOut(); }
+/* ---- Session timeout: auto sign-out 4 h after login ---- */
+var SESSION_MAX_MS=4*60*60*1000;
+function _markAuthStart(reset){ try{ if(reset||!localStorage.getItem("hub.authStart")) localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
+function _sessionExpired(){ try{ var t=+localStorage.getItem("hub.authStart")||0; return t>0&&(Date.now()-t)>SESSION_MAX_MS; }catch(e){ return false; } }
+async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await signOut(); } }
+setInterval(function(){ try{ _enforceSessionTimeout(); }catch(e){} },60000);
 
 async function initAuth(){
   accountInit();
@@ -3894,7 +4053,7 @@ async function initAuth(){
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
+  if(session){ user=session.user; _markAuthStart(false); if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
   else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
 }
 
