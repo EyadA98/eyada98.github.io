@@ -2260,7 +2260,7 @@ async function doSignIn(){
   if(!email || !pass) return authErr("Enter your email and password.");
   authBusy(true, "Signing in…");
   const {error} = await supa.auth.signInWithPassword({email, password:pass});
-  if(error){ authBusy(false, "Sign in"); authErr(error.message); }
+  if(error){ authBusy(false, "Sign in"); authErr(error.message); } else { _markAuthStart(true); }
 }
 async function doSignUp(){
   const email = document.getElementById("aEmail").value.trim(), pass = document.getElementById("aPass").value;
@@ -2269,7 +2269,7 @@ async function doSignUp(){
   authBusy(true, "Creating…");
   const {data:res, error} = await supa.auth.signUp({email, password:pass});
   if(error){ authBusy(false, "Create account"); return authErr(error.message); }
-  if(res && res.session) return;          // signed in instantly
+  if(res && res.session){ _markAuthStart(true); return; }          // signed in instantly
   authBusy(false, "Create account");
   authErr("Almost there — check your email to confirm your account.", true);
 }
@@ -2326,7 +2326,13 @@ function openAccount(){
       <button class="btn" onclick="closeModal()">Close</button>
     </div>`);
 }
-async function doSignOut(){ await supa.auth.signOut(); }
+async function doSignOut(){ try{localStorage.removeItem("hub.authStart");}catch(e){} await supa.auth.signOut(); }
+/* ---- Shared 4 h session timeout (coordinated with Hub via hub.authStart) ---- */
+var SESSION_MAX_MS=4*60*60*1000;
+function _markAuthStart(reset){ try{ if(reset||!localStorage.getItem("hub.authStart")) localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
+function _sessionExpired(){ try{ var t=+localStorage.getItem("hub.authStart")||0; return t>0&&(Date.now()-t)>SESSION_MAX_MS; }catch(e){ return false; } }
+async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await doSignOut(); } }
+setInterval(function(){ try{ _enforceSessionTimeout(); }catch(e){} },60000);
 
 async function initAuth(){
   updateAcctBtn();
@@ -2353,7 +2359,9 @@ async function initAuth(){
   });
   const {data:{session}} = await supa.auth.getSession();
   if(session){
-    user = session.user; updateAcctBtn();
+    user = session.user; _markAuthStart(false);
+    if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Session expired — please sign in again"); await supa.auth.signOut(); authUI("in"); return; }
+    updateAcctBtn();
     try{ const c = localStorage.getItem(KEY+":"+user.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
     pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
   } else { if(!localStorage.getItem(GUEST_FLAG)) authUI("in"); refreshPrices(false); }
