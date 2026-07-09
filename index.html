@@ -3913,8 +3913,9 @@ function gGetToken(kind,scope,cb,silent){
       var r=await gServerToken({});
       if(r&&r.access_token){ saveGToken("google",r.access_token,r.expires_in); saveGToken(kind,r.access_token,r.expires_in); cb(r.access_token); return; }
       if(r&&r.error==="no_refresh_token"){ if(silent){ cb(null,r); return; } gConnectCode(scope,cb); return; }
-      /* unreachable / not-deployed / other -> fall back to popup flow */
+      /* unreachable / not-deployed / other */
     }
+    if(silent){ cb(null); return; }
     gImplicitToken(kind,scope,cb,silent);
   })();
   return true;
