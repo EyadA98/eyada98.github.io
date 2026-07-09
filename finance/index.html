@@ -2240,7 +2240,6 @@ function authUI(mode){
       <button class="btn full" id="aBtn" onclick="${mode==="up"?"doSignUp()":"doSignIn()"}">${mode==="up"?"Create account":"Sign in"}</button>
       <div class="auth-links">
         <button onclick="authUI('forgot')">Forgot password?</button>
-        <button onclick="guestMode()">Continue without account</button>
       </div>`;
   }
   root.innerHTML = `<div class="auth-wrap"><div class="auth-card">
@@ -2367,7 +2366,7 @@ async function initAuth(){
     updateAcctBtn();
     try{ const c = localStorage.getItem(KEY+":"+user.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
     pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
-  } else { if(!localStorage.getItem(GUEST_FLAG)) authUI("in"); refreshPrices(false); }
+  } else { authUI("in"); refreshPrices(false); }
 }
 
 /* ---------- Render ---------- */
