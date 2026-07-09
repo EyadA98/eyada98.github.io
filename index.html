@@ -4187,7 +4187,7 @@ function authUI(mode){
     <input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
     <div class="auth-err" id="aErr"></div>
     <button class="btn full" id="aBtn" onclick="${mode==='up'?'doSignUp()':'doSignIn()'}">${mode==='up'?'Create account':'Sign in'}</button>
-    <div class="auth-links"><button onclick="guestMode()">Continue without account</button>${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}</div>
+    <div class="auth-links">${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}</div>
   </div>`;
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
@@ -4248,7 +4248,7 @@ async function initAuth(){
   });
   const {data:{session}}=await supa.auth.getSession();
   if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
-  else if(!localStorage.getItem(GUEST_FLAG)) authUI("in");
+  else authUI("in");
 }
 
 /* ============ Calendar write (create / edit / delete events) ============ */
