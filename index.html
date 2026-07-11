@@ -2590,7 +2590,7 @@ function buildDigest(){
   var greet=hr<12?"Good morning":(hr<18?"Good afternoon":"Good evening");
   var name=((data.profile&&data.profile.name)||"there").split(" ")[0];
   var url=(/^https?:/.test(location.origin)?location.origin:"https://eyadalfi.com");
-  var INK="#7f7595",MUT="#867c9c",SOFT="#8b81a3",LINE="#f1ecfa",BG="#f4f1fb",NIGHT="#0d0926",PUR="#8a64c8",PUR2="#8a64c8",LAV="#c6b3ef",PEACH="#f3b98e",RED="#d6554c";
+  var INK="#2a1d44",MUT="#6a5f86",SOFT="#8a7fb0",LINE="#f1ecfa",BG="#f4f1fb",NIGHT="#0d0926",PUR="#8a64c8",PUR2="#623f94",LAV="#c6b3ef",PEACH="#f3b98e",RED="#d6554c";
   var F="'Plus Jakarta Sans',Arial,sans-serif", D="'Marcellus',Georgia,serif";
   var any=d.today.length||d.week.length||d.overdue.length;
 
@@ -2608,7 +2608,7 @@ function buildDigest(){
    +'</tr></table>';
 
   /* --- rows --- */
-  var PILL={ task:["TASK","#e8e0f6","#8a64c8"], sub:["SUB","#e6def7","#9070cf"], event:["EVENT","#e0f0fa","#2c7fb0"], routine:["ROUTINE","#f8e5d5","#c25f22"] };
+  var PILL={ task:["TASK","rgba(138,100,200,.18)",PUR2], sub:["SUB","rgba(198,179,239,.36)","#6b52c9"], event:["EVENT","rgba(78,168,222,.16)","#2c7fb0"], routine:["ROUTINE","rgba(221,130,75,.20)","#c25f22"] };
   function whenLbl(it,mode){
     if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
     if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
@@ -2621,57 +2621,56 @@ function buildDigest(){
     return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
      +'<td width="60" valign="middle" style="width:60px"><div style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
-     +'<td valign="middle" width="15" bgcolor="#ffffff" style="background-color:#ffffff;width:15px;padding-left:12px;font:400 12px '+F+';color:#9070cf;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
-     +'<td class="ttl" valign="middle" bgcolor="#ffffff" style="background-color:#ffffff;font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#8b81a3":INK)+'">'+esc(it.title)+'</td>'
-     +'<td class="tm" align="right" valign="middle" bgcolor="#ffffff" style="background-color:#ffffff;white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
+     +'<td width="15" valign="middle" style="width:15px;padding-left:12px;font:400 12px '+F+';color:#b6a6e0;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
+     +'<td valign="middle" style="font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#5f5480":INK)+'">'+esc(it.title)+'</td>'
+     +'<td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
      +'</tr></table></td></tr>';
   }
   function head(title,right,od){
     return '<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="3" bgcolor="'+(od?RED:PUR)+'" style="width:3px;background-color:'+(od?RED:PUR)+';border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
-     +'<td class="h2" bgcolor="#ffffff" style="background-color:#ffffff;padding-left:10px;font:800 15.5px '+F+';color:'+(od?RED:PUR)+'">'+title+'</td>'
-     +(right?'<td align="right" style="white-space:nowrap"><span style="display:inline-block;font:700 11px '+F+';color:#867c9c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+right+'</span></td>':'')
+     +'<td width="3" style="width:3px;background:'+(od?RED:PUR)+';border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
+     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">'+title+'</td>'
+     +(right?'<td align="right" style="white-space:nowrap"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+right+'</span></td>':'')
      +'</tr></table>';
   }
   function sect(title,items,mode,od){
     if(!items.length) return "";
-    return '<tr><td class="sec" bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head(title,items.length+' item'+(items.length>1?"s":""),od)
+    return '<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head(title,items.length+' item'+(items.length>1?"s":""),od)
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+items.map(function(x){return row(x,mode);}).join("")+'</table></td></tr>';
   }
   var sections=sect("Today",d.today,"today")+sect("This week",d.week,"week")+sect("Overdue",d.overdue,"over",true);
-  if(!any) sections='<tr><td class="sec" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
+  if(!any) sections='<tr><td align="center" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
 
   /* --- prayer --- */
   var prayer="";
   if(Array.isArray(_prayList)&&_prayList.length){
     var p2=function(x){return (x<10?"0":"")+x;};
     var cells=_prayList.map(function(p){
-      return '<td width="20%" valign="top" style="padding:0 3px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" class="pcell" style="background-color:#f1ecfa;border:1px solid #ddd0f2;border-radius:10px"><tr><td align="center" style="padding:9px 4px">'
-       +'<div class="pnm" style="font:800 8.5px '+F+';letter-spacing:.06em;color:#8a64c8;text-transform:uppercase">'+esc(p.name)+'</div>'
-       +'<div class="ptm" style="font:700 14px '+F+';color:#7f7595;margin-top:3px">'+p2(p.h)+':'+p2(p.m)+'</div>'
+      return '<td width="20%" valign="top" style="padding:0 3px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(138,100,200,.10);border:1px solid rgba(138,100,200,.20);border-radius:10px"><tr><td align="center" style="padding:9px 4px">'
+       +'<div style="font:800 8.5px '+F+';letter-spacing:.06em;color:#7a55bd;text-transform:uppercase">'+esc(p.name)+'</div>'
+       +'<div style="font:700 14px '+F+';color:'+INK+';margin-top:3px">'+p2(p.h)+':'+p2(p.m)+'</div>'
        +'</td></tr></table></td>';
     }).join("");
-    prayer='<tr><td class="sec" bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Prayer",esc((data.settings&&data.settings.city)||""))
+    prayer='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Prayer",esc((data.settings&&data.settings.city)||""))
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px"><tr>'+cells+'</tr></table></td></tr>';
   }
 
   /* --- finance: net worth only, no chart --- */
   var fin="";
   if(financeStat){
-    fin='<tr><td class="sec" bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Finance","")
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" class="finbox" style="margin-top:12px;background-color:#fbf9fe;border:1px solid #e7e0f5;border-radius:12px"><tr>'
+    fin='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Finance","")
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px;background:#fbf9fe;border:1px solid #e7e0f5;border-radius:12px"><tr>'
      +'<td valign="middle" style="padding:16px 18px">'
-     +'<div class="mut" style="font:800 8.5px '+F+';letter-spacing:.12em;text-transform:uppercase;color:'+SOFT+'">Current net worth</div>'
-     +'<div class="nwv" style="font:400 28px '+D+';color:#8a64c8;margin-top:5px;line-height:1.05">'+esc((data.settings&&data.settings.currency)||"SAR")+' '+esc(financeStat)+'</div>'
+     +'<div style="font:800 8.5px '+F+';letter-spacing:.12em;text-transform:uppercase;color:'+SOFT+'">Current net worth</div>'
+     +'<div style="font:400 28px '+D+';color:'+PUR2+';margin-top:5px;line-height:1.05">'+esc((data.settings&&data.settings.currency)||"SAR")+' '+esc(financeStat)+'</div>'
      +'</td></tr></table></td></tr>';
   }
 
-var css='<style>@media (prefers-color-scheme:dark){.body-bg{background-color:#0d0926!important}.card{background-color:#15102e!important;border-color:#2a2450!important}.sec,.h2,.ttl,.tm{background-color:#15102e!important}.sec{border-bottom-color:#241d47!important;border-top-color:#241d47!important}.h2,.ttl,.nwv,.ptm{color:#efe9fb!important}.mut,.tm{color:#a99ccb!important}.chip{background-color:#221b45!important;border-color:#33295e!important;color:#c6b3ef!important}.finbox{background-color:#1b1540!important;border-color:#2e2657!important}.pcell{background-color:#241c4d!important;border-color:#3a2f6b!important}.pnm{color:#c6b3ef!important}}</style>';
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'+css+'</head>'
-   +'<body class="body-bg" bgcolor="'+BG+'" style="margin:0;padding:0;background-color:'+BG+';-webkit-font-smoothing:antialiased">'
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></head>'
+   +'<body style="margin:0;padding:0;background:'+BG+';-webkit-font-smoothing:antialiased">'
    +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:'+BG+'"><tr><td align="center" style="padding:26px 12px">'
-   +'<table width="560" cellpadding="0" cellspacing="0" role="presentation" class="card" bgcolor="#ffffff" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7f6">'
-   +'<tr><td background="https://eyadalfi.com/email/hero-bg.png" bgcolor="#0d0926" style="background:#0d0926 url(\'https://eyadalfi.com/email/hero-bg.png\') no-repeat center top;background-size:cover;background-color:#0d0926;padding:32px 23px 22px">'
+   +'<table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7f6">'
+   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 88% 4%,rgba(138,100,200,.50),transparent 42%),radial-gradient(circle at 72% 10%,rgba(243,185,142,.26),transparent 40%),radial-gradient(circle at 2% 88%,rgba(98,63,148,.60),transparent 46%),radial-gradient(circle at 46% 104%,rgba(198,179,239,.18),transparent 46%);padding:32px 23px 22px">'
    +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation">'
    +'<tr><td style="padding:0 3px 20px">'
    +'<div style="font:800 9px '+F+';letter-spacing:.24em;text-transform:uppercase;color:'+LAV+'">Daily Briefing</div>'
@@ -2682,7 +2681,7 @@ var css='<style>@media (prefers-color-scheme:dark){.body-bg{background-color:#0d
    +'<tr><td>'+strip+'</td></tr>'
    +'</table></td></tr>'
    +sections+prayer+fin
-   +'<tr><td class="sec" align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 26px"><a href="'+url+'" style="display:inline-block;background:#4a2f74;background-image:linear-gradient(120deg,#0d0926 0%,#4a2f74 50%,#8a64c8 100%);color:#ffffff;font:700 13px '+F+';text-decoration:none;padding:13px 28px;border-radius:11px">Open your HQ &#8599;</a></td></tr>'
+   +'<tr><td align="center" style="padding:22px 26px"><a href="'+url+'" style="display:inline-block;background:#4a2f74;background-image:linear-gradient(120deg,#0d0926 0%,#4a2f74 50%,#8a64c8 100%);color:#ffffff;font:700 13px '+F+';text-decoration:none;padding:13px 28px;border-radius:11px">Open your HQ &#8599;</a></td></tr>'
    +'<tr><td style="background:'+NIGHT+';padding:18px 26px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
    +'<td valign="middle" style="font:400 16px '+D+';color:#ffffff">Eyad&rsquo;s HQ</td>'
    +'<td align="right" valign="middle"><div style="font:600 10px '+F+';color:'+LAV+'"><a href="'+url+'" style="color:'+LAV+';text-decoration:none">eyadalfi.com</a></div>'
