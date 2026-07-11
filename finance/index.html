@@ -412,6 +412,11 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   box-shadow:0 30px 90px rgba(10,8,30,.45),inset 0 1px 0 #fff;animation:pop .45s var(--ease)}
 .auth-logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,var(--lavender),var(--violet));display:grid;place-items:center;margin:0 auto 14px;box-shadow:0 8px 22px rgba(93,79,168,.4)}
 .auth-logo svg{width:28px;height:28px;color:#fff}
+.pwf{position:relative}
+.pwf input{padding-right:46px!important}
+.pwf-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;padding:0;cursor:pointer;color:var(--muted);border-radius:9px;transition:color .18s,background .18s}
+.pwf-eye:hover{color:var(--lavender);background:rgba(138,100,200,.10)}
+.pwf-eye svg{width:18px;height:18px;display:block}
 .auth-card h2{text-align:center;font-size:1.3rem;font-weight:800;letter-spacing:-.015em}
 .auth-card .tag{text-align:center;font-size:.84rem;color:var(--muted);font-weight:500;margin:4px 0 20px}
 .auth-tabs{display:flex;background:var(--lilac-soft);border-radius:99px;padding:4px;margin-bottom:18px}
@@ -806,6 +811,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 .av-menu button.danger-item{color:var(--red)}
 
 #syncStatus{display:none!important}
+#themeToggle{display:inline-flex;align-items:center;justify-content:center}#themeIcon{display:grid;place-items:center;line-height:0}
 </style>
 </head>
 <body>
@@ -2219,6 +2225,9 @@ async function pullCloud(){
 
 /* ----- Auth UI ----- */
 const AUTH_LOGO = '<svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg>';
+var I_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+var I_EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 6.7A8.9 8.9 0 0 1 12 6.5c6 0 9.5 6 9.5 6a17 17 0 0 1-2.6 3.3M6.2 7.9A16.6 16.6 0 0 0 2.5 12.5s3.5 6 9.5 6a9 9 0 0 0 3.5-.7"/><path d="M9.9 10.4a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>';
+function togglePw(inId,btnId){ var i=document.getElementById(inId), b=document.getElementById(btnId); if(!i) return; var show=(i.type==="password"); i.type=show?"text":"password"; if(b){ b.innerHTML=show?I_EYEOFF:I_EYE; b.setAttribute("aria-label",show?"Hide password":"Show password"); b.title=show?"Hide password":"Show password"; } try{ i.focus(); }catch(e){} }
 function authUI(mode){
   mode = mode || "in";
   const root = document.getElementById("authRoot");
@@ -2235,7 +2244,7 @@ function authUI(mode){
   } else {
     body = tabs + `
       <input id="aEmail" type="email" placeholder="Email" autocomplete="email">
-      <input id="aPass" type="password" placeholder="Password${mode==="up"?" (min 6 characters)":""}" autocomplete="${mode==="up"?"new-password":"current-password"}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
+      <div class="pwf"><input id="aPass" type="password" placeholder="Password${mode==="up"?" (min 6 characters)":""}" autocomplete="${mode==="up"?"new-password":"current-password"}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()"><button type="button" class="pwf-eye" id="aEye" onclick="togglePw('aPass','aEye')" aria-label="Show password" title="Show password">${I_EYE}</button></div>
       <div class="auth-err" id="aErr"></div>
       <button class="btn full" id="aBtn" onclick="${mode==="up"?"doSignUp()":"doSignIn()"}">${mode==="up"?"Create account":"Sign in"}</button>
       <div class="auth-links">
@@ -2282,7 +2291,7 @@ async function doForgot(){
 }
 function newPasswordModal(){
   showModal(`<h4>Set a new password</h4>
-    <input id="nPass" type="password" placeholder="New password (min 6 characters)" style="width:100%;background:rgba(255,255,255,.8);border:1px solid var(--border);color:var(--text);padding:10px 13px;border-radius:11px;font-family:inherit;font-size:.95rem;margin-bottom:16px" onkeydown="if(event.key==='Enter')document.getElementById('nOk').click()">
+    <div class="pwf" style="margin-bottom:16px"><input id="nPass" type="password" placeholder="New password (min 6 characters)" style="width:100%;background:rgba(255,255,255,.8);border:1px solid var(--border);color:var(--text);padding:10px 13px;border-radius:11px;font-family:inherit;font-size:.95rem" onkeydown="if(event.key==='Enter')document.getElementById('nOk').click()"><button type="button" class="pwf-eye" id="nEye" onclick="togglePw('nPass','nEye')" aria-label="Show password" title="Show password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
     <div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button>
     <button class="btn" id="nOk" onclick="saveNewPassword()">Update password</button></div>`);
 }
