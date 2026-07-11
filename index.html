@@ -2566,13 +2566,14 @@ function digestData(){
   var today=[], week=[], overdue=[];
   function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
   (data.tasks||[]).forEach(function(x){
-    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||"",prio:x.priority||""});
-    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||"",parent:x.t||""}); });
+    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||""});
+    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||""}); });
   });
   (Array.isArray(calEvents)?calEvents:[]).forEach(function(e){
     var w=(e.start&&(e.start.dateTime||e.start.date))||""; if(!w) return;
-    var dt=e.start&&e.start.dateTime;
-    push({kind:"event",title:e.summary||"(event)",date:w.slice(0,10),time:dt?w.slice(11,16):"",allday:!dt});
+    var dt=e.start&&e.start.dateTime; var ed=w.slice(0,10);
+    if(ed<t) return; /* past events are never "overdue" — they just passed */
+    push({kind:"event",title:e.summary||"(event)",date:ed,time:dt?w.slice(11,16):""});
   });
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(nx) push({kind:"routine",title:r.title||"Routine",date:nx,time:"",recur:rtRecurLabel(r)}); });
   function srt(a,b){ return (a.date||"").localeCompare(b.date||"")||((a.time||"zz").localeCompare(b.time||"zz")); }
@@ -2589,84 +2590,80 @@ function buildDigest(){
   var greet=hr<12?"Good morning":(hr<18?"Good afternoon":"Good evening");
   var name=((data.profile&&data.profile.name)||"there").split(" ")[0];
   var url=(/^https?:/.test(location.origin)?location.origin:"https://eyadalfi.com");
-  var INK="#2a1d44",MUT="#6a5f86",SOFT="#8a7fb0",LINE="#f1ecfa",BG="#f4f1fb",NIGHT="#0d0926",PUR="#8a64c8",PUR2="#623f94",LAV="#c6b3ef",PEACH="#f3b98e",BLUE="#4ea8de",RED="#d6554c";
+  /* solid hex only — rgba() breaks under Gmail dark-mode inversion */
   var F="'Plus Jakarta Sans',Arial,sans-serif", D="'Marcellus',Georgia,serif";
+  var NIGHT="#0d0926", INK="#2a1d44", SOFT="#8a7fb0", MUT="#4a4066", LINE="#f1ecfa", BG="#f4f1fb",
+      PUR="#8a64c8", PUR2="#623f94", LAV="#c6b3ef", PEACH="#f3b98e", RED="#d6554c",
+      BOX="#1c1833", BOXB="#2a2740";
   var any=d.today.length||d.week.length||d.overdue.length;
 
-  /* --- dark stat boxes (today only) --- */
+  /* --- today stat boxes: inline-block so they reflow on phones --- */
   function statBox(n,label,puck,glyph,gcol,ncol){
-    return '<td width="20%" valign="top" style="padding:0 3px">'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px">'
-     +'<tr><td align="center" style="padding:12px 4px 11px">'
+    return '<div class="stat" style="display:inline-block;width:19%;margin:0 .4% 0;vertical-align:top;background:'+BOX+';border:1px solid '+BOXB+';border-radius:14px">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:12px 2px 11px">'
      +'<table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 7px"><tr><td align="center" width="26" height="26" style="width:26px;height:26px;background:'+puck+';border-radius:13px;font:700 13px '+F+';color:'+gcol+';line-height:26px">'+glyph+'</td></tr></table>'
-     +'<div style="font:400 19px '+D+';color:'+(ncol||"#ffffff")+';line-height:1">'+n+'</div>'
-     +'<div style="font:800 8px '+F+';letter-spacing:.1em;text-transform:uppercase;color:#9d8fc4;margin-top:5px">'+label+'</div>'
-     +'</td></tr></table></td>';
+     +'<div class="statn" style="font:700 19px '+F+';color:'+(ncol||"#ffffff")+';line-height:1">'+n+'</div>'
+     +'<div class="statl" style="font:800 8px '+F+';letter-spacing:.09em;text-transform:uppercase;color:#9d8fc4;margin-top:5px">'+label+'</div>'
+     +'</td></tr></table></div>';
   }
-  var strip='<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-   +statBox(d.c.task,"Tasks","rgba(138,100,200,.30)","&#10003;","#dccff6")
-   +statBox(d.c.sub,"Subtasks","rgba(198,179,239,.28)","&#8627;","#e3d9f8")
-   +statBox(d.c.event,"Events","rgba(78,168,222,.26)","&#9670;","#bee4f7")
-   +statBox(d.c.routine,"Routines","rgba(243,185,142,.26)","&#8635;","#fad9bf")
-   +statBox(d.c.overdue,"Overdue","rgba(214,85,76,.28)","!","#f7b9b3",PEACH)
-   +'</tr></table>';
+  var strip='<div style="font-size:0;text-align:center">'
+   +statBox(d.c.task,"Tasks","#322457","&#10003;","#dccff6")
+   +statBox(d.c.sub,"Subtasks","#41395e","&#8627;","#e3d9f8")
+   +statBox(d.c.event,"Events","#1e3256","&#9670;","#bee4f7")
+   +statBox(d.c.routine,"Routines","#493741","&#8635;","#fad9bf")
+   +statBox(d.c.overdue,"Overdue","#451e31","!","#f7b9b3",PEACH)
+   +'</div>';
 
-  /* --- activity rows --- */
-  var PILL={ task:["TASK","rgba(138,100,200,.18)",PUR2], sub:["SUB","rgba(198,179,239,.36)","#6b52c9"], event:["EVENT","rgba(78,168,222,.16)","#2c7fb0"], routine:["ROUTINE","rgba(221,130,75,.20)","#c25f22"] };
+  /* --- rows --- */
+  var PILL={ task:["TASK","#e8e0f6",PUR2], sub:["SUB","#e6def7","#6b52c9"], event:["EVENT","#e0f0fa","#2c7fb0"], routine:["ROUTINE","#f8e5d5","#c25f22"] };
   function whenLbl(it,mode){
     if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
     if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
     var dd=new Date(it.date+"T00:00:00");
-    var s=dd.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-    return s+(it.time?(", "+prettyTime(it.time)):"");
+    return dd.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+(it.time?(", "+prettyTime(it.time)):"");
   }
   function row(it,mode){
     var p=PILL[it.kind]||PILL.task, isSub=(it.kind==="sub");
-    var tcol=mode==="over"?RED:(isSub?SOFT:"#4a4066"), tw=mode==="over"?800:(isSub?500:700);
-    return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
+    var tcol=mode==="over"?RED:(isSub?SOFT:MUT), tw=mode==="over"?800:(isSub?500:700);
+    return '<tr><td class="rw" style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="60" valign="middle" style="width:60px"><div style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
-     +'<td width="15" valign="middle" style="width:15px;padding-left:12px;font:400 12px '+F+';color:#b6a6e0;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
-     +'<td valign="middle" style="font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#5f5480":INK)+'">'+esc(it.title)+'</td>'
-     +'<td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
+     +'<td width="58" valign="middle" style="width:58px"><div class="pill" style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
+     +'<td width="14" valign="middle" class="lnk" style="width:14px;padding-left:10px;font:400 12px '+F+';color:#b6a6e0;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
+     +'<td valign="middle" class="ttl" style="font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#5f5480":INK)+'">'+esc(it.title)+'</td>'
+     +'<td align="right" valign="middle" class="tm" style="white-space:nowrap;padding-left:8px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
      +'</tr></table></td></tr>';
+  }
+  function head(title,right,od){
+    return '<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td width="3" style="width:3px;background:'+(od?RED:PUR)+';border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
+     +'<td class="h2" style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">'+title+'</td>'
+     +(right?'<td align="right" style="white-space:nowrap"><span class="chip" style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+right+'</span></td>':'')
+     +'</tr></table>';
   }
   function sect(title,items,mode,od){
     if(!items.length) return "";
-    var rail=od?"linear-gradient(120deg,#d6554c,#f0836a)":"linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%)";
-    return '<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="3" style="width:3px;background:'+(od?"#d6554c":PUR)+';background-image:'+rail+';border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
-     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">'+title+'</td>'
-     +'<td align="right" style="white-space:nowrap"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+items.length+' item'+(items.length>1?"s":"")+'</span></td>'
-     +'</tr></table>'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+items.map(function(x){return row(x,mode);}).join("")+'</table>'
-     +'</td></tr>';
+    return '<tr><td class="sec pad" style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head(title,items.length+' item'+(items.length>1?"s":""),od)
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+items.map(function(x){return row(x,mode);}).join("")+'</table></td></tr>';
   }
   var sections=sect("Today",d.today,"today")+sect("This week",d.week,"week")+sect("Overdue",d.overdue,"over",true);
-  if(!any) sections='<tr><td align="center" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
+  if(!any) sections='<tr><td align="center" class="sec pad" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div class="h2" style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div class="mut" style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
 
   /* --- prayer --- */
   var prayer="";
   if(Array.isArray(_prayList)&&_prayList.length){
-    function p2(x){return (x<10?"0":"")+x;}
+    var p2=function(x){return (x<10?"0":"")+x;};
     var cells=_prayList.map(function(p){
-      return '<td width="20%" valign="top" style="padding:0 3px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(138,100,200,.10);border:1px solid rgba(138,100,200,.20);border-radius:10px"><tr><td align="center" style="padding:9px 4px">'
-       +'<div style="font:800 8.5px '+F+';letter-spacing:.06em;color:#7a55bd;text-transform:uppercase">'+esc(p.name)+'</div>'
-       +'<div style="font:700 14px '+F+';color:'+INK+';margin-top:3px">'+p2(p.h)+':'+p2(p.m)+'</div>'
-       +'</td></tr></table></td>';
+      return '<div class="stat pray" style="display:inline-block;width:19%;margin:0 .4%;vertical-align:top;background:#f1ecfa;border:1px solid #ddd0f2;border-radius:10px">'
+       +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:9px 2px">'
+       +'<div class="pnm" style="font:800 8.5px '+F+';letter-spacing:.05em;color:#7a55bd;text-transform:uppercase">'+esc(p.name)+'</div>'
+       +'<div class="ptm" style="font:700 14px '+F+';color:'+INK+';margin-top:3px">'+p2(p.h)+':'+p2(p.m)+'</div>'
+       +'</td></tr></table></div>';
     }).join("");
-    prayer='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="3" style="width:3px;background:'+PUR+';background-image:linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%);border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
-     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">Prayer</td>'
-     +'<td align="right"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+esc((data.settings&&data.settings.city)||"")+'</span></td>'
-     +'</tr></table>'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px"><tr>'+cells+'</tr></table>'
-     +'</td></tr>';
+    prayer='<tr><td class="sec pad" style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Prayer",esc((data.settings&&data.settings.city)||""))
+     +'<div style="font-size:0;text-align:center;margin-top:12px">'+cells+'</div></td></tr>';
   }
 
-  /* --- finance: current net worth + email-safe bar chart --- */
+  /* --- finance --- */
   var fin="";
   if(financeStat){
     var chart="";
@@ -2678,39 +2675,60 @@ function buildDigest(){
         var h=Math.round(14+((+x.v||0)-mn)/rng*40), last=(i===ser.length-1);
         return '<td valign="bottom" align="center" style="padding:0 2px">'
          +'<div style="height:'+h+'px;background:'+(last?PEACH:LAV)+';border-radius:3px 3px 0 0;font-size:0;line-height:0">&nbsp;</div>'
-         +'<div style="font:800 7px '+F+';letter-spacing:.06em;color:#b6a6e0;margin-top:4px">'+esc(x.l)+'</div></td>';
+         +'<div style="font:800 7px '+F+';letter-spacing:.04em;color:#a99ccb;margin-top:4px">'+esc(x.l)+'</div></td>';
       }).join("");
-      chart='<td align="right" valign="middle" width="170" style="width:170px"><table cellpadding="0" cellspacing="0" role="presentation" style="width:160px"><tr>'+bars+'</tr></table></td>';
+      chart='<td class="chart" align="right" valign="middle" width="170" style="width:170px;padding:12px 18px 12px 0"><table cellpadding="0" cellspacing="0" role="presentation" style="width:160px"><tr>'+bars+'</tr></table></td>';
     }
-    fin='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="3" style="width:3px;background:'+PUR+';background-image:linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%);border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
-     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">Finance</td></tr></table>'
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px;background:#fbf9fe;border:1px solid #e7e0f5;border-radius:12px"><tr>'
-     +'<td valign="middle" style="padding:15px 18px">'
-     +'<div style="font:800 8.5px '+F+';letter-spacing:.12em;text-transform:uppercase;color:'+SOFT+'">Current net worth</div>'
-     +'<div style="font:400 27px '+D+';color:'+PUR2+';margin-top:4px">'+esc((data.settings&&data.settings.currency)||"SAR")+' '+esc(financeStat)+'</div>'
-     +'</td>'+(chart?chart.replace("<td align=\"right\"","<td style=\"padding:12px 18px 12px 0\" align=\"right\""):"")+'</tr></table>'
-     +'</td></tr>';
+    fin='<tr><td class="sec pad" style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head("Finance","")
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px;background:#fbf9fe;border:1px solid #e7e0f5;border-radius:12px" class="finbox"><tr>'
+     +'<td valign="middle" style="padding:15px 18px"><div class="mut" style="font:800 8.5px '+F+';letter-spacing:.12em;text-transform:uppercase;color:'+SOFT+'">Current net worth</div>'
+     +'<div class="nwv" style="font:400 27px '+D+';color:'+PUR2+';margin-top:4px">'+esc((data.settings&&data.settings.currency)||"SAR")+' '+esc(financeStat)+'</div></td>'
+     +chart+'</tr></table></td></tr>';
   }
 
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></head>'
-   +'<body style="margin:0;padding:0;background:'+BG+';-webkit-font-smoothing:antialiased">'
-   +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:'+BG+'"><tr><td align="center" style="padding:26px 12px">'
-   +'<table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7f6">'
-   /* hero (aurora) */
-   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 88% 6%,rgba(138,100,200,.55),transparent 46%),radial-gradient(circle at 74% 12%,rgba(243,185,142,.30),transparent 42%),radial-gradient(circle at 4% 96%,rgba(98,63,148,.62),transparent 48%),radial-gradient(circle at 40% 98%,rgba(198,179,239,.20),transparent 50%);padding:32px 26px 20px">'
+  var css='<style>'
+   +'@media only screen and (max-width:480px){'
+   +'.pad{padding-left:16px!important;padding-right:16px!important}'
+   +'.hero{padding:26px 14px 18px!important}'
+   +'.stat{width:31%!important;margin:0 1% 6px!important}'
+   +'.statl{font-size:7px!important}'
+   +'.chart{display:none!important}'
+   +'.ttl{font-size:12.5px!important}.tm{font-size:10px!important}'
+   +'.nwv{font-size:23px!important}'
+   +'}'
+   /* Gmail / Apple dark mode: recolour instead of letting the client invert */
+   +'@media (prefers-color-scheme:dark){'
+   +'.bg,.wrap{background:#0d0926!important}'
+   +'.card{background:#15102e!important;border-color:#2a2450!important}'
+   +'.sec{border-color:#241d47!important}'
+   +'.h2,.ttl,.nwv,.ptm{color:#efe9fb!important}'
+   +'.mut,.tm{color:#a99ccb!important}'
+   +'.chip{background:#221b45!important;border-color:#33295e!important;color:#c6b3ef!important}'
+   +'.finbox{background:#1b1540!important;border-color:#2e2657!important}'
+   +'.stat.pray{background:#241c4d!important;border-color:#3a2f6b!important}'
+   +'.pnm{color:#c6b3ef!important}'
+   +'}'
+   +'</style>';
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+   +'<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">'
+   +'<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
+   +css+'</head>'
+   +'<body class="bg" style="margin:0;padding:0;background:'+BG+';-webkit-font-smoothing:antialiased">'
+   +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" class="wrap" style="background:'+BG+'"><tr><td align="center" style="padding:20px 8px">'
+   +'<table width="560" cellpadding="0" cellspacing="0" role="presentation" class="card" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7f6">'
+   +'<tr><td class="hero" style="background:'+NIGHT+';background-image:radial-gradient(circle at 88% 4%,rgba(138,100,200,.50),transparent 42%),radial-gradient(circle at 2% 92%,rgba(98,63,148,.60),transparent 46%);padding:32px 22px 22px">'
+   +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation">'
+   +'<tr><td style="padding:0 4px 20px">'
    +'<div style="font:800 9px '+F+';letter-spacing:.24em;text-transform:uppercase;color:'+LAV+'">Daily Briefing</div>'
    +'<div style="font:400 30px '+D+';color:#ffffff;margin:9px 0 7px;line-height:1.15">'+esc(dateStr)+'</div>'
    +'<div style="font:500 12px '+F+';color:#b9abd8">'+esc(greet)+', '+esc(name)+' &mdash; here&rsquo;s your day at a glance.</div>'
    +'</td></tr>'
-   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 4% 20%,rgba(98,63,148,.55),transparent 55%),radial-gradient(circle at 60% 120%,rgba(198,179,239,.16),transparent 55%);padding:0 23px 8px;font:800 8px '+F+';letter-spacing:.18em;text-transform:uppercase;color:#7b6ea6"><div style="padding-left:3px">Today</div></td></tr>'
-   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 4% -10%,rgba(98,63,148,.5),transparent 55%);padding:0 23px 22px">'+strip+'</td></tr>'
+   +'<tr><td style="padding:0 4px 8px;font:800 8px '+F+';letter-spacing:.18em;text-transform:uppercase;color:#8479a8">Today</td></tr>'
+   +'<tr><td>'+strip+'</td></tr></table></td></tr>'
    +sections+prayer+fin
-   /* cta */
-   +'<tr><td align="center" style="padding:22px 26px"><a href="'+url+'" style="display:inline-block;background:#4a2f74;background-image:linear-gradient(120deg,#0d0926 0%,#4a2f74 50%,#8a64c8 100%);color:#ffffff;font:700 13px '+F+';text-decoration:none;padding:13px 28px;border-radius:11px">Open your HQ &#8599;</a></td></tr>'
-   /* footer */
-   +'<tr><td style="background:'+NIGHT+';padding:18px 26px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+   +'<tr><td align="center" class="pad" style="padding:22px 26px"><a href="'+url+'" style="display:inline-block;background:#4a2f74;background-image:linear-gradient(120deg,#0d0926 0%,#4a2f74 50%,#8a64c8 100%);color:#ffffff;font:700 13px '+F+';text-decoration:none;padding:13px 28px;border-radius:11px">Open your HQ &#8599;</a></td></tr>'
+   +'<tr><td class="pad" style="background:'+NIGHT+';padding:18px 26px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
    +'<td valign="middle" style="font:400 16px '+D+';color:#ffffff">Eyad&rsquo;s HQ</td>'
    +'<td align="right" valign="middle"><div style="font:600 10px '+F+';color:'+LAV+'"><a href="'+url+'" style="color:'+LAV+';text-decoration:none">eyadalfi.com</a></div>'
    +'<div style="font:500 9px '+F+';color:#8479a8;margin-top:2px">Daily briefing &middot; 8:00 AM Riyadh</div></td>'
@@ -4337,7 +4355,7 @@ async function loadFinance(){
     const d=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]&&rows[0].updated_at) financeUpdated=rows[0].updated_at; if(!d) return;
     let net=null;
     if(typeof d.netWorth==="number" && isFinite(d.netWorth)) net=d.netWorth;
-    if(Array.isArray(d.snapshots)&&d.snapshots.length){ const ss=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(-6); financeSeries=ss.map(x=>({v:+(x.net??x.value??0)||0, l:(function(dt){var q=new Date(String(dt)+"T00:00:00"); return isNaN(q)?"":q.toLocaleDateString("en-US",{month:"short"}).toUpperCase();})(x.date)})); }
+    if(Array.isArray(d.snapshots)&&d.snapshots.length){ const ss=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(-6); financeSeries=ss.map(x=>({v:+(x.net??x.value??0)||0, d:String(x.date||"")})); var _ml=financeSeries.map(x=>{var q=new Date(x.d+"T00:00:00"); return isNaN(q)?"":q.toLocaleDateString("en-US",{month:"short"}).toUpperCase();}); var _dup=(new Set(_ml)).size!==_ml.length; financeSeries.forEach((x,i)=>{ var q=new Date(x.d+"T00:00:00"); x.l=isNaN(q)?"":(_dup?(q.getDate()+" "+_ml[i].slice(0,1)+_ml[i].slice(1,3).toLowerCase()):_ml[i]); }); }
     if(net==null && Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
     if(net!=null) financeStat=Number(net).toLocaleString("en-US",{maximumFractionDigits:0});
