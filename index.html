@@ -204,6 +204,13 @@ html:not(.dark) .modal{background:rgba(255,255,255,.92);border:1px solid rgba(25
 .auth-card h2{font-size:1.5rem;letter-spacing:-.01em}
 .auth-card .tag{font-size:.86rem;color:#cbb9ec;margin:6px 0 22px}
 .auth-card .fld{margin-bottom:11px;text-align:left;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff}
+.pwf{position:relative;margin-bottom:11px}
+.pwf .fld{margin-bottom:0!important;padding-right:46px}
+.pwf-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;padding:0;cursor:pointer;color:#b9a8e0;border-radius:9px;transition:color .18s,background .18s}
+.pwf-eye:hover{color:#fff;background:rgba(255,255,255,.09)}
+.pwf-eye svg{width:18px;height:18px;display:block}
+html:not(.dark) .pwf-eye{color:#8a7fb0}
+html:not(.dark) .pwf-eye:hover{color:#623f94;background:rgba(138,100,200,.10)}
 .auth-card .btn.full{width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px}
 .auth-tabs{display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:4px;margin-bottom:18px}
 .auth-tabs button{flex:1;border:none;background:none;padding:9px;border-radius:99px;font-family:inherit;font-weight:700;color:#cbb9ec;cursor:pointer;transition:all .25s}
@@ -2554,64 +2561,164 @@ document.addEventListener("click",function(e){ if(!e.target.closest(".ntf-snz"))
 
 /* ============ Daily Productivity Email Digest ============ */
 function digestData(){
-  var t=isoLocal(new Date()); var tmo=new Date(); tmo.setDate(tmo.getDate()+1); var tomo=isoLocal(tmo); var wkE=new Date(); wkE.setDate(wkE.getDate()+7); var weekEnd=isoLocal(wkE);
-  function bd(a,b){return (a.due||"").localeCompare(b.due||"");}
-  var open=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done&&x.due;});
-  var overdue=open.filter(function(x){return x.due<t;}).sort(bd);
-  var today=open.filter(function(x){return x.due===t;}).sort(bd);
-  var tomorrow=open.filter(function(x){return x.due===tomo;}).sort(bd);
-  var week=open.filter(function(x){return x.due>tomo&&x.due<=weekEnd;}).sort(bd);
-  var events=(Array.isArray(calEvents)?calEvents:[]).filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;}).sort(function(a,b){return (((a.start&&a.start.dateTime)||"")).localeCompare(((b.start&&b.start.dateTime)||""));});
-  var routines=(data.routines||[]).filter(function(r){ var nx=rtNext(r); return nx&&nx<=t; });
-  return {t:t,today:today,overdue:overdue,tomorrow:tomorrow,week:week,events:events,routines:routines};
+  var t=isoLocal(new Date());
+  var we=new Date(); we.setDate(we.getDate()+7); var weekEnd=isoLocal(we);
+  var today=[], week=[], overdue=[];
+  function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
+  (data.tasks||[]).forEach(function(x){
+    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||"",prio:x.priority||""});
+    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||"",parent:x.t||""}); });
+  });
+  (Array.isArray(calEvents)?calEvents:[]).forEach(function(e){
+    var w=(e.start&&(e.start.dateTime||e.start.date))||""; if(!w) return;
+    var dt=e.start&&e.start.dateTime;
+    push({kind:"event",title:e.summary||"(event)",date:w.slice(0,10),time:dt?w.slice(11,16):"",allday:!dt});
+  });
+  (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(nx) push({kind:"routine",title:r.title||"Routine",date:nx,time:"",recur:rtRecurLabel(r)}); });
+  function srt(a,b){ return (a.date||"").localeCompare(b.date||"")||((a.time||"zz").localeCompare(b.time||"zz")); }
+  today.sort(srt); week.sort(srt); overdue.sort(srt);
+  function cnt(arr,k){ return arr.filter(function(x){return x.kind===k;}).length; }
+  return { t:t, today:today, week:week, overdue:overdue,
+    c:{ task:cnt(today,"task"), sub:cnt(today,"sub"), event:cnt(today,"event"), routine:cnt(today,"routine"), overdue:overdue.length } };
 }
 function buildDigest(){
-  var d=digestData(); var now=new Date();
-  var TZ="Asia/Riyadh";
-  var dateStr=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric",timeZone:TZ});
+  var d=digestData(); var now=new Date(); var TZ="Asia/Riyadh";
+  var dateStr=now.toLocaleDateString("en-US",{weekday:"long",day:"numeric",month:"long",timeZone:TZ});
   var wd=now.toLocaleDateString("en-US",{weekday:"long",timeZone:TZ});
+  var hr=+now.toLocaleString("en-US",{hour:"2-digit",hour12:false,timeZone:TZ});
+  var greet=hr<12?"Good morning":(hr<18?"Good afternoon":"Good evening");
   var name=((data.profile&&data.profile.name)||"there").split(" ")[0];
   var url=(/^https?:/.test(location.origin)?location.origin:"https://eyadalfi.com");
-  var totalTasks=d.today.length+d.overdue.length+d.tomorrow.length+d.week.length;
-  var any=totalTasks||d.events.length||d.routines.length;
-  var PUR="#8a64c8",PUR2="#623f94",INK="#2a1d44",MUT="#8a7fb0",LINE="#ece7f6",BG="#f4f1fb",PEACH="#dd824b",RED="#d6554c",GREEN="#1e915f";
-  function badge(txt,bg){ return '<span style="display:inline-block;font:700 11px Arial,sans-serif;color:#ffffff;background:'+bg+';padding:4px 11px;border-radius:99px;white-space:nowrap">'+txt+'</span>'; }
-  function pri(p){ if(p==="high")return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+RED+';margin-right:8px"></span>'; if(p==="low")return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#86d0c4;margin-right:8px"></span>'; return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+PUR+';margin-right:8px"></span>'; }
-  function taskRow(t,label,bg){ var when=(t.due?fmtShort(t.due):"")+(t.time?(" · "+prettyTime(t.time)):""); return '<tr><td style="padding:13px 0;border-bottom:1px solid '+LINE+'"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td style="vertical-align:middle">'+pri(t.priority)+'<a href="'+url+'" style="font:600 15px Arial,sans-serif;color:'+INK+';text-decoration:none">'+esc(t.t)+'</a>'+(when?'<div style="font:400 12px Arial,sans-serif;color:'+MUT+';margin-top:3px;padding-left:16px">'+esc(when)+'</div>':'')+'</td><td align="right" style="vertical-align:middle;white-space:nowrap">'+badge(label,bg)+'</td></tr></table></td></tr>'; }
-  function section(title){ return '<tr><td style="padding:26px 0 6px;font:700 12px Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:'+PUR+'">'+title+'</td></tr>'; }
-  var rows="";
-  if(d.overdue.length){ rows+=section("Overdue"); d.overdue.forEach(function(t){ rows+=taskRow(t,"Overdue",RED); }); }
-  if(d.today.length){ rows+=section("Due today"); d.today.forEach(function(t){ rows+=taskRow(t,"Today",PEACH); }); }
-  if(d.tomorrow.length){ rows+=section("Due tomorrow"); d.tomorrow.forEach(function(t){ rows+=taskRow(t,"Tomorrow",PUR); }); }
-  if(d.week.length){ rows+=section("Due this week"); d.week.forEach(function(t){ rows+=taskRow(t,"This week","#9aa0b5"); }); }
-  var evHtml="";
-  if(d.events.length){ evHtml+=section("Today's schedule"); d.events.forEach(function(e){ var st=e.start&&e.start.dateTime?new Date(e.start.dateTime):null; var en=e.end&&e.end.dateTime?new Date(e.end.dateTime):null; var tm=st?(st.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+(en?(" – "+en.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})):"")):"All day"; var loc=e.location?('<div style="font:400 12px Arial,sans-serif;color:'+MUT+';margin-top:3px">📍 '+esc(e.location)+'</div>'):""; var link=(e.hangoutLink||e.location&&/^https?:/.test(e.location))?('<a href="'+esc(e.hangoutLink||e.location)+'" style="font:600 12px Arial,sans-serif;color:'+PUR+';text-decoration:none">Join →</a>'):""; evHtml+='<tr><td style="padding:13px 0;border-bottom:1px solid '+LINE+'"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td><div style="font:600 15px Arial,sans-serif;color:'+INK+'">'+esc(e.summary||"(event)")+'</div><div style="font:400 12px Arial,sans-serif;color:'+MUT+';margin-top:3px">'+esc(tm)+'</div>'+loc+'</td><td align="right" style="white-space:nowrap">'+link+'</td></tr></table></td></tr>'; }); }
-  var rtHtml="";
-  if(d.routines.length){ rtHtml+=section("Today's routines"); d.routines.forEach(function(r){ var nx=rtNext(r); var st=rtCountdown(nx); rtHtml+='<tr><td style="padding:13px 0;border-bottom:1px solid '+LINE+'"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td style="vertical-align:middle"><span style="display:inline-block;width:14px;height:14px;border:2px solid '+PUR+';border-radius:50%;margin-right:9px;vertical-align:middle"></span><span style="font:600 15px Arial,sans-serif;color:'+INK+'">'+esc(r.title)+'</span><div style="font:400 12px Arial,sans-serif;color:'+MUT+';margin-top:3px;padding-left:23px">'+esc(rtRecurLabel(r))+'</div></td><td align="right" style="white-space:nowrap">'+badge(st.cls==="over"?"Overdue":"Today",st.cls==="over"?RED:PEACH)+'</td></tr></table></td></tr>'; }); }
-  function stat(n,l){ return '<td align="center" style="padding:6px 4px"><div style="font:400 24px Georgia,serif;color:'+INK+'">'+n+'</div><div style="font:600 10px Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:'+MUT+';margin-top:2px">'+l+'</div></td>'; }
-  var doneToday=(data.tasks||[]).filter(function(x){return (x.status==="done"||x.done)&&x.due===d.t;}).length;
-  var prog=totalTasks?Math.round(doneToday/(doneToday+d.today.length+d.overdue.length||1)*100):100;
-  var body = any
-    ? ('<table width="100%" cellpadding="0" cellspacing="0" role="presentation">'+(rows||'')+(evHtml||'')+(rtHtml||'')+'</table>'
-       +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:28px;background:'+BG+';border-radius:14px"><tr>'
-       +stat(totalTasks,"Tasks")+stat(d.events.length,"Events")+stat(d.routines.length,"Routines")+stat(d.overdue.length,"Overdue")+stat(prog+"%","Done")
-       +'</tr></table>')
-    : '<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:44px 20px"><div style="font:400 40px Arial,sans-serif">🎉</div><div style="font:600 18px Georgia,serif;color:'+INK+';margin-top:10px">You\'re all caught up.</div><div style="font:400 14px Arial,sans-serif;color:'+MUT+';margin-top:4px">Nothing due today — enjoy your day!</div></td></tr></table>';
-  var LOGO='<img src="https://eyadalfi.com/logo.png" alt="Eyad HQ" width="40" height="40" style="display:block;border:0">';
+  var INK="#2a1d44",MUT="#6a5f86",SOFT="#8a7fb0",LINE="#f1ecfa",BG="#f4f1fb",NIGHT="#0d0926",PUR="#8a64c8",PUR2="#623f94",LAV="#c6b3ef",PEACH="#f3b98e",BLUE="#4ea8de",RED="#d6554c";
+  var F="'Plus Jakarta Sans',Arial,sans-serif", D="'Marcellus',Georgia,serif";
+  var any=d.today.length||d.week.length||d.overdue.length;
+
+  /* --- dark stat boxes (today only) --- */
+  function statBox(n,label,puck,glyph,gcol,ncol){
+    return '<td width="20%" valign="top" style="padding:0 3px">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px">'
+     +'<tr><td align="center" style="padding:12px 4px 11px">'
+     +'<table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 7px"><tr><td align="center" width="26" height="26" style="width:26px;height:26px;background:'+puck+';border-radius:13px;font:700 13px '+F+';color:'+gcol+';line-height:26px">'+glyph+'</td></tr></table>'
+     +'<div style="font:400 19px '+D+';color:'+(ncol||"#ffffff")+';line-height:1">'+n+'</div>'
+     +'<div style="font:800 8px '+F+';letter-spacing:.1em;text-transform:uppercase;color:#9d8fc4;margin-top:5px">'+label+'</div>'
+     +'</td></tr></table></td>';
+  }
+  var strip='<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+   +statBox(d.c.task,"Tasks","rgba(138,100,200,.30)","&#10003;","#dccff6")
+   +statBox(d.c.sub,"Subtasks","rgba(198,179,239,.28)","&#8627;","#e3d9f8")
+   +statBox(d.c.event,"Events","rgba(78,168,222,.26)","&#9670;","#bee4f7")
+   +statBox(d.c.routine,"Routines","rgba(243,185,142,.26)","&#8635;","#fad9bf")
+   +statBox(d.c.overdue,"Overdue","rgba(214,85,76,.28)","!","#f7b9b3",PEACH)
+   +'</tr></table>';
+
+  /* --- activity rows --- */
+  var PILL={ task:["TASK","rgba(138,100,200,.18)",PUR2], sub:["SUB","rgba(198,179,239,.36)","#6b52c9"], event:["EVENT","rgba(78,168,222,.16)","#2c7fb0"], routine:["ROUTINE","rgba(221,130,75,.20)","#c25f22"] };
+  function whenLbl(it,mode){
+    if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
+    if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
+    var dd=new Date(it.date+"T00:00:00");
+    var s=dd.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+    return s+(it.time?(", "+prettyTime(it.time)):"");
+  }
+  function row(it,mode){
+    var p=PILL[it.kind]||PILL.task, isSub=(it.kind==="sub");
+    var tcol=mode==="over"?RED:(isSub?SOFT:"#4a4066"), tw=mode==="over"?800:(isSub?500:700);
+    return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td width="60" valign="middle" style="width:60px"><div style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
+     +'<td width="15" valign="middle" style="width:15px;padding-left:12px;font:400 12px '+F+';color:#b6a6e0;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
+     +'<td valign="middle" style="font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#5f5480":INK)+'">'+esc(it.title)+'</td>'
+     +'<td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
+     +'</tr></table></td></tr>';
+  }
+  function sect(title,items,mode,od){
+    if(!items.length) return "";
+    var rail=od?"linear-gradient(120deg,#d6554c,#f0836a)":"linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%)";
+    return '<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td width="3" style="width:3px;background:'+(od?"#d6554c":PUR)+';background-image:'+rail+';border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
+     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">'+title+'</td>'
+     +'<td align="right" style="white-space:nowrap"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+items.length+' item'+(items.length>1?"s":"")+'</span></td>'
+     +'</tr></table>'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+items.map(function(x){return row(x,mode);}).join("")+'</table>'
+     +'</td></tr>';
+  }
+  var sections=sect("Today",d.today,"today")+sect("This week",d.week,"week")+sect("Overdue",d.overdue,"over",true);
+  if(!any) sections='<tr><td align="center" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
+
+  /* --- prayer --- */
+  var prayer="";
+  if(Array.isArray(_prayList)&&_prayList.length){
+    function p2(x){return (x<10?"0":"")+x;}
+    var cells=_prayList.map(function(p){
+      return '<td width="20%" valign="top" style="padding:0 3px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(138,100,200,.10);border:1px solid rgba(138,100,200,.20);border-radius:10px"><tr><td align="center" style="padding:9px 4px">'
+       +'<div style="font:800 8.5px '+F+';letter-spacing:.06em;color:#7a55bd;text-transform:uppercase">'+esc(p.name)+'</div>'
+       +'<div style="font:700 14px '+F+';color:'+INK+';margin-top:3px">'+p2(p.h)+':'+p2(p.m)+'</div>'
+       +'</td></tr></table></td>';
+    }).join("");
+    prayer='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td width="3" style="width:3px;background:'+PUR+';background-image:linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%);border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
+     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">Prayer</td>'
+     +'<td align="right"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+esc((data.settings&&data.settings.city)||"")+'</span></td>'
+     +'</tr></table>'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px"><tr>'+cells+'</tr></table>'
+     +'</td></tr>';
+  }
+
+  /* --- finance: current net worth + email-safe bar chart --- */
+  var fin="";
+  if(financeStat){
+    var chart="";
+    var ser=(Array.isArray(financeSeries)&&financeSeries.length>1)?financeSeries.slice(-6):null;
+    if(ser){
+      var vals=ser.map(function(x){return +x.v||0;});
+      var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), rng=(mx-mn)||1;
+      var bars=ser.map(function(x,i){
+        var h=Math.round(14+((+x.v||0)-mn)/rng*40), last=(i===ser.length-1);
+        return '<td valign="bottom" align="center" style="padding:0 2px">'
+         +'<div style="height:'+h+'px;background:'+(last?PEACH:LAV)+';border-radius:3px 3px 0 0;font-size:0;line-height:0">&nbsp;</div>'
+         +'<div style="font:800 7px '+F+';letter-spacing:.06em;color:#b6a6e0;margin-top:4px">'+esc(x.l)+'</div></td>';
+      }).join("");
+      chart='<td align="right" valign="middle" width="170" style="width:170px"><table cellpadding="0" cellspacing="0" role="presentation" style="width:160px"><tr>'+bars+'</tr></table></td>';
+    }
+    fin='<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td width="3" style="width:3px;background:'+PUR+';background-image:linear-gradient(120deg,#8a64c8 0%,#a081d6 40%,#f3b98e 100%);border-radius:3px;font-size:0;line-height:0">&nbsp;</td>'
+     +'<td style="padding-left:10px;font:800 15.5px '+F+';color:'+INK+'">Finance</td></tr></table>'
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px;background:#fbf9fe;border:1px solid #e7e0f5;border-radius:12px"><tr>'
+     +'<td valign="middle" style="padding:15px 18px">'
+     +'<div style="font:800 8.5px '+F+';letter-spacing:.12em;text-transform:uppercase;color:'+SOFT+'">Current net worth</div>'
+     +'<div style="font:400 27px '+D+';color:'+PUR2+';margin-top:4px">'+esc((data.settings&&data.settings.currency)||"SAR")+' '+esc(financeStat)+'</div>'
+     +'</td>'+(chart?chart.replace("<td align=\"right\"","<td style=\"padding:12px 18px 12px 0\" align=\"right\""):"")+'</tr></table>'
+     +'</td></tr>';
+  }
+
   var html='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></head>'
    +'<body style="margin:0;padding:0;background:'+BG+';-webkit-font-smoothing:antialiased">'
-   +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:'+BG+'"><tr><td align="center" style="padding:28px 14px">'
-   +'<table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid '+LINE+'">'
-   +'<tr><td style="background:'+PUR2+';background-image:linear-gradient(120deg,'+PUR+','+PUR2+');padding:26px 32px"><div style="font:700 12px Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.72)">Daily Briefing</div><div style="font:400 26px Georgia,serif;color:#ffffff;margin-top:4px">Eyad\'s HQ</div></td></tr>'
-   +'<tr><td style="padding:30px 32px 8px"><div style="font:400 17px Arial,sans-serif;color:'+INK+'">Hi '+esc(name)+',</div><div style="font:600 13px Arial,sans-serif;color:'+MUT+';margin-top:6px">'+esc(dateStr)+'</div>'
-   +'<div style="font:400 24px Georgia,serif;color:'+INK+';margin-top:14px;line-height:1.3">Here\'s your plan for today.</div>'
-   +'<div style="margin-top:20px"><a href="'+url+'" style="display:inline-block;background:'+PUR+';background-image:linear-gradient(120deg,'+PUR+',#a081d6 60%,'+PEACH+');color:#ffffff;font:700 14px Arial,sans-serif;text-decoration:none;padding:13px 26px;border-radius:10px">Open Dashboard →</a></div></td></tr>'
-   +'<tr><td style="padding:6px 32px 30px">'+body+'</td></tr>'
-   +'<tr><td style="background:'+BG+';padding:20px 32px;border-top:1px solid '+LINE+'"><table width="100%" role="presentation"><tr><td style="font:700 15px Georgia,serif;color:'+PUR2+'">Eyad\'s HQ</td><td align="right" style="font:400 12px Arial,sans-serif;color:'+MUT+'"><a href="'+url+'" style="color:'+MUT+';text-decoration:none">eyadalfi.com</a></td></tr></table><div style="font:400 11px Arial,sans-serif;color:'+MUT+';margin-top:10px">Your automated daily briefing · 8:00 AM Riyadh</div></td></tr>'
+   +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:'+BG+'"><tr><td align="center" style="padding:26px 12px">'
+   +'<table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7f6">'
+   /* hero (aurora) */
+   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 88% 6%,rgba(138,100,200,.55),transparent 46%),radial-gradient(circle at 74% 12%,rgba(243,185,142,.30),transparent 42%),radial-gradient(circle at 4% 96%,rgba(98,63,148,.62),transparent 48%),radial-gradient(circle at 40% 98%,rgba(198,179,239,.20),transparent 50%);padding:32px 26px 20px">'
+   +'<div style="font:800 9px '+F+';letter-spacing:.24em;text-transform:uppercase;color:'+LAV+'">Daily Briefing</div>'
+   +'<div style="font:400 30px '+D+';color:#ffffff;margin:9px 0 7px;line-height:1.15">'+esc(dateStr)+'</div>'
+   +'<div style="font:500 12px '+F+';color:#b9abd8">'+esc(greet)+', '+esc(name)+' &mdash; here&rsquo;s your day at a glance.</div>'
+   +'</td></tr>'
+   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 4% 20%,rgba(98,63,148,.55),transparent 55%),radial-gradient(circle at 60% 120%,rgba(198,179,239,.16),transparent 55%);padding:0 23px 8px;font:800 8px '+F+';letter-spacing:.18em;text-transform:uppercase;color:#7b6ea6"><div style="padding-left:3px">Today</div></td></tr>'
+   +'<tr><td style="background:'+NIGHT+';background-image:radial-gradient(circle at 4% -10%,rgba(98,63,148,.5),transparent 55%);padding:0 23px 22px">'+strip+'</td></tr>'
+   +sections+prayer+fin
+   /* cta */
+   +'<tr><td align="center" style="padding:22px 26px"><a href="'+url+'" style="display:inline-block;background:#4a2f74;background-image:linear-gradient(120deg,#0d0926 0%,#4a2f74 50%,#8a64c8 100%);color:#ffffff;font:700 13px '+F+';text-decoration:none;padding:13px 28px;border-radius:11px">Open your HQ &#8599;</a></td></tr>'
+   /* footer */
+   +'<tr><td style="background:'+NIGHT+';padding:18px 26px"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
+   +'<td valign="middle" style="font:400 16px '+D+';color:#ffffff">Eyad&rsquo;s HQ</td>'
+   +'<td align="right" valign="middle"><div style="font:600 10px '+F+';color:'+LAV+'"><a href="'+url+'" style="color:'+LAV+';text-decoration:none">eyadalfi.com</a></div>'
+   +'<div style="font:500 9px '+F+';color:#8479a8;margin-top:2px">Daily briefing &middot; 8:00 AM Riyadh</div></td>'
+   +'</tr></table></td></tr>'
    +'</table></td></tr></table></body></html>';
-  html=html.replace(/Arial,sans-serif/g,"'Plus Jakarta Sans',Arial,sans-serif").replace(/Georgia,serif/g,"'Marcellus',Georgia,serif");
-  return {subject:"Your "+wd+" Tasks Plan",html:html,empty:!any};
+  return {subject:"Your "+wd+" briefing",html:html,empty:!any};
 }
+
 async function sendHtmlEmail(to,subject,html){
   var t=getGToken("google")||gmailToken; if(!t) throw new Error("no gmail");
   var headers=["To: "+to,"Subject: "+subject,"MIME-Version: 1.0","Content-Type: text/html; charset=UTF-8"];
@@ -4107,7 +4214,7 @@ function closeAvMenu(){ var m=document.getElementById("avMenu"); if(m) m.classLi
 function avMenuHtml(){
   var signed=!!user; var email=signed?(user.email||""):""; var nm=(data.profile&&data.profile.name)||"Guest";
   var h='<div class="avm-head"><b>'+esc(nm)+'</b><span>'+(email?esc(email):'Not signed in')+'</span></div>';
-  h+='<button onclick="closeAvMenu();openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8M4.6 9A1.6 1.6 0 0 0 3.5 14M12 2v2M12 20v2M4 12H2M22 12h-2"/></svg> Preferences</button>';
+  h+='<button onclick="closeAvMenu();openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg> Preferences</button>';
   h+=signed? '<button class="danger-item" onclick="closeAvMenu();signOut()">'+I_SIGNOUT+' Sign out</button>' : '<button onclick="closeAvMenu();openAccount()">'+I_SIGNOUT+' Sign in</button>';
   return h;
 }
@@ -4206,7 +4313,7 @@ function prayerCitySave(){
 }
 
 /* ============ Finance net worth (Supabase boards) ============ */
-let financeStat="", calEvents=null, zakatDue=null;
+let financeStat="", calEvents=null, zakatDue=null; let financeSeries=[];
 let travelTrips=[], travelUpdated=null, travelAll=[];
 async function loadTravel(){
   if(!user||!supa) return;
@@ -4230,6 +4337,7 @@ async function loadFinance(){
     const d=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]&&rows[0].updated_at) financeUpdated=rows[0].updated_at; if(!d) return;
     let net=null;
     if(typeof d.netWorth==="number" && isFinite(d.netWorth)) net=d.netWorth;
+    if(Array.isArray(d.snapshots)&&d.snapshots.length){ const ss=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(-6); financeSeries=ss.map(x=>({v:+(x.net??x.value??0)||0, l:(function(dt){var q=new Date(String(dt)+"T00:00:00"); return isNaN(q)?"":q.toLocaleDateString("en-US",{month:"short"}).toUpperCase();})(x.date)})); }
     if(net==null && Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
     if(net!=null) financeStat=Number(net).toLocaleString("en-US",{maximumFractionDigits:0});
@@ -4310,6 +4418,9 @@ function openAccount(){
   showModal(`<h4>Account</h4><p class="muted" style="margin-bottom:14px">Signed in as <b style="color:var(--text)">${esc(user.email||"")}</b>. Your notes, tasks and links are saved on this device.</p>
     <div class="row"><button class="btn danger" style="margin-right:auto;border-color:var(--border)" onclick="signOut()">Sign out</button><button class="btn soft" onclick="closeModal()">Close</button></div>`);
 }
+var I_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+var I_EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 6.7A8.9 8.9 0 0 1 12 6.5c6 0 9.5 6 9.5 6a17 17 0 0 1-2.6 3.3M6.2 7.9A16.6 16.6 0 0 0 2.5 12.5s3.5 6 9.5 6a9 9 0 0 0 3.5-.7"/><path d="M9.9 10.4a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>';
+function togglePw(inId,btnId){ var i=document.getElementById(inId), b=document.getElementById(btnId); if(!i) return; var show=(i.type==="password"); i.type=show?"text":"password"; if(b){ b.innerHTML=show?I_EYEOFF:I_EYE; b.setAttribute("aria-label",show?"Hide password":"Show password"); b.title=show?"Hide password":"Show password"; } try{ i.focus(); var v=i.value; i.value=""; i.value=v; }catch(e){} }
 function authUI(mode){
   mode=mode||"in";
   const root=document.getElementById("authRoot"); root.style.display="grid";
@@ -4319,7 +4430,7 @@ function authUI(mode){
     <h2 class="marc">Eyad Alfi</h2><div class="tag">Everything you build & use, in one place.</div>
     ${tabs}
     <input class="fld" id="aEmail" type="email" placeholder="Email" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
-    <input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
+    <div class="pwf"><input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()"><button type="button" class="pwf-eye" id="aEye" onclick="togglePw('aPass','aEye')" aria-label="Show password" title="Show password">${I_EYE}</button></div>
     <div class="auth-err" id="aErr"></div>
     <button class="btn full" id="aBtn" onclick="${mode==='up'?'doSignUp()':'doSignIn()'}">${mode==='up'?'Create account':'Sign in'}</button>
     <div class="auth-links">${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}</div>
