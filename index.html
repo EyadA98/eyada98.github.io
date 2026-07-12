@@ -1756,15 +1756,15 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#7a52bd,#8a64c8,
 .hx-greet{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.04;color:#fff;margin:7px 0 0}
 .hx-greet #userName{background:linear-gradient(100deg,#cbb0f7,#f3b98e 75%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .hx-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-.hx-box{position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:16px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:9px;padding:14px;min-width:0;transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease),background .35s var(--ease);animation:hxRise .6s var(--ease) both}
+.hx-box{position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:16px;min-height:128px;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;align-items:center;text-align:center;gap:9px;padding:14px;min-width:0;transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease),background .35s var(--ease);animation:hxRise .6s var(--ease) both}
 .hx-box:nth-child(1){animation-delay:.05s}.hx-box:nth-child(2){animation-delay:.13s}.hx-box:nth-child(3){animation-delay:.21s}
 .hx-box:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09);box-shadow:0 18px 40px -22px rgba(98,63,148,.95)}
 @keyframes hxRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.hx-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:rgba(255,255,255,.6)}
+.hx-lbl{align-self:start;font-size:.62rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:rgba(255,255,255,.6)}
 .hx-val{font-family:'Marcellus',Georgia,serif;font-weight:700;font-size:2.3rem;line-height:1.05;display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;background:linear-gradient(100deg,#cbb0f7,#f3b98e 55%,#cbb0f7 90%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:hxShimmer 7s linear infinite}
 @keyframes hxShimmer{0%{background-position:0% center}100%{background-position:200% center}}
 .hx-box.hx-date .hx-val{font-size:1.7rem}
-.hx-sub{font-size:.74rem;font-weight:600;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hx-sub{align-self:end;font-size:.74rem;font-weight:600;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 #clockTime .sec{display:none}
 #clockTime .mer{font-size:.46em;font-weight:700;-webkit-text-fill-color:rgba(255,255,255,.55);margin-left:4px;letter-spacing:.06em;font-family:'Plus Jakarta Sans',sans-serif}
 .hx-val svg,.hx-val .wx-ic,.hx-val .wx-ic svg{width:26px;height:26px;flex:none}
