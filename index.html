@@ -247,6 +247,10 @@ html:not(.dark) .pwf-eye:hover{color:#623f94;background:rgba(138,100,200,.10)}
   aside{position:sticky;top:0;z-index:40;height:auto;flex-direction:row;align-items:center;gap:2px;padding:10px 14px;overflow-x:auto}
   .logo{padding:0 12px 0 2px;flex:none}.logo span,.nav-label,.side-foot{display:none}
   aside button.nav{width:auto;flex:none;white-space:nowrap}.aside button.nav.active::before{display:none}
+  body{grid-template-columns:minmax(0,1fr)}
+  aside{min-width:0;max-width:100%}
+  .content{min-width:0}
+  main{min-width:0}
   .topbar{position:relative;z-index:60}
   .notes-masonry{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -1022,7 +1026,7 @@ html:not(.dark) .modal .muted,html:not(.dark) .cs-pop .muted{color:var(--muted)}
   .integ-head{gap:9px}
   .cal-grid{gap:4px}
   .wsummary{gap:12px}
-  .av-menu{left:10px;right:10px}
+  .av-menu{left:auto;right:0;width:min(268px,calc(100vw - 28px))}
 }
 
 
