@@ -326,6 +326,9 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   .two-col{grid-template-columns:1fr}
 }
 @media(max-width:768px){
+  /* iOS zooms on focus if a field is under 16px — and never zooms back. */
+  input,select,textarea,.auth-card input,.modal input{font-size:16px!important}
+
   .cards{grid-template-columns:1fr}
   aside{padding:9px 14px}
   aside button{display:none}
