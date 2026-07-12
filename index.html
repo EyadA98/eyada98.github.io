@@ -948,7 +948,10 @@ html,body{max-width:100%;overflow-x:hidden}
   .overlay{align-items:flex-end;padding:0}
   .modal,.modal.wide,.modal.xwide{max-width:none;width:100%;border-radius:22px 22px 0 0;max-height:92vh;overflow:auto;animation:sheetUp .3s var(--ease);padding:22px 18px calc(18px + env(safe-area-inset-bottom))}
   .f2{grid-template-columns:1fr}
-  .av-menu{position:fixed;left:12px;right:12px;top:auto;bottom:calc(90px + env(safe-area-inset-bottom));min-width:0;z-index:120;max-height:calc(100dvh - 150px);overflow:auto}
+  .av-menu{position:absolute;left:auto;right:0;top:calc(100% + 8px);bottom:auto;width:min(272px,86vw);min-width:0;z-index:120;max-height:70vh;overflow:auto}
+  /* iOS zooms on focus if the field is under 16px — and never zooms back. */
+  .fld,input.fld,select.fld,textarea.fld,input,select,textarea{font-size:16px!important}
+  .auth-card .fld{font-size:16px!important}
   /* larger touch targets */
   .icon-btn{padding:9px}
   .btn{padding:11px 18px;font-size:.9rem}
@@ -4409,7 +4412,11 @@ function authUI(mode){
   </div>`;
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
-function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML=""; }
+function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML="";
+  try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(e){}
+  try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
+       var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
+}
 function guestMode(){ try{localStorage.setItem(GUEST_FLAG,"1");}catch(e){} closeAuth(); }
 async function doSignIn(){
   if(!supaReady) return guestMode();
