@@ -54,8 +54,8 @@ aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88)
 .logo-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--lavender),var(--violet));display:grid;place-items:center;font-weight:900;font-size:1.05rem;box-shadow:0 4px 14px rgba(141,127,208,.45);letter-spacing:-.02em;animation:logoIn .7s var(--ease)}
 .logo-mark svg{width:21px;height:21px;color:#fff}
 @keyframes logoIn{from{opacity:0;transform:scale(.55) rotate(-10deg)}to{opacity:1;transform:none}}
-.logo b{font-size:1.02rem;font-weight:800;display:block;line-height:1.1}
-.logo span{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.55;font-weight:500}
+.logo b{font-size:1.02rem;font-weight:800;display:block;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo span{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.55;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .nav-label{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;opacity:.4;padding:14px 12px 6px;font-weight:700}
 aside button{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;color:rgba(255,255,255,.62);padding:10px 12px;border-radius:11px;cursor:pointer;font-size:.91rem;font-family:inherit;font-weight:600;text-align:left;position:relative;transition:color .22s var(--ease),background .22s var(--ease),transform .22s var(--ease)}
 aside button svg{width:17px;height:17px;flex:none;opacity:.8}
@@ -87,6 +87,10 @@ main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 56px;max-width:1280px
 .tab.active{display:block;animation:fadeUp .42s var(--ease)}
 .grid{display:grid;gap:18px}
 .cards{grid-template-columns:repeat(auto-fit,minmax(248px,1fr))}
+@supports (grid-template-rows: subgrid){
+  .cards{grid-template-rows:auto auto 1fr}
+  .cards > .card{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0}
+}
 .cards .card,.hero,.alloc-card,.insight{animation:fadeUp .5s var(--ease) backwards}
 .cards .card:nth-child(2),.insight:nth-child(2){animation-delay:.07s}
 .cards .card:nth-child(3),.insight:nth-child(3){animation-delay:.14s}
@@ -2314,7 +2318,7 @@ function updateAcctBtn(){
 var _AVI={user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>',up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M7 13l5-5 5 5M5 3h14"/></svg>',prn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',rst:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>',out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>'};
 function toggleAvMenu(e){ if(e)e.stopPropagation(); var m=document.getElementById("avMenu"); if(!m)return; if(m.classList.contains("show")){m.classList.remove("show");return;} m.innerHTML=avMenuHtml(); m.classList.add("show"); }
 function closeAvMenu(){ var m=document.getElementById("avMenu"); if(m)m.classList.remove("show"); }
-function avMenuHtml(){ var email=(user&&user.email)||""; var h='<div class="avm-head"><b>Finance Board</b><span>'+(email?esc(email):"Not signed in")+'</span></div>';
+function avMenuHtml(){ var email=(user&&user.email)||""; var h='<div class="avm-head"><b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">Finance&nbsp;Board</b><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">'+(email?esc(email):"Not signed in")+'</span></div>';
   h+='<button onclick="closeAvMenu();openAccount()">'+_AVI.user+' Account</button>';
   h+='<button onclick="closeAvMenu();exportData()">'+_AVI.down+' Export backup</button>';
   h+='<button onclick="closeAvMenu();document.getElementById(\'importFile\').click()">'+_AVI.up+' Import backup</button>';
