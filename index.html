@@ -264,7 +264,8 @@ html:not(.dark) .pwf-eye:hover{color:#623f94;background:rgba(138,100,200,.10)}
   aside{display:none!important}
   .logo-mark{width:34px;height:34px;border-radius:11px}.logo-mark svg{width:18px;height:18px}
   .topbar{padding:12px 16px}.topbar h2{font-size:1.05rem}
-  main{padding-bottom:110px}
+  main{padding-bottom:110px;padding-top:18px}   /* 18px = the gap between dashboard widgets */
+  .welcome-hero,.hx-hero{margin-bottom:18px}   /* same rhythm below the hero */
   .notes-masonry{grid-template-columns:1fr}
   .bottombar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:80;
     background:linear-gradient(180deg,rgba(60,48,110,.34),rgba(18,12,48,.46));backdrop-filter:blur(32px) saturate(1.9) brightness(1.06);-webkit-backdrop-filter:blur(32px) saturate(1.9) brightness(1.06);
@@ -946,7 +947,7 @@ html:not(.dark) .kcol-add{background:rgba(255,255,255,.4)}
 html,body{max-width:100%;overflow-x:hidden}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
 @media(max-width:600px){
-  main{padding:12px 13px 118px}
+  main{padding:18px 13px 118px}   /* 18px top = the widget rhythm */
   .card{padding:15px}
   .hero{padding:22px 18px;border-radius:20px}
   .section-head{margin:2px 0 12px}
