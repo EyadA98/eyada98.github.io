@@ -85,6 +85,9 @@ html:not(.dark) .topbar{background:rgba(247,245,252,.6);border-bottom:1px solid 
 main{padding:clamp(14px,2.4vw,32px) clamp(14px,2.8vw,38px) 80px;max-width:1320px}
 .tab{display:none}.tab.active{display:block;animation:fadeUp .42s var(--ease)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.td-donebtn{background:var(--grad-iri)!important;color:#fff!important;border-color:transparent!important}
+.fx-cv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+@media(prefers-reduced-motion:reduce){.fx-cv{display:none}}
 @keyframes pop{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
 .grid{display:grid;gap:18px}
 
@@ -159,9 +162,9 @@ html:not(.dark) .app-card .big{background:linear-gradient(120deg,#6f49b4,#8f5fc0
 /* lists (tasks / notes / links) */
 .row-item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border)}
 .row-item:last-child{border-bottom:none}
-.chk{width:20px;height:20px;border-radius:7px;border:1.5px solid var(--lavender);flex:none;cursor:pointer;display:grid;place-items:center;transition:background .2s}
-.chk.done{background:var(--grad-iri);border-color:transparent}
-.chk svg{width:12px;height:12px;color:#fff;opacity:0}.chk.done svg{opacity:1}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--lavender);flex:none;cursor:pointer;display:grid;place-items:center;transition:background .2s,transform .18s var(--ease);background-clip:padding-box}
+.chk.done{background:var(--grad-iri);background-clip:padding-box;border-color:transparent}
+.chk svg{width:12px;height:12px;color:#fff;opacity:0;transform:scale(.6);transition:opacity .16s,transform .22s var(--ease)}.chk.done svg{opacity:1;transform:scale(1)}
 .row-item .tt{flex:1;min-width:0}
 .row-item .tt .t{font-weight:600;font-size:.93rem}
 .row-item.done .tt .t{text-decoration:line-through;opacity:.5}
@@ -278,7 +281,8 @@ html:not(.dark) .pwf-eye:hover{color:#623f94;background:rgba(138,100,200,.10)}
 @media(max-width:820px){.kanban{grid-template-columns:1fr}}
 .kcol{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;padding:12px;min-height:120px;display:flex;flex-direction:column;max-height:calc(100dvh - 208px)}
 html:not(.dark) .kcol{background:rgba(255,255,255,.5)}
-.kcol-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;margin:0 -3px;padding:3px 9px 10px 3px}
+.kcol-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;margin:0;padding:3px 0 10px;scrollbar-width:none}
+.kcol-body::-webkit-scrollbar{width:0;height:0}
 .kcol-body::-webkit-scrollbar{width:8px}
 .kcol-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:8px}
 .kcol-body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.22)}
@@ -313,7 +317,7 @@ html:not(.dark) .kcard{background:#fff}
 .kc-check{width:19px;height:19px;flex:none;border-radius:50%;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;padding:0;transition:all .15s}
 .kc-check svg{width:11px;height:11px}
 .kc-check:hover{border-color:var(--green);color:var(--green)}
-.kcard.nk.done .kc-check{background:var(--grad-iri);border-color:transparent;color:#fff}
+.kcard.nk.done .kc-check{background:var(--grad-iri);background-clip:padding-box;border-color:transparent;color:#fff}
 .kc-title{flex:1;font-weight:600;font-size:.95rem;line-height:1.3;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .kcard.nk.done .kc-title{text-decoration:line-through;color:var(--muted)}
 .kc-av{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#8a64c8,#623f94)}
@@ -482,7 +486,7 @@ html:not(.dark) .tl2{background:#fff}
 .tl2-check{width:19px;height:19px;flex:none;border-radius:50%;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;padding:0;transition:all .15s}
 .tl2-check svg{width:11px;height:11px}
 .tl2-check:hover{border-color:var(--green);color:var(--green)}
-.tl2-row.done .tl2-check{background:var(--grad-iri);border-color:transparent;color:#fff}
+.tl2-row.done .tl2-check{background:var(--grad-iri);background-clip:padding-box;border-color:transparent;color:#fff}
 .tl2-asg{width:124px;flex:none;display:flex;align-items:center;gap:7px;min-width:0}
 .tl2-asg .kc-av{width:22px;height:22px;font-size:.6rem}
 .tl2-asgn{font-size:.82rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1293,8 +1297,10 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .to-tab.to-over.on{background:linear-gradient(120deg,#d6554c,#e8836b)}
 .to-tab.to-over .to-cnt{background:rgba(214,85,76,.16);color:var(--red)}
 .to-tab.to-over.on .to-cnt{background:rgba(255,255,255,.26);color:#fff}
-.to-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-.to-due{font-size:.73rem;color:var(--muted);flex:none}
+.to-kind{flex:none;padding:1px 7px;text-align:center;font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1.7;border-radius:5px}
+.to-kind.sub{background:rgba(198,179,239,.22);color:var(--lavender)}
+.to-title{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.to-due{font-size:.73rem;color:var(--muted);flex:none;margin-left:auto;padding-left:10px}
 .to-due.over{color:var(--red);font-weight:700}
 .rn-row{padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .rn-row:last-child{border-bottom:none}
@@ -3145,7 +3151,7 @@ function renderOvTasks(){
   var c=document.getElementById("ovTaskCnt");if(c)c.textContent=items.length;
   el.innerHTML=items.length?items.map(function(x){var over=x.due<t;var chk=x.sub?("ovToggleSub(\'"+x.id+"\',\'"+x.sid+"\')"):("toggleTask(\'"+x.id+"\')");var opn=x.sub?("openSubFromLib(\'"+x.id+"\',\'"+x.sid+"\')"):("openTask(\'"+x.id+"\')");return '<div class="mini-item"><div class="chk" onclick="event.stopPropagation();'+chk+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0;cursor:pointer" onclick="'+opn+'"><div style="font-weight:600">'+esc(x.t)+(x.sub?' <span class="badge b-doing" style="font-size:.58rem;padding:1px 6px;vertical-align:middle">Subtask</span>':'')+'</div>'+(over?'<div class="kdue over" style="font-size:.72rem">Overdue &middot; '+esc(fmtShort(x.due))+'</div>':'')+'</div><span class="pdot p-'+x.priority+'"></span></div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing due today &mdash; you are clear.</div>';
 }
-function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; o.t.updated=Date.now(); save(); render(); }
+function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"med",start:"",due:t,tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
 function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:"",sk:"zz"});}});var _wd=new Date().getDay();var _sat=new Date();_sat.setDate(_sat.getDate()+(6-_wd));var _we=isoLocal(_sat);items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items.slice(0,6);var _mo=g.items.length-_sh.length;var rows=_sh.map(function(it){return '<div class="up2-row"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
@@ -3296,13 +3302,13 @@ function openTask(id,presetStatus){ _tdSub=null;
   var ICsch='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
   var ICdet='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.8 13.8 20.6a2 2 0 0 1-2.8 0l-7.6-7.6V3h10z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   var ICsub='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
-  var ICcmt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>';
+  var ICcmt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>';
   var icU='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
   var icFl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h13l-2.5 4L18 12H5"/></svg>';
   var icCl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
   var icKb='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="10" rx="1"/></svg>';
   var html='<div class="td-panel"><div class="tdp-head">'
-    +'<button class="btn soft sm" onclick="completeTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>Mark complete</button>'
+    +'<button class="btn soft sm'+((t.done||t.status==="done")?' td-donebtn':'')+'" onclick="completeTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>'+((t.done||t.status==="done")?'Completed':'Mark complete')+'</button>'
     +'<div class="tdp-actions"><button type="button" class="tdp-ic dz" title="Delete task" onclick="delTask(\''+t.id+'\');closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></button><button type="button" class="tdp-ic" title="Close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'
     +'<input class="tdp-title" id="tdTitle" value="'+esc(t.t)+'" placeholder="Task title">'
     +'<div class="tdp-scroll">'
@@ -3596,7 +3602,7 @@ var SUB_CHK2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 var SUB_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
 var SUB_TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
 var _subRow=null,_subAsgList=[];
-function subToggleChk(el){ el.classList.toggle("done"); var i=el.parentNode.querySelector(".sub-in"); if(i) i.classList.toggle("done",el.classList.contains("done")); if(window.tdCommit&&_tdReady) tdCommit(); try{render();}catch(e){} }
+function subToggleChk(el){ el.classList.toggle("done"); if(el.classList.contains("done")) celebrateHere(); var i=el.parentNode.querySelector(".sub-in"); if(i) i.classList.toggle("done",el.classList.contains("done")); if(window.tdCommit&&_tdReady) tdCommit(); try{render();}catch(e){} }
 function subDelRow(btn){ var row=btn.closest(".sub-row"); if(row) row.remove(); if(window.tdCommit&&_tdReady) tdCommit(); }
 function subDateOpen(btn){ var inp=btn.previousElementSibling; if(!inp) return; try{ if(inp.showPicker) inp.showPicker(); else { inp.focus(); inp.click(); } }catch(e){ try{ inp.focus(); }catch(_){}} }
 function subDateChanged(inp){ var row=inp.closest(".sub-row"); if(!row) return; var v=inp.value||""; row.setAttribute("data-due",v); var b=row.querySelector(".sub-date-btn"); if(b){ b.classList.toggle("set",!!v); b.innerHTML=v?('<span class="sub-badge">'+esc(fmtShort(v))+'</span>'):SUB_CAL; } if(window.tdCommit&&_tdReady) tdCommit(); }
@@ -3643,7 +3649,7 @@ function renderSubPanel(pid,sid){
   var icTag='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.8 13.8 20.6a2 2 0 0 1-2.8 0l-7.6-7.6V3h10z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   function osel(v,arr){ return arr.map(function(x){ return '<option value="'+x[0]+'"'+(v===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join(""); }
   var html='<div class="td-panel"><div class="tdp-head">'
-    +'<button class="btn soft sm" id="sdCompleteBtn" onclick="subMarkComplete()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>Mark complete</button>'
+    +'<button class="btn soft sm'+(o.s.done?' td-donebtn':'')+'" id="sdCompleteBtn" onclick="subMarkComplete()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>'+(o.s.done?'Completed':'Mark complete')+'</button>'
     +'<div class="tdp-actions"><button type="button" class="tdp-ic" title="Back to task" onclick="subBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M9 6l6 6-6 6"/></svg></button><button type="button" class="tdp-ic dz" title="Delete subtask" onclick="subPanelDelete()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></button><button type="button" class="tdp-ic" title="Close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'
     +'<input class="tdp-title" id="tdTitle" value="'+esc(s.t||"")+'" placeholder="Subtask title">'
     +'<div class="tdp-scroll"><div class="tdp-fields">'
@@ -3654,7 +3660,7 @@ function renderSubPanel(pid,sid){
     +'</div>'
     +'<div class="tdp-sec"><div class="tdp-sechd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Description</div><textarea class="fld" id="tdDesc" rows="3" style="margin-top:8px" placeholder="Add a description&hellip;">'+esc(s.desc||"")+'</textarea></div>'
     +'<div class="tdp-sec"><div class="tdp-sechd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>Attachments<label class="btn soft sm" style="margin-left:auto;cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>Add<input type="file" multiple style="display:none" onchange="attPick(this,\'sub\',\''+pid+'::'+sid+'\')"></label></div><div id="sdAttach" class="att-list" style="margin-top:9px"></div></div>'
-    +'<div class="tdp-sec"><div class="tdp-sechd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>Comments</div><div id="sdComments" style="margin-top:9px"></div></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>Comments</div><div id="sdComments" style="margin-top:9px"></div></div>'
     +'</div>'
     +'<div class="tdp-bottom"><div style="display:flex;gap:8px"><input class="fld" id="sdCmtIn" placeholder="Write a comment&hellip;" style="flex:1" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sdAddComment();}"><button class="btn" onclick="sdAddComment()">Send</button></div></div>'
     +'</div>';
@@ -3678,7 +3684,9 @@ function sdCommit(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s); if(!o)
   var tg=document.getElementById("tdTags"); if(tg) s.tags=tg.value.split(",").map(function(x){return x.trim();}).filter(Boolean);
   o.t.updated=Date.now(); save(true);
 }
-function subMarkComplete(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s); if(!o) return; o.s.done=true; o.t.updated=Date.now(); save(true); try{render();}catch(e){} toast("Subtask completed ✓"); subBack(); }
+function subMarkComplete(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s); if(!o) return;
+  if(o.s.done){ o.s.done=false; o.t.updated=Date.now(); save(true); try{render();}catch(e){} toast("Subtask reopened"); try{renderSubPanel(_tdSub.p,_tdSub.s);}catch(e){} return; }
+  o.s.done=true; o.t.updated=Date.now(); celebrateHere(); save(true); try{render();}catch(e){} toast("Subtask completed ✓"); subBack(); }
 function sdAutoSave(){ if(_sdT) clearTimeout(_sdT); _sdT=setTimeout(function(){ _sdT=null; sdCommit(); },400); }
 function subBack(){ var pid=_sdParent; try{ sdCommit(); }catch(e){} _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
 function subPanelDelete(){ var pid=_sdParent, o=_subOf(_sdParent,_sdId); if(o){ o.t.subs=(o.t.subs||[]).filter(function(x){return x.id!==_sdId;}); o.t.updated=Date.now(); save(); } _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
@@ -3689,7 +3697,61 @@ function sdRenderAttach(){ var host=document.getElementById("sdAttach"); if(!hos
   if(!supa||!user){ host.innerHTML='<div class="att-empty">Sign in to add or view attachments.</div>'; return; }
   host.innerHTML=arr.length?_attRows("sub",key,arr):'<div class="att-empty">No attachments yet.</div>'; }
 function completedStatusId(){ var ss=statuses(); for(var i=0;i<ss.length;i++){ if(ss[i].id==="done") return "done"; } for(var j=0;j<ss.length;j++){ if(/done|complete/i.test(ss[j].name)) return ss[j].id; } return ss.length?ss[ss.length-1].id:"done"; }
-function completeTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return; t.status=completedStatusId(); t.done=true; t.updated=Date.now(); save(); closeModal(); render(); toast("Task completed ✓"); }
+
+function reopenStatusId(){ var ss=statuses(), done=completedStatusId();
+  for(var i=0;i<ss.length;i++){ if(ss[i].id!==done) return ss[i].id; }
+  return ss[0]?ss[0].id:"todo"; }
+/* ===== completion celebration: brand confetti ===== */
+var _fxCv=null,_fxCtx=null,_fxParts=[],_fxRaf=null;
+function _fxInit(){
+  if(_fxCv) return;
+  _fxCv=document.createElement("canvas"); _fxCv.className="fx-cv"; document.body.appendChild(_fxCv);
+  _fxCtx=_fxCv.getContext("2d");
+  function size(){ var r=window.devicePixelRatio||1; _fxCv.width=innerWidth*r; _fxCv.height=innerHeight*r; _fxCtx.setTransform(r,0,0,r,0,0); }
+  size(); window.addEventListener("resize",size);
+}
+function _fxTick(){
+  _fxCtx.clearRect(0,0,innerWidth,innerHeight);
+  _fxParts=_fxParts.filter(function(p){return p.life>0;});
+  _fxParts.forEach(function(p){
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.14; p.vx*=0.995; p.rot+=p.vr; p.life-=0.016;
+    _fxCtx.save(); _fxCtx.globalAlpha=Math.max(0,Math.min(1,p.life));
+    _fxCtx.translate(p.x,p.y); _fxCtx.rotate(p.rot); _fxCtx.fillStyle=p.c;
+    _fxCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h); _fxCtx.restore();
+  });
+  if(_fxParts.length) _fxRaf=requestAnimationFrame(_fxTick);
+  else { _fxRaf=null; _fxCtx.clearRect(0,0,innerWidth,innerHeight); }
+}
+/* fire from an element (or the screen centre if we can't find one) */
+function celebrate(el){
+  try{
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+    if(document.hidden) return;                 /* rAF is throttled in a background tab */
+    if(_fxParts.length>400) return;             /* never let the buffer run away */
+    _fxInit();
+    var ox=innerWidth/2, oy=innerHeight/3;
+    if(el && el.getBoundingClientRect){ var r=el.getBoundingClientRect(); if(r.width||r.height){ ox=r.left+r.width/2; oy=r.top+r.height/2; } }
+    var COL=["#8a64c8","#a081d6","#c6b3ef","#f3b98e","#dd824b"];
+    for(var i=0;i<30;i++){
+      var a=(-90+(Math.random()*130-65))*Math.PI/180, sp=3+Math.random()*4.6;
+      _fxParts.push({x:ox,y:oy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+        w:3+Math.random()*5,h:2+Math.random()*5,rot:Math.random()*6.28,vr:(Math.random()-.5)*.34,
+        c:COL[(Math.random()*COL.length)|0],life:1});
+    }
+    if(!_fxRaf) _fxRaf=requestAnimationFrame(_fxTick);
+  }catch(e){}
+}
+/* the element the user actually clicked — so the burst starts where they tapped */
+var _fxLast=null;
+document.addEventListener("click",function(e){ _fxLast=e.target; },true);
+function celebrateHere(){ celebrate(_fxLast); }
+
+function completeTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
+  var _wasDone=(t.done||t.status==="done");
+  if(_wasDone){ t.status=reopenStatusId(); t.done=false; t.updated=Date.now(); save(); render();
+    try{ openTask(id); }catch(e){}   /* keep the panel open, refreshed */
+    toast("Task reopened"); return; }
+  t.status=completedStatusId(); t.done=true; t.updated=Date.now(); celebrateHere(); save(); closeModal(); render(); toast("Task completed ✓"); }
 function saveTask(id){
   var title=document.getElementById("tdTitle").value.trim(); if(!title){ toast("Title is required"); return; }
   var subs=[]; var _pv=(id?(((data.tasks||[]).find(function(x){return x.id===id;})||{}).subs||[]):[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; var _a=r.getAttribute("data-asg"); if(_a)_sd.assignee=_a; var _u=r.getAttribute("data-due"); if(_u)_sd.due=_u; var _d=r.getAttribute("data-desc"); if(_d)_sd.desc=_d; subs.push(_sd); });
@@ -3700,7 +3762,7 @@ function saveTask(id){
   else { data.tasks.push(Object.assign({id:uid(),project:"",created:Date.now(),updated:Date.now()},f)); }
   save(); closeModal(); render(); toast(id?"Task updated":"Task created");
 }
-function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ if(t.status==="done"){ t.status="backlog"; t.done=false; } else { t.status="done"; t.done=true; } t.updated=Date.now(); save(); render(); } }
+function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ if(t.status==="done"||t.done){ t.status=reopenStatusId(); t.done=false; } else { t.status="done"; t.done=true; celebrateHere(); } t.updated=Date.now(); save(); render(); } }
 function delTask(id){ var arr=data.tasks||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i<0) return; var it=arr[i]; tombstone({id:id}); arr.splice(i,1); save(); render(); undoToast("Task deleted", function(){ data.deleted=data.deleted||{}; data.deleted["#"+id]=-Date.now(); data.tasks=data.tasks||[]; data.tasks.splice(Math.min(i,data.tasks.length),0,it); save(); render(); }); }
 
 /* ---- Notes ---- */
@@ -3864,7 +3926,7 @@ function renderLibrary(){ var host=document.getElementById("libList"); if(!host)
   if(!supa||!user){ host.innerHTML='<div class="empty"><p>Sign in to see your attachment library.</p></div>'; if(cnt)cnt.textContent=""; return; }
   var all=_allAttachments(); if(cnt) cnt.textContent=all.length?(all.length+" file"+(all.length>1?"s":"")):"";
   if(!all.length){ host.innerHTML='<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg></div><p>No attachments yet. Add PDFs or files to any task or note.</p></div>'; return; }
-  host.innerHTML='<div class="lib-cards">'+all.map(function(r){ var openSrc=r.kind==="task"?("openTask(\''+r.id+'\')"):(r.kind==="sub"?("openSubFromLib(\''+r.pid+'\',\''+r.sid+'\')"):("editNote(\''+r.id+'\')")); var sc=r.kind==="note"?"n":"t"; var si=r.kind==="note"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>':(r.kind==="sub"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>'); var dt=r.a.uploadedAt?(" · "+new Date(r.a.uploadedAt).toLocaleDateString(undefined,{month:"short",day:"numeric"})):"";
+  host.innerHTML='<div class="lib-cards">'+all.map(function(r){ var openSrc=r.kind==="task"?("openTask('"+r.id+"')"):(r.kind==="sub"?("openSubFromLib('"+r.pid+"','"+r.sid+"')"):("editNote('"+r.id+"')")); var sc=r.kind==="note"?"n":"t"; var si=r.kind==="note"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>':(r.kind==="sub"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>'); var dt=r.a.uploadedAt?(" · "+new Date(r.a.uploadedAt).toLocaleDateString(undefined,{month:"short",day:"numeric"})):"";
     return '<div class="lib-card">'+_attIcon(r.a)
       +'<button type="button" class="lib-nm" onclick="attOpen(\''+r.kind+'\',\''+r.id+'\',\''+r.a.id+'\')" title="'+esc(r.a.name)+'">'+esc(r.a.name)+'</button>'
       +'<span class="lib-src2 '+sc+'" onclick="'+openSrc+'" title="'+esc(r.src)+'">'+si+esc(r.src)+'</span>'
@@ -4829,7 +4891,7 @@ function scheduleMasonry(){ if(_msnRAF) cancelAnimationFrame(_msnRAF); _msnRAF=r
 function layoutMasonry(){ var grid=document.getElementById("dashStack"); if(!grid) return; grid.style.position=""; grid.style.height=""; Array.prototype.forEach.call(grid.children,function(el){ if(el&&el.style){ el.style.position=""; el.style.left=""; el.style.top=""; el.style.width=""; } }); }
 window.addEventListener("resize",scheduleMasonry);
 /* ===== batch v12 additions: Tasks Overview + Recent Notes ===== */
-function toRow(x){ var today=isoLocal(new Date()); var over=x.due&&x.due<today; var _pl={high:"High",med:"Med",low:"Low"}; var _clk=x._sub?("openSubFromLib(\''+x.pid+'\',\''+x.sid+'\')"):("openTask(\''+x.id+'\')"); var _bd=x._sub?' <span class="badge b-doing" style="font-size:.54rem;padding:1px 6px;vertical-align:middle;margin-left:8px">Sub</span>':''; return '<div class="to-row" onclick="'+_clk+'"><span class="pflag p-'+(x.priority||"med")+'">'+(_pl[x.priority||"med"])+'</span><span class="to-title">'+esc(x.t)+_bd+'</span>'+(x.due?'<span class="to-due'+(over?" over":"")+'">'+esc(fmtShort(x.due))+(x.time?' &middot; '+esc(prettyTime(x.time)):'')+'</span>':'')+'</div>'; }
+function toRow(x){ var today=isoLocal(new Date()); var over=x.due&&x.due<today; var _pl={high:"High",med:"Med",low:"Low"}; var _clk=x._sub?("openSubFromLib('"+x.pid+"','"+x.sid+"')"):("openTask('"+x.id+"')"); var _bd=x._sub?'<span class="to-kind sub">Sub</span>':''; return '<div class="to-row" onclick="'+_clk+'"><span class="pflag p-'+(x.priority||"med")+'">'+(_pl[x.priority||"med"])+'</span><span class="to-title">'+esc(x.t)+'</span>'+_bd+(x.due?'<span class="to-due'+(over?" over":"")+'">'+esc(fmtShort(x.due))+(x.time?' &middot; '+esc(prettyTime(x.time)):'')+'</span>':'')+'</div>'; }
 var toTab="today";
 function setToTab(k){ toTab=k; renderTasksOverview(); }
 function renderTasksOverview(){
