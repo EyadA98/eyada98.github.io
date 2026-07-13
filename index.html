@@ -63,8 +63,8 @@ aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88)
 .logo-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--lavender),var(--violet));display:grid;place-items:center;box-shadow:0 4px 14px rgba(141,127,208,.45);animation:logoIn .7s var(--ease)}
 .logo-mark svg{width:21px;height:21px;color:#fff}
 @keyframes logoIn{from{opacity:0;transform:scale(.55) rotate(-10deg)}to{opacity:1;transform:none}}
-.logo b{font-size:1.02rem;font-weight:800;display:block;line-height:1.1}
-.logo span{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.55;font-weight:500}
+.logo b{font-size:1.02rem;font-weight:800;display:block;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo span{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;opacity:.55;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .nav-label{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;opacity:.4;padding:14px 12px 6px;font-weight:700}
 aside button.nav{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;color:rgba(255,255,255,.62);padding:10px 12px;border-radius:11px;cursor:pointer;font-size:.91rem;font-family:inherit;font-weight:600;text-align:left;position:relative;transition:all .22s var(--ease)}
 aside button.nav svg{width:17px;height:17px;flex:none;opacity:.8}
@@ -4192,7 +4192,8 @@ function toggleAvMenu(e){ if(e) e.stopPropagation(); var m=document.getElementBy
 function closeAvMenu(){ var m=document.getElementById("avMenu"); if(m) m.classList.remove("show"); }
 function avMenuHtml(){
   var signed=!!user; var email=signed?(user.email||""):""; var nm=(data.profile&&data.profile.name)||"Guest";
-  var h='<div class="avm-head"><b>'+esc(nm)+'</b><span>'+(email?esc(email):'Not signed in')+'</span></div>';
+  var _nbn=esc(nm).replace(/ /g,"&nbsp;");
+  var h='<div class="avm-head"><b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">'+_nbn+'</b><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">'+(email?esc(email):'Not signed in')+'</span></div>';
   h+='<button onclick="closeAvMenu();openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg> Preferences</button>';
   h+=signed? '<button class="danger-item" onclick="closeAvMenu();signOut()">'+I_SIGNOUT+' Sign out</button>' : '<button onclick="closeAvMenu();openAccount()">'+I_SIGNOUT+' Sign in</button>';
   return h;
