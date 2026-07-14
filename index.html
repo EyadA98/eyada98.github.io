@@ -2251,6 +2251,15 @@ html:not(.dark) .tl-hint .h-chip{background:rgba(20,14,45,.06)}
   .hx-box{min-height:96px}
   .hx-greet{font-size:1.5rem}
 }
+
+/* ===== LAST WORD: the collapsed top nav scrolls. Three earlier rules fight over this;
+   without !important the last one wins and Mind Map + Library become unreachable. ===== */
+@media(max-width:1024px){
+  aside{overflow-x:auto!important;overflow-y:visible!important;flex-wrap:nowrap!important;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  aside::-webkit-scrollbar{height:0}
+  aside button.nav{flex:none!important}
+}
 </style>
 </head>
 <body>
