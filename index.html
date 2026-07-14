@@ -324,7 +324,8 @@ html:not(.dark) .pwf-eye:hover{color:#623f94;background:rgba(138,100,200,.10)}
 .more-overlay.show{display:block}
 .more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:95;transform:translateY(115%);transition:transform .3s var(--ease);
   background:linear-gradient(180deg,rgba(42,34,86,.99),rgba(20,14,50,.99));border-top-left-radius:26px;border-top-right-radius:26px;
-  border-top:1px solid rgba(255,255,255,.16);padding:8px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -22px 55px rgba(0,0,0,.55)}
+  border-top:1px solid #3b2f6b;padding:8px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -22px 55px rgba(0,0,0,.55)}
+html:not(.dark) .more-sheet{border-top-color:#d9cdf2}
 .more-sheet.show{transform:none}
 .more-grip{width:44px;height:4px;border-radius:3px;background:rgba(255,255,255,.32);margin:8px auto 14px}
 .more-title{font-family:'Marcellus',Georgia,serif;font-size:1.15rem;color:#fff;margin:0 0 16px 4px}
@@ -1768,10 +1769,11 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
 .icon-btn,.nib,.rt-more,.wsm-del,.rc-del,.tdp-ic{min-width:36px;min-height:36px}
 .sticky .nib{width:32px;height:32px}
 @media(pointer:coarse){
-  .icon-btn,.nib,.rt-more,.rt-alt,.wsm-del,.rc-del,.tdp-ic,.kc-check,.tl2-check{min-width:40px;min-height:40px}
-  .kc-check,.tl2-check{width:24px;height:24px}      /* the hit area grows, the drawn circle does not */
-  .kc-check{position:relative}
-  .kc-check::after,.tl2-check::after{content:"";position:absolute;inset:-9px}
+  .icon-btn,.nib,.rt-more,.rt-alt,.wsm-del,.rc-del,.tdp-ic{min-width:40px;min-height:40px}
+  /* the checkbox must stay 19px — only its HIT AREA grows. min-width would beat width and
+     inflate the drawn circle, which is exactly what happened. */
+  .kc-check,.tl2-check{min-width:0;min-height:0;position:relative}
+  .kc-check::after,.tl2-check::after{content:"";position:absolute;inset:-11px}
 }
 /* counts read as numbers, not as display glyphs */
 .sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
@@ -3359,7 +3361,7 @@ function rtDoComplete(id){ var r=(data.routines||[]).find(function(x){return x.i
   var km=document.getElementById("rtcKm"); if(km&&r.recur){ r.recur.lastKm=+km.value||r.recur.lastKm; }
   var nk=document.getElementById("rtcNextKm"); if(nk&&r.recur&&nk.value!==""){ r.recur.nextKm=+nk.value||r.recur.nextKm; }
   var dd=document.getElementById("rtcDue"); var rty2=(normRecur(r.recur||{})).type; if(dd&&dd.value){ r.due=dd.value; } else if(rty2==="once"||rty2==="usage"||rty2==="distance"||rty2==="customUnit"){ r.due=""; }
-  r.updated=Date.now(); save(); closeModal(); render(); toast("Routine completed ✓");
+  r.updated=Date.now(); save(); closeModal(); render(); toast("Routine completed");
 }
 function rtHistory(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return; var h=r.history||[];
   showModal('<h4>History &middot; '+esc(r.title)+'</h4><div class="tm">'+(h.length?h.map(function(x){return '<div style="display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:6px;flex:none"></div><div style="flex:1"><div style="font-weight:600;font-size:.86rem">'+esc(new Date(x.ts).toLocaleString())+'</div>'+(x.note?'<div class="muted" style="font-size:.84rem;margin-top:2px">'+esc(x.note)+'</div>':'')+'</div></div>';}).join(""):'<p class="muted" style="padding:14px 0">No completions logged yet.</p>')+'</div><div class="row"><button class="btn soft" onclick="closeModal()">Close</button></div>');
@@ -3521,7 +3523,7 @@ function notifPin(id){ var ns=notifStore(); if(ns.pinned[id])delete ns.pinned[id
 function notifDismiss(id){ var ns=notifStore(); ns.dismissed[id]=Date.now(); save(); renderNotifs(); updateNotifBadge(); }
 function notifSnzMenu(btn){ var pop=btn.parentNode.querySelector(".ntf-snz-pop"); var open=pop.classList.contains("show"); document.querySelectorAll(".ntf-snz-pop.show").forEach(function(p){p.classList.remove("show");}); if(!open)pop.classList.add("show"); }
 function notifSnooze(id,amt){ var ns=notifStore(); var until; if(amt==="tomorrow"){ var t=new Date(); t.setDate(t.getDate()+1); t.setHours(9,0,0,0); until=t.getTime(); } else if(amt==="week"){ var w=new Date(); w.setDate(w.getDate()+7); w.setHours(9,0,0,0); until=w.getTime(); } else if(amt==="custom"){ var v=prompt("Snooze until (YYYY-MM-DD HH:MM):", new Date(Date.now()+86400000).toISOString().slice(0,16).replace("T"," ")); if(!v)return; var dt=new Date(v.replace(" ","T")); if(isNaN(dt)){toast("Invalid date");return;} until=dt.getTime(); } else { until=Date.now()+amt; } ns.snooze[id]=until; save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }
-function notifComplete(id){ var p=id.split(":"); if(p[0]==="task"){ var t=(data.tasks||[]).find(function(x){return x.id===p[1];}); if(t){ t.status=completedStatusId(); t.done=true; t.updated=Date.now(); } } else if(p[0]==="routine"){ var r=(data.routines||[]).find(function(x){return x.id===p[1];}); if(r){ r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:""}); r.lastCompleted=isoLocal(new Date()); (r.checklist||[]).forEach(function(c){c.done=false;}); } } notifStore().dismissed[id]=Date.now(); save(); render(); toast("Done ✓"); }
+function notifComplete(id){ var p=id.split(":"); if(p[0]==="task"){ var t=(data.tasks||[]).find(function(x){return x.id===p[1];}); if(t){ t.status=completedStatusId(); t.done=true; t.updated=Date.now(); } } else if(p[0]==="routine"){ var r=(data.routines||[]).find(function(x){return x.id===p[1];}); if(r){ r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:""}); r.lastCompleted=isoLocal(new Date()); (r.checklist||[]).forEach(function(c){c.done=false;}); } } notifStore().dismissed[id]=Date.now(); save(); render(); toast("Done"); }
 function notifOpenRoutine(rid){ go("routines"); setTimeout(function(){ openRoutine(rid); },80); }
 function openNotifSettings(){ var s=notifStore().settings; var IClead='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>'; var ICmail='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
   showModal('<h4>Reminder settings</h4><div class="tm">'
@@ -3673,7 +3675,7 @@ async function sendHtmlEmail(to,subject,html){
 }
 async function sendDigestNow(auto){
   var to=data.settings.googleEmail; if(!to||!(getGToken("google")||gmailToken)){ if(!auto)toast("Connect Gmail first"); return; }
-  try{ var dg=buildDigest(); await sendHtmlEmail(to,dg.subject,dg.html); if(!auto)toast("Digest sent to your inbox ✓"); }
+  try{ var dg=buildDigest(); await sendHtmlEmail(to,dg.subject,dg.html); if(!auto)toast("Digest sent to your inbox"); }
   catch(e){ if(!auto)toast("Couldn't send — reconnect Gmail"); }
 }
 function previewDigest(){ var dg=buildDigest(); showModal('<h4>Daily digest preview</h4><iframe id="digFrame" sandbox style="width:100%;height:62vh;max-height:680px;border:1px solid var(--border);border-radius:12px;background:#fff"></iframe><div class="row"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn" onclick="sendDigestNow(false)">Send to my inbox</button></div>',"xwide"); var f=document.getElementById("digFrame"); if(f)f.srcdoc=dg.html; }
@@ -4762,7 +4764,7 @@ function sdCommit(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s); if(!o)
 }
 function subMarkComplete(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s); if(!o) return;
   if(o.s.done){ o.s.done=false; o.t.updated=Date.now(); save(true); try{render();}catch(e){} toast("Subtask reopened"); try{renderSubPanel(_tdSub.p,_tdSub.s);}catch(e){} return; }
-  o.s.done=true; o.t.updated=Date.now(); celebrateHere(); save(true); try{render();}catch(e){} toast("Subtask completed ✓"); subBack(); }
+  o.s.done=true; o.t.updated=Date.now(); celebrateHere(); save(true); try{render();}catch(e){} toast("Subtask completed"); subBack(); }
 function sdAutoSave(){ if(_sdT) clearTimeout(_sdT); _sdT=setTimeout(function(){ _sdT=null; sdCommit(); },400); }
 function subBack(){ var pid=_sdParent; try{ sdCommit(); }catch(e){} _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
 function subPanelDelete(){ var pid=_sdParent, o=_subOf(_sdParent,_sdId); if(o){ o.t.subs=(o.t.subs||[]).filter(function(x){return x.id!==_sdId;}); o.t.updated=Date.now(); save(); } _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
@@ -4841,7 +4843,7 @@ function completeTask(id){ var t=(data.tasks||[]).find(function(x){return x.id==
   if(_wasDone){ t.status=reopenStatusId(t.ws); t.done=false; t.updated=Date.now(); save(); render();
     try{ openTask(id); }catch(e){}   /* keep the panel open, refreshed */
     toast("Task reopened"); return; }
-  t.status=completedStatusId(); t.done=true; t.updated=Date.now(); celebrateHere(); save(); closeModal(); render(); toast("Task completed ✓"); }
+  t.status=completedStatusId(); t.done=true; t.updated=Date.now(); celebrateHere(); save(); closeModal(); render(); toast("Task completed"); }
 function saveTask(id){
   var title=document.getElementById("tdTitle").value.trim(); if(!title){ toast("Title is required"); return; }
   var subs=[]; var _pv=(id?(((data.tasks||[]).find(function(x){return x.id===id;})||{}).subs||[]):[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; var _a=r.getAttribute("data-asg"); if(_a)_sd.assignee=_a; var _u=r.getAttribute("data-due"); if(_u)_sd.due=_u; var _d=r.getAttribute("data-desc"); if(_d)_sd.desc=_d; subs.push(_sd); });
@@ -5126,7 +5128,7 @@ function renderLinks(){
   const keys=Object.keys(groups);
   document.getElementById("linksList").innerHTML = keys.length? keys.map(g=>
     `<div class="link-group"><h3>${esc(g)}</h3><div>${groups[g].map(l=>
-      `<span class="link-chip" style="cursor:default"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px"><span class="dot"></span>${esc(l.label)}</a><button class="btn danger" style="margin-left:6px;padding:2px 7px" onclick="delLink(${l.i})" aria-label="Delete">✕</button></span>`
+      `<span class="link-chip" style="cursor:default"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px"><span class="dot"></span>${esc(l.label)}</a><button class="btn danger" style="margin-left:6px;padding:2px 7px" onclick="delLink(${l.i})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`
     ).join("")}</div></div>`
   ).join("") : '<div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div><p>No links yet.</p></div>';
 }
@@ -5712,7 +5714,7 @@ async function initAuth(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
-    if(signedIn){ closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back ✓"); }
+    if(signedIn){ closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back"); }
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
@@ -5789,7 +5791,7 @@ async function saveEvent(id){
   try{
     if(id) await calApi("events/"+encodeURIComponent(id),"PATCH",body,"sendUpdates=all");
     else await calApi("events","POST",body,"sendUpdates=all");
-    closeModal(); toast(id?"Event updated ✓":"Event created ✓");
+    closeModal(); toast(id?"Event updated":"Event created");
     var t=getGToken("google")||calToken; if(t) await loadCalEvents(t);
   }catch(e){ if(btn){ btn.disabled=false; btn.textContent=id?"Save":"Create event"; } toast("Couldn't save event — reconnect Google"); }
 }
@@ -5822,7 +5824,7 @@ async function sendEmail(){
   var headers=["To: "+to,"Subject: "+subj,"MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8"];
   var raw=headers.join("\r\n")+"\r\n\r\n"+bodyTxt;
   var btn=document.getElementById("cmSendBtn"); if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
-  try{ await gmailApi("messages/send","POST",{raw:_b64url(raw)}); closeModal(); toast("Email sent ✓"); }
+  try{ await gmailApi("messages/send","POST",{raw:_b64url(raw)}); closeModal(); toast("Email sent"); }
   catch(e){ if(btn){ btn.disabled=false; btn.textContent="Send"; } toast("Couldn't send — reconnect Gmail"); }
 }
 function replyTo(id){ var m=(gmailMsgs||[]).find(function(x){return x.id===id;}); if(!m){ openCompose(); return; } var em=((/<([^>]+)>/.exec(m.from||"")||[])[1])||m.from||""; var s=m.subject||""; if(s&&!/^re:/i.test(s)) s="Re: "+s; openCompose(em,s); }
@@ -6044,7 +6046,7 @@ async function wsAdd(){
   var id="ws"+Date.now().toString(36);
   data.workspaces.push({id:id,name:name.trim(),color:color,
     statuses:JSON.parse(JSON.stringify(WS_DEFAULT_STATUSES)),created:Date.now()});
-  data.settings.activeWs=id; save(); render(); toast("Workspace created ✓");
+  data.settings.activeWs=id; save(); render(); toast("Workspace created");
 }
 function wsmRow(w){
   var n=(w.statuses||[]).length||3;
