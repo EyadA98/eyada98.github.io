@@ -2629,7 +2629,9 @@ function go(name,fromHistory){
   if(name==="home"&&user&&supa){ try{ loadFinance(); loadTravel(); }catch(e){} }
   if(name==="mindmap"){ try{ initMindMap(); }catch(e){ console.error(e); } }
   try{ localStorage.setItem("hubView",name); }catch(e){}
-  window.scrollTo({top:0}); render();
+  window.scrollTo({top:0});
+  if(_dirty[name]!==false) renderTab(name);          /* it changed while we were on another tab */
+  try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
 }
 function openMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s)s.classList.add("show"); }
 function closeMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.remove("show"); if(s)s.classList.remove("show"); }
@@ -2638,16 +2640,31 @@ document.querySelectorAll("aside button.nav,.bottombar button[data-tab]").forEac
 
 /* ============ Render ============ */
 function avatarText(){ var nm=((data.profile&&data.profile.name)||(user&&user.email)||"").trim(); return nm? nm.charAt(0).toUpperCase() : "\u2022"; }
-function render(){ applyLang();
-  try{ renderHome(); }catch(e){ console.error("renderHome",e); }
-  try{ renderApps(); }catch(e){ console.error(e); }
-  try{ renderNotes(); }catch(e){ console.error(e); }
-  try{ renderTasks(); }catch(e){ console.error(e); }
-  try{ renderTimeline(); }catch(e){ console.error(e); }
-  try{ renderRoutines(); }catch(e){ console.error(e); }
-  try{ renderNotifs(); }catch(e){ console.error(e); }
+/* every module used to re-render on every save, whether or not it was on screen.
+   Now only the visible tab renders; the rest are marked dirty and rendered when you open them. */
+var _dirty={};
+var _RENDERERS={ home:renderHome, apps:renderApps, notes:renderNotes, tasks:renderTasks,
+                 timeline:renderTimeline, routines:renderRoutines, notifications:renderNotifs, library:renderLibrary };
+function _activeTab(){ var t=document.querySelector(".tab.active"); return t?t.id.replace("tab-",""):"home"; }
+function renderTab(name){
+  var fn=_RENDERERS[name]; if(!fn) return;
+  try{ fn(); }catch(e){ console.error("render "+name,e); }
+  _dirty[name]=false;
+}
+function render(opts){
+  applyLang();
+  var active=_activeTab();
+  Object.keys(_RENDERERS).forEach(function(k){ if(k!==active) _dirty[k]=true; });
+  renderTab(active);
+  if(active!=="home"){ try{ renderTasksOverview(); }catch(e){} }   /* the dashboard widgets stay truthful */
   try{ updateNotifBadge(); }catch(e){}
-  try{ renderLibrary(); }catch(e){}
+  var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
+  try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
+}
+function renderAll(){                                   /* boot / sign-in: everything once */
+  applyLang();
+  Object.keys(_RENDERERS).forEach(function(k){ renderTab(k); });
+  try{ updateNotifBadge(); }catch(e){}
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
 }
@@ -6369,8 +6386,14 @@ function renameLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var 
 function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var l=row.dataset.l; (data.notes||[]).forEach(function(n){ if(n.labels) n.labels=n.labels.filter(function(x){return x!==l;}); }); if(notesFilterLabel===l) notesFilterLabel=""; save(); renderNotes(); toast("Label deleted"); openLabels(); }
 
 function priFlag(p){ var k=priKey(p); return '<span class="pflag p-'+k+'">'+PRI[k].s+'</span>'; }
+/* a hard tab-close must not lose a keystroke that is still inside the 400ms autosave window */
+window.addEventListener("beforeunload",function(){
+  try{ if(typeof _tdT!=="undefined" && _tdT){ clearTimeout(_tdT); _tdT=null; if(_tdSub){ if(_sdReady) sdCommit(); } else if(_tdReady) tdCommit(); } }catch(e){}
+  try{ if(typeof _sdT!=="undefined" && _sdT){ clearTimeout(_sdT); _sdT=null; if(_sdReady) sdCommit(); } }catch(e){}
+  try{ save(true); }catch(e){}
+});
 /* ============ Boot ============ */
-render();
+renderAll();
 if(location.hash && PAGES[location.hash.slice(1)]) { _navInit(); }
 else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
