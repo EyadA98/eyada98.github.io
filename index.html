@@ -1115,7 +1115,15 @@ html,body{max-width:100%;overflow-x:hidden}
 @media(max-width:600px){.tb-logo{width:30px;height:30px}.tb-logo svg{width:16px;height:16px}}
 /* Sidebar: never clipped */
 aside{height:100dvh;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;padding-bottom:26px}
-@media(max-width:1024px){aside{height:auto;max-height:none;overflow:visible;padding-bottom:10px}}
+/* the collapsed top nav MUST keep scrolling horizontally — a later overflow:visible here
+   silently killed the overflow-x:auto above, and Mind Map + Library became unreachable */
+@media(max-width:1024px){aside{height:auto;max-height:none;overflow-x:auto;overflow-y:visible;padding-bottom:10px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  aside::-webkit-scrollbar{height:0}
+  aside::after{content:"";position:sticky;right:0;flex:none;width:24px;height:36px;pointer-events:none;
+    background:linear-gradient(90deg,rgba(26,23,63,0),rgba(26,23,63,.9))}
+  html:not(.dark) aside::after{background:linear-gradient(90deg,rgba(244,241,251,0),rgba(244,241,251,.95))}
+}
 /* Unified Google account chip */
 .gchip{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:10px 12px;flex-wrap:wrap}
 html:not(.dark) .gchip{background:rgba(255,255,255,.6)}
@@ -1750,6 +1758,24 @@ html:not(.dark) .rt-card.v1.st-ok{background-image:linear-gradient(140deg,rgba(3
 html:not(.dark) .rt-card.v1.st-soon{background-image:linear-gradient(140deg,rgba(221,130,75,.12),rgba(255,255,255,0) 55%)}
 html:not(.dark) .rt-card.v1.st-od{background-image:linear-gradient(140deg,rgba(214,85,76,.12),rgba(255,255,255,0) 55%)}
 html:not(.dark) .to-branch{color:var(--muted)}
+/* ===== accessibility: keyboard focus is visible, mouse focus is not ===== */
+:where(button,a,input,select,textarea,[tabindex],.kcard,.tl2-row,.sticky,.rt-card,.ws-p,.to-row):focus-visible{
+  outline:2px solid var(--lavender);outline-offset:2px;border-radius:8px}
+html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{outline-color:#6a4aa8}
+.modal:focus{outline:none}
+@media(prefers-reduced-motion:reduce){ .sticky,.kcard,.rt-card.v1{transition:none!important} }
+/* ===== QA: touch targets and numerals ===== */
+.icon-btn,.nib,.rt-more,.wsm-del,.rc-del,.tdp-ic{min-width:36px;min-height:36px}
+.sticky .nib{width:32px;height:32px}
+@media(pointer:coarse){
+  .icon-btn,.nib,.rt-more,.rt-alt,.wsm-del,.rc-del,.tdp-ic,.kc-check,.tl2-check{min-width:40px;min-height:40px}
+  .kc-check,.tl2-check{width:24px;height:24px}      /* the hit area grows, the drawn circle does not */
+  .kc-check{position:relative}
+  .kc-check::after,.tl2-check::after{content:"";position:absolute;inset:-9px}
+}
+/* counts read as numbers, not as display glyphs */
+.sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.sum-card .sc-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em}
 /* ===== sticky notes ===== */
 .sticky{position:relative;display:flex;flex-direction:column;min-height:228px;height:100%;padding:16px;cursor:pointer;
   border-radius:4px 16px 4px 4px;color:var(--nink);
@@ -2548,7 +2574,7 @@ function _reconcileNested(base, local, cloud, tomb){ try{
   recon("notes",[["checklist","/k",_subKey]]);
   var Lr=_byIdN(local&&local.routines), Cr=_byIdN(cloud&&cloud.routines); ((base&&base.routines)||[]).forEach(function(r){ if(!r||r.id==null)return; var lv=Lr["#"+r.id], cv=Cr["#"+r.id]; if(lv&&cv) r.history=_unionHist(lv.history,cv.history); });
 }catch(e){} }
-function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
+function toast(m){ const t=document.getElementById("toast"); t.setAttribute("role","status"); t.setAttribute("aria-live","polite"); t.textContent=m; t.classList.add("show"); clearTimeout(t.__h); t.__h=setTimeout(()=>t.classList.remove("show"),2200); }
 /* Delete-with-undo: item is removed immediately; a 10-second toast can restore it (and clears the tombstone). */
 function undoToast(msg, restore){ var t=document.getElementById("toast"); if(!t) return; t.innerHTML=esc(msg)+' <button type="button" class="undo-b" style="background:none;border:none;color:var(--lavender);font-weight:700;font-size:.86rem;cursor:pointer;margin-left:14px;font-family:inherit;pointer-events:auto">Undo</button>'; t.classList.add("show"); var b=t.querySelector(".undo-b"); if(b) b.onclick=function(){ try{ restore(); }catch(e){} t.classList.remove("show"); clearTimeout(t.__h); }; clearTimeout(t.__h); t.__h=setTimeout(function(){ t.classList.remove("show"); },10000); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/`/g,"&#96;"); }
@@ -2563,7 +2589,30 @@ updThemeIcon();
 /* ============ Navigation ============ */
 const PAGES={home:["Home","Dashboard"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"],goals:["Workspace","Goals & Habits"]};
 var BOTTOM_TABS=["home","tasks","routines","notes"];
-function go(name){
+window.addEventListener("popstate",function(e){
+  var name=(e.state&&e.state.tab) || (location.hash||"#home").slice(1) || "home";
+  go(name,true);
+});
+function _navInit(){
+  var name=(location.hash||"").slice(1);
+  if(name && PAGES[name]) go(name,true);
+}
+var _navSilent=false;
+function go(name,fromHistory){
+  /* a panel or modal must never survive a page change — it would float over the new page,
+     and its pending autosave would fire against a DOM that no longer exists */
+  if(document.querySelector(".overlay")){ try{ closeModal(); }catch(e){} }
+  if(!PAGES[name]) name="home";
+  /* the URL is the source of truth for "where am I" — Back/Forward and bookmarks both work */
+  if(!fromHistory && !_navSilent){
+    try{
+      var url=location.pathname+location.search+"#"+name;
+      if(location.hash!=="#"+name) history.pushState({tab:name},"",url);
+    }catch(e){}
+  }
+  try{ taskMenuClose(); }catch(e){}
+  try{ rtMenuClose(); }catch(e){}
+  try{ subMenuClose(); }catch(e){}
   document.querySelectorAll("aside button.nav,.bottombar button,.more-grid button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.id==="tab-"+name));
   var mb=document.getElementById("moreBtn"); if(mb)mb.classList.toggle("active",BOTTOM_TABS.indexOf(name)<0);
@@ -2862,6 +2911,9 @@ function timelineItems(){
 var TL_IC={task:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l5 5L20 7"/></svg>',event:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',trip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>',routine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>' };
 var TL_NM={task:"Task",event:"Event",trip:"Trip",routine:"Routine"};
 function emptyTimeline(){ return '<div class="card" style="text-align:center;padding:56px 22px;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:46px;height:46px;opacity:.5"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg><p style="margin:12px auto 0;max-width:360px;line-height:1.55">Nothing scheduled yet. Add tasks with dates, connect your calendar, or plan a trip — everything you have will flow onto this timeline.</p></div>'; }
+function _tlgBar(it,left,w,active,range){
+  return '<div class="tlg-bar'+(active?' grad':'')+(it.done?' done':'')+(it.click?'':' nolink')+'" style="left:'+(left+3)+'px;width:'+w+'px'+(active?'':';border-left-color:'+it.color)+'"'+(it.click?' onclick="'+it.click+'"':'')+' data-title="'+esc(it.title)+'" data-type="'+it.type+'" data-range="'+esc(range)+'" data-done="'+(it.done?"1":"")+'" data-desc="'+esc(it.desc||"")+'"'+(it.ws?' data-ws="'+esc(it.ws.name)+'" data-wsc="'+it.ws.color+'"':"")+(it.sub?' data-sub="1"':"")+'><div class="t">'+esc(it.title)+'</div><div class="s">'+TL_IC[it.type]+esc(TL_NM[it.type])+' &middot; '+esc(range)+'</div></div>';
+}
 function renderTimeline(){
   var host=document.getElementById("tlBody"); if(!host) return;
   tlHideHint();
@@ -2883,12 +2935,23 @@ function renderTimeline(){
     daysHtml+='<div class="tlg-d'+((dow===5||dow===6)?' wk':'')+(isToday?' tdy':'')+'" style="width:'+dw+'px">'+(show?('<span class="dl">'+DLT[dow]+'</span><span class="dn">'+d.getDate()+'</span>'):'')+'</div>'; }
   var moHtml=""; Object.keys(months).forEach(function(mk){ var p=mk.split("-"); var nm=new Date(+p[0],+p[1],1).toLocaleDateString(undefined,{month:"long",year:"numeric"}); moHtml+='<div class="tlg-mo" style="width:'+(months[mk]*dw)+'px">'+esc(nm)+'</div>'; });
   var rowsHtml="";
+  /* row packing: two items that don't overlap in time share a lane.
+     Without it, 500 tasks meant 1,500 rows and a chart taller than the screen many times over. */
+  var lanes=[];                              /* lanes[i] = right-most px used in that lane */
+  function laneFor(left,w){
+    var right=left+w+12;
+    for(var i=0;i<lanes.length;i++){ if(left>=lanes[i]){ lanes[i]=right; return i; } }
+    lanes.push(right); return lanes.length-1;
+  }
+  var laneBars={};
   items.forEach(function(it){
     var left=tlDayIdx(it.s,start)*dw; var span=tlDayIdx(it.e,it.s)+1; var w=Math.max(span*dw-6,150);
     var active=(it.s<=today && today<=it.e);
-    var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' → '+fmtShort(isoLocal(it.e))):'');
-    rowsHtml+='<div class="tlg-row"><div class="tlg-bar'+(active?' grad':'')+(it.done?' done':'')+(it.click?'':' nolink')+'" style="left:'+(left+3)+'px;width:'+w+'px'+(active?'':';border-left-color:'+it.color)+'"'+(it.click?' onclick="'+it.click+'"':'')+' data-title="'+esc(it.title)+'" data-type="'+it.type+'" data-range="'+esc(range)+'" data-done="'+(it.done?"1":"")+'" data-desc="'+esc(it.desc||"")+'"'+(it.ws?' data-ws="'+esc(it.ws.name)+'" data-wsc="'+it.ws.color+'"':"")+(it.sub?' data-sub="1"':"")+'><div class="t">'+esc(it.title)+'</div><div class="s">'+TL_IC[it.type]+esc(TL_NM[it.type])+' &middot; '+esc(range)+'</div></div></div>';
+    var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' \u2192 '+fmtShort(isoLocal(it.e))):'');
+    var ln=laneFor(left,w);
+    laneBars[ln]=(laneBars[ln]||"")+_tlgBar(it,left,w,active,range);
   });
+  for(var _l=0;_l<lanes.length;_l++){ rowsHtml+='<div class="tlg-row">'+(laneBars[_l]||"")+'</div>'; }
   var todayX=tlDayIdx(today,start)*dw+dw/2;
   host.innerHTML='<div class="tlg-wrap"><div class="tlg-scroll" id="tlScroll"><div class="tlg-inner" style="width:'+chartW+'px">'
     +'<div class="tlg-axis"><div class="tlg-months">'+moHtml+'</div><div class="tlg-days">'+daysHtml+'</div></div>'
@@ -4186,6 +4249,16 @@ var TL_PAL=[["#8a64c8","#c6b3ef"],["#f3b98e","#f3b98e"],["#74c4b6","#7fd1c4"],["
 function renderTaskListView(host){
   var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;}
   var today=isoLocal(new Date()); var body="";
+  var _sortMode=(document.getElementById("taskSort")&&document.getElementById("taskSort").value)||"manual";
+  if(_sortMode!=="manual"){
+    /* a sort the user asked for must reorder the WHOLE list — grouping by status would hide it */
+    var head0='<div class="tl2-head"><div class="tl2-task">Task</div>'
+      +(wsActive()?'':'<div class="tl2-ws">Workspace</div>')
+      +'<div class="tl2-asg">Assignee</div><div class="tl2-due">Due</div><div class="tl2-pri">Priority</div></div>';
+    var rows0=arr.map(function(t,i){ return taskListRow(t,today,i%2===1); }).join("");
+    host.innerHTML='<div class="tl2">'+head0+rows0+'</div>';
+    return;
+  }
   statuses().forEach(function(col,ci){
     var items=arr.filter(function(t){return taskStatus(t)===col.id;});
     var c=TL_PAL[ci%TL_PAL.length];
@@ -5464,8 +5537,33 @@ function saveSettings(){
 }
 
 /* ============ Modal helpers ============ */
-function showModal(html,cls){ const r=document.getElementById("modalRoot"); r.innerHTML=`<div class="overlay ${cls||''}" onclick="if(event.target===this)closeModal()"><div class="modal ${cls||''}">${html}</div></div>`; document.documentElement.classList.add("modal-open"); document.body.classList.add("modal-open"); }
+function showModal(html,cls){
+  const r=document.getElementById("modalRoot");
+  r.innerHTML=`<div class="overlay ${cls||''}" onclick="if(event.target===this)closeModal()"><div class="modal ${cls||''}" role="dialog" aria-modal="true" tabindex="-1">${html}</div></div>`;
+  document.documentElement.classList.add("modal-open"); document.body.classList.add("modal-open");
+  _mdlPrevFocus=document.activeElement;
+  var m=r.querySelector(".modal");
+  setTimeout(function(){
+    var f=m.querySelector("input:not([type=hidden]),textarea,select,button");
+    (f||m).focus();
+  },30);
+  document.addEventListener("keydown",_mdlTrap,true);
+}
+var _mdlPrevFocus=null;
+function _mdlTrap(e){
+  if(e.key!=="Tab") return;
+  var m=document.querySelector(".overlay .modal"); if(!m) return;
+  if(document.querySelector(".cp,.rtm-pop,.cs-pop,.dp-pop")) return;      /* popups own their own tabbing */
+  var f=[...m.querySelectorAll('a[href],button:not([disabled]),input:not([type=hidden]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+        .filter(function(x){ return x.offsetParent!==null || x===document.activeElement; });
+  if(!f.length) return;
+  var first=f[0], last=f[f.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
 function closeModal(){ try{ cpClose(); }catch(_){}
+  document.removeEventListener("keydown",_mdlTrap,true);
+  try{ if(_mdlPrevFocus&&_mdlPrevFocus.focus) _mdlPrevFocus.focus(); }catch(_){} _mdlPrevFocus=null;
   try{ _rtmClose(); }catch(_){}
   /* a panel that autosaves may still have a debounced write in flight — flush it BEFORE the DOM goes */
   var _wasPanel=!!document.querySelector(".td-panel,.sd-panel");
@@ -5955,9 +6053,14 @@ function wsManage(){
     +'<p class="muted" style="font-size:.72rem;margin-top:12px">Each workspace keeps its own board columns. Deleting one never deletes its tasks \u2014 it asks where they go.</p>'
     +'<div class="row" style="margin-top:14px"><button class="btn soft" onclick="closeModal()">Done</button></div>');
 }
+function wsNameTaken(name,exceptId){
+  var n=(name||"").trim().toLowerCase();
+  return wsAll().some(function(w){ return w.id!==exceptId && (w.name||"").trim().toLowerCase()===n; });
+}
 function wsAddInline(){
   var el=document.getElementById("wsmNew"); if(!el) return;
   var name=(el.value||"").trim(); if(!name){ el.focus(); return; }
+  if(wsNameTaken(name)){ toast("A workspace called \u201c"+name+"\u201d already exists"); el.focus(); el.select(); return; }
   var used=wsAll().map(function(w){return w.color;});
   var color=WS_COLORS.find(function(c){ return used.indexOf(c)<0; })||WS_COLORS[used.length%WS_COLORS.length];
   var id="ws"+Date.now().toString(36);
@@ -5992,7 +6095,13 @@ function wsDrop(e,targetId){
   /* order is the array order — persist it and redraw both the modal and the pills */
   save(); wsmRefresh(); renderWsBar();
 }
-function wsRename(id,v){ var w=wsById(id); if(!w||!v.trim()) return; w.name=v.trim(); w.updated=Date.now(); save(); renderWsBar(); }
+function wsRename(id,v){
+  var w=wsById(id); if(!w) return;
+  var n=(v||"").trim();
+  if(!n){ toast("A workspace needs a name"); wsmRefresh(); return; }
+  if(wsNameTaken(n,id)){ toast("A workspace called \u201c"+n+"\u201d already exists"); wsmRefresh(); return; }
+  w.name=n; w.updated=Date.now(); save(); renderWsBar();
+}
 function wsOpenPalette(id,btn){
   try{ cpClose(); }catch(_){}
   var pal=document.getElementById("pal-"+id); if(!pal) return;
@@ -6253,11 +6362,26 @@ function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var 
 function priFlag(p){ var k=priKey(p); return '<span class="pflag p-'+k+'">'+PRI[k].s+'</span>'; }
 /* ============ Boot ============ */
 render();
-try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
+if(location.hash && PAGES[location.hash.slice(1)]) { _navInit(); }
+else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
 setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); } },30000);
 setInterval(function(){ try{ updateNotifBadge(); }catch(e){} },60000);
-document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&user&&supa){ loadFinance(); loadTravel(); } });
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible"&&user&&supa){
+    loadFinance(); loadTravel();
+    try{ pullHub(); }catch(e){}        /* the hub itself was never re-pulled — a stale tab kept stale tasks */
+  }
+});
+/* another tab (same browser) just wrote: merge it in rather than let the last save win */
+window.addEventListener("storage",function(e){
+  if(!e.key || e.key.indexOf("hub")<0) return;
+  try{
+    var incoming=JSON.parse(e.newValue||"null"); if(!incoming) return;
+    if(typeof mergeHubData==="function"){ mergeHubData(incoming); } else { data=incoming; }
+    render();
+  }catch(err){}
+});
 scheduleMasonry();
 setTimeout(scheduleMasonry,300); setTimeout(scheduleMasonry,1200);
 (function(){ var g=document.getElementById("dashStack"); if(g&&window.MutationObserver){ try{ new MutationObserver(function(){ scheduleMasonry(); }).observe(g,{childList:true,subtree:true}); }catch(e){} } })();
