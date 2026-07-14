@@ -1217,16 +1217,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
-ansition ${on?'text-white':''}`}/>{t.label}</button>); })}</div>
-        </nav>}
-
-        {toast&&<div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl iridescent text-indigo2-950 text-sm font-semibold shadow-glow fade-in">{toast}</div>}
-        {(authOpen||(cloud.ready&&!cloud.session))&&<AuthModal cloud={cloud} onClose={()=>{ if(cloud.session) setAuthOpen(false); }} onSettings={()=>{setAuthOpen(false);setView('settings');}}/>}
-      </div>
-    </Theme.Provider>
-  );
-}
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
-</body>
-</html>
