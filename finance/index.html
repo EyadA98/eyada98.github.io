@@ -661,7 +661,7 @@ input[type=date]:focus,input[type=time]:focus{outline:none;border-color:var(--la
 input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.95}
 /* selects styled exactly like the date inputs, with a lavender chevron */
 select,.tbl-filter,td select,select.bare{-webkit-appearance:none;-moz-appearance:none;appearance:none;border-radius:12px;padding-right:30px;background-repeat:no-repeat;background-position:right 10px center;background-size:14px;font-family:inherit}
-html.dark select,html.dark .tbl-filter,html.dark td select,html.dark select.bare{background-color:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#ece7fb;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23bba4e4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
+html.dark select,html.dark .tbl-filter,html.dark td select,html.dark select.bare{background-color:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#ece7fb;background-image:url("data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23bba4e4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
 html:not(.dark) select,html:not(.dark) .tbl-filter,html:not(.dark) td select,html:not(.dark) select.bare{background-color:#fff;border:1px solid #d4c6ef;color:#2a1d44;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a64c8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
 select:focus,.tbl-filter:focus,td select:focus,select.bare:focus{outline:none;border-color:var(--lavender);box-shadow:0 0 0 3px rgba(138,100,200,.22)}
 html.dark select option,html.dark .tbl-filter option,html.dark td select option,html.dark select.bare option{background:#1b1442;color:#ece7fb}
@@ -823,6 +823,20 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
 
 #syncStatus{display:none!important}
 #themeToggle{display:inline-flex;align-items:center;justify-content:center}#themeIcon{display:grid;place-items:center;line-height:0}
+
+/* ===== the top bar already names the page ===== */
+/* the H2 and its pill are redundant chrome — the whole heading text goes, the row's
+   action buttons stay. If the row holds nothing but the heading, the row goes too. */
+.tab .section-head>h2{display:none}
+.tab .section-head{min-height:0;margin:0 0 12px}
+.tab .section-head:has(>h2:only-child){display:none}
+
+/* ===== mobile: the first card must not touch the sticky header ===== */
+@media(max-width:820px){
+  main{padding-top:18px}                    /* was 0 — only .hero had a margin, every other page had none */
+  .tab>.section-head:first-child{margin-top:0}
+  .hero{margin-top:0;margin-bottom:18px}
+}
 </style>
 </head>
 <body>
@@ -886,8 +900,8 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
     <div class="hero-stars"></div><div class="hero-moon"></div>
     <div>
       <div class="greet">
-        <h2><span id="greetLine">Welcome back</span>, <span id="userName">Eyad</span> 👋
-          <button class="name-edit" onclick="editName()" title="Edit name" aria-label="Edit your name">✎</button></h2>
+        <h2><span id="greetLine">Welcome back</span>, <span id="userName">Eyad</span>
+          <button class="name-edit" onclick="editName()" title="Edit name" aria-label="Edit your name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:block"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></h2>
         <p id="greetSub">Here's a snapshot of your portfolio and financial performance today.</p>
       </div>
       <div class="eyebrow">Total Net Worth</div>
@@ -922,7 +936,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
   </div>
   <div class="card chart-card" style="margin-top:18px">
     <div class="chart-head">
-      <div><h3>Net Worth Trend</h3><div class="chart-sub">Backfilled from Zakat history + your snapshots · ★ all-time high</div></div>
+      <div><h3>Net Worth Trend</h3><div class="chart-sub">Backfilled from Zakat history + your snapshots · <svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg> all-time high</div></div>
       <div class="seg" id="trendSeg" role="group" aria-label="Trend period">
         <button data-r="1y">1Y</button><button data-r="3y">3Y</button><button data-r="all" class="active">All</button>
       </div>
@@ -1028,7 +1042,7 @@ html:not(.dark) .bud-income td:first-child input{color:#1E915F}
   <div class="section-head"><h2>Net Worth Snapshots</h2>
     <button class="btn peach" onclick="takeSnapshot()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-inline-end:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot today</button></div>
   <div class="miles" id="milestones"></div>
-  <div class="card chart-card" style="margin-bottom:18px"><h3>Net Worth Trend</h3><div class="chart-sub">Every saved point in time · ★ all-time high</div><canvas id="trendChart2"></canvas></div>
+  <div class="card chart-card" style="margin-bottom:18px"><h3>Net Worth Trend</h3><div class="chart-sub">Every saved point in time · <svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg> all-time high</div><canvas id="trendChart2"></canvas></div>
   <div class="card"><table id="snapTable">
     <thead><tr><th>Date</th><th class="num">Net Worth</th><th class="num">Cash</th><th class="num">Investment</th><th class="num">Portfolio</th><th class="num">Assets</th><th>Source</th><th></th></tr></thead><tbody></tbody>
   </table></div>
@@ -1455,7 +1469,7 @@ function trendCfg(){
       pointBorderColor:vals.map((_,i)=>i===athIdx?"#fff":"rgba(255,255,255,.8)"),
       pointBorderWidth:vals.map((_,i)=>i===athIdx?2:1)}]},
     options:{plugins:{legend:{display:false},tooltip:{callbacks:{
-      label:c=>" "+sar(c.parsed.y)+(c.dataIndex===athIdx?" ★ All-time high":"")}}},
+      label:c=>" "+sar(c.parsed.y)+(c.dataIndex===athIdx?" \u00b7 All-time high":"")}}},
       scales:{y:{ticks:{callback:v=>fmt(v/1000)+"k"}}}}};
 }
 function sparkCfg(values, color, fill){
@@ -1552,19 +1566,19 @@ function computeInsights(){
       html:`Net worth <b>${d>=0?"up":"down"} ${sar(Math.abs(d))}</b> (${pct(Math.abs(d/prev.value))}) since ${prev.date}.`});
   }
   const maxSnap = Math.max(...data.snapshots.map(s=>s.value), 0);
-  if(t.net > maxSnap && maxSnap > 0) list.push({id:"ath", tone:"good", ico:"★",
+  if(t.net > maxSnap && maxSnap > 0) list.push({id:"ath", tone:"good", ico:`<svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg>`,
     html:`<b>New all-time high.</b> You've passed your previous record of ${sar(maxSnap)}.`,
-    act:{label:"Snapshot it", fn:"takeSnapshot()"}});
+    act:{label:'Snapshot it', fn:'takeSnapshot()'}});
   data.roi.forEach((r,i)=>{
     if(!r.end) return;
     const days = Math.ceil((new Date(r.end)-now)/864e5);
-    if(days>0 && days<=60) list.push({id:"roi"+i, tone:"info", ico:"⏳",
+    if(days>0 && days<=60) list.push({id:'roi'+i, tone:'info', ico:'⏳',
       html:`<b>${esc(r.name)}</b> matures in <b>${days} days</b> (${r.end}).`});
   });
   const lastSnap = [...data.snapshots].sort((a,b)=>a.date.localeCompare(b.date)).pop();
   if(lastSnap){
     const days = Math.floor((now-new Date(lastSnap.date))/864e5);
-    if(days>=14) list.push({id:"stale", tone:"info", ico:"📷",
+    if(days>=14) list.push({id:'stale', tone:'info', ico:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;display:inline-block"><path d="M3 8.5A2 2 0 0 1 5 6.5h1.7l1-1.7h6.6l1 1.7H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.2"/></svg>`,
       html:`Last snapshot was <b>${days} days ago</b> — capture today to keep your trend fresh.`,
       act:{label:"Snapshot today", fn:"takeSnapshot()"}});
   }
@@ -1572,7 +1586,7 @@ function computeInsights(){
   if(t.net && goldVal/t.net > 0.5) list.push({id:"gold", tone:"warn", ico:"◆",
     html:`<b>${fmt(goldVal/t.net*100)}%</b> of your net worth is in gold — strong conviction, concentrated risk.`});
   const z = nextZaka();
-  if(z && z.days<=120) list.push({id:"zaka", tone:"info", ico:"☪",
+  if(z && z.days<=120) list.push({id:"zaka", tone:"info", ico:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;display:inline-block"><path d="M16.5 4.5a8 8 0 1 0 0 15 6.5 6.5 0 1 1 0-15Z"/></svg>`,
     html:`Next zaka in about <b>${z.days} days</b> — projected ${sar(t.net*0.025)} at today's net worth.`});
   return list.filter(i=>!(data.dismissed||{})[i.id]).slice(0,3);
 }
@@ -1652,7 +1666,7 @@ function renderKPIs(){
   } else dEl.style.display = "none";
 
   const badges = [];
-  badges.push(saveRate>=0.3 ? `<span class="badge good">✦ Strong ${fmt(saveRate*100)}% savings rate</span>`
+  badges.push(saveRate>=0.3 ? `<span class="badge good"><svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="M12 2l2 8 8 2-8 2-2 8-2-8-8-2 8-2z"/></svg> Strong ${fmt(saveRate*100)}% savings rate</span>`
                             : `<span class="badge">Savings rate ${fmt(saveRate*100)}%</span>`);
   if(goldPct>0.5) badges.push(`<span class="badge warn">◆ ${fmt(goldPct*100)}% concentrated in gold</span>`);
   badges.push(t.pl>=0 ? `<span class="badge good">▲ Portfolio up ${pct(t.cost? t.pl/t.cost:0)}</span>`
@@ -1802,7 +1816,7 @@ function renderHoldings(){
     <td class="num ${h.pl>=0?"pos":"neg"}">${h.pl>=0?"+":""}${fmt(h.pl)}</td>
     <td class="num ${h.pl>=0?"pos":"neg"}">${pct(h.plPct)}</td></tr>`;
   }).join("")
-    || `<tr><td colspan="10"><div class="empty"><div class="glyph">🪙</div><p>No holdings yet — your portfolio builds itself from recorded purchases.</p><button class="btn" onclick="goTab('purchases')">Record first purchase</button></div></td></tr>`;
+    || `<tr><td colspan="10"><div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:34px;height:34px"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.5 10h5M9.5 14h5"/></svg></div><p>No holdings yet — your portfolio builds itself from recorded purchases.</p><button class="btn" onclick="goTab('purchases')">Record first purchase</button></div></td></tr>`;
   const t = totals();
   document.getElementById("holdValTotal").textContent = fmt(t.inv);
   document.getElementById("holdCostTotal").textContent = fmt(t.cost);
@@ -1819,7 +1833,7 @@ function renderHoldings(){
     luEl.title = d.toLocaleString();
   } else { luEl.textContent = "Prices not updated yet"; luEl.title = ""; }
   document.getElementById("watchChips").innerHTML = data.watchlist.map((w,i)=>
-    `<span class="chip">${esc(w)}<button onclick="delWatch(${i})" aria-label="Remove from watchlist">✕</button></span>`).join("") || '<span class="note">Empty watchlist</span>';
+    `<span class="chip">${esc(w)}<button onclick="delWatch(${i})" aria-label="Remove from watchlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`).join("") || '<span class="note">Empty watchlist</span>';
 }
 function updMeta(item,field,val){
   if(!data.meta[item]) data.meta[item]={assetType:"Stock",price:0};
@@ -1844,8 +1858,8 @@ function renderPurchases(){
     <td class="num">${fmt((p.qty||0)*(p.unit||0))}</td>
     <td><select onchange="upd('purchases',${i},'status',this.value)" aria-label="Status">
       ${["Owned","Sold"].map(s=>`<option ${s===p.status?"selected":""}>${s}</option>`).join("")}</select></td>
-    <td><button class="btn danger" onclick="del('purchases',${i})" aria-label="Delete purchase">✕</button></td></tr>`).join("")
-    || `<tr><td colspan="8"><div class="empty"><div class="glyph">🛒</div><p>No purchases recorded yet — every lot you add here flows straight into your portfolio.</p><button class="btn" onclick="addPurchase()">Add first purchase</button></div></td></tr>`;
+    <td><button class="btn danger" onclick="del('purchases',${i})" aria-label="Delete purchase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`).join("")
+    || `<tr><td colspan="8"><div class="empty"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:34px;height:34px"><path d="M3 4h2.2l2 11h10l2-8H7"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg></div><p>No purchases recorded yet — every lot you add here flows straight into your portfolio.</p><button class="btn" onclick="addPurchase()">Add first purchase</button></div></td></tr>`;
   document.getElementById("purchTotal").textContent = fmt(data.purchases.filter(p=>p.status==="Owned").reduce((s,p)=>s+(p.qty||0)*(p.unit||0),0));
 }
 function addPurchase(){
@@ -1941,7 +1955,7 @@ function _budgetTableLegacy(month,act){ return data.plan.map((p,i)=>{
       <td class="num"><input type="number" step="0.01" value="${p.amt}" onchange="upd('plan',${i},'amt',+this.value)" aria-label="Planned"></td>
       <td class="num"><input type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${isInc?fmt(p.amt):"0"}" onchange="setActual('${month}','${esc(p.cat)}',this.value)" aria-label="Actual for ${month}"></td>
       <td class="num ${d>=0?"pos":"neg"}">${d>=0?"+":""}${fmt(d)}</td>
-      <td><button class="btn danger" onclick="del('plan',${i})" aria-label="Delete item">✕</button></td></tr>`;
+      <td><button class="btn danger" onclick="del('plan',${i})" aria-label="Delete item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`;
   }).join("");
 }
 function setActual(month,cat,val){ if(!data.actuals[month]) data.actuals[month]={}; if(val===""||val===undefined||val===null) delete data.actuals[month][cat]; else data.actuals[month][cat]=+val; save(); render(); }
@@ -1992,7 +2006,7 @@ function renderRoi(){
     <td class="num"><input type="number" step="0.01" value="${r.profit}" onchange="upd('roi',${i},'profit',+this.value)" aria-label="Profit"></td>
     <td class="num ${p>=0?"pos":"neg"}">${pct(p)}</td>
     <td><input value="${esc(r.notes||"")}" onchange="upd('roi',${i},'notes',this.value)" aria-label="Notes"></td>
-    <td><button class="btn danger" onclick="del('roi',${i})" aria-label="Delete entry">✕</button></td></tr>`;
+    <td><button class="btn danger" onclick="del('roi',${i})" aria-label="Delete entry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`;
   }).join("");
   const amt = data.roi.reduce((s,r)=>s+(+r.amount||0),0);
   const prof = data.roi.reduce((s,r)=>s+(+r.profit||0),0);
@@ -2013,7 +2027,7 @@ function renderAssetsInv(){
     <td class="num"><input type="number" step="0.01" value="${a.selling}" onchange="upd('assetsInv',${i},'selling',+this.value)" aria-label="Selling price"></td>
     <td><input type="checkbox" ${a.sold?"checked":""} onchange="upd('assetsInv',${i},'sold',this.checked)" aria-label="Sold"></td>
     <td>${a.sold?`<input type="date" value="${a.soldDate||''}" onchange="upd('assetsInv',${i},'soldDate',this.value)" aria-label="Date of sale">`:""}</td>
-    <td><button class="btn danger" onclick="del('assetsInv',${i})" aria-label="Delete asset">✕</button></td></tr>`).join("");
+    <td><button class="btn danger" onclick="del('assetsInv',${i})" aria-label="Delete asset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`).join("");
   const cost = data.assetsInv.reduce((s,a)=>s+(+a.cost||0),0);
   const sell = data.assetsInv.reduce((s,a)=>s+(+a.selling||0),0);
   document.getElementById("assetCostTotal").textContent = fmt(cost);
@@ -2043,7 +2057,7 @@ function renderZaka(){
     <td class="num"><input type="number" step="0.01" value="${x.paid}" onchange="upd('zaka',${i},'paid',+this.value)" aria-label="Zakat paid"></td>
     <td class="num">${fmt((x.before||0)*0.025)}</td>
     <td class="num">${fmt((x.before||0)-(x.paid||0))}</td>
-    <td><button class="btn danger" onclick="del('zaka',${i})" aria-label="Delete year">✕</button></td></tr>`).join("");
+    <td><button class="btn danger" onclick="del('zaka',${i})" aria-label="Delete year"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`).join("");
 }
 function addZaka(){ data.zaka.push({year:String(new Date().getFullYear()),dateG:"",dateH:"",before:totals().net,paid:0,_id:uid(),_u:Date.now()}); save(); render(); }
 
@@ -2055,21 +2069,21 @@ function renderSnapshots(){
   const dash = v => (v==null)?'<span style="opacity:.4">—</span>':sar(v);
   document.querySelector("#snapTable tbody").innerHTML = snaps.map(s=>{
     const i = data.snapshots.indexOf(s);
-    return `<tr><td>${s.date} ${s===ath?'<span class="pill" style="background:rgba(212,161,30,.15);color:#A87F12">★ All-time high</span>':""}</td>
+    return `<tr><td>${s.date} ${s===ath?'<span class="pill" style="background:rgba(212,161,30,.15);color:#A87F12"><svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg> All-time high</span>':""}</td>
     <td class="num">${sar(s.value)}</td>
     <td class="num">${dash(s.cash)}</td>
     <td class="num">${dash(s.investmentAccounts)}</td>
     <td class="num">${dash(s.portfolioValue)}</td>
     <td class="num">${dash(s.assetsValue)}</td>
     <td><span class="pill">${esc(s.source||"")}</span></td>
-    <td><button class="btn danger" onclick="del('snapshots',${i})" aria-label="Delete snapshot">✕</button></td></tr>`;
+    <td><button class="btn danger" onclick="del('snapshots',${i})" aria-label="Delete snapshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`;
   }).join("");
 
   const steps = [50000,100000,150000,200000,250000,300000,400000,500000,750000,1000000];
   const out = [];
   steps.forEach(s=>{
     const hit = sorted.find(x=>x.value>=s);
-    if(hit) out.push(`<span class="mile">🏁 ${s/1000}k <span>· ${hit.date}</span></span>`);
+    if(hit) out.push(`<span class="mile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px;display:inline-block"><path d="M5 21V4M5 5h9l-1.5 3L14 11H5"/></svg> ${s/1000}k <span>· ${hit.date}</span></span>`);
   });
   if(ath && ath.value) out.push(`<span class="mile">⭐ All-time high ${sar(ath.value)} <span>· ${ath.date}</span></span>`);
   document.getElementById("milestones").innerHTML = out.join("");
@@ -2100,7 +2114,7 @@ function takeSnapshot(){
   save(true);
   if(user && typeof pushCloud==="function"){ try{ pushCloud(); }catch(e){} }
   render();
-  toast(exists ? "📸 Today's snapshot updated" : (wasATH ? "📸 Snapshot saved — new all-time high! 🎉" : "📸 Snapshot saved"));
+  toast(exists ? "Today's snapshot updated" : (wasATH ? "Snapshot saved — new all-time high" : "Snapshot saved"));
 }
 
 /* ---------- Shared: edit, delete + undo ---------- */
@@ -2162,7 +2176,7 @@ let user = null, sbTimer = null;
 
 function setSyncState(s){
   const el = document.getElementById("syncStatus"); if(!el) return;
-  const map = {off:"", busy:"☁ syncing…", synced:"☁ synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}), error:"☁ sync error"};
+  const map = {off:"", busy:"Syncing…", synced:"Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}), error:"Sync error"};
   el.textContent = map[s]||"";
   el.style.color = s==="error" ? "var(--red)" : "";
 }
@@ -2171,7 +2185,7 @@ let _syncWarned=false;
 function _syncFail(e){
   console.error("Cloud sync failed:", (e&&e.message)||e, e);
   setSyncState("error");
-  if(!_syncWarned){ _syncWarned=true; toast("⚠ Couldn't sync to your account — saved on this device only. Check your Supabase setup."); }
+  if(!_syncWarned){ _syncWarned=true; toast("Couldn't sync to your account — saved on this device only. Check your Supabase setup."); }
 }
 async function pushCloud(){
   if(!user) return;
@@ -2311,7 +2325,7 @@ async function saveNewPassword(){
   if(!p || p.length < 6) return toast("Password must be at least 6 characters");
   closeModal();
   const {error} = await supa.auth.updateUser({password:p});
-  toast(error ? "Couldn't update password: "+error.message : "Password updated ✓");
+  toast(error ? "Couldn't update password: "+error.message : "Password updated");
 }
 function updateAcctBtn(){
   const b = document.getElementById("acctBtn"); if(b) b.textContent = user ? (user.email||"Account").split("@")[0] : "Account";
@@ -2369,7 +2383,7 @@ async function initAuth(){
       closeAuth();
       try{ const c = localStorage.getItem(KEY+":"+u.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
       pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
-      toast("Welcome back ✓");
+      toast("Welcome back");
     }
     if(signedOut){
       setSyncState("off");
