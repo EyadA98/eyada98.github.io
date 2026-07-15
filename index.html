@@ -1779,10 +1779,15 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
 .sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 /* summary counts are display numerals — Marcellus, with tabular figures so columns align */
 .sum-card .sc-n{font-family:'Marcellus',Georgia,serif!important;font-weight:400;letter-spacing:.01em}
-/* the sticky top bar already states the page name — an H2 repeating it is redundant */
+/* ===== the sticky top bar already states the page name =====
+   The H2 repeating it is redundant. It appears BOTH as a direct child of .section-head
+   and wrapped in a <div>, so both shapes must be covered. */
+.tab .section-head>h2,
 .tab .section-head>div>h2{display:none}
-.tab .section-head{min-height:0}
-@media(max-width:1024px){ .tab .section-head>div>h2{display:none} }
+.tab .section-head{min-height:0;margin:0 0 12px}
+/* a row that held nothing but the heading collapses entirely */
+.tab .section-head:has(>div:only-child:empty),
+.tab .section-head:not(:has(button)):not(:has(input)):not(:has(select)):not(:has(a)){display:none}
 /* ===== tall modals on a short screen =====
    The overlay centred its child with place-items:center. A modal taller than the viewport
    then overflowed EQUALLY above and below — its top slid under the browser chrome and
