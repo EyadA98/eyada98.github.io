@@ -1777,7 +1777,29 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
 }
 /* counts read as numbers, not as display glyphs */
 .sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.sum-card .sc-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.01em}
+/* summary counts are display numerals — Marcellus, with tabular figures so columns align */
+.sum-card .sc-n{font-family:'Marcellus',Georgia,serif!important;font-weight:400;letter-spacing:.01em}
+/* the sticky top bar already states the page name — an H2 repeating it is redundant */
+.tab .section-head>div>h2{display:none}
+.tab .section-head{min-height:0}
+@media(max-width:1024px){ .tab .section-head>div>h2{display:none} }
+/* ===== tall modals on a short screen =====
+   The overlay centred its child with place-items:center. A modal taller than the viewport
+   then overflowed EQUALLY above and below — its top slid under the browser chrome and
+   could not be scrolled to. Now the overlay itself scrolls and the modal aligns to the top
+   once it stops fitting. */
+@media(max-height:900px){
+  .overlay{place-items:start center;overflow-y:auto;overscroll-behavior:contain;
+    padding:16px 14px calc(16px + env(safe-area-inset-bottom))}
+  .overlay .modal{margin:auto 0;max-height:none}
+}
+@media(max-width:768px){
+  .overlay{place-items:start center;overflow-y:auto;overscroll-behavior:contain;
+    padding:12px 12px calc(96px + env(safe-area-inset-bottom))}   /* clears the bottom tab bar */
+  .overlay .modal{max-height:none;margin:0}
+  .overlay.side{padding:0}
+  .modal.side{max-height:100dvh}
+}
 /* ===== sticky notes ===== */
 .sticky{position:relative;display:flex;flex-direction:column;min-height:228px;height:100%;padding:16px;cursor:pointer;
   border-radius:4px 16px 4px 4px;color:var(--nink);
