@@ -702,6 +702,12 @@ html:not(.dark) .tdp-head .btn.soft{background:rgba(138,100,200,.1);border:1px s
    declared nothing and fell through to the browser default. Three sizes and a default,
    stacked directly on top of one another. ── */
 .tdp-row{--val-fs:.82rem}
+/* On a phone the tags box is forced to 16px — iOS zooms the page on any input under
+   16px and never zooms back. "Set dates" is a span, so it kept 13.1px and the two rows
+   disagreed. Nothing can shrink the input without bringing the zoom bug back, so the
+   row matches UP: every value becomes 16px below 1024px, exactly what the input already
+   is. Same size, nothing jumps when you type, and every value is easier to tap. */
+@media(max-width:1024px){ .tdp-row{--val-fs:16px} }
 .tdp-row .cs-btn,
 .tdp-row .tdp-chip-in,
 .tdp-row .tdd-ph,
