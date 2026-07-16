@@ -696,6 +696,22 @@ html:not(.dark) .tdp-head .btn.soft{background:rgba(138,100,200,.1);border:1px s
 .tdp-asgfield,.tdp-datefield{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:var(--text);font:inherit;font-size:.9rem;text-align:left;padding:6px 6px 6px 2px;border-radius:8px;cursor:pointer;transition:background .16s}
 .tdp-asgfield:hover,.tdp-datefield:hover{background:rgba(255,255,255,.05)}
 .tdp-asg-ph,.tdd-ph{color:var(--muted)}
+/* ── ONE VALUE SIZE. Every row in the task panel states the same kind of thing, but each
+   was sized by whoever built that row: .cs-btn declared .80rem, .tdp-chip-in .82rem,
+   .tdd-ph declared nothing and inherited .9rem from .tdp-datefield, and .tdp-asg-ph
+   declared nothing and fell through to the browser default. Three sizes and a default,
+   stacked directly on top of one another. ── */
+.tdp-row{--val-fs:.82rem}
+.tdp-row .cs-btn,
+.tdp-row .tdp-chip-in,
+.tdp-row .tdd-ph,
+.tdp-row .tdd-v,
+.tdp-row .tdd-t,
+.tdp-row .tdd-sep,
+.tdp-row .tdd-arr,
+.tdp-row .tdp-asg-ph,
+.tdp-row .tdp-asg-n,
+.tdp-row .tdp-datefield{font-size:var(--val-fs)}
 .tdp-av-empty{background:none;border:1.5px dashed var(--border);color:var(--muted)}
 .tdp-asg-n{display:flex;align-items:baseline;gap:7px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .tdp-asg-e,.asg-em{color:var(--muted);font-size:.8rem;font-weight:500}
