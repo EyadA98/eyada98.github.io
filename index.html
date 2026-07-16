@@ -3841,9 +3841,15 @@ function digestData(){
   var we=new Date(); we.setDate(we.getDate()+7); var weekEnd=isoLocal(we);
   var today=[], week=[], overdue=[];
   function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
+  /* Only tasks and subtasks belong to a workspace — events come from Google and routines
+     are global. Mirrors supabase/functions/daily-digest/index.ts exactly, because this
+     builder feeds the preview and the test email; if the two drift, the preview lies. */
+  var _WS={}; (data.workspaces||[]).forEach(function(w){ if(w&&w.id) _WS[w.id]={name:w.name||"",color:w.color||"#8a64c8"}; });
+  function _wsOf(id){ return (id&&_WS[id]&&_WS[id].name)?_WS[id]:null; }
   (data.tasks||[]).forEach(function(x){
-    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||""});
-    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||""}); });
+    var _w=_wsOf(x.ws);
+    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||"",ws:_w?_w.name:"",wsColor:_w?_w.color:""});
+    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||"",ws:_w?_w.name:"",wsColor:_w?_w.color:""}); });
   });
   (Array.isArray(calEvents)?calEvents:[]).forEach(function(e){
     var w=(e.start&&(e.start.dateTime||e.start.date))||""; if(!w) return;
@@ -3893,12 +3899,11 @@ function buildDigest(){
   }
   function row(it,mode){
     var p=PILL[it.kind]||PILL.task, isSub=(it.kind==="sub");
-    var tcol=mode==="over"?RED:(isSub?SOFT:"#4a4066"), tw=mode==="over"?800:(isSub?500:700);
+    var tcol=mode==="over"?RED:"#4a4066", tw=mode==="over"?800:700;
     return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
      +'<td width="60" valign="middle" style="width:60px"><div style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
-     +'<td width="15" valign="middle" style="width:15px;padding-left:12px;font:400 12px '+F+';color:#b6a6e0;line-height:1">'+(isSub?"&#8627;":"")+'</td>'
-     +'<td valign="middle" style="font:'+(isSub?"400 12.5px":"700 13px")+' '+F+';color:'+(isSub?"#5f5480":INK)+'">'+esc(it.title)+'</td>'
+     +'<td valign="middle" style="padding-left:14px;font:700 13px '+F+';color:'+INK+'">'+esc(it.title)+(it.ws?('<span style="white-space:nowrap"><span style="display:inline-block;width:5px;height:5px;border-radius:99px;background:'+esc(it.wsColor||"#8a64c8")+';margin:0 5px 0 8px;vertical-align:middle"></span><span style="font:600 11px '+F+';color:#4a4066;vertical-align:middle">'+esc(it.ws)+'</span></span>'):'')+'</td>'
      +'<td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
      +'</tr></table></td></tr>';
   }
