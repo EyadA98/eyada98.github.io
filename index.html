@@ -2634,9 +2634,9 @@ main{padding-top:32px!important}
       <button class="btn soft" onclick="notifMarkAllRead()">Mark all read</button>
       <button class="btn soft" onclick="openNotifSettings()">Reminders</button>
       <span class="tvsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="fld" id="ntfSearch" placeholder="Search reminders…" oninput="renderNotifs()"></span>
-      <select class="fld bare" id="ntfSource" style="max-width:150px" onchange="renderNotifs()"><option value="">All sources</option><option value="task">Tasks</option><option value="routine">Routines</option><option value="event">Calendar</option><option value="finance">Finance</option><option value="travel">Travel</option></select>
-      <select class="fld bare" id="ntfStatus" style="max-width:150px" onchange="renderNotifs()"><option value="active">Active</option><option value="all">All</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="pinned">Pinned</option><option value="snoozed">Snoozed</option></select>
-      <select class="fld bare" id="ntfPrio" style="max-width:140px" onchange="renderNotifs()"><option value="">Any priority</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
+      <select class="fld bare" aria-label="Filter reminders by source" id="ntfSource" style="max-width:150px" onchange="renderNotifs()"><option value="">All sources</option><option value="task">Tasks</option><option value="routine">Routines</option><option value="event">Calendar</option><option value="finance">Finance</option><option value="travel">Travel</option></select>
+      <select class="fld bare" aria-label="Filter reminders by status" id="ntfStatus" style="max-width:150px" onchange="renderNotifs()"><option value="active">Active</option><option value="all">All</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="pinned">Pinned</option><option value="snoozed">Snoozed</option></select>
+      <select class="fld bare" aria-label="Filter reminders by priority" id="ntfPrio" style="max-width:140px" onchange="renderNotifs()"><option value="">Any priority</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
     </div>
   </div>
   <div id="ntfSummary" class="ntf-summary"></div>
@@ -2650,9 +2650,9 @@ main{padding-top:32px!important}
     <div class="pg-scroll">
       <span id="rtCats" class="rt-cats"></span>
       <span class="tvsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="fld" id="rtSearch" placeholder="Search routines…" oninput="renderRoutines()"></span>
-      <select class="fld bare" id="rtStatus" style="max-width:150px" onchange="renderRoutines()"><option value="">All statuses</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="upcoming">Upcoming</option><option value="done">Done recently</option></select>
-      <select class="fld bare" id="rtPrio" style="max-width:140px" onchange="renderRoutines()"><option value="">Any priority</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
-      <select class="fld bare" id="rtSort" style="max-width:150px" onchange="renderRoutines()"><option value="due">Next due</option><option value="title">Title</option><option value="recent">Recently done</option></select>
+      <select class="fld bare" aria-label="Filter routines by status" id="rtStatus" style="max-width:150px" onchange="renderRoutines()"><option value="">All statuses</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="upcoming">Upcoming</option><option value="done">Done recently</option></select>
+      <select class="fld bare" aria-label="Filter routines by priority" id="rtPrio" style="max-width:140px" onchange="renderRoutines()"><option value="">Any priority</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
+      <select class="fld bare" aria-label="Sort routines" id="rtSort" style="max-width:150px" onchange="renderRoutines()"><option value="due">Next due</option><option value="title">Title</option><option value="recent">Recently done</option></select>
     </div>
     <button class="btn soft" onclick="openRtCats()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="3" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2.2"/><path d="M17.25 14.4v5.7M14.4 17.25h5.7"/></svg>Manage</button>
     <button class="btn" onclick="openRoutine()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:15px;height:15px"><path d="M12 5v14M5 12h14"/></svg>New routine</button>
@@ -2672,8 +2672,8 @@ main{padding-top:32px!important}
       </div>
       <button class="btn soft" onclick="openStatuses()" aria-label="Manage statuses">Statuses</button>
       <span class="tvsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="fld" id="taskSearch" placeholder="Search&hellip;" oninput="renderTasks()"></span>
-      <select class="fld bare" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option><option value="none">No priority</option></select>
-      <select class="fld bare" id="taskSort" style="max-width:160px" onchange="renderTasks()"><option value="manual">Manual order</option><option value="priority">Priority</option><option value="due">Due date</option><option value="updated">Recently updated</option></select>
+      <select class="fld bare" aria-label="Filter tasks by priority" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option><option value="none">No priority</option></select>
+      <select class="fld bare" aria-label="Sort tasks" id="taskSort" style="max-width:160px" onchange="renderTasks()"><option value="manual">Manual order</option><option value="priority">Priority</option><option value="due">Due date</option><option value="updated">Recently updated</option></select>
     </div>
   </div>
   <div id="taskViewBody"></div>
