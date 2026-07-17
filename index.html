@@ -4323,9 +4323,12 @@ function mmImport(ev){ var f=ev.target.files[0]; if(!f)return; var r=new FileRea
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function hijri(d){ try{ var x=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d); return /AH/i.test(x)?x:(x+" AH"); }catch(e){ return ""; } }
 
+/* One rule for what time of day it is, so the words, the sub-label and the hero
+   backdrop can never disagree: 4am-12pm morning, 12pm-6pm afternoon, 6pm-4am evening. */
+function dayPart(h){ return (h>=4&&h<12)?"morning":(h>=12&&h<18)?"afternoon":"evening"; }
 function renderHome(){
   const now=new Date(), h=now.getHours();
-  var slot=(h>=4&&h<11)?"morning":(h>=11&&h<17)?"afternoon":"evening";
+  var slot=dayPart(h);
   const greet=slot==="morning"?"Good morning":slot==="afternoon"?"Good afternoon":"Good evening";
   var gl=document.getElementById("greetLine"); if(gl) gl.textContent=greet;
   var ps=document.getElementById("periodSub"); if(ps) ps.textContent=slot.charAt(0).toUpperCase()+slot.slice(1);
