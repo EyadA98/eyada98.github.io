@@ -1715,6 +1715,11 @@ html:not(.dark) .rt-checkcard{background:rgba(255,255,255,.5)}
   letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .to-ghead:first-child{padding-top:4px}
 .to-gdot{width:7px;height:7px;border-radius:50%;background:var(--wsc,var(--lavender));flex:none}
+/* The priority chip lines up with the workspace NAME, not its dot. That offset is the dot
+   plus the header gap -- if either changes, this token is the one place to change. Only
+   applied when a header actually rendered: with one workspace there is no header to align to. */
+.to-list{--to-gind:14px}   /* .to-gdot width 7 + .to-ghead gap 7 */
+.to-list.to-grouped .to-row{padding-left:calc(var(--to-gind) + 8px)}   /* +8 cancels .to-row margin:0 -8px */
 /* widget rows: the workspace chip and the priority chip are the SAME box */
 .to-row{align-items:center}
 .to-row .pflag{height:20px;display:inline-flex;align-items:center;justify-content:center;
@@ -6859,7 +6864,8 @@ function renderTasksOverview(){
   var arr=map[toTab]||[];
   var empties={overdue:"Nothing overdue &mdash; nicely done.",today:"Nothing due today &mdash; you&rsquo;re all caught up.",week:"Nothing due this week."};
   var list=arr.length?toGrouped(arr):'<div class="muted" style="font-size:.86rem;padding:14px 2px">'+empties[toTab]+'</div>';
-  el.innerHTML=bar+'<div class="to-list">'+list+'</div>';
+  var _grouped=/to-ghead/.test(list);   /* headings only render with 2+ workspaces */
+  el.innerHTML=bar+'<div class="to-list'+(_grouped?' to-grouped':'')+'">'+list+'</div>';
 }
 function renderRecentNotes(){
   var el=document.getElementById("rnBody"); if(!el) return;
