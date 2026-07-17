@@ -1462,7 +1462,7 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .to-row:last-child{border-bottom:none}
 .to-row:hover .to-title{color:var(--lavender)}
 .to-tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:13px;padding:4px;margin-bottom:12px}
-.to-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.76rem;padding:7px 6px;border-radius:9px;cursor:pointer;transition:all .18s var(--ease);white-space:nowrap}
+.to-tab{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.76rem;padding:7px 6px;border-radius:9px;cursor:pointer;transition:all .18s var(--ease);white-space:nowrap}
 .to-tab:hover{color:var(--text)}
 .to-tab.on{background:var(--grad-iri);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 12px rgba(138,100,200,.3);border-color:#a081d6}
 .to-tab .to-cnt{background:rgba(138,100,200,.18);color:var(--lavender);border-radius:99px;padding:0 7px;font-size:.66rem;font-weight:800;min-width:18px;text-align:center}
@@ -1470,6 +1470,12 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .to-tab.to-over.on{background:linear-gradient(120deg,#d6554c,#e8836b);border-color:#e8836b}
 .to-tab.to-over .to-cnt{background:rgba(214,85,76,.16);color:var(--red)}
 .to-tab.to-over.on .to-cnt{background:rgba(255,255,255,.26);color:#fff}
+/* Four tabs, not three. The bar is nowrap inside #toBody{overflow-x:hidden!important},
+   so anything too wide is clipped silently rather than wrapped -- tighten instead. */
+@media(max-width:600px){
+  .to-tab{font-size:.7rem;padding:7px 4px;gap:4px}
+  .to-tab .to-cnt{min-width:16px;padding:0 5px;font-size:.6rem}
+}
 .to-ws{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:800;letter-spacing:.04em;
   text-transform:uppercase;padding:2px 8px;border-radius:5px;line-height:1.5;
   background:color-mix(in srgb, var(--wsc,#8a64c8) 16%, transparent);color:var(--wsc,var(--lavender));max-width:104px}
@@ -1719,7 +1725,10 @@ html:not(.dark) .rt-checkcard{background:rgba(255,255,255,.5)}
    plus the header gap -- if either changes, this token is the one place to change. Only
    applied when a header actually rendered: with one workspace there is no header to align to. */
 .to-list{--to-gind:14px}   /* .to-gdot width 7 + .to-ghead gap 7 */
-.to-list.to-grouped .to-row{padding-left:calc(var(--to-gind) + 8px)}   /* +8 cancels .to-row margin:0 -8px */
+/* Straight 14px, NOT 14+8. .to-row declares margin:0 -8px, but a later !important rule
+   (.to-row,.rn-row{margin-left:0!important}) zeroes it, so there is no negative margin to
+   cancel -- the row already starts at its own padding edge. */
+.to-list.to-grouped .to-row{padding-left:var(--to-gind)}
 /* widget rows: the workspace chip and the priority chip are the SAME box */
 .to-row{align-items:center}
 .to-row .pflag{height:20px;display:inline-flex;align-items:center;justify-content:center;
@@ -6853,16 +6862,25 @@ function renderTasksOverview(){
   var t=isoLocal(new Date());
   var wk=new Date(); wk.setDate(wk.getDate()+(6-wk.getDay())); var weekEnd=isoLocal(wk);
   var open=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});
-  (data.tasks||[]).forEach(function(pt){ (pt.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) open.push({_sub:true,pid:pt.id,sid:sb.id,id:pt.id,t:sb.t||"Subtask",due:sb.due,time:sb.time||"",priority:sb.priority||pt.priority||"med"}); }); });
+  (data.tasks||[]).forEach(function(pt){ (pt.subs||[]).forEach(function(sb){ if(!sb.done) open.push({_sub:true,pid:pt.id,sid:sb.id,id:pt.id,t:sb.t||"Subtask",due:sb.due||"",time:sb.time||"",priority:sb.priority||pt.priority||"med"}); }); });   /* was `&&sb.due` — an undated subtask still exists, and All must show it */
   var today=open.filter(function(x){return x.due&&x.due===t;});
   var overdue=open.filter(function(x){return x.due&&x.due<t;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
   var week=open.filter(function(x){return x.due&&x.due>t&&x.due<=weekEnd;}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
-  var map={overdue:overdue,today:today,week:week};
-  if(!map[toTab]) toTab="today";
-  var tabs=[["overdue","Overdue",overdue.length,"to-over"],["today","Due today",today.length,""],["week","Due this week",week.length,""]];
+  /* All = every open task, dated or not. Undated sink to the bottom: a task with no date
+     cannot be sorted against one that has one, and guessing a date would be a lie. */
+  var all=open.slice().sort(function(a,b){
+    var ad=a.due||"", bd=b.due||"";
+    if(ad&&bd) return ad.localeCompare(bd)||(a.time||"zz").localeCompare(b.time||"zz");
+    if(ad) return -1;
+    if(bd) return 1;
+    return (a.t||"").localeCompare(b.t||"");
+  });
+  var map={all:all,overdue:overdue,today:today,week:week};
+  if(!map[toTab]) toTab="today";   /* Today is the default every sign-in: toTab is never persisted */
+  var tabs=[["all","All",all.length,""],["overdue","Overdue",overdue.length,"to-over"],["today","Today",today.length,""],["week","This week",week.length,""]];
   var bar='<div class="to-tabs">'+tabs.map(function(tb){ return '<button class="to-tab '+tb[3]+(toTab===tb[0]?" on":"")+'" onclick="setToTab(\''+tb[0]+'\')">'+tb[1]+'<span class="to-cnt">'+tb[2]+'</span></button>'; }).join("")+'</div>';
   var arr=map[toTab]||[];
-  var empties={overdue:"Nothing overdue &mdash; nicely done.",today:"Nothing due today &mdash; you&rsquo;re all caught up.",week:"Nothing due this week."};
+  var empties={all:"No open tasks &mdash; add one below.",overdue:"Nothing overdue &mdash; nicely done.",today:"Nothing due today &mdash; you&rsquo;re all caught up.",week:"Nothing due this week."};
   var list=arr.length?toGrouped(arr):'<div class="muted" style="font-size:.86rem;padding:14px 2px">'+empties[toTab]+'</div>';
   var _grouped=/to-ghead/.test(list);   /* headings only render with 2+ workspaces */
   el.innerHTML=bar+'<div class="to-list'+(_grouped?' to-grouped':'')+'">'+list+'</div>';
