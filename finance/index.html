@@ -1701,11 +1701,18 @@ function renderInsights(){
 function dismissInsight(id){ (data.dismissed = data.dismissed||{})[id] = true; save(true); render(); }
 
 /* ---------- Welcome experience ---------- */
+/* One rule for what time of day it is, so the words, the sub-label and the hero
+   backdrop can never disagree: 4am-12pm morning, 12pm-6pm afternoon, 6pm-4am evening. */
+function dayPart(h){ return (h>=4&&h<12)?"morning":(h>=12&&h<18)?"afternoon":"evening"; }
 function renderGreeting(){
   const h = new Date().getHours();
-  const g = h<12? "Good morning" : h<17? "Good afternoon" : "Good evening";
+  var ksaH=h; try{ ksaH=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',hour12:false}).format(new Date()); }catch(_){ ksaH=h; } ksaH=ksaH%24;
+  /* The greeting used to read the viewer's LOCAL hour while the backdrop read Riyadh's, so
+     outside KSA the words and the picture could contradict. Both now use the same clock. */
+  var slot=dayPart(ksaH);
+  const g = slot==="morning"? "Good morning" : slot==="afternoon"? "Good afternoon" : "Good evening";
   document.getElementById("greetLine").textContent = g;
-  try{ var ksaH; try{ ksaH=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',hour12:false}).format(new Date()); }catch(_){ ksaH=h; } ksaH=ksaH%24; var slot=(ksaH>=4&&ksaH<11)?"morning":(ksaH>=11&&ksaH<17)?"afternoon":"evening"; var heroEl=document.getElementById("ovHero"); if(heroEl){ heroEl.classList.remove("tr-morning","tr-afternoon","tr-evening"); heroEl.classList.add("tr-"+slot); } }catch(e){}
+  try{ var heroEl=document.getElementById("ovHero"); if(heroEl){ heroEl.classList.remove("tr-morning","tr-afternoon","tr-evening"); heroEl.classList.add("tr-"+slot); } }catch(e){}
   document.getElementById("userName").textContent = data.userName || "there";
   const t = totals();
   const prev = prevSnapshot();
