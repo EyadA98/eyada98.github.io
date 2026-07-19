@@ -1551,7 +1551,13 @@ html:not(.dark) .tvm .m-rib{background:url("data:image/svg+xml,%3Csvg xmlns='htt
 html:not(.dark) .tvm-gl .nm{color:#2a1d44;text-shadow:0 1px 4px rgba(255,255,255,.95)}
 .tvm-glleg{transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer}
 .tvm-glleg .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
-  font:700 .62rem/1 'Plus Jakarta Sans',sans-serif;color:#fff;background:rgba(138,100,200,.92);
+  /* Leg numbers are figures, and figures in this system are Marcellus. One
+     weight only — the family ships a single cut. Sized up slightly because
+     Marcellus runs smaller than Jakarta at the same px, and set in lining
+     figures so the numerals sit level inside the disc instead of hanging
+     below its centre. Applied to the globe and the flat map alike. */
+  font:400 .78rem/1 'Marcellus',Georgia,serif;font-variant-numeric:lining-nums;
+  color:#fff;background:rgba(138,100,200,.92);
   border:1.5px solid rgba(255,255,255,.75)}
 .tvm-glleg.on .n{background:#c8763a}
 
@@ -1567,7 +1573,13 @@ html:not(.dark) .tvm .leaflet-control-attribution{background:rgba(255,255,255,.7
 .tvm-pin .p.term{background:#c8763a}
 .tvm-legpin{background:none!important;border:none!important}
 .tvm-legpin .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
-  font:700 .62rem/1 'Plus Jakarta Sans',sans-serif;color:#fff;background:rgba(138,100,200,.92);
+  /* Leg numbers are figures, and figures in this system are Marcellus. One
+     weight only — the family ships a single cut. Sized up slightly because
+     Marcellus runs smaller than Jakarta at the same px, and set in lining
+     figures so the numerals sit level inside the disc instead of hanging
+     below its centre. Applied to the globe and the flat map alike. */
+  font:400 .78rem/1 'Marcellus',Georgia,serif;font-variant-numeric:lining-nums;
+  color:#fff;background:rgba(138,100,200,.92);
   border:1.5px solid rgba(255,255,255,.8)}
 
 /* ── timeline spine (B3) ─────────────────────────────────────────────────── */
@@ -2030,8 +2042,9 @@ function prettyDateFull(d){ if(!d)return '—'; const dt=new Date(d+'T00:00:00')
 /* Cities you are visiting — the origin is where you live, not a destination.
    Jeddah -> Dubai is one city, not two; Jeddah -> Manchester -> London is two.
    Defined once because four surfaces report it: the Plan summary, the backbone
-   facts row, the trip card and the PDF. The Map and Timeline deliberately keep
-   counting the origin, because there it is a real point on the route. */
+   facts row, the trip card and the PDF. The Map's Stops figure applies the same
+   rule inline (stops.length-1) — its stops[] array must keep the origin to draw
+   a route from, but the number shown to you should not count home. */
 function tripCities(trip){ const ns=tripNodes(trip);
   return ns.filter(n=>n.name && n.anchor!=='start').length; }
 function tripDays(dep,ret){ const span=daysBetween(dep,ret);
@@ -3460,7 +3473,10 @@ function MapView({trip,cur}){
         <div className="tk-g"><div className="m-cap">Distance</div><div className="v">{mKM(legs.total)}</div></div>
         <div className="tk-g"><div className="m-cap">Legs</div><div className="v">{legs.length}</div></div>
         <div className="tk-g"><div className="m-cap">Nights</div><div className="v">{nights||'—'}</div></div>
-        <div className="tk-g"><div className="m-cap">Stops</div><div className="v">{stops.length}</div></div>
+        {/* The route needs the origin to draw a line from; the figure does not.
+                Home is where you set out from, not a stop on the trip — the same
+                rule the Plan tab uses for Cities. stops[] keeps it either way. */}
+            <div className="tk-g"><div className="m-cap">Stops</div><div className="v">{Math.max(0,stops.length-1)}</div></div>
       </div>
     </section>
 
