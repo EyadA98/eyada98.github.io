@@ -2566,16 +2566,28 @@ html:not(.dark) .pw-wrap::before{border-bottom-color:rgba(138,100,200,.16);
 /* TASK & SUBTASK DETAIL PANELS — vertical ribbon on the far right edge.
    z-index 4 clears .tdp-head's 3; pointer-events:none so nothing under it
    becomes unclickable. The scroll area is pulled in with a margin rather than
-   padding, so its scrollbar stays beside the ribbon instead of beneath it. */
+   padding, so its scrollbar stays beside the ribbon instead of beneath it.
+
+   Desktop only. Below 769px the side modal goes full-bleed and 26px of the
+   screen width is too much to spend on trim. Scoped with min-width rather than
+   switched off with a max-width override, so the narrow-screen paddings set at
+   ≤600px stay exactly as they were instead of being overridden by a later
+   reset — which is what a display:none block would have caused. */
+@media(min-width:769px){
 .td-panel,.sd-panel{position:relative}
 .td-panel::after,.sd-panel::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
   z-index:4;pointer-events:none;border-left:1px solid var(--border);
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
 html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.05)}
-.td-panel .tdp-head,.td-panel .tdp-title,.td-panel .tdp-bottom,
-.sd-panel .tdp-head,.sd-panel .tdp-title,.sd-panel .tdp-bottom{padding-right:44px}
+/* Each of these keeps its own left padding, so the right padding is that
+   value plus the 26px rail — otherwise the gap beside the ribbon does not
+   match the gap on the other side. head and bottom run 18px, the title 22px. */
+.td-panel .tdp-head,.td-panel .tdp-bottom,
+.sd-panel .tdp-head,.sd-panel .tdp-bottom{padding-right:44px}
+.td-panel .tdp-title,.sd-panel .tdp-title{padding-right:48px}
 .td-panel .tdp-scroll,.sd-panel .tdp-scroll{margin-right:26px}
+}
 
 /* ── note cards: pattern rail (option N1) ─────────────────────────────────────
    The tile is used as a MASK over a block of the note's own ink colour, not as
@@ -2589,7 +2601,7 @@ html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
    stacking context — it already is, via its rotate() — but isolation:isolate
    makes it explicit so the rail cannot slip behind the background if that
    transform is ever removed. */
-.sticky{padding-left:44px;isolation:isolate}
+.sticky{padding-left:42px;isolation:isolate}   /* 26px rail + the note's own 16px */
 .sticky::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
   background:var(--nink);opacity:.20;
   border-right:1px solid rgba(13,9,38,.14);
@@ -2620,6 +2632,52 @@ html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
 html:not(.dark) .rt-card.v1::before{
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.05)}
+
+/* ── sign-in card: pattern rail (option S2) ───────────────────────────────────
+   One card serves the Hub, Finance and Travel, so this rule is identical in all
+   three files.
+
+   The tile is masked over `currentColor` rather than painted in a fixed colour.
+   The Hub and Travel cards are dark with white text; Finance's is white with
+   dark text and only flips dark under html.dark. Masking off currentColor means
+   the rail is always the card's own ink at the right contrast, with no theme
+   variants to keep in sync — the same technique the sticky notes use.
+
+   z-index:-1 with isolation:isolate keeps the rail above the card's translucent
+   background but below every field, so nothing needs its own stacking. The rail
+   carries the card's 26px radius on its left corners instead of the card being
+   clipped, which leaves the card's shadow and pop animation untouched. */
+/* Centred against the space BESIDE the rail, not against the whole card.
+   The rail reads as part of the frame rather than as margin, so the eye
+   compares the gap from the rail's inner edge (26px in) to the gap at the
+   right edge. Equal padding made those 20 and 46 — visibly lopsided even
+   though the content box was, strictly, centred in the card.
+   left = rail (26) + the card's own 34, right = 34: 34px of air on both
+   sides of the content, measured from what the eye actually treats as the
+   edges. */
+.auth-card,.tv-authcard{padding-left:60px;padding-right:34px;isolation:isolate}
+.auth-card::before,.tv-authcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 0 0 26px;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:26px 26px;mask-size:26px 26px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* hairline closing the rail — its own element, since the ::before's alpha is
+   spent on the mask and a border there would be masked away with it */
+.auth-card::after,.tv-authcard::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
+  background:currentColor;opacity:.14}
+
+/* Room between the app name and the Sign in / Create account row. Applied to
+   the tabs rather than the heading because the Hub and Travel carry a tagline
+   between the two and Finance does not — margins between siblings collapse to
+   the larger of the pair, so this sets a floor of 26px either way instead of
+   stacking on top of the tagline's own 22px. */
+.auth-tabs,.tv-authtabs{margin-top:26px}
+/* the card is narrow on a phone; give the fields their width back */
+@media(max-width:420px){
+  .auth-card,.tv-authcard{padding-left:48px;padding-right:26px}   /* 22px rail + 26 */
+  .auth-card::after,.tv-authcard::after{left:22px}
+  .auth-card::before,.tv-authcard::before{width:22px}
+}
 </style>
 </head>
 <body>
@@ -3882,7 +3940,7 @@ function buildNotifs(){
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(!nx||nx>horIso) return; out.push({time:(r.time||""),id:"routine:"+r.id,source:"routine",title:r.title,desc:rtRecurLabel(r)+(r.desc?(" · "+r.desc):""),due:nx,priority:r.priority||"med",open:"notifOpenRoutine(\'"+r.id+"\')"}); });
   if(Array.isArray(calEvents)) calEvents.forEach(function(e){ var w=(e.start&&(e.start.dateTime||e.start.date))||""; var dd=w.slice(0,10); if(!dd||dd<today||dd>horIso) return; out.push({id:"event:"+e.id,source:"event",title:e.summary||"(event)",desc:e.location||"",due:dd,time:evTime(e),priority:"med",open:"go(\'home\')"}); });
   if(zakatDue!=null&&zakatDue>=0&&zakatDue<=Math.max(lead,60)){ var z=new Date(); z.setDate(z.getDate()+zakatDue); out.push({id:"finance:zakat",source:"finance",title:"Zakat due",desc:"Annual zakat is approaching",due:isoLocal(z),priority:"high",open:"window.open(data.settings.financeUrl,'_blank')"}); }
-  (travelTrips||[]).forEach(function(tr){ if(!tr.departDate||tr.departDate<today||tr.departDate>horIso) return; out.push({id:"travel:"+(tr.id||tr.departDate),source:"travel",title:"Trip: "+(tr.name||"Travel"),desc:"Departure "+fmtShort(tr.departDate),due:tr.departDate,priority:"med",open:"window.open(data.settings.travelUrl,'_blank')"}); });
+  (travelTrips||[]).forEach(function(tr){ if(!tr.departDate||tr.departDate<today||tr.departDate>horIso) return; out.push({id:"travel:"+(tr.id||tr.departDate),source:"travel",title:"Trip: "+(tr.name||"Travel"),desc:"Departure "+fmtShort(tr.departDate),due:tr.departDate,priority:"med",open:"window.open(travelHref(),'_blank')"}); });
   return out;
 }
 function notifActive(){ var ns=notifStore(); var now=Date.now(); return buildNotifs().filter(function(n){ if(notifDismissed(n)) return false; if(ns.snooze[n.id]&&ns.snooze[n.id]>now) return false; return true; }); }
@@ -4516,6 +4574,13 @@ function appDef(){
 }
 var ARROW_SVG='<span class="arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span>';
 function tripCountdown(dep){ if(!dep) return ""; var today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00"); var d=new Date(dep+"T00:00:00"); if(isNaN(d)) return ""; var n=Math.round((d-today)/86400000); if(n<0) return ""; if(n===0) return "Today"; if(n===1) return "Tomorrow"; return "In "+n+" days"; }
+/* Every way into Travel from the Hub lands on All trips. Kept in one place so
+   the app card and the notification item cannot disagree; travelUrl is a
+   user-editable setting and may already carry a query of its own. */
+function travelHref(){
+  var u=(data.settings&&data.settings.travelUrl)||"./travel/";
+  return u+(u.indexOf("?")>=0?"&":"?")+"view=trips";
+}
 function travelCardHtml(a){
   var trips=travelTrips||[]; var top=trips[0];
   var live = "";
@@ -4532,7 +4597,7 @@ function travelCardHtml(a){
      Travel for All trips. Appended rather than baked into the setting, because
      travelUrl is user-editable and may already carry a query of its own. */
   const url=a.url||'#';
-  const href = url==='#' ? url : url+(url.indexOf('?')>=0?'&':'?')+'view=trips';
+  const href = url==='#' ? url : travelHref();
   return `<a class="card lift app-card" href="${esc(href)}" ${/^https?:/.test(url)?'target="_blank" rel="noopener"':''}>
     ${ARROW_SVG}
     <div class="ico ${a.tile}">${a.icon}</div>
@@ -4623,8 +4688,8 @@ function renderOvTasks(){
 }
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
-function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});var _wd=new Date().getDay();var _sat=new Date();_sat.setDate(_sat.getDate()+(6-_wd));var _we=isoLocal(_sat);items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
-function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
+function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
+function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));try{var _tv=travelDigestRow();if(_tv)rows.push(_tv);}catch(e){}if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
 var calView="month",calCursor=new Date(),calSel=null;
@@ -4636,9 +4701,9 @@ function _calLo(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(ca
   var d=new Date(c.getFullYear(), c.getMonth(), 1); d.setDate(d.getDate()-7); return isoLocal(d); }
 function _calHi(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(calCursor):new Date();
   var d=new Date(c.getFullYear(), c.getMonth()+1, 0); d.setDate(d.getDate()+7); return isoLocal(d); }
-function calItemsByDate(){var map={};function add(date,label,kind,time,sk,id,link){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task",prettyTime(x.time),x.time||"");});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due)add(sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"");});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _calLo(), _calHi()).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });if(0){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
+function calItemsByDate(){var map={};function add(date,label,kind,time,sk,id,link,full){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||"",full:full||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task",prettyTime(x.time),x.time||"");});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due)add(sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"");});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _calLo(), _calHi()).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
 function evClass(k){ return "ev-"+kindKey(k==="sub"?"subtask":k); }
-function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
+function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
 function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
 function computeNudges(){
@@ -6076,6 +6141,148 @@ function prayerCitySave(){
 /* ============ Finance net worth (Supabase boards) ============ */
 let financeStat="", calEvents=null, zakatDue=null; let financeSeries=[];
 let travelTrips=[], travelUpdated=null, travelAll=[];
+
+/* ══════════════ TRAVEL → UPCOMING · CALENDAR · AGENDA ══════════════════════
+   Travel already reaches the timeline (trip spans) and the notification centre
+   (departure). This adds the rest of a trip to the three date surfaces.
+
+   Labels are built to survive a month cell, which shows two chips in roughly
+   90px. Three rules do the work:
+     · the [TRIP] badge already says what these are, so the word "Trip" and the
+       trip's own name are dropped from the label;
+     · cities become the codes Travel already prints on its boarding pass and
+       PDF, so "Saudia SV1032 · Jeddah → Riyadh" (31 chars) becomes
+       "JED → RUH" (9);
+     · everything cut goes into `full`, which the chip renders as a title.
+
+   No horizon logic here: each surface applies its own. Upcoming keeps its
+   through-Saturday window, the calendar its month ±7 days.                  */
+
+var TV_CODE={"Riyadh":"RUH","Jeddah":"JED","Dammam":"DMM","Medina":"MED","Abha":"AHB","Dubai":"DXB","Abu Dhabi":"AUH","Doha":"DOH","Kuwait City":"KWI","Manama":"BAH","Muscat":"MCT","Cairo":"CAI","Amman":"AMM","Beirut":"BEY","London":"LON","Manchester":"MAN","Edinburgh":"EDI","Paris":"PAR","Nice":"NCE","Amsterdam":"AMS","Madrid":"MAD","Barcelona":"BCN","Lisbon":"LIS","Rome":"ROM","Milan":"MIL","Venice":"VCE","Zurich":"ZRH","Geneva":"GVA","Munich":"MUC","Berlin":"BER","Frankfurt":"FRA","Vienna":"VIE","Istanbul":"IST","Athens":"ATH","Prague":"PRG","New York":"NYC","Los Angeles":"LAX","San Francisco":"SFO","Chicago":"CHI","Miami":"MIA","Washington":"WAS","Boston":"BOS","Toronto":"YYZ","Tokyo":"TYO","Osaka":"OSA","Seoul":"SEL","Beijing":"BJS","Shanghai":"SHA","Hong Kong":"HKG","Singapore":"SIN","Bangkok":"BKK","Bali":"DPS","Jakarta":"CGK","Kuala Lumpur":"KUL","Mumbai":"BOM","Delhi":"DEL","Sydney":"SYD","Melbourne":"MEL","Maldives":"MLE","Cape Town":"CPT","Nairobi":"NBO","Casablanca":"CMN","Marrakech":"RAK"};
+
+/* Travel's own normaliser, so "london " and "London" resolve alike */
+function tvKey(s){ return String(s||"").toLowerCase().replace(/\(.*?\)/g,"").replace(/[^a-z ]/g,"").trim(); }
+function tvCode(name){
+  var n=String(name||"").trim(); if(!n) return "";
+  for(var k in TV_CODE){ if(tvKey(k)===tvKey(n)) return TV_CODE[k]; }
+  /* not one of the 63 known cities — first three letters is not an airport
+     code, but it is short and recognisable, which is all the chip needs */
+  var a=n.replace(/[^A-Za-z ]/g,"").trim();
+  return a.slice(0,3).toUpperCase();
+}
+/* cut at a word boundary: "Four Seasons Riy…" does not read, "Four Seasons…" does */
+function tvClip(s,n){
+  s=String(s||"").trim(); if(s.length<=n) return s;
+  var cut=s.slice(0,n); var sp=cut.lastIndexOf(" ");
+  return (sp>Math.floor(n*0.55)? cut.slice(0,sp) : cut).replace(/[\s.,;:·-]+$/,"")+"…";
+}
+function tvPretty(iso){
+  if(!iso) return ""; var d=new Date(iso+"T00:00:00");
+  return isNaN(d)?"":d.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+}
+
+/* every dated thing in every non-archived trip, as flat items */
+function travelItems(){
+  var out=[]; var trips=(typeof travelAll!=="undefined"&&travelAll&&travelAll.length)?travelAll:(travelTrips||[]);
+  (trips||[]).forEach(function(t){
+    if(!t) return;
+    var nodes=t.nodes||[];
+    var named=nodes.map(function(n){return n&&n.name;}).filter(Boolean);
+    var nameOf=function(id){ var n=nodes.filter(function(x){return x&&x.id===id;})[0]; return (n&&n.name)||""; };
+    /* The destination reads better than a user-written trip name, and is
+       shorter. It is NOT simply the last stop: a round trip ends where it
+       started, so Jeddah → Riyadh → Jeddah would be labelled "Jeddah". Take
+       the last stop that differs from the first, and fall back to the first
+       when every stop is the same place. */
+    var dest=(function(){
+      if(!named.length) return t.name||"Trip";
+      var first=tvKey(named[0]);
+      for(var i=named.length-1;i>=0;i--){ if(tvKey(named[i])!==first) return named[i]; }
+      return named[0];
+    })();
+    var span=(tvPretty(t.departDate)+(t.returnDate?" – "+tvPretty(t.returnDate):""));
+    var route=named.join(" → ");
+    var push=function(date,label,full,time){
+      if(!date) return;
+      out.push({date:date,label:label,full:full,kind:"trip",
+        time:time?prettyTime(time):"", sk:time||"zz"});
+    };
+
+    push(t.departDate, tvClip(dest,16)+" · starts",
+         (t.name||"Trip")+" · "+span+(route?" · "+route:""));
+    if(t.returnDate && t.returnDate!==t.departDate)
+      push(t.returnDate, tvClip(dest,16)+" · ends",
+           (t.name||"Trip")+" · "+span+(route?" · "+route:""));
+
+    (t.transports||[]).forEach(function(x){
+      if(!x||!x.startDate) return;
+      var a=tvCode(x.from)||"–––", b=tvCode(x.to)||tvCode(nameOf(x.cityId))||"–––";
+      var when=(x.startTime||"")+(x.endTime?"–"+x.endTime:"");
+      push(x.startDate, a+" → "+b,
+           [x.provider, x.ref, (x.from||"?")+" → "+(x.to||"?"), when]
+             .filter(Boolean).join(" · "), x.startTime);
+    });
+
+    (t.hotels||[]).forEach(function(h){
+      if(!h) return; var nm=h.name||"Hotel"; var city=nameOf(h.cityId);
+      if(h.checkIn)  push(h.checkIn,  "In · "+tvClip(nm,14),
+        "Check in · "+nm+(city?" · "+city:""));
+      if(h.checkOut) push(h.checkOut, "Out · "+tvClip(nm,13),
+        "Check out · "+nm+(city?" · "+city:""));
+    });
+
+    /* activities, as written, only when they carry a date */
+    (t.spend||[]).forEach(function(s){
+      if(!s||!s.date) return; var city=nameOf(s.cityId);
+      push(s.date, tvClip(s.name||"Activity",20),
+        [s.name||"Activity", s.category, city, s.location].filter(Boolean).join(" · "),
+        s.time);
+    });
+  });
+  return out;
+}
+
+
+/* One line for the daily digest. A trip in progress outranks one that is
+   coming, and an upcoming trip is only mentioned inside the same window
+   Upcoming this week uses — through Saturday. A live trip is always shown,
+   whenever it happens to end, because you are in it now. */
+var IC_PLANE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 15.5 3 10.2l2-2.6 4.4 1 3.2-3.9a1.8 1.8 0 0 1 2.8 2.3l-2.4 3.6 5.6 1.3z"/><path d="M8 18h11"/></svg>';
+/* The end of the current week, Saturday, as Upcoming this week defines it.
+   Defined once because two surfaces now share the window — if this were
+   copied, the digest and Upcoming could silently disagree about what "this
+   week" means. Note it collapses to today on a Saturday; that is the existing
+   behaviour of Upcoming, deliberately matched rather than corrected here. */
+function hubWeekEnd(){ var d=new Date(); var s=new Date(); s.setDate(s.getDate()+(6-d.getDay())); return isoLocal(s); }
+function travelDigestRow(){
+  var trips=(typeof travelAll!=="undefined"&&travelAll)?travelAll:[];
+  if(!trips.length) return "";
+  var t=isoLocal(new Date());
+  var DAY=86400000, d0=new Date(t+"T00:00:00");
+  var dest=function(tr){
+    var named=(tr.nodes||[]).map(function(n){return n&&n.name;}).filter(Boolean);
+    if(!named.length) return tr.name||"Trip";
+    var first=tvKey(named[0]);
+    for(var i=named.length-1;i>=0;i--){ if(tvKey(named[i])!==first) return named[i]; }
+    return named[0];
+  };
+  var live=trips.filter(function(tr){
+    return tr.departDate && tr.departDate<=t && (tr.returnDate||tr.departDate)>=t; })[0];
+  if(live){
+    var back=Math.round((new Date((live.returnDate||live.departDate)+"T00:00:00")-d0)/DAY);
+    return sumRow(IC_PLANE,"In <b>"+esc(dest(live))+"</b>"+
+      (back>0?(" &middot; back in <b>"+back+"</b> day"+(back>1?"s":"")):" &middot; back today"));
+  }
+  var next=trips.filter(function(tr){ return tr.departDate && tr.departDate>t; })
+    .sort(function(a,b){ return a.departDate.localeCompare(b.departDate); })[0];
+  if(!next) return "";
+  var days=Math.round((new Date(next.departDate+"T00:00:00")-d0)/DAY);
+  /* same window as Upcoming this week: a departure past Saturday is not
+     today's news, and showing it here while Upcoming stays empty would have
+     the two surfaces contradicting each other. */
+  if(next.departDate>hubWeekEnd()) return "";
+  return sumRow(IC_PLANE,"<b>"+esc(dest(next))+"</b> in <b>"+days+"</b> day"+(days>1?"s":""));
+}
 async function loadTravel(){
   if(!user||!supa) return;
   try{
@@ -6086,7 +6293,7 @@ async function loadTravel(){
     var ups=rows.map(function(r){return r.data;}).filter(function(t){ return t&&t.departDate&&t.departDate>=today&&t.status!=="completed"&&t.status!=="archived"; });
     ups.sort(function(a,b){return (a.departDate||"").localeCompare(b.departDate||"");});
     travelTrips=ups;
-    try{ renderTimeline(); }catch(e){}
+    try{ renderTimeline(); }catch(e){}try{ renderUpcoming(); }catch(e){}try{ renderCalendar(); }catch(e){}try{ renderDailySummary(); }catch(e){}
     var lu=rows.map(function(r){return r.updated_at;}).filter(Boolean).sort().pop(); if(lu) travelUpdated=lu;
     renderAppCards("appCards"); renderAppCards("appCardsFull");
   }catch(e){}
