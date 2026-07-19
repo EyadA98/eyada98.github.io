@@ -241,7 +241,7 @@ tfoot td{font-weight:800;border-top:2px solid rgba(142,127,208,.2);background:rg
 .btn.soft{background:rgba(255,255,255,.55);color:var(--indigo);border:1px solid rgba(255,255,255,.75);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
 .btn.soft:hover{background:rgba(255,255,255,.85)}
-.btn.peach{background:linear-gradient(120deg,var(--peach),#F6BCA6);color:var(--indigo-3)}
+.btn.peach{background:linear-gradient(120deg,var(--peach),#F6BCA6);color:#fff}
 .btn.danger{background:transparent;color:var(--red);border:1px solid var(--border);padding:5px 10px;border-radius:9px;box-shadow:none}
 .btn.danger:hover{background:var(--red-soft);transform:none;box-shadow:none;filter:none}
 .btn:focus-visible,aside button:focus-visible,.seg button:focus-visible,.bottombar button:focus-visible,.name-edit:focus-visible,.insight .dismiss:focus-visible{outline:2px solid var(--lavender);outline-offset:2px}
@@ -305,7 +305,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   .spark-box{height:88px}
   table{font-size:.95rem}
   .card .big{font-size:1.75rem}
-  .topbar{padding:20px var(--gutter)}
+  .topbar{padding:18px var(--gutter)}
 }
 @media(max-width:1024px){
   body{grid-template-columns:1fr}
@@ -492,7 +492,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
 /* iridescent primary buttons + soft glow */
 .btn{background:var(--grad-iri);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),var(--glow-lav)}
 .btn:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 14px 34px rgba(138,100,200,.45);filter:brightness(1.05) saturate(1.05)}
-.btn.peach{background:var(--grad-iri-rev);color:#2a1d44;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),var(--glow-peach)}
+.btn.peach{background:var(--grad-iri-rev);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),var(--glow-peach)}
 .btn.soft{background:rgba(255,255,255,.6);color:var(--violet);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 4px 16px rgba(67,49,99,.08)}
 .btn.soft:hover{background:rgba(255,255,255,.9);filter:none}
 .btn.danger{background:transparent;color:var(--red);box-shadow:none}
@@ -935,6 +935,31 @@ main{padding-top:32px!important}
    of drift. Both now read --gutter. This pair stays as a guard. ── */
 .topbar{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!important }
 main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!important }
+
+/* ── workspace pattern: the rail ends on a ribbon ─────────────────────────────
+   The same interlocking-circle tile the Travel cards and the boarding pass
+   carry, so all three apps close their sidebar the same way.
+
+   It is a flex child pinned with margin-top:auto rather than an absolutely
+   positioned band: the rail scrolls, so an absolute band would either scroll
+   away from the foot or sit under the nav on a short viewport. As a flex child
+   it settles at the bottom when there is room and simply follows the last item
+   when there isn't. The negative bottom margin cancels the rail's own 26px
+   bottom padding so the ribbon meets the edge instead of floating above it.
+
+   One tile tall, so the geometry never ends mid-circle. The tile is baked
+   rather than built from a custom property, because a data-URI is opaque to
+   the cascade and a var() inside one never resolves.
+
+   Scoped to >=1025 rather than hidden below it: at narrow widths the rail
+   becomes a horizontal bar, and the Hub already gives aside::after a job there
+   as the scroll-fade on the right edge. Overriding it with display:none would
+   have taken that fade away. */
+@media(min-width:1025px){
+  aside::after{content:"";display:block;flex:none;height:26px;min-height:26px;
+    margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+}
 </style>
 </head>
 <body>
