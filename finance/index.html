@@ -960,6 +960,94 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
     margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
 }
+
+/* ── sign-in card: pattern rail (option S2) ───────────────────────────────────
+   One card serves the Hub, Finance and Travel, so this rule is identical in all
+   three files.
+
+   The tile is masked over `currentColor` rather than painted in a fixed colour.
+   The Hub and Travel cards are dark with white text; Finance's is white with
+   dark text and only flips dark under html.dark. Masking off currentColor means
+   the rail is always the card's own ink at the right contrast, with no theme
+   variants to keep in sync — the same technique the sticky notes use.
+
+   z-index:-1 with isolation:isolate keeps the rail above the card's translucent
+   background but below every field, so nothing needs its own stacking. The rail
+   carries the card's 26px radius on its left corners instead of the card being
+   clipped, which leaves the card's shadow and pop animation untouched. */
+/* Centred against the space BESIDE the rail, not against the whole card.
+   The rail reads as part of the frame rather than as margin, so the eye
+   compares the gap from the rail's inner edge (26px in) to the gap at the
+   right edge. Equal padding made those 20 and 46 — visibly lopsided even
+   though the content box was, strictly, centred in the card.
+   left = rail (26) + the card's own 34, right = 34: 34px of air on both
+   sides of the content, measured from what the eye actually treats as the
+   edges. */
+.auth-card,.tv-authcard{padding-left:60px;padding-right:34px;isolation:isolate}
+.auth-card::before,.tv-authcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 0 0 26px;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:26px 26px;mask-size:26px 26px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* hairline closing the rail — its own element, since the ::before's alpha is
+   spent on the mask and a border there would be masked away with it */
+.auth-card::after,.tv-authcard::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
+  background:currentColor;opacity:.14}
+
+/* Room between the app name and the Sign in / Create account row. Applied to
+   the tabs rather than the heading because the Hub and Travel carry a tagline
+   between the two and Finance does not — margins between siblings collapse to
+   the larger of the pair, so this sets a floor of 26px either way instead of
+   stacking on top of the tagline's own 22px. */
+.auth-tabs,.tv-authtabs{margin-top:26px}
+/* the card is narrow on a phone; give the fields their width back */
+@media(max-width:420px){
+  .auth-card,.tv-authcard{padding-left:48px;padding-right:26px}   /* 22px rail + 26 */
+  .auth-card::after,.tv-authcard::after{left:22px}
+  .auth-card::before,.tv-authcard::before{width:22px}
+}
+
+/* ── ribbon: accounts hero (A3) · budget + zakat summaries (B2 / Z2) ──────────
+   One tile-tall band across the top of each widget.
+
+   Scoped by container, not by .card. The kpi() helper builds the dashboard,
+   portfolio and net-worth rows from the same markup, so a rule on .cards .card
+   would have banded every summary row in Finance rather than the two asked for.
+
+   The tile is masked over currentColor: Finance's cards are white in light mode
+   and indigo in dark, and masking off the card's own ink means one rule covers
+   both with nothing to keep in step.
+
+   z-index:-1 with isolation:isolate puts the band above the card's translucent
+   background but below its contents. .card is not otherwise a stacking context
+   — its transform only exists on hover — so the isolation is doing real work.
+   The band carries the card's own radius on its top corners rather than the
+   card being clipped, which leaves the shadow and hover lift untouched. */
+.card.acc-head,
+#budgetCards .card,
+#zakaCards .card{position:relative;isolation:isolate}
+.card.acc-head{padding-top:52px}
+#budgetCards .card,#zakaCards .card{padding-top:44px}
+
+.card.acc-head::before,
+#budgetCards .card::before,
+#zakaCards .card::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;z-index:-1;
+  background:currentColor;opacity:.13;border-radius:var(--radius) var(--radius) 0 0;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:26px 26px;mask-size:26px 26px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* hairline closing the band; its own element because the ::before's alpha is
+   spent on the mask and a border there would be masked away with it */
+.card.acc-head::after,
+#budgetCards .card::after,
+#zakaCards .card::after{content:"";position:absolute;left:0;right:0;top:26px;height:1px;z-index:-1;
+  background:currentColor;opacity:.12}
+/* phones: the band costs a whole tile of vertical space on a card that is
+   already tight, so it steps down with the card's own padding */
+@media(max-width:600px){
+  .card.acc-head{padding-top:44px}
+  #budgetCards .card,#zakaCards .card{padding-top:40px}
+}
 </style>
 </head>
 <body>
