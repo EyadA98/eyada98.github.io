@@ -134,7 +134,7 @@ html:not(.dark) .tv-topbar{background:rgba(247,245,252,.6);border-bottom:1px sol
      card's own 18px radius on its left corners instead. */
 html.dark .tv-trip{--tv-rib:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.16)}
 html:not(.dark) .tv-trip{--tv-rib:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,#f0ebfb}
-.tv-trip{padding:clamp(16px,1.7vw,22px);padding-left:calc(26px + clamp(15px,1.5vw,19px));
+.tv-trip{padding:clamp(16px,1.7vw,22px);padding-left:calc(26px + clamp(16px,1.7vw,22px));
   display:flex;flex-direction:column;gap:0;position:relative}
 .tv-trip::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:0;
   background:var(--tv-rib);border-right:1px solid var(--border);border-radius:18px 0 0 18px}
@@ -194,7 +194,12 @@ html:not(.dark) .tv-trip{--tv-rib:url("data:image/svg+xml,%3Csvg xmlns='http://w
 @media(pointer:coarse){ .tv-trip-open{height:40px;min-height:40px} }
 .tv-trip-foot{display:flex;align-items:center;gap:8px;margin-top:18px}
 .tv-trip-open svg{width:15px;height:15px;flex:none}
-@media(max-width:600px){ .tv-trip-stats{gap:8px} .tv-big{font-size:1.35rem} }
+/* The money column has to hold "SAR 48,320" in Marcellus. At 390px the
+   1.5fr track lands near 124px against a ~120px string, so the total
+   ellipsised at random. Give the figure column more of the row and drop
+   the size a step below 430 — measured, not guessed. */
+@media(max-width:600px){ .tv-trip-stats{gap:8px;grid-template-columns:1.9fr 1fr 1fr} .tv-big{font-size:1.35rem} }
+@media(max-width:430px){ .tv-big{font-size:1.2rem} .tv-cap{font-size:10px} }
 /* ---- auth: Hub's .auth-card / #authRoot, copied ------------------------------- */
 .tv-authroot{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
   background:linear-gradient(112deg,#15103a 0%,#2a1d44 45%,#623f94 85%,#8a64c8 115%)}
@@ -834,8 +839,64 @@ html:not(.dark) .tw-foot{border-top-color:var(--border)}
 .pass-amt{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.3rem;line-height:1;white-space:nowrap;
   background:var(--grad-iri-rev);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 html:not(.dark) .pass-amt{background:var(--grad-iri);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-@media(max-width:900px){
-  .pass-row{flex-wrap:wrap}.pass-stub{width:100%}.pass-body{grid-template-columns:1fr;gap:12px;padding:14px}
+/* ── Plan city row: three bands, from measured space, not guesswork ───────────
+   Measured live at 1014px: the page chrome takes 122px, .pass-stub is a fixed
+   264px, and the four fixed columns (300+118+156 + 74, three 22px gaps, 48px
+   padding) have a hard floor of 762px. That left 628px of room for a 762px
+   grid — an 87px overflow, and it persisted anywhere between the old 900px
+   breakpoint and roughly 1400px. It was verified clean at 1424px, which is why
+   it never showed up on a large monitor.
+
+     <= 1240   stack. A single column cannot overflow at any width.
+   1241-1439   compact columns. Floor is 630px; at 1241 the row offers 641
+               after the sidebar (214) and the stub, so it fits with margin.
+     >= 1440   the original columns, which measured clean.
+
+   The leg column keeps a 250px floor: its content ("Arrive <date> -> Depart
+   <date>") needs 248px, measured, and below that it clips. */
+@media(max-width:1240px){
+  /* !important because a later, unscoped .pass-stub{width:264px} (added for the
+     city input) sits further down the sheet and was winning on source order —
+     the stub stayed 264px wide, so the tear line stopped short of the card edge
+     and left a lighter block beside it. */
+  .pass-row{flex-wrap:wrap}.pass-stub{width:100%!important}
+
+  /* ── the stacked row, tightened ──────────────────────────────────────────────
+     Stacking alone left the row ~240px tall and mostly empty: the body kept a
+     one-column grid, so the coverage badge, the fare and the move buttons each
+     took a full row of their own, and an empty badge or fare still occupied one.
+     As a wrapping flex the leg takes the first line and everything else shares
+     the second, with empty slots collapsing entirely.
+
+     The perforation also has to turn. .pass-stub::after is the ticket's tear
+     line, sitting on the seam between stub and body — vertical when they are
+     side by side. Once the stub is full width that seam is horizontal, and
+     leaving the strip vertical stranded it in the middle of the card. */
+  /* Room to breathe. The row was compressed to kill dead space, which fixed the
+     emptiness but left everything crowded onto the tear line. These paddings
+     give the stub and the leg their own air either side of the perforation, and
+     the leg's internal gap separates the dates from the nights badge. */
+  .pass-body{display:flex;flex-wrap:wrap;align-items:center;gap:12px 10px;padding:18px 16px 16px}
+  .pass-leg{gap:11px}
+  .pass-row{margin-bottom:2px}
+  /* the leg shares its line with the move buttons rather than claiming the full
+     width — alone on a line they left an empty band the height of a control */
+  .pass-leg{flex:1 1 210px;min-width:0}
+  /* A slot with no badge is not actually :empty — it holds an empty .tv-slot
+     placeholder, so it kept its 92px and pushed the row to three lines. :has()
+     catches that case; the plain :empty still covers the fare slot. */
+  .pass-slot{flex:0 0 auto;min-width:0}
+  .pass-slot:empty,.pass-slot:has(> .tv-slot:empty){display:none}
+  .pass-actions{flex:0 0 auto;margin-left:auto;align-self:center}
+  .pass-stub{padding:16px 16px 18px;gap:12px}
+  /* the tile is set to repeat-y for a vertical seam; a horizontal one has to
+     repeat along the other axis or it draws a single square */
+  .pass-stub::after{left:0;right:0;top:auto;bottom:-14px;width:auto;height:28px;
+    background-repeat:repeat-x;background-position:left center}
+  .pass-stub{border-radius:16px 16px 0 0}
+}
+@media(min-width:1241px) and (max-width:1439px){
+  .pass-body{grid-template-columns:minmax(250px,1.6fr) 100px 132px 74px;gap:14px;padding:12px 16px}
 }
 
 /* RangeField renders its own nights suffix after the depart cell, which pushed
@@ -1052,11 +1113,17 @@ html:not(.dark) .bb-farecap{color:rgba(60,40,100,.7)}
 }
 /* ── phone: route stacks, stats go 2-up ── */
 @media(max-width:540px){
-  .bb-rt{flex-direction:column;gap:16px}
-  .bb-mid{display:none}
-  /* the return block stays right-aligned at every width */
-  .bb-end{width:100%}
-  .bb-end.bb-r{width:100%;text-align:right}
+  /* Departure and return stay SIDE BY SIDE. Stacking them turned the trip's
+     defining fact — from here, to there — into two unrelated blocks, and cost a
+     whole card's height to say it worse. Two halves of the row fit at 430px:
+     ~150px each plus the flight path between them. The path keeps its plane but
+     loses its minimum width so it can compress to whatever is left. */
+  .bb-rt{flex-direction:row;align-items:flex-start;gap:10px}
+  .bb-end{flex:1 1 0;width:auto;min-width:0}
+  .bb-end.bb-r{width:auto;text-align:right}
+  .bb-mid{display:flex;flex:0 1 auto;min-width:22px;padding-top:16px}
+  .bb-code{font-size:1.75rem!important}
+  .bb-city input{font-size:.86rem!important}
   .bb-i{flex:0 0 50%;padding:0 12px}
   .bb-i:nth-child(3n+1){padding-left:12px}
   .bb-i:nth-child(2n+1){padding-left:0}
@@ -1570,13 +1637,22 @@ html:not(.dark) .tvm .leaflet-control-attribution{background:rgba(255,255,255,.7
   .tvm .tk-rail{width:100%;height:22px;align-self:auto}
   .tvm .dests{grid-template-columns:1fr 1fr}
 }
+/* The spine keeps alternating left and right at every width — that is the
+   point of the design, and collapsing it to one column reads as a plain list.
+   Narrow screens only tighten it: a slimmer node and a smaller inset hand the
+   cards back the room they lose.
+
+   Note what is NOT here: display:none on .sp-side.l. Each row renders both
+   sides and puts its content in whichever one its turn calls for, so hiding
+   the left side deletes every other stop rather than moving it. */
 @media (max-width:760px){
   .tvm .dests{grid-template-columns:1fr}
-  .tvm .spine-rail{left:14px;transform:none}
-  .tvm .sp-item,.tvm .sp-leg{align-items:flex-start}
-  .tvm .sp-side.l{display:none}
-  .tvm .sp-node{width:52px;justify-items:start}
-  .tvm .sp-side{width:calc(100% - 52px);text-align:left}
+  .tvm .sp-node{width:44px}
+  .tvm .sp-side{width:calc(50% - 22px)}
+}
+@media (max-width:480px){
+  .tvm .sp-node{width:34px}
+  .tvm .sp-side{width:calc(50% - 17px);padding:6px 0}
 }
 /* Phone. A 520px stage eats a whole screen before you reach the stops, and the
    view toggle has no room to sit beside the title. */
@@ -1716,7 +1792,104 @@ html:not(.dark) .tvs .s-rib{background:url("data:image/svg+xml,%3Csvg xmlns='htt
 <style>@media(max-width:1024px){/* iOS (iPhone AND iPad) zooms on focus if a field is under 16px. */input,select,textarea{font-size:16px!important}
 /* keep the custom select trigger (a <button>, so not caught above) the same
    size as real inputs — otherwise the Move "Type" field looked smaller. */
-.pv-fsel{font-size:16px!important}}</style>
+
+/* ── sign-in card: pattern rail (option S2) ───────────────────────────────────
+   One card serves the Hub, Finance and Travel, so this rule is identical in all
+   three files.
+
+   The tile is masked over `currentColor` rather than painted in a fixed colour.
+   The Hub and Travel cards are dark with white text; Finance's is white with
+   dark text and only flips dark under html.dark. Masking off currentColor means
+   the rail is always the card's own ink at the right contrast, with no theme
+   variants to keep in sync — the same technique the sticky notes use.
+
+   z-index:-1 with isolation:isolate keeps the rail above the card's translucent
+   background but below every field, so nothing needs its own stacking. The rail
+   carries the card's 26px radius on its left corners instead of the card being
+   clipped, which leaves the card's shadow and pop animation untouched. */
+/* Centred against the space BESIDE the rail, not against the whole card.
+   The rail reads as part of the frame rather than as margin, so the eye
+   compares the gap from the rail's inner edge (26px in) to the gap at the
+   right edge. Equal padding made those 20 and 46 — visibly lopsided even
+   though the content box was, strictly, centred in the card.
+   left = rail (26) + the card's own 34, right = 34: 34px of air on both
+   sides of the content, measured from what the eye actually treats as the
+   edges. */
+.auth-card,.tv-authcard{padding-left:60px;padding-right:34px;isolation:isolate}
+.auth-card::before,.tv-authcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 0 0 26px;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:26px 26px;mask-size:26px 26px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* hairline closing the rail — its own element, since the ::before's alpha is
+   spent on the mask and a border there would be masked away with it */
+.auth-card::after,.tv-authcard::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
+  background:currentColor;opacity:.14}
+
+/* Room between the app name and the Sign in / Create account row. Applied to
+   the tabs rather than the heading because the Hub and Travel carry a tagline
+   between the two and Finance does not — margins between siblings collapse to
+   the larger of the pair, so this sets a floor of 26px either way instead of
+   stacking on top of the tagline's own 22px. */
+.auth-tabs,.tv-authtabs{margin-top:26px}
+/* the card is narrow on a phone; give the fields their width back */
+@media(max-width:420px){
+  .auth-card,.tv-authcard{padding-left:48px;padding-right:26px}   /* 22px rail + 26 */
+  .auth-card::after,.tv-authcard::after{left:22px}
+  .auth-card::before,.tv-authcard::before{width:22px}
+}
+.pv-fsel{font-size:16px!important}}
+/* ── mobile navigation coverage ───────────────────────────────────────────────
+   The bottom bar carried Tailwind's md:hidden, which hides it from 768px up,
+   while the sidebar hides at 1024px and below. Between those two numbers there
+   was no navigation at all — and that band is exactly iPad portrait (834) and
+   an iPad split view (768). Nothing was reachable but the tab you happened to
+   land on.
+
+   The visibility of the two is now keyed to one boundary, stated once: the
+   sidebar appears above 1024, the bottom bar at 1024 and below. Complementary
+   by construction, with no gap and no overlap at any width. */
+@media(min-width:1025px){ .tp-bottombar{display:none!important} }
+
+/* Space for the bottom bar, reserved only where the bar actually shows.
+   This was an inline style keyed to showBottomNav; inline wins over any
+   media query, so it had to move here to stay in step with the CSS that
+   governs the bar itself. */
+@media(max-width:1024px){ .tv-shell{padding-bottom:90px} }
+
+/* rows keep an empty nights badge so both stay the same height */
+.pass-dur{min-height:20px}
+
+
+/* ── the origin has no arrival ────────────────────────────────────────────────
+   You leave from home; you do not arrive there. The row still renders the same
+   range control — swapping in a different control fought the row's own styling
+   and, worse, wrote to the trip on mount — so the Arrive half and the arrow
+   between are simply hidden on the first row. One date, and it is the one that
+   means something.
+
+   Marked with a class rather than :first-child: both rows sit in identical
+   .tv-city.anchor wrappers, so position alone cannot tell origin from
+   destination. */
+/* The origin row keeps its full shape — Arrive cell, dashed line, plane,
+   Depart — so both rows read as one grid and the Depart columns line up. Only
+   the arrival DATE is swapped for a dash, because you do not arrive in the city
+   you are leaving from.
+
+   The date is blanked with font-size:0 and the dash drawn as ::after, rather
+   than changing the text in JSX. The row's date control writes to the trip when
+   it is touched, and an earlier attempt to swap the control out fired that write
+   on mount and moved a real departure date. CSS cannot reach the data at all,
+   which is the point. The cell is left non-interactive for the same reason:
+   an origin arrival has nothing to set. */
+.pass-row.is-origin .pass-when .flex > button:first-of-type{pointer-events:none}
+.pass-row.is-origin .pass-when .flex > button:first-of-type > div:last-child{
+  font-size:0!important;color:transparent!important}
+.pass-row.is-origin .pass-when .flex > button:first-of-type > div:last-child::after{
+  content:"\2014";font:700 1rem/1.1 'Plus Jakarta Sans',sans-serif;color:var(--dim)}
+/* an empty badge still painted its pill; keep the height, drop the paint */
+.pass-dur:empty{visibility:hidden}
+</style>
 </head>
 <body>
 <div id="splash"><div id="splash-logo" style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%238E7FD0%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2326225C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22url%28%23g%29%22/%3E%3Cg%20transform%3D%22translate%2820%2C21.6%29%20scale%280.3053%29%20translate%28-381.64%2C-176.88%29%22%20fill%3D%22%23ffffff%22%3E%3Cpath%20d%3D%22M381.64%20217.79l10.23-40.91h171.15l-10.23%2040.91z%22/%3E%3Cpath%20d%3D%22M381.64%20322.21l10.23%2040.91h171.15l-10.23-40.91z%22/%3E%3Cpath%20d%3D%22M381.64%20290.46l10.23-40.91h186.5l-10.23%2040.91z%22/%3E%3C/g%3E%3C/svg%3E" width="112" height="112" alt="Travel Planner" style="display:block"/><div style="font-family:Marcellus,serif;font-size:26px;letter-spacing:1px;background:linear-gradient(110deg,#c6b3ef,#f3b98e);-webkit-background-clip:text;background-clip:text;color:transparent">Travel Planner</div></div><div class="splash-bar"></div></div>
@@ -1842,7 +2015,30 @@ function daysBetween(a,b){ if(!a||!b)return 0; const d1=new Date(a+'T00:00:00'),
 function fmt(a,cur){ const c=CURRENCIES[cur]||CURRENCIES.SAR; const v=a||0; return `${c.symbol} ${v.toLocaleString(undefined,{minimumFractionDigits:v%1===0?0:2,maximumFractionDigits:2})}`; }
 function prettyDate(d){ if(!d)return '—'; const dt=new Date(d+'T00:00:00'); if(isNaN(dt))return '—'; return dt.toLocaleDateString(undefined,{day:'numeric',month:'short'}); }
 function prettyDateFull(d){ if(!d)return '—'; const dt=new Date(d+'T00:00:00'); if(isNaN(dt))return '—'; return dt.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
-function addDays(d,n){ const dt=new Date(d+'T00:00:00'); dt.setDate(dt.getDate()+n); return dt.toISOString().slice(0,10); }
+/* toISOString() converts to UTC before formatting. The date is built at LOCAL
+   midnight, so anywhere east of Greenwich that lands on the previous day — at
+   UTC+3 every derived date came out exactly one day early, including +0 days,
+   which turned a same-day stop into a negative one. Format from the local
+   fields instead; the input and output are both plain calendar dates and no
+   timezone should ever enter into it. */
+/* Nights are the gaps between dates; days are the dates themselves. Jul 19 to
+   Jul 25 is 6 nights but 7 days, and the two were being reported from the same
+   number. Defined once because four places need it — the Plan summary, the trip
+   card, the PDF, and the budget forecast, which sizes its array by this value
+   and was therefore dropping the final day of every trip. Values <= 0 pass
+   through unchanged so the "return is before departure" check still fires. */
+/* Cities you are visiting — the origin is where you live, not a destination.
+   Jeddah -> Dubai is one city, not two; Jeddah -> Manchester -> London is two.
+   Defined once because four surfaces report it: the Plan summary, the backbone
+   facts row, the trip card and the PDF. The Map and Timeline deliberately keep
+   counting the origin, because there it is a real point on the route. */
+function tripCities(trip){ const ns=tripNodes(trip);
+  return ns.filter(n=>n.name && n.anchor!=='start').length; }
+function tripDays(dep,ret){ const span=daysBetween(dep,ret);
+  return (dep&&ret&&span>=0) ? span+1 : span; }
+function addDays(d,n){ const dt=new Date(d+'T00:00:00'); dt.setDate(dt.getDate()+n);
+  const p=x=>String(x).padStart(2,'0');
+  return dt.getFullYear()+'-'+p(dt.getMonth()+1)+'-'+p(dt.getDate()); }
 function cityKey(name){ return (name||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/[^a-z\s]/g,'').trim(); }
 function cityCoord(name){ const c=CITY_DB[cityKey(name)]; return c?{lon:c[0],lat:c[1],tz:c[2]}:null; }
 /* Real IATA code for a city (Dubai → DXB, not DUB). Falls back to the first
@@ -1937,13 +2133,28 @@ function spendBase(s,trip){ return convertAmount(spendNative(s),itemCur(s,trip),
 function hotelBase(h,trip){ return convertAmount(hotelCost(h),(h&&h.currency)||trip.baseCurrency||'SAR',trip.baseCurrency||'SAR'); }
 function cityWindows(trip){ const nodes=tripNodes(trip); const dep=trip.departDate,ret=trip.returnDate; const out={};
   nodes.forEach(n=>out[n.id]={arrive:n.arrive||dep||'',depart:n.depart||ret||dep||''}); if(!dep) return out;
-  const startN=nodes.find(n=>n.anchor==='start'), endN=nodes.find(n=>n.anchor==='end'); const stops=nodes.filter(n=>!n.anchor);
-  if(startN) out[startN.id]={arrive:startN.arrive||dep,depart:startN.depart||dep}; if(endN) out[endN.id]={arrive:endN.arrive||ret||dep,depart:endN.depart||ret||dep};
+  const startN=nodes.find(n=>n.anchor==='start'), endN=nodes.find(n=>n.anchor==='end'); const mids=nodes.filter(n=>!n.anchor);
+  if(startN) out[startN.id]={arrive:startN.arrive||dep,depart:startN.depart||dep};
+
+  /* ── which cities get nights ────────────────────────────────────────────────
+     The final city used to be pinned to arrive = depart = returnDate, on the
+     reading that it is "where you return from". For a one-destination trip that
+     made Jeddah -> Dubai, 19-25 Jul, show Dubai as a same-day visit; with
+     stops in between, the whole span was divided among the middle cities and
+     the destination still got nothing.
+
+     The cities you actually sleep in are every stop after the origin, the last
+     one included. The origin is day zero: you leave from home, you do not stay
+     there. So the nights are shared across mids + the final city, and only the
+     final city's departure is pinned to the return date. Two dates now describe
+     the trip correctly with nothing typed per city. */
+  const staying=mids.concat(endN?[endN]:[]);
+  if(!staying.length) return out;
   const total=Math.max(0,daysBetween(dep,ret));
   const nightsOf=id=>{ const hs=(trip.hotels||[]).filter(h=>h.cityId===id&&h.checkIn&&h.checkOut); return hs.reduce((a,h)=>{const n=daysBetween(h.checkIn,h.checkOut);return a+(n>0?n:0);},0); };
-  let known=0,unknown=0; const kn={}; stops.forEach(n=>{ let k=nightsOf(n.id); if((!k||k<=0)&&n.arrive&&n.depart) k=Math.max(0,daysBetween(n.arrive,n.depart)); kn[n.id]=k; if(k>0)known+=k; else unknown++; });
+  let known=0,unknown=0; const kn={}; staying.forEach(n=>{ let k=nightsOf(n.id); if((!k||k<=0)&&n.arrive&&n.depart) k=Math.max(0,daysBetween(n.arrive,n.depart)); kn[n.id]=k; if(k>0)known+=k; else unknown++; });
   let rem=Math.max(0,total-known); const baseN=unknown?Math.floor(rem/unknown):0; let extra=unknown?rem-baseN*unknown:0; let cursor=dep;
-  stops.forEach((n,i)=>{ const arrive=n.arrive||cursor; let depart=n.depart; if(!depart){ let nights=kn[n.id]; if(!nights||nights<=0){ nights=baseN+(extra>0?1:0); if(extra>0)extra--; } const isLast=(i===stops.length-1)&&!endN; depart=isLast?(ret||addDays(arrive,nights)):addDays(arrive,nights); } out[n.id]={arrive,depart}; cursor=depart; });
+  staying.forEach((n,i)=>{ const arrive=n.arrive||cursor; let depart=n.depart; if(!depart){ let nights=kn[n.id]; if(!nights||nights<=0){ nights=baseN+(extra>0?1:0); if(extra>0)extra--; } const isLast=(i===staying.length-1); depart=isLast?(ret||addDays(arrive,nights)):addDays(arrive,nights); } out[n.id]={arrive,depart}; cursor=depart; });
   return out; }
 function CurSel({value,onChange}){ const {dark}=useContext(Theme); return <FancySelect value={value||'SAR'} onChange={onChange} align="right" menuWidth={104} options={Object.keys(CURRENCIES).map(k=>({value:k,label:k}))} btnClass={`rounded-xl pl-3 pr-2 py-2.5 text-sm shrink-0 ${dark?'bg-white/5 border border-white/10 text-lavender-50':'bg-white border border-lavender-200 text-lavender-950'}`}/>; }
 
@@ -2131,7 +2342,7 @@ function hotelCost(h){ const n=daysBetween(h.checkIn,h.checkOut); const r=Math.m
 function useComputed(trip){
   return useMemo(()=>{
     const {departDate,returnDate,tripExpenses={}}=trip; const hotels=trip.hotels||[]; const transports=trip.transports||[]; const spend=trip.spend||[];
-    const nodes=tripNodes(trip); const defaultPax=pax(null,trip); const days=daysBetween(departDate,returnDate); const nights=days>0?days:0; const win=cityWindows(trip);
+    const nodes=tripNodes(trip); const defaultPax=pax(null,trip); const span=daysBetween(departDate,returnDate); const nights=span>0?span:0; const days=tripDays(departDate,returnDate); const win=cityWindows(trip);
     const accommodationTotal=hotels.reduce((s,h)=>s+hotelBase(h,trip),0);
     const transportTotal=transports.reduce((s,t)=>s+transportBase(t,trip),0);
     const spendTotal=spend.reduce((s,x)=>s+spendBase(x,trip),0);
@@ -2529,7 +2740,7 @@ function PlanView({trip,setTrip,cur,onSave}){
               <div className="tv-cap2 bb-sumcap">Trip summary</div>
               <div className="bb-stats">
                 <div className="bb-i"><span className="bb-l">Days</span><span className="bb-v">{c.days>0?c.days:D}</span></div>
-                <div className="bb-i"><span className="bb-l">Cities</span><span className="bb-v">{named.length}</span></div>
+                <div className="bb-i"><span className="bb-l">Cities</span><span className="bb-v">{tripCities(trip)}</span></div>
                 <div className="bb-i"><span className="bb-l">Guests</span>
                   <span className="bb-stp">
                     <button type="button" onClick={()=>setT({persons:Math.max(1,(Math.round(num(trip.persons))||1)-1)})} aria-label="One fewer traveller"><Ic.minus className="w-3 h-3"/></button>
@@ -2558,7 +2769,7 @@ function PlanView({trip,setTrip,cur,onSave}){
         </div>
         <div className="tv-sumhead" hidden><span className="tv-kicker">Trip summary</span><span className="tv-sumnote">· auto-calculated</span></div>
         <div className="tv-tiles" hidden>
-          {[[Ic.cal,'Trip days',c.days>0?c.days:D,'teal'],[Ic.pin,'Cities / stops',named.length,'lav'],[Ic.people,'Travellers',c.persons,'lilac'],
+          {[[Ic.cal,'Trip days',c.days>0?c.days:D,'teal'],[Ic.pin,'Cities',tripCities(trip),'lav'],[Ic.people,'Travellers',c.persons,'lilac'],
             [Ic.plane,'Transport',c.transportTotal?fmt(c.transportTotal,cur):D,'lav'],[Ic.hotel,'Hotels',c.accommodationTotal?fmt(c.accommodationTotal,cur):D,'lilac'],
             [Ic.ticket,'Activities / spend',c.spendTotal?fmt(c.spendTotal,cur):D,'peach'],[Ic.money,'Total est. cost',fmt(c.grand,cur),'hero']].map((b,i)=>{
             const hero=b[3]==='hero'; const I=b[0];
@@ -2580,7 +2791,7 @@ function PlanView({trip,setTrip,cur,onSave}){
             <div onDragOver={e=>{if(!movable)return;e.preventDefault();if(overIdx!==i)setOverIdx(i);}} onDrop={()=>{ if(dragIdx!=null&&dragIdx!==i)reorder(dragIdx,i); setDragIdx(null);setOverIdx(null); }}
               className={`tv-city${open?' open':''}${n.anchor?' anchor':''}${overIdx===i&&dragIdx!=null&&dragIdx!==i?' drop':''}${dragIdx===i?' dragging':''}`}>
               <span className="tv-dot"/>
-              <div className="pass-row">
+              <div className={"pass-row"+(i===0?" is-origin":"")}>
                 <div className="pass-stub">
                   {movable
                     ? <span draggable onDragStart={e=>{setDragIdx(i);e.dataTransfer.effectAllowed='move';}} onDragEnd={()=>{setDragIdx(null);setOverIdx(null);}} title="Drag to reorder" className="pass-grip"><Ic.drag className="w-4 h-4"/></span>
@@ -2594,7 +2805,12 @@ function PlanView({trip,setTrip,cur,onSave}){
                 <div className="pass-body">
                   <div className="pass-leg">
                     <span className="pass-when">{n.name?<RangeField start={n.arrive||wd.arrive} end={n.depart||wd.depart} onStart={d=>setNode(n.id,{arrive:d})} onEnd={d=>setNode(n.id,{depart:d})} min={trip.departDate} max={trip.returnDate} labels={['Arrive','Depart']}/>:null}</span>
-                    <span className="pass-dur">{coverage(n).winN>0?<><b>{coverage(n).winN}</b> nights</>:'same day'}</span>
+                    {/* The origin never accrues nights — you leave from home, you do not stay
+                        there — so its badge always read "same day", which says nothing and
+                        sits oddly under a single Depart date. Dropped on that row only; a
+                        middle stop reading "same day" is real information (you passed
+                        through without staying), so it is kept everywhere else. */}
+                    <span className="pass-dur">{i===0?'':(coverage(n).winN>0?<><b>{coverage(n).winN}</b> nights</>:'same day')}</span>
                   </div>
                   <div className="pass-slot pass-stamp-slot">{covBadge(n)}</div>
                   <div className="pass-slot pass-fare-slot">{tot>0?<div className="pass-fare"><span className="tv-cap2">Budget</span><span className="pass-amt">{fmt(tot,cur)}</span></div>:null}</div>
@@ -2829,7 +3045,7 @@ function BudgetView({trip,cur}){ const {dark}=useContext(Theme); const c=useComp
     </div>
 
     <div className="b-stats">
-      {[['Days',c.days>0?c.days:0],['Cities',tripNodes(trip).filter(n=>n.name).length],
+      {[['Days',c.days>0?c.days:0],['Cities',tripCities(trip)],
         ['Hotels',(trip.hotels||[]).length],['Flights',c.flights],['Trains',c.trains],['Guests',c.persons]]
        .map(([l,v])=>(<div key={l} className="b-card b-tile"><div className="b-cap">{l}</div>
          <div className={`d b-fig v${v===0?' b-nil':''}`}>{v}</div></div>))}
@@ -3467,7 +3683,7 @@ function pdfModel(trip,cur){
   const sp=(trip.spend||[]).reduce((s,x)=>s+spendBase(x,trip),0);
   const misc=Object.values(trip.tripExpenses||{}).reduce((s,e)=>s+num(e.amount)*pax(e.persons,trip),0);
   const grand=accom+trans+sp+misc;
-  const days=daysBetween(trip.departDate,trip.returnDate);
+  const days=tripDays(trip.departDate,trip.returnDate);
   const nmOf=id=>{ const n=(trip.nodes||[]).find(x=>x.id===id); return n?(n.name||'—'):'—'; };
   const M=v=>cur+' '+Math.round(num(v)).toLocaleString('en-US');
   /* Inside a table the currency is stated once, in the column head. Repeating
@@ -3487,7 +3703,7 @@ function pdfModel(trip,cur){
     to:{code:(last&&cityCode(last.name))||'–––',city:(last&&last.name)||dash,
         date:prettyDate(trip.returnDate)||dash},
     route:routeNodes(trip),
-    stats:[['Days',String(days>0?days:0)],['Cities',String(named.length)],['Guests',String(persons)],
+    stats:[['Days',String(days>0?days:0)],['Cities',String(tripCities(trip))],['Guests',String(persons)],
            ['Transport',trans?M(trans):dash],['Hotels',accom?M(accom):dash],['Activities',sp?M(sp):dash]],
     tables:[
       { title:'Cities',
@@ -3660,7 +3876,7 @@ async function exportTripPDF(trip,cur){
 /* ============================ TRIPS / HISTORY ============================ */
 function tripTotals(t0){ const trip=migrateTrip(t0);
   const accommodation=(trip.hotels||[]).reduce((s,h)=>s+hotelBase(h,trip),0); const transport=(trip.transports||[]).reduce((s,t)=>s+transportBase(t,trip),0); const sp=(trip.spend||[]).reduce((s,x)=>s+spendBase(x,trip),0); const misc=Object.values(trip.tripExpenses||{}).reduce((s,e)=>s+num(e.amount)*pax(e.persons,trip),0);
-  return {grand:accommodation+transport+sp+misc,days:daysBetween(trip.departDate,trip.returnDate),cities:tripNodes(trip).filter(n=>n.name).length}; }
+  return {grand:accommodation+transport+sp+misc,days:tripDays(trip.departDate,trip.returnDate),cities:tripCities(trip)}; }
 
 /* ===== how soon? one number, one bar — the same language as the routine card ===== */
 function tripCountdown(t){
@@ -4078,6 +4294,18 @@ function App(){
   /* Signing in lands on All trips. Restoring a stored session on reload does
      not — that would discard the view you were last on. */
   useEffect(()=>{ if(cloud.signInAt) setView('trips'); },[cloud.signInAt]);
+  /* Arriving from the Hub's app card lands on All trips rather than wherever
+     you happened to be last. The parameter is stripped straight afterwards so
+     a later reload restores the view you were actually on — the instruction is
+     "this arrival", not "this tab from now on". */
+  useEffect(()=>{ try{
+    const p=new URLSearchParams(location.search), v=p.get('view');
+    if(!v) return;
+    if(['trips','plan','budget','map','timeline','settings'].indexOf(v)>=0) setView(v);
+    p.delete('view');
+    const q=p.toString();
+    history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash);
+  }catch(e){} },[]);
 
   useEffect(()=>{ document.documentElement.classList.toggle('dark',dark); },[dark]);
   useEffect(()=>{ const s=document.getElementById('splash'); if(s){ setTimeout(()=>s.classList.add('hide'),650); setTimeout(()=>s.remove(),1400);} },[]);
@@ -4166,11 +4394,16 @@ function App(){
     </button>); };
   const NAV=[{id:'trips',label:'Trips',I:Ic.bag},{id:'map',label:'Map',I:Ic.map},{id:'budget',label:'Budget',I:Ic.chart},{id:'timeline',label:'Timeline',I:Ic.compass},{id:'settings',label:'Settings',I:Ic.gear}];
   const TOPNAV=[{id:'trips',label:'Trips'},...(currentTrip?[{id:'plan',label:'Plan'}]:[]),{id:'map',label:'Map'},{id:'budget',label:'Budget'},{id:'timeline',label:'Timeline'},{id:'settings',label:'Settings'}];
-  const showBottomNav=view!=='plan';
+  /* The bottom bar used to be suppressed on Plan. Below 1024 the sidebar is
+     hidden, so that left the Plan tab with no navigation at all on an iPad
+     or a phone — you could reach Plan and not leave it. Nothing in Plan is
+     fixed to the bottom, so there was no collision to avoid. It now always
+     renders and the CSS hides it above 1024, where the sidebar takes over. */
+  const showBottomNav=true;
 
   return (
     <Theme.Provider value={{dark}}>
-      <div className={`tv-shell ${dark?'app-bg-dark text-lavender-50':'app-bg-light text-lavender-950'} font-sans transition-colors`} style={{paddingBottom:showBottomNav?'90px':'0'}}>
+      <div className={`tv-shell ${dark?'app-bg-dark text-lavender-50':'app-bg-light text-lavender-950'} font-sans transition-colors`} >
 <aside className="tv-aside sb">
 <button onClick={()=>setView('trips')} title="All trips" className="tv-logo sb-logo"><Logo logo={logo}/></button>
 
@@ -4249,7 +4482,7 @@ function App(){
             view==='settings'? <SettingsView dark={dark} setDark={setDark} logo={logo} setLogo={setLogo} cloud={cloud} onResetAll={()=>setConfirmReset(true)}/> : null}
         </div></main>
 
-        {showBottomNav&&<nav className="md:hidden fixed left-3 right-3 z-40 rounded-[28px] tp-bottombar" style={{bottom:'calc(10px + env(safe-area-inset-bottom))'}}>
+        {showBottomNav&&<nav className="fixed left-3 right-3 z-40 rounded-[28px] tp-bottombar" style={{bottom:'calc(10px + env(safe-area-inset-bottom))'}}>
           <div className="flex gap-1 px-[7px] py-[7px]">{NAV.map(t=>{ const on=view===t.id; return (<button key={t.id} onClick={()=>setView(t.id)} style={on?{background:'linear-gradient(140deg,#f3b98e 0%,#ec9d6a 45%,#dd824b 100%)',boxShadow:'0 6px 18px rgba(221,130,75,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:undefined} className={`flex-1 flex flex-col items-center gap-1 px-2 py-2 rounded-[18px] text-[11px] font-bold tracking-wide transition ${on?'text-white':'text-white/55 hover:text-white/80'}`}><NavIcon id={t.id} className={`w-[19px] h-[19px] transition`}/>{t.label}</button>); })}</div>
         </nav>}
 
