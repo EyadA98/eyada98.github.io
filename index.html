@@ -155,7 +155,9 @@ html:not(.dark) .wchip{background:rgba(138,100,200,.08);color:var(--violet)}
 
 .wsm-name{flex:1;min-width:0;background:none;border:none;color:var(--text);font-family:inherit;font-size:.9rem;font-weight:700;padding:4px 2px}
 .wsm-name:focus{outline:none;border-bottom:1px solid var(--lavender)}
-.wsm-cols{flex:none;font-size:.66rem;font-weight:700;color:var(--muted);background:var(--chip);border-radius:99px;padding:3px 9px;white-space:nowrap}
+/* --chip was never defined either, so this pill had no fill. Using the soft
+   lavender wash the other neutral pills in the Hub use, which reads in both themes. */
+.wsm-cols{flex:none;font-size:.66rem;font-weight:700;color:var(--muted);background:rgba(138,100,200,.14);border-radius:99px;padding:3px 9px;white-space:nowrap}
 .wsm-cnt{font-size:.72rem;color:var(--muted);font-weight:700;flex:none;min-width:52px;text-align:right}
 .wsm-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px;border-radius:8px;flex:none}
 .wsm-del:hover{color:var(--red);background:rgba(214,85,76,.14)}
@@ -537,7 +539,7 @@ html:not(.dark) .note-card .ntitle{background:linear-gradient(120deg,#7a52bd,#8f
 .note-card .nchk{margin-top:10px;display:flex;flex-direction:column;gap:6px}
 .nchk-row{display:flex;align-items:flex-start;gap:8px;font-size:.86rem;line-height:1.4;color:var(--text)}
 .nchk-b{width:16px;height:16px;border:1.6px solid var(--border);border-radius:5px;flex:none;display:grid;place-items:center;margin-top:1px;color:#fff}
-.nchk-row.done .nchk-b{background:linear-gradient(135deg,var(--lav),var(--peach-deep))}
+.nchk-row.done .nchk-b{background:linear-gradient(135deg,var(--lavender),var(--peach-deep))}   /* same --lav typo */
 .nchk-b svg{width:11px;height:11px}
 .nchk-row.done span{color:var(--muted);text-decoration:line-through}
 .nchk-more{font-size:.74rem;color:var(--muted);padding-left:24px}
@@ -2064,7 +2066,11 @@ html:not(.dark) .td-side{background:rgba(0,0,0,.02)}
 .td-cmts{margin-top:14px}
 .td-cmt-l{display:flex;flex-direction:column;gap:9px;margin:10px 0;max-height:220px;overflow:auto}
 .td-cmt{display:flex;gap:9px}
-.td-cmt .av,.td-cmt-add .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--peach-deep));display:grid;place-items:center;font-weight:800;font-size:.66rem;color:#fff;flex:none}
+/* --lav was never defined; the variable is --lavender. An invalid var() inside
+   a gradient invalidates the whole background declaration, so the avatar had no
+   fill at all — white initials on white in light mode, and only readable in dark
+   because the panel behind it happens to be dark. */
+.td-cmt .av,.td-cmt-add .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--lavender),var(--peach-deep));display:grid;place-items:center;font-weight:800;font-size:.66rem;color:#fff;flex:none}
 .td-cmt-b{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;padding:8px 11px;flex:1;min-width:0}
 html:not(.dark) .td-cmt-b{background:rgba(0,0,0,.025)}
 .td-cmt-au{font-weight:700;font-size:.8rem;display:flex;align-items:center;gap:8px}
@@ -2529,6 +2535,91 @@ main{padding-top:32px!important}
     margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
 }
+
+/* ── workspace pattern, applied ───────────────────────────────────────────────
+   Same interlock tile as the sidebar ribbon, the Travel card rib and the
+   boarding pass. Baked per theme: a data-URI is opaque to the cascade, so a
+   var() inside one never resolves and each theme needs its own finished URI. */
+
+/* PRAYER WIDGET — one tile-tall band across the top, and more room to breathe.
+   .prayer-card is already overflow:hidden, so the band clips to the card's
+   radius without any extra handling.
+
+   The padding does two jobs: 26px of it clears the band, and the rest is the
+   extra height. Base was a flat 20px, so the widget gains ~32px overall and
+   the ring is no longer tight against the card edge.
+
+   isolation:isolate + z-index:-1 rather than a positive z-index and a rule on
+   the children: .pw-wrap is not a stacking context on its own, so without the
+   isolation a positioned pseudo-element would paint over the prayer times. */
+.pw-wrap{position:relative;isolation:isolate;padding:46px 24px 28px;gap:26px}
+/* The existing ≤560 rule sets gap:14px, but it sits earlier in the sheet and
+   ties on specificity, so the line above would have overridden it on phones.
+   Restated here, after, with padding sized for the narrow layout. */
+@media(max-width:560px){ .pw-wrap{padding:40px 16px 22px;gap:14px} }
+.pw-wrap::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;z-index:-1;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+html:not(.dark) .pw-wrap::before{border-bottom-color:rgba(138,100,200,.16);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.05)}
+
+/* TASK & SUBTASK DETAIL PANELS — vertical ribbon on the far right edge.
+   z-index 4 clears .tdp-head's 3; pointer-events:none so nothing under it
+   becomes unclickable. The scroll area is pulled in with a margin rather than
+   padding, so its scrollbar stays beside the ribbon instead of beneath it. */
+.td-panel,.sd-panel{position:relative}
+.td-panel::after,.sd-panel::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
+  z-index:4;pointer-events:none;border-left:1px solid var(--border);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.05)}
+.td-panel .tdp-head,.td-panel .tdp-title,.td-panel .tdp-bottom,
+.sd-panel .tdp-head,.sd-panel .tdp-title,.sd-panel .tdp-bottom{padding-right:44px}
+.td-panel .tdp-scroll,.sd-panel .tdp-scroll{margin-right:26px}
+
+/* ── note cards: pattern rail (option N1) ─────────────────────────────────────
+   The tile is used as a MASK over a block of the note's own ink colour, not as
+   a painted image. Stickies come in eight colours with their own --nink, and a
+   tile baked in one colour would fight six of them; masked, a single tile is
+   always correct relative to its note and needs no per-colour or per-theme
+   variant.
+
+   z-index:-1 puts the rail above the note's gradient but below every child,
+   without touching any child's stacking. That relies on .sticky being a
+   stacking context — it already is, via its rotate() — but isolation:isolate
+   makes it explicit so the rail cannot slip behind the background if that
+   transform is ever removed. */
+.sticky{padding-left:44px;isolation:isolate}
+.sticky::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
+  background:var(--nink);opacity:.20;
+  border-right:1px solid rgba(13,9,38,.14);
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:26px 26px;mask-size:26px 26px;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat}
+/* the border-right is drawn in the mask layer's own alpha, so it needs its own
+   element to survive masking — a right-edge hairline instead */
+.sticky::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
+  background:rgba(13,9,38,.13)}
+
+/* ── routine cards: pattern rail beside the priority stripe (option R1) ───────
+   The 4px priority rail keeps left:0..4 of the padding box; the pattern takes
+   4..30, so the two read as one edge treatment rather than competing stripes.
+   .rt-card.v1's own 1px border beats the legacy .rt-card border-left:4px, so
+   there is no extra border to account for here.
+
+   isolation:isolate + z-index:-1 puts the rail above the card's background —
+   including the st-ok / st-soon / st-od state wash, which is a background-image
+   on the card itself — but below every child, without disturbing the priority
+   rail or the footer buttons. The card is not otherwise a stacking context
+   (overflow:hidden is not one, and its transform only exists on hover), so the
+   isolation is doing real work rather than restating a default. */
+.rt-card.v1{padding-left:48px;isolation:isolate}
+.rt-card.v1::before{content:"";position:absolute;left:4px;top:0;bottom:0;width:26px;z-index:-1;
+  border-right:1px solid var(--border);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+html:not(.dark) .rt-card.v1::before{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(138,100,200,.05)}
 </style>
 </head>
 <body>
@@ -4437,7 +4528,12 @@ function travelCardHtml(a){
   } else {
     body = `<div class="muted" style="font-size:.86rem">${esc(a.desc)}</div>`;
   }
-  return `<a class="card lift app-card" href="${esc(a.url||'#')}" ${/^https?:/.test(a.url||'')?'target="_blank" rel="noopener"':''}>
+  /* The card is a way in, not a way back to wherever you left off — so it asks
+     Travel for All trips. Appended rather than baked into the setting, because
+     travelUrl is user-editable and may already carry a query of its own. */
+  const url=a.url||'#';
+  const href = url==='#' ? url : url+(url.indexOf('?')>=0?'&':'?')+'view=trips';
+  return `<a class="card lift app-card" href="${esc(href)}" ${/^https?:/.test(url)?'target="_blank" rel="noopener"':''}>
     ${ARROW_SVG}
     <div class="ico ${a.tile}">${a.icon}</div>
     <div class="nm">${esc(a.nm)}</div>
