@@ -2504,6 +2504,31 @@ main{padding-top:32px!important}
 @media(max-width:760px){
   .ws-bar{padding-bottom:12px;margin-bottom:12px}
 }
+
+/* ── workspace pattern: the rail ends on a ribbon ─────────────────────────────
+   The same interlocking-circle tile the Travel cards and the boarding pass
+   carry, so all three apps close their sidebar the same way.
+
+   It is a flex child pinned with margin-top:auto rather than an absolutely
+   positioned band: the rail scrolls, so an absolute band would either scroll
+   away from the foot or sit under the nav on a short viewport. As a flex child
+   it settles at the bottom when there is room and simply follows the last item
+   when there isn't. The negative bottom margin cancels the rail's own 26px
+   bottom padding so the ribbon meets the edge instead of floating above it.
+
+   One tile tall, so the geometry never ends mid-circle. The tile is baked
+   rather than built from a custom property, because a data-URI is opaque to
+   the cascade and a var() inside one never resolves.
+
+   Scoped to >=1025 rather than hidden below it: at narrow widths the rail
+   becomes a horizontal bar, and the Hub already gives aside::after a job there
+   as the scroll-fade on the right edge. Overriding it with display:none would
+   have taken that fade away. */
+@media(min-width:1025px){
+  aside::after{content:"";display:block;flex:none;height:26px;min-height:26px;
+    margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+}
 </style>
 </head>
 <body>
