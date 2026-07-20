@@ -1901,6 +1901,19 @@ html:not(.dark) .tvs .s-rib{background:url("data:image/svg+xml,%3Csvg xmlns='htt
   content:"\2014";font:700 1rem/1.1 'Plus Jakarta Sans',sans-serif;color:var(--dim)}
 /* an empty badge still painted its pill; keep the height, drop the paint */
 .pass-dur:empty{visibility:hidden}
+
+/* ── the top bar actually stays put ──────────────────────────────────────────
+   .tv-topbar carried position:sticky and looked identical to Finance's, but a
+   sticky element can only move within its containing block — and here that is
+   the <header> wrapping it, which is exactly the bar's own height. With no room
+   to travel it simply scrolled away with its parent. Finance's .topbar is a
+   direct child of the tall grid column, which is the whole difference.
+
+   The fix is to make the wrapper the sticky one: its containing block is
+   .tv-col, which runs the full height of the page. The bar itself goes static
+   and rides along, keeping its own blur, border and padding. */
+.tv-col > header{position:sticky;top:0;z-index:20}
+.tv-col > header > .tv-topbar{position:static}
 </style>
 </head>
 <body>
