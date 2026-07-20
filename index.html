@@ -2684,6 +2684,42 @@ html:not(.dark) .rt-card.v1::before{
    instead of wrapping. anywhere (not break-word) so it also breaks mid-token
    when there is no space to break at. */
 .sticky .ntitle{overflow-wrap:anywhere}
+
+/* ── the date box must not wrap ───────────────────────────────────────────────
+   "Mon, Jul 20" broke at the space on phones: .hx-val had no white-space rule,
+   and the fixed step-downs at 760px and 400px still left the string wider than
+   a third of a narrow viewport. Rather than chase a font size that happens to
+   fit — Marcellus at 700 is wider than it looks, and the string changes length
+   through the week ("Wed, Sep 3" vs "Mon, Sep 22") — the value is pinned to one
+   line and sized against the viewport, so it scales down instead of breaking.
+   The tighter side padding buys back the room that costs. */
+@media(max-width:760px){
+  .hx-box.hx-date .hx-val{white-space:nowrap;font-size:clamp(.72rem,3vw,1.15rem)}
+  .hx-box.hx-date{padding-left:6px;padding-right:6px}
+}
+
+/* ── hero boxes: two up on phones, not three ─────────────────────────────────
+   Three across a 390px screen leaves ~100px of usable width per box, which
+   forced the date down to ~11.5px just to stay on one line — legible, but
+   visibly smaller than the time and weather beside it. Two across gives ~174px,
+   so all three values go back to a readable size and the date has room for the
+   weekday. The third box takes the full width of the second row rather than
+   sitting half-empty next to a gap. */
+@media(max-width:560px){
+  .hx-boxes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hx-box:nth-child(3){grid-column:1 / -1}
+  .hx-box{min-height:112px;padding:14px 12px}
+  .hx-val{font-size:1.75rem}
+  .hx-box.hx-date .hx-val{font-size:1.35rem;white-space:nowrap}
+  .hx-box.hx-date{padding-left:12px;padding-right:12px}
+}
+@media(max-width:360px){
+  .hx-val{font-size:1.55rem}
+  /* at 320px a 1.2rem date lands exactly on the box width, so it steps down
+     once more — still far larger than the 11.5px the 3-up layout forced */
+  .hx-box.hx-date .hx-val{font-size:1.06rem}
+  .hx-box{padding:12px 10px}
+}
 </style>
 </head>
 <body>
