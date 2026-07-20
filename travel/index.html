@@ -1914,6 +1914,60 @@ html:not(.dark) .tvs .s-rib{background:url("data:image/svg+xml,%3Csvg xmlns='htt
    and rides along, keeping its own blur, border and padding. */
 .tv-col > header{position:sticky;top:0;z-index:20}
 .tv-col > header > .tv-topbar{position:static}
+
+/* ── responsive corrections ──────────────────────────────────────────────────
+   Each of these properties is set inside a media query earlier in this sheet and
+   then re-declared unscoped further down, so the responsive value lost on source
+   order — the same failure that produced the iPad navigation gap, the prayer
+   widget's spacing and the stub width. Restating them last is deliberate: it
+   fixes the outcome without reordering rules whose desktop behaviour is correct
+   and well tested. If you ever move the offending declarations above their
+   breakpoints, this block can go.
+
+   Not included: .pv-cityhead{min-height} (both values are 0, so it never
+   mattered) and .pass-stub{width} (already carries !important and wins). */
+@media(max-width:900px){
+  .tv-when{width:100%}                 /* was reverting to a fixed 226px on phones */
+  .tv-tripbar{gap:12px}                /* was taking the desktop 22px gap */
+  .tv-cityname{max-width:none}         /* long city names were capped at 210px */
+  .tv-citymeta{margin-left:0}          /* margin-left:auto was pushing meta right */
+  html:not(.dark) .bb-rib{background:
+     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%233b2a63' stroke-opacity='.28' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3C/g%3E%3C/svg%3E") left center/26px 26px repeat-x,
+     linear-gradient(135deg,rgba(138,100,200,.20),rgba(138,100,200,.10))}
+}
+@media(max-width:1240px){
+  /* my own regression: the stacked stub needs its radius on top, not on the left */
+  .pass-stub{border-radius:16px 16px 0 0}
+}
+@media(max-width:540px){
+  .bb-foot{justify-content:stretch}    /* footer buttons were not filling the row */
+}
+
+/* ── keyboard focus, restored ─────────────────────────────────────────────────
+   Travel already carries the same global ring Finance does:
+     :where(button,a,input,…):focus-visible{outline:2px solid #a081d6}
+   but :where() contributes zero specificity, so every element-specific
+   outline:none below it wins and the ring never appears. Those rules exist for
+   good reason — the fields are styled as bare text on a card, and the UA outline
+   ruins them — so the fix is not to delete them but to state the ring again at
+   matching specificity, only for :focus-visible.
+
+   :focus-visible, not :focus, so a mouse click still gets no ring; this shows up
+   for keyboard navigation only. Colour follows the existing ring, with the
+   darker violet in light mode for contrast, exactly as Finance does it. */
+.tw-in:focus-visible,.tw-per:focus-visible,
+.bb-city input:focus-visible,.bb-date button:focus-visible,
+.fld-ctl input:focus-visible,.fld-ctl .pv-fsel:focus-visible,
+.fld-ctl .pv-fieldbtn:focus-visible,.fld-ctl .pv-rangecell:focus-visible,
+.sb-search input:focus-visible,.sb-name input:focus-visible,
+.bb-name:focus-visible{
+  outline:2px solid #a081d6!important;outline-offset:2px;border-radius:10px}
+html:not(.dark) .tw-in:focus-visible,html:not(.dark) .tw-per:focus-visible,
+html:not(.dark) .bb-city input:focus-visible,html:not(.dark) .bb-date button:focus-visible,
+html:not(.dark) .fld-ctl input:focus-visible,html:not(.dark) .fld-ctl .pv-fsel:focus-visible,
+html:not(.dark) .fld-ctl .pv-fieldbtn:focus-visible,html:not(.dark) .fld-ctl .pv-rangecell:focus-visible,
+html:not(.dark) .sb-search input:focus-visible,html:not(.dark) .sb-name input:focus-visible,
+html:not(.dark) .bb-name:focus-visible{outline-color:#623f94!important}
 </style>
 </head>
 <body>
