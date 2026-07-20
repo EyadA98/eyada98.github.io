@@ -4673,7 +4673,7 @@ function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new 
 var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
 function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var now=new Date(),nowS=now.getHours()*3600+now.getMinutes()*60; for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
 function hpill(ic,html,cls){ return '<span class="hpill'+(cls?" "+cls:"")+'">'+ic+'<span>'+html+'</span></span>'; }
-function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var over=op.filter(function(x){return x.due&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));el.innerHTML=parts.join("");}
+function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var over=op.filter(function(x){return x.due&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));/* travel: renderDailySummary() looks for #dailySummary, which no longer exists in the markup — it returns on the first line, so a row added there is invisible. This hero strip is the summary that actually renders. */try{var _tv=travelDigestPill();if(_tv)parts.push(_tv);}catch(e){}el.innerHTML=parts.join("");}
 
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
@@ -4689,7 +4689,7 @@ function renderOvTasks(){
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
 function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
-function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));try{var _tv=travelDigestRow();if(_tv)rows.push(_tv);}catch(e){}if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
+function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));/* moved: #dailySummary is not in the markup, so nothing here ever rendered */if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
 var calView="month",calCursor=new Date(),calSel=null;
@@ -6185,7 +6185,7 @@ function tvPretty(iso){
 function travelItems(){
   var out=[]; var trips=(typeof travelAll!=="undefined"&&travelAll&&travelAll.length)?travelAll:(travelTrips||[]);
   (trips||[]).forEach(function(t){
-    if(!t) return;
+    if(!t||t.__deleted) return;
     var nodes=t.nodes||[];
     var named=nodes.map(function(n){return n&&n.name;}).filter(Boolean);
     var nameOf=function(id){ var n=nodes.filter(function(x){return x&&x.id===id;})[0]; return (n&&n.name)||""; };
@@ -6254,7 +6254,12 @@ var IC_PLANE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
    week" means. Note it collapses to today on a Saturday; that is the existing
    behaviour of Upcoming, deliberately matched rather than corrected here. */
 function hubWeekEnd(){ var d=new Date(); var s=new Date(); s.setDate(s.getDate()+(6-d.getDay())); return isoLocal(s); }
-function travelDigestRow(){
+/* the hero strip takes pills, not rows — same rule, different wrapper */
+function travelDigestPill(){
+  var r=travelDigestRow(true);
+  return r? hpill(IC_PLANE, r) : "";
+}
+function travelDigestRow(asText){
   var trips=(typeof travelAll!=="undefined"&&travelAll)?travelAll:[];
   if(!trips.length) return "";
   var t=isoLocal(new Date());
@@ -6270,7 +6275,7 @@ function travelDigestRow(){
     return tr.departDate && tr.departDate<=t && (tr.returnDate||tr.departDate)>=t; })[0];
   if(live){
     var back=Math.round((new Date((live.returnDate||live.departDate)+"T00:00:00")-d0)/DAY);
-    return sumRow(IC_PLANE,"In <b>"+esc(dest(live))+"</b>"+
+    return (function(h){return asText?h:sumRow(IC_PLANE,h);})("In <b>"+esc(dest(live))+"</b>"+
       (back>0?(" &middot; back in <b>"+back+"</b> day"+(back>1?"s":"")):" &middot; back today"));
   }
   var next=trips.filter(function(tr){ return tr.departDate && tr.departDate>t; })
@@ -6281,7 +6286,7 @@ function travelDigestRow(){
      today's news, and showing it here while Upcoming stays empty would have
      the two surfaces contradicting each other. */
   if(next.departDate>hubWeekEnd()) return "";
-  return sumRow(IC_PLANE,"<b>"+esc(dest(next))+"</b> in <b>"+days+"</b> day"+(days>1?"s":""));
+  var h2="<b>"+esc(dest(next))+"</b> in <b>"+days+"</b> day"+(days>1?"s":"");return asText?h2:sumRow(IC_PLANE,h2);
 }
 async function loadTravel(){
   if(!user||!supa) return;
@@ -6289,8 +6294,11 @@ async function loadTravel(){
     const {data:rows}=await supa.from("trips").select("data,updated_at").eq("user_id",user.id);
     if(!rows) return;
     var today=isoLocal(new Date());
-    travelAll=rows.map(function(r){return r.data;}).filter(function(t){ return t&&t.departDate&&t.status!=="archived"; });
-    var ups=rows.map(function(r){return r.data;}).filter(function(t){ return t&&t.departDate&&t.departDate>=today&&t.status!=="completed"&&t.status!=="archived"; });
+    /* Travel deletes a trip by writing a tombstone ({__deleted:true}) rather than
+       removing the row, so the record stays in the table for last-write-wins sync.
+       Without this filter the Hub kept showing trips you had already deleted. */
+    travelAll=rows.map(function(r){return r.data;}).filter(function(t){ return t&&!t.__deleted&&t.departDate&&t.status!=="archived"; });
+    var ups=rows.map(function(r){return r.data;}).filter(function(t){ return t&&!t.__deleted&&t.departDate&&t.departDate>=today&&t.status!=="completed"&&t.status!=="archived"; });
     ups.sort(function(a,b){return (a.departDate||"").localeCompare(b.departDate||"");});
     travelTrips=ups;
     try{ renderTimeline(); }catch(e){}try{ renderUpcoming(); }catch(e){}try{ renderCalendar(); }catch(e){}try{ renderDailySummary(); }catch(e){}
