@@ -6301,7 +6301,9 @@ async function loadTravel(){
     var ups=rows.map(function(r){return r.data;}).filter(function(t){ return t&&!t.__deleted&&t.departDate&&t.departDate>=today&&t.status!=="completed"&&t.status!=="archived"; });
     ups.sort(function(a,b){return (a.departDate||"").localeCompare(b.departDate||"");});
     travelTrips=ups;
-    try{ renderTimeline(); }catch(e){}try{ renderUpcoming(); }catch(e){}try{ renderCalendar(); }catch(e){}try{ renderDailySummary(); }catch(e){}
+    try{ renderTimeline(); }catch(e){}try{ renderUpcoming(); }catch(e){}try{ renderCalendar(); }catch(e){}try{ renderDailySummary(); }catch(e){}/* the hero strip is where the travel line actually lives — renderDailySummary
+       targets #dailySummary, which is no longer in the markup, so without this the
+       pill never repainted when trips arrived */try{ renderWelcomeSummary(); }catch(e){}
     var lu=rows.map(function(r){return r.updated_at;}).filter(Boolean).sort().pop(); if(lu) travelUpdated=lu;
     renderAppCards("appCards"); renderAppCards("appCardsFull");
   }catch(e){}
