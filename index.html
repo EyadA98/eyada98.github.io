@@ -4083,6 +4083,9 @@ function digestData(){
     push({kind:"event",title:e.summary||"(event)",date:ed,time:dt?w.slice(11,16):""});
   });
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(nx) push({kind:"routine",title:r.title||"Routine",date:nx,time:(r.time||""),recur:rtRecurLabel(r)}); });
+  /* travel. travelItems() is the same extractor the calendar and Upcoming use,
+     so the digest cannot disagree with what the rest of the Hub shows. */
+  try{ travelItems().forEach(function(x){ push({kind:"trip",title:x.label,date:x.date,time:x.time||""}); }); }catch(e){}
   function srt(a,b){ return (a.date||"").localeCompare(b.date||"")||((a.time||"zz").localeCompare(b.time||"zz")); }
   today.sort(srt); week.sort(srt); overdue.sort(srt);
   function cnt(a,k){ return a.filter(function(x){return x.kind===k;}).length; }
@@ -4123,7 +4126,7 @@ function buildDigest(){
    +'</tr></table>';
 
   /* --- rows --- */
-  var PILL={ task:["TASK","rgba(138,100,200,.18)",PUR2], sub:["SUB","rgba(198,179,239,.36)","#6b52c9"], event:["EVENT","rgba(78,168,222,.16)","#2c7fb0"], routine:["ROUTINE","rgba(30,145,95,.18)","#177a50"] };
+  var PILL={ task:["TASK","rgba(138,100,200,.18)",PUR2], sub:["SUB","rgba(198,179,239,.36)","#6b52c9"], event:["EVENT","rgba(78,168,222,.16)","#2c7fb0"], routine:["ROUTINE","rgba(30,145,95,.18)","#177a50"], trip:["TRAVEL","rgba(221,130,75,.18)","#b0632a"] };
   function whenLbl(it,mode){
     if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
     if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
@@ -4660,7 +4663,7 @@ var KIND={ task   :{c:"#8a64c8",n:"Task"},
            sub    :{c:"#c6b3ef",n:"Subtask"},
            event  :{c:"#4ea8de",n:"Event"},
            routine:{c:"#1e915f",n:"Routine"},
-           trip   :{c:"#dd824b",n:"Trip"},
+           trip   :{c:"#dd824b",n:"Travel"},
            zakat  :{c:"#7fd1c4",n:"Zakat"} };
 function kindKey(k){ return KIND[k]?k:"task"; }
 function kindColor(k){ return KIND[kindKey(k)].c; }
