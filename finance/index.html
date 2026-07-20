@@ -1048,6 +1048,10 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
   .card.acc-head{padding-top:44px}
   #budgetCards .card,#zakaCards .card{padding-top:40px}
 }
+
+/* Account names are user-entered and render into a <span> with no wrapping rule;
+   a long unbroken name pushed the row's figures off the card. */
+.acc-nm{overflow-wrap:anywhere;min-width:0}
 </style>
 </head>
 <body>
@@ -1292,6 +1296,11 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
 <div class="toast" id="toast" role="status">Saved</div>
 
 <script>
+/* Local calendar date. toISOString() converts to UTC first, so between midnight
+   and 03:00 in Riyadh (UTC+3) it returns YESTERDAY — which dated new purchases
+   and snapshots a day early and made "today" comparisons wrong. These are plain
+   calendar dates; no timezone should enter into them. */
+function isoLocal(d){ d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const ACCOUNT_TYPES = ["Bank Account","Savings","Investment Account","Wallet","Cash","Credit Account","Receivable"];
 const ROI_TYPES = ["Investment Account","Stocks","ETF / Fund","Real Estate","Crypto","Gold / Metals","Business","Bonds","Other"];
 const ASSET_TYPES = ["Precious Metals","Stock","Fund","Crypto","Real Estate","Other"];
@@ -1671,7 +1680,7 @@ function filteredSnaps(){
   if(trendRange==="all") return snaps;
   const cut = new Date();
   cut.setFullYear(cut.getFullYear() - (trendRange==="1y"?1:3));
-  const c = cut.toISOString().slice(0,10);
+  const c = isoLocal(cut);
   return snaps.filter(s=>s.date>=c);
 }
 function trendCfg(){
@@ -1770,7 +1779,7 @@ function nextZaka(){
   let d = new Date(last.dateG);
   const now = new Date();
   while(d <= now) d = new Date(d.getTime() + 354.37*864e5);   // lunar year
-  return {date: d.toISOString().slice(0,10), days: Math.ceil((d-now)/864e5)};
+  return {date: isoLocal(d), days: Math.ceil((d-now)/864e5)};
 }
 function computeInsights(){
   const list = [];
@@ -1857,7 +1866,7 @@ function kpi(title, value, sub, tile, icon, extra){
     <div class="icon-tile ${tile}">${icon}</div></div>${sub?`<div class="sub">${sub}</div>`:""}${extra||""}</div>`;
 }
 function prevSnapshot(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = isoLocal();
   const snaps = [...data.snapshots].filter(s=>s.date<today).sort((a,b)=>a.date.localeCompare(b.date));
   return snaps[snaps.length-1];
 }
@@ -2093,7 +2102,7 @@ function renderPurchases(){
   document.getElementById("purchTotal").textContent = fmt(data.purchases.filter(p=>p.status==="Owned").reduce((s,p)=>s+(p.qty||0)*(p.unit||0),0));
 }
 function addPurchase(){
-  data.purchases.push({item:"",qty:0,unit:0,date:new Date().toISOString().slice(0,10),status:"Owned",_id:uid(),_u:Date.now()});
+  data.purchases.push({item:"",qty:0,unit:0,date:isoLocal(),status:"Owned",_id:uid(),_u:Date.now()});
   save(); render();
 }
 
@@ -2296,7 +2305,11 @@ function renderSnapshots(){
   const ath = sorted.reduce((m,x)=>x.value>m.value?x:m, sorted[0]||{value:0});
   const snaps = [...sorted].reverse();
   const dash = v => (v==null)?'<span style="opacity:.4">—</span>':sar(v);
-  document.querySelector("#snapTable tbody").innerHTML = snaps.map(s=>{
+  /* every other list in the three apps states its empty case; this one rendered
+     column headers above nothing at all. */
+  if(!snaps.length){ document.querySelector("#snapTable tbody").innerHTML =
+    '<tr><td colspan="9" class="muted" style="text-align:center;padding:22px 8px">No snapshots yet — record one to start tracking net worth over time.</td></tr>'; }
+  else document.querySelector("#snapTable tbody").innerHTML = snaps.map(s=>{
     const i = data.snapshots.indexOf(s);
     return `<tr><td>${s.date} ${s===ath?'<span class="pill" style="background:rgba(212,161,30,.15);color:#A87F12"><svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg> All-time high</span>':""}</td>
     <td class="num">${sar(s.value)}</td>
@@ -2318,7 +2331,7 @@ function renderSnapshots(){
   document.getElementById("milestones").innerHTML = out.join("");
 }
 function buildSnapshot(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = isoLocal();
   const t = totals(), hs = holdings(), r = n=>Math.round((+n||0)*100)/100;
   const cash = data.accounts.filter(a=>["Bank Account","Wallet","Cash","Receivable"].includes(a.type)).reduce((s,a)=>s+(+a.balance||0),0);
   const investmentAccounts = data.accounts.filter(a=>a.type==="Investment Account").reduce((s,a)=>s+(+a.balance||0),0);
@@ -2374,7 +2387,7 @@ function exportData(){
   const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "finance-board-backup-"+new Date().toISOString().slice(0,10)+".json";
+  a.download = "finance-board-backup-"+isoLocal()+".json";
   a.click();
 }
 function importData(ev){
