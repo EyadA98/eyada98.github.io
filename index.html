@@ -2678,6 +2678,12 @@ html:not(.dark) .rt-card.v1::before{
   .auth-card::after,.tv-authcard::after{left:22px}
   .auth-card::before,.tv-authcard::before{width:22px}
 }
+
+/* A note title is a <div> holding whatever you typed. Without this, one long
+   unbroken string — a URL, a pasted token — runs straight out of the sticky
+   instead of wrapping. anywhere (not break-word) so it also breaks mid-token
+   when there is no space to break at. */
+.sticky .ntitle{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -2985,7 +2991,17 @@ let data = (function(){
 function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); }catch(e){} scheduleHubSync(); }
 let _hubTimer=null;
 function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
-async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){ console.error("Hub sync failed:",(e&&e.message)||e); } }
+async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){
+  /* A failed cloud save used to reach console.error and nowhere else: you kept
+     working, the change never left the device, and another device showed stale
+     data with no hint anything had gone wrong. Finance and Travel both surface
+     this. Told once per failure run, not per retry, so a long offline spell does
+     not produce a stream of toasts. */
+  console.error("Hub sync failed:",(e&&e.message)||e);
+  if(!_hubSyncWarned){ _hubSyncWarned=true; try{ toast("Changes saved on this device — cloud sync failed"); }catch(_){} }
+  return;
+} _hubSyncWarned=false; }
+var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; if(tv>0&&((x.id!=null)||tv>=xu)) return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
@@ -3581,7 +3597,7 @@ function rtRecurLabel(r){ var rc=normRecur(r.recur||{}); switch(rc.type){
   case"distance":return"Every "+(+(rc.n||rc.kmInterval)||0).toLocaleString()+" "+(rc.unit||"km");
   case"customUnit":return"Every "+(rc.n||1)+" "+(rc.customUnit||"units");
   default:return"Recurring"; } }
-function rtCountdown(iso){ if(!iso) return {cls:"none",txt:"No date"}; var today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00"); var d=new Date(iso+"T00:00:00"); var n=Math.round((d-today)/86400000); if(n<0) return {cls:"over",txt:(-n)+"d overdue"}; if(n===0) return {cls:"today",txt:"Due today"}; if(n===1) return {cls:"up",txt:"Tomorrow"}; if(n<=14) return {cls:"up",txt:"In "+n+" days"}; return {cls:"none",txt:fmtShort(iso)}; }
+function rtCountdown(iso){ if(!iso) return {cls:"none",txt:"No date"}; var today=new Date(isoLocal(new Date())+"T00:00:00"); var d=new Date(iso+"T00:00:00"); var n=Math.round((d-today)/86400000); if(n<0) return {cls:"over",txt:(-n)+"d overdue"}; if(n===0) return {cls:"today",txt:"Due today"}; if(n===1) return {cls:"up",txt:"Tomorrow"}; if(n<=14) return {cls:"up",txt:"In "+n+" days"}; return {cls:"none",txt:fmtShort(iso)}; }
 function rtStatus(r){ var nx=rtNext(r); if(!nx) return "none"; var c=rtCountdown(nx).cls; return c==="over"?"overdue":c==="today"?"today":(c==="up"?"upcoming":"later"); }
 function rtList(){
   var q=((document.getElementById("rtSearch")||{}).value||"").toLowerCase();
@@ -3946,7 +3962,7 @@ function buildNotifs(){
 function notifActive(){ var ns=notifStore(); var now=Date.now(); return buildNotifs().filter(function(n){ if(notifDismissed(n)) return false; if(ns.snooze[n.id]&&ns.snooze[n.id]>now) return false; return true; }); }
 function notifUnreadCount(){ var ns=notifStore(); return notifActive().filter(function(n){return !ns.read[n.id];}).length; }
 function updateNotifBadge(){ var c=notifUnreadCount(); var b=document.getElementById("notifBadge"); if(b){ b.textContent=c>99?"99+":c; b.classList.toggle("show",c>0); } var nb=document.getElementById("navNotifBadge"); if(nb){ nb.textContent=c>99?"99+":c; nb.classList.toggle("show",c>0); } }
-function notifWhen(due,time){ if(!due) return {txt:"",cls:""}; var today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00"); var d=new Date(due+"T00:00:00"); var n=Math.round((d-today)/86400000); var tm=time?(" · "+time):""; if(n<0) return {txt:(-n)+(n===-1?" day":" days")+" overdue",cls:"over"}; if(n===0) return {txt:"Today"+tm,cls:"soon"}; if(n===1) return {txt:"Tomorrow"+tm,cls:"soon"}; return {txt:"In "+n+" days"+tm,cls:""}; }
+function notifWhen(due,time){ if(!due) return {txt:"",cls:""}; var today=new Date(isoLocal(new Date())+"T00:00:00"); var d=new Date(due+"T00:00:00"); var n=Math.round((d-today)/86400000); var tm=time?(" · "+time):""; if(n<0) return {txt:(-n)+(n===-1?" day":" days")+" overdue",cls:"over"}; if(n===0) return {txt:"Today"+tm,cls:"soon"}; if(n===1) return {txt:"Tomorrow"+tm,cls:"soon"}; return {txt:"In "+n+" days"+tm,cls:""}; }
 function renderNotifs(){
   var host=document.getElementById("ntfList"); if(!host) return;
   var ns=notifStore(); var now=Date.now(); var all=buildNotifs(); var today=isoLocal(new Date());
@@ -4576,7 +4592,7 @@ function appDef(){
   ];
 }
 var ARROW_SVG='<span class="arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span>';
-function tripCountdown(dep){ if(!dep) return ""; var today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00"); var d=new Date(dep+"T00:00:00"); if(isNaN(d)) return ""; var n=Math.round((d-today)/86400000); if(n<0) return ""; if(n===0) return "Today"; if(n===1) return "Tomorrow"; return "In "+n+" days"; }
+function tripCountdown(dep){ if(!dep) return ""; var today=new Date(isoLocal(new Date())+"T00:00:00"); var d=new Date(dep+"T00:00:00"); if(isNaN(d)) return ""; var n=Math.round((d-today)/86400000); if(n<0) return ""; if(n===0) return "Today"; if(n===1) return "Tomorrow"; return "In "+n+" days"; }
 /* Every way into Travel from the Hub lands on All trips. Kept in one place so
    the app card and the notification item cannot disagree; travelUrl is a
    user-editable setting and may already carry a query of its own. */
@@ -4629,13 +4645,13 @@ function renderApps(){ renderAppCards("appCardsFull"); }
 
 function renderInsights(){
   const out=[];
-  const today=new Date().toISOString().slice(0,10);
+  const today=isoLocal(new Date());
   const overdue=data.tasks.filter(t=>!t.done&&t.due&&t.due<today).length;
   if(overdue) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',`<b>${overdue}</b> task${overdue>1?"s":""} overdue — take a look in Tasks.`));
   if(financeStat) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',`Latest recorded net worth: <b>${esc(financeStat)}</b>.`));
   const dueSoon=data.tasks.filter(t=>!t.done&&t.due&&t.due>=today).sort((a,b)=>a.due.localeCompare(b.due))[0];
   if(dueSoon) out.push(insight('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',`Next due: <b>${esc(dueSoon.t)}</b> on ${esc(dueSoon.due)}.`));
-  document.getElementById("insightStrip").innerHTML = out.join("");
+  var _is=document.getElementById("insightStrip"); if(_is) _is.innerHTML = out.join("");   /* element no longer in the markup */
 }
 function insight(ic,html){ return `<div class="insight"><div class="ico">${ic}</div><div>${html}</div></div>`; }
 
@@ -4710,7 +4726,7 @@ function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var
 function calPick(iso){calSel=iso;renderCalendar();}
 function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
 function computeNudges(){
-  var out=[], todayISO=new Date().toISOString().slice(0,10);
+  var out=[], todayISO=isoLocal(new Date());
   var overdue=(data.tasks||[]).filter(function(t){return !t.done&&t.due&&t.due<todayISO;}).length;
   if(overdue) out.push("<b>"+overdue+"</b> task"+(overdue>1?"s":"")+" overdue.");
   var td=data.settings.nextTripDate;
@@ -4724,7 +4740,7 @@ function renderAgenda(){
   var el=document.getElementById("agendaList"); if(!el) return;
   if(data.settings.showCalendar===false){ el.innerHTML='<span class="muted" style="font-size:.84rem">Calendar off (enable in Settings).</span>'; return; }
   if(calEvents===null){ el.innerHTML = data.settings.gcalId ? '<button class="btn soft" onclick="connectCal()">Connect Google Calendar</button>' : '<span class="muted" style="font-size:.84rem">Add a Google Client ID in Settings to see your agenda.</span>'; return; }
-  var today=new Date().toISOString().slice(0,10);
+  var today=isoLocal(new Date());
   var todays=calEvents.filter(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";return w.slice(0,10)===today;});
   el.innerHTML = todays.length ? todays.map(function(e){var dt=e.start&&e.start.dateTime; var tm=dt?new Date(e.start.dateTime).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"All day"; return '<div class="agenda-item"><div class="agenda-time">'+esc(tm)+'</div><div style="flex:1">'+esc(e.summary||"(no title)")+'</div></div>';}).join("") : '<div class="muted" style="padding:8px 0;font-size:.86rem">No events today.</div>';
 }
@@ -5771,7 +5787,7 @@ function linkChip(l){ return `<a class="link-chip" href="${esc(l.url)}" target="
 function renderLinks(){
   const groups={}; data.links.forEach((l,i)=>{ (groups[l.group||"Links"]=groups[l.group||"Links"]||[]).push({...l,i}); });
   const keys=Object.keys(groups);
-  document.getElementById("linksList").innerHTML = keys.length? keys.map(g=>
+  var _ll=document.getElementById("linksList"); if(_ll) _ll.innerHTML = keys.length? keys.map(g=>
     `<div class="link-group"><h3>${esc(g)}</h3><div>${groups[g].map(l=>
       `<span class="link-chip" style="cursor:default"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px"><span class="dot"></span>${esc(l.label)}</a><button class="btn danger" style="margin-left:6px;padding:2px 7px" onclick="delLink(${l.i})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`
     ).join("")}</div></div>`
@@ -5788,7 +5804,7 @@ async function addLink(){
 function delLink(i){ var l=data.links[i]; if(l) tombstone(l); data.links.splice(i,1); save(); render(); }
 
 /* ---- Travel countdown ---- */
-function travelStat(){ var d=data.settings.nextTripDate; if(!d) return ""; var diff=Math.ceil((new Date(d+"T00:00:00")-new Date(new Date().toISOString().slice(0,10)+"T00:00:00"))/86400000); if(isNaN(diff)||diff<0) return ""; var dest=data.settings.nextTripDest||"your trip"; return diff===0?("Today · "+dest):(diff+"d · "+dest); }
+function travelStat(){ var d=data.settings.nextTripDate; if(!d) return ""; var diff=Math.ceil((new Date(d+"T00:00:00")-new Date(isoLocal(new Date())+"T00:00:00"))/86400000); if(isNaN(diff)||diff<0) return ""; var dest=data.settings.nextTripDest||"your trip"; return diff===0?("Today · "+dest):(diff+"d · "+dest); }
 
 /* ---- Goals & habits ---- */
 function fmtNum(x){ return Number(x||0).toLocaleString("en-US",{maximumFractionDigits:2}); }
@@ -6355,16 +6371,21 @@ var _acTimer=null,_acIdx=-1,_acItems=[],_acInp="setCity",_acList="cityAClist";
 function cityAC(q,inpId,listId){ if(inpId)_acInp=inpId; if(listId)_acList=listId; var box=document.getElementById(_acList); if(!box) return; q=(q||"").trim(); if(q.length<2){ box.classList.remove("show"); box.innerHTML=""; return; } clearTimeout(_acTimer); _acTimer=setTimeout(function(){ fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(q)+"&count=6&language=en").then(function(r){return r.json();}).then(function(j){ _acItems=(j&&j.results)||[]; _acIdx=-1; if(!_acItems.length){ box.classList.remove("show"); box.innerHTML=""; return; } box.innerHTML=_acItems.map(function(r,i){ return '<div class="ac-item" data-i="'+i+'" onmousedown="cityPick('+i+')"><span>'+esc(r.name)+'</span><small>'+esc([r.admin1,r.country].filter(Boolean).join(", "))+'</small></div>'; }).join(""); box.classList.add("show"); }).catch(function(){}); },220); }
 function cityPick(i){ var r=_acItems[i]; if(!r) return; var inp=document.getElementById(_acInp); if(inp) inp.value=r.name; if(_acInp==="pcCity"){ var cf=document.getElementById("pcCountry"); if(cf&&r.country) cf.value=r.country; } var box=document.getElementById(_acList); if(box){ box.classList.remove("show"); box.innerHTML=""; } }
 function cityACKey(e){ var box=document.getElementById(_acList); if(!box||!box.classList.contains("show")) return; var items=box.querySelectorAll(".ac-item"); if(!items.length) return; if(e.key==="ArrowDown"){ _acIdx=Math.min(_acIdx+1,items.length-1); } else if(e.key==="ArrowUp"){ _acIdx=Math.max(_acIdx-1,0); } else if(e.key==="Enter"){ if(_acIdx>=0){ e.preventDefault(); cityPick(_acIdx); } return; } else { return; } e.preventDefault(); items.forEach(function(it,i){ it.classList.toggle("hi",i===_acIdx); }); }
+/* These four toggles were removed from the Settings modal but saveSettings kept
+   reading them, so it threw on the first one — before save(), closeModal() and
+   the confirmation toast. Settings silently could not be saved at all. Read the
+   control when it exists and keep the stored value when it does not. */
+function _qaChk(id,cur){ var e=document.getElementById(id); return e? e.checked : (cur!==false); }
 function saveSettings(){
   var s=data.settings;
   data.profile.name=document.getElementById("setName").value.trim();
   s.city=document.getElementById("setCity").value.trim()||"Makkah"; s.cityUpdated=Date.now();
   s.lang=document.getElementById("setLang").value;
   s.gcalId=document.getElementById("setGcal").value.trim();
-  s.showPrayer=document.getElementById("wPrayer").checked;
-  s.showWeather=document.getElementById("wWeather").checked;
-  s.showCalendar=document.getElementById("wCal").checked;
-  s.showGmail=document.getElementById("wGmail").checked;
+  s.showPrayer=_qaChk("wPrayer",s.showPrayer);
+  s.showWeather=_qaChk("wWeather",s.showWeather);
+  s.showCalendar=_qaChk("wCal",s.showCalendar);
+  s.showGmail=_qaChk("wGmail",s.showGmail);
   _wxCache={}; _prayCache={}; save(); applyLang(); closeModal(); render(); toast("Settings saved");
 }
 
