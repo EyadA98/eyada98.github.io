@@ -2720,6 +2720,20 @@ html:not(.dark) .rt-card.v1::before{
   .hx-box.hx-date .hx-val{font-size:1.06rem}
   .hx-box{padding:12px 10px}
 }
+
+/* ── the countdown ring, in both themes ──────────────────────────────────────
+   The track was painted rgba(255,255,255,.14) inline — white at 14%, which is
+   invisible against the light-mode widget (#f1ecfb → #faf3f0). Only the peach
+   arc showed, floating with nothing to read it against. The arc had a milder
+   version of the same problem: #f3b98e is a light peach, fine on the dark
+   panel, weak on a near-white one.
+
+   Colour now comes from CSS instead of the markup, so each theme states its
+   own: a violet-tinted track and the deeper peach in light mode. */
+.pw-ring .pw-track{stroke:rgba(255,255,255,.14)}
+.pw-ring .pw-arc{stroke:#f3b98e}
+html:not(.dark) .pw-ring .pw-track{stroke:rgba(60,40,100,.16)}
+html:not(.dark) .pw-ring .pw-arc{stroke:#dd824b}
 </style>
 </head>
 <body>
@@ -6153,7 +6167,7 @@ function renderPrayerNext(){
   var city=esc(data.settings.city||"Makkah");
   var strip=_prayList.map(function(p,idx){ var on=(idx===cur); return '<div class="pw-col'+(on?" on":"")+'"><span class="pw-nm">'+esc(p.name)+'</span><span class="pw-tm">'+fmtS(secs[idx])+'</span></div>'; }).join("");
   el.innerHTML='<div class="pw-wrap">'
-    +'<div class="pw-ring"><svg width="100%" height="100%" viewBox="0 0 104 104"><circle cx="52" cy="52" r="40" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="7"/><circle cx="52" cy="52" r="40" fill="none" stroke="#f3b98e" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 52 52)"/></svg><div class="pw-ringc"><b>'+esc(cd)+'</b><span>until '+esc(nextName)+'</span></div></div>'
+    +'<div class="pw-ring"><svg width="100%" height="100%" viewBox="0 0 104 104"><circle class="pw-track" cx="52" cy="52" r="40" fill="none" stroke-width="7"/><circle class="pw-arc" cx="52" cy="52" r="40" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 52 52)"/></svg><div class="pw-ringc"><b>'+esc(cd)+'</b><span>until '+esc(nextName)+'</span></div></div>'
     +'<div class="pw-right"><div class="pw-hd"><span class="pw-up">Up next</span><button type="button" class="pw-city" onclick="prayerCityPicker()">'+city+' &#9662;</button></div>'
     +'<div class="pw-next"><span class="pw-nn">'+esc(nextName)+'</span><span class="pw-nt">'+fmt(nextAbs)+'</span></div>'
     +'<div class="pw-then">then '+esc(thenName)+' &middot; '+fmt(thenSec)+'</div>'
