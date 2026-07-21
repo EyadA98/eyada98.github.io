@@ -174,6 +174,7 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .card h3{font-size:.71rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.11em;margin-bottom:9px}
 .card .big{font-size:1.56rem;font-weight:800;letter-spacing:-.015em;white-space:nowrap}
 .cards .card{display:flex;flex-direction:column}
+@media(max-width:430px){.card .big{font-size:1.2rem}}  /* keep 7-figure values from clipping on narrow phones */
 .cards .card .kpi-head,.cards .card .sub{flex:none}
 .cards .card>.prog,.cards .card>.spark-mini{margin-top:auto}
 .card .sub{font-size:.81rem;color:var(--muted);margin-top:6px;font-weight:500}
@@ -506,6 +507,8 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.18}
 /* trend pill: keep its own solid color (don't inherit the gradient text-clip), center it with the number */
 .card .big .trend,.trend{-webkit-text-fill-color:initial;background-clip:border-box;-webkit-background-clip:border-box;margin-left:0;align-self:center}
+/* Tier-3 light-mode contrast: the iridescent gradient drops below 3:1 across the right half of each figure on white; use a solid ink fill in light mode */
+html:not(.dark) .card .big{background:none;-webkit-text-fill-color:#2a1d44;color:#2a1d44}
 tfoot td{color:var(--violet)}
 .pill.live{background:rgba(138,100,200,.14);color:var(--violet)}
 
@@ -1132,7 +1135,6 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
     </div>
   </div>
 
-  <div class="insights" id="insights"></div>
 
   <div class="alloc-card">
     <h3>Wealth Allocation</h3>
@@ -1773,10 +1775,11 @@ function animateNumbers(){
 
 /* ---------- Insights engine ---------- */
 function nextZaka(){
-  const rows = [...data.zaka].filter(z=>z.dateG).sort((a,b)=>a.dateG.localeCompare(b.dateG));
+  const rows = [...data.zaka].filter(z=>z.dateG && isFinite(new Date(z.dateG).getTime())).sort((a,b)=>a.dateG.localeCompare(b.dateG));
   const last = rows[rows.length-1];
   if(!last) return null;
   let d = new Date(last.dateG);
+  if(!isFinite(d.getTime())) return null;   /* guard: ignore an unparseable date instead of returning NaN */
   const now = new Date();
   while(d <= now) d = new Date(d.getTime() + 354.37*864e5);   // lunar year
   return {date: isoLocal(d), days: Math.ceil((d-now)/864e5)};
@@ -2044,13 +2047,13 @@ function renderHoldings(){
     const fl = flashSet.has(h.name);
     return `<tr>
     <td style="font-weight:700;white-space:nowrap"><div style="display:inline-flex;align-items:center;gap:8px">${esc(h.name)}${h.live?'<span class="pill live" style="margin-inline-start:0">LIVE</span>':""}</div></td>
-    <td><select onchange="updMeta('${esc(h.name)}','assetType',this.value)" aria-label="Asset type">
+    <td><select onchange="updMeta('${jsq(h.name)}','assetType',this.value)" aria-label="Asset type">
       ${ASSET_TYPES.map(tp=>`<option ${tp===h.assetType?"selected":""}>${tp}</option>`).join("")}</select></td>
-    <td><input value="${esc(h.symbol)}" placeholder="e.g. 2222.SR" style="width:110px" onchange="updMeta('${esc(h.name)}','symbol',this.value.trim())" aria-label="Ticker symbol"></td>
+    <td><input value="${esc(h.symbol)}" placeholder="e.g. 2222.SR" style="width:110px" onchange="updMeta('${jsq(h.name)}','symbol',this.value.trim())" aria-label="Ticker symbol"></td>
     <td class="num">${fmt(h.qty)}</td>
     <td class="num">${fmt(h.avg)}</td>
     <td class="num">${fmt(h.invested)}</td>
-    <td class="num ${fl?"flash":""}">${ld?'<div class="shimmer"></div>':`<input type="number" step="any" value="${(+h.price).toFixed(2)}" onchange="updMeta('${esc(h.name)}','price',+this.value)" aria-label="Current price">`}</td>
+    <td class="num ${fl?"flash":""}">${ld?'<div class="shimmer"></div>':`<input type="number" step="any" value="${(+h.price).toFixed(2)}" onchange="updMeta('${jsq(h.name)}','price',+this.value)" aria-label="Current price">`}</td>
     <td class="num ${fl?"flash":""}">${ld?'<div class="shimmer"></div>':fmt(h.value)}</td>
     <td class="num ${h.pl>=0?"pos":"neg"}">${h.pl>=0?"+":""}${fmt(h.pl)}</td>
     <td class="num ${h.pl>=0?"pos":"neg"}">${pct(h.plPct)}</td></tr>`;
@@ -2192,7 +2195,7 @@ function _budgetTableLegacy(month,act){ return data.plan.map((p,i)=>{
       <td><input value="${esc(p.cat)}" onchange="upd('plan',${i},'cat',this.value)" aria-label="Category"></td>
       <td><select onchange="upd('plan',${i},'group',this.value)" aria-label="Group">${["Income","Fixed","Variable"].map(g=>`<option ${g===p.group?"selected":""}>${g}</option>`).join("")}</select></td>
       <td class="num"><input type="number" step="0.01" value="${p.amt}" onchange="upd('plan',${i},'amt',+this.value)" aria-label="Planned"></td>
-      <td class="num"><input type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${isInc?fmt(p.amt):"0"}" onchange="setActual('${month}','${esc(p.cat)}',this.value)" aria-label="Actual for ${month}"></td>
+      <td class="num"><input type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${isInc?fmt(p.amt):"0"}" onchange="setActual('${month}','${jsq(p.cat)}',this.value)" aria-label="Actual for ${month}"></td>
       <td class="num ${d>=0?"pos":"neg"}">${d>=0?"+":""}${fmt(d)}</td>
       <td><button class="btn danger" onclick="del('plan',${i})" aria-label="Delete item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`;
   }).join("");
@@ -2375,13 +2378,15 @@ function del(arr,i){
 }
 function undoDel(){
   if(!lastDel) return;
-  if(lastDel.item&&lastDel.item._id!=null&&data.deleted){ delete data.deleted["#"+lastDel.item._id]; }
+  if(lastDel.item&&data.deleted){ if(lastDel.item._id!=null){ delete data.deleted["#"+lastDel.item._id]; } else if(lastDel.item.date!=null){ delete data.deleted["~"+lastDel.item.date]; } }
   data[lastDel.arr].splice(lastDel.i, 0, lastDel.item);
   lastDel = null;
   save(true); render();
   toast("Restored");
 }
 function esc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+/* safe to embed inside a single-quoted JS string that sits in a double-quoted HTML attribute (fixes names with apostrophes) */
+function jsq(s){ return String(s??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function exportData(){
   const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -2452,7 +2457,7 @@ function _mergeMap(a,b){ var o=Object.assign({}, a||{}); var src=b||{}; Object.k
 function _finKey(x){ if(x==null) return "$null"; if(x._id!=null) return "#"+x._id; return "#"+_hashId(x); }
 function _mergeFinArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null)return; var id=_finKey(x); var xu=+x._u||0; var tv=+tomb[id]||0; if(tv>0&&((x._id!=null)||tv>=xu))return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+cur._u||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
 function _mergeWatch(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var seen={},out=[]; function add(s){ if(s==null)return; var id="$"+JSON.stringify(s); if((+tomb[id]||0)>0)return; if(!seen[id]){ seen[id]=1; out.push(s); } } a.forEach(add); b.forEach(add); return out; }
-function _mergeActuals(a,b,tomb){ a=a||{}; b=b||{}; tomb=tomb||{}; var out={},keys={}; Object.keys(a).forEach(function(k){keys[k]=1;}); Object.keys(b).forEach(function(k){keys[k]=1;}); Object.keys(keys).forEach(function(m){ if((+tomb["@"+m]||0)>0) return; out[m]=Object.assign({}, a[m]||{}, b[m]||{}); }); return out; }
+function _mergeActuals(newer,older,tomb){ newer=newer||{}; older=older||{}; tomb=tomb||{}; var out={}; /* month-level last-writer-wins: categories carry no per-item timestamp, so the newer-saved side owns each month it has (this also stops a cleared category being resurrected). */ Object.keys(older).forEach(function(m){ if((+tomb["@"+m]||0)>0) return; out[m]=Object.assign({}, older[m]); }); Object.keys(newer).forEach(function(m){ if((+tomb["@"+m]||0)>0){ delete out[m]; return; } out[m]=Object.assign({}, newer[m]); }); return out; }
 function mergeFinance(local, cloud){
   if(!cloud) return local; if(!local) return cloud;
   if(local.__seed) return cloud;   // local is untouched seed data → take cloud wholesale (no seed duplication)
@@ -2468,7 +2473,7 @@ function mergeFinance(local, cloud){
   out.watchlist=_mergeWatch(local.watchlist,cloud.watchlist,tomb);
   out.snapshots=mergeSnaps(local.snapshots,cloud.snapshots,tomb);
   out.meta=_mergeMap(older.meta,newer.meta);
-  out.actuals=_mergeActuals(local.actuals,cloud.actuals,tomb);
+  out.actuals=_mergeActuals(newer.actuals,older.actuals,tomb);
   return out;
 }
 async function pullCloud(){
@@ -2498,6 +2503,7 @@ function togglePw(inId,btnId){ var i=document.getElementById(inId), b=document.g
 function authUI(mode){
   mode = mode || "in";
   const root = document.getElementById("authRoot");
+  document.documentElement.classList.add("dark");
   const tabs = `<div class="auth-tabs">
     <button class="${mode==="in"?"active":""}" onclick="authUI('in')">Sign in</button>
     <button class="${mode==="up"?"active":""}" onclick="authUI('up')">Create account</button></div>`;
@@ -2526,7 +2532,7 @@ function authUI(mode){
 }
 function authErr(msg, ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=msg||""; e.classList.toggle("auth-ok", !!ok); } }
 function authBusy(b, label){ const btn=document.getElementById("aBtn"); if(btn){ btn.disabled=b; if(label) btn.textContent=label; } }
-function closeAuth(){ document.getElementById("authRoot").innerHTML=""; }
+function closeAuth(){ document.getElementById("authRoot").innerHTML=""; try{applyTheme(localStorage.getItem("financeBoard.theme")||"dark");}catch(e){} }
 function guestMode(){ try{ localStorage.setItem(GUEST_FLAG,"1"); }catch(e){} closeAuth(); }
 
 async function doSignIn(){
