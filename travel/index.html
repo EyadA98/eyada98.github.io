@@ -881,13 +881,14 @@ html:not(.dark) .pass-amt{background:var(--grad-iri);-webkit-background-clip:tex
   .pass-row{margin-bottom:2px}
   /* the leg shares its line with the move buttons rather than claiming the full
      width — alone on a line they left an empty band the height of a control */
-  .pass-leg{flex:1 1 210px;min-width:0}
+  .pass-leg{flex:1 1 100%;min-width:0}   /* mobile: dates get their own full-width line so the NO-STAY badge drops to the meta row instead of crowding DEPART */
   /* A slot with no badge is not actually :empty — it holds an empty .tv-slot
      placeholder, so it kept its 92px and pushed the row to three lines. :has()
      catches that case; the plain :empty still covers the fare slot. */
   .pass-slot{flex:0 0 auto;min-width:0}
   .pass-slot:empty,.pass-slot:has(> .tv-slot:empty){display:none}
   .pass-actions{flex:0 0 auto;margin-left:auto;align-self:center}
+  .pass-fare-slot{flex:1 1 auto;justify-content:flex-end;text-align:right}   /* grow to fill the line and right-align the budget; arrow keeps margin-left:auto so it stays right even with no budget */
   .pass-stub{padding:16px 16px 18px;gap:12px}
   /* the tile is set to repeat-y for a vertical seam; a horizontal one has to
      repeat along the other axis or it draws a single square */
@@ -1620,7 +1621,7 @@ html:not(.dark) .tvm .leaflet-control-attribution{background:rgba(255,255,255,.7
 .tvm .dest{padding:0;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:.16s}
 .tvm .dest:hover{border-color:var(--lav)}
 .tvm .dest.on{border-color:var(--m-panelb)}
-.tvm .dest-band{height:22px;width:100%;flex:none}
+.tvm .dest-band{height:26px;width:100%;flex:none}   /* match the 26px pattern tile so circles aren't clipped at the bottom */
 .tvm .dest-head{padding:15px 17px;display:flex;align-items:flex-start;gap:10px}
 .tvm .dest-head .t{flex:1;min-width:0}
 .tvm .dest-head h4{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.35rem;margin:0;
@@ -1646,7 +1647,7 @@ html:not(.dark) .tvm .leaflet-control-attribution{background:rgba(255,255,255,.7
 
 @media (max-width:1000px){
   .tvm .tk{flex-wrap:wrap} .tvm .tk-grid{width:100%;border-top:1px solid var(--m-rule)}
-  .tvm .tk-rail{width:100%;height:22px;align-self:auto}
+  .tvm .tk-rail{width:100%;height:26px;align-self:auto}   /* match the 26px pattern tile so the circles aren't clipped at the bottom on mobile */
   .tvm .dests{grid-template-columns:1fr 1fr}
 }
 /* The spine keeps alternating left and right at every width — that is the
@@ -2128,7 +2129,7 @@ function cityCode(name){ const k=cityKey(name); if(!k) return '';
   if(e&&e[2]) return String(e[2]).toUpperCase();
   return (name||'').replace(/[^a-zA-Z]/g,'').slice(0,3).toUpperCase(); }
 function tripNodes(trip){ return trip.nodes||[]; }
-function pax(p,trip){ const n=Math.round(num(p)); if(n>=1)return n; const d=Math.round(num(trip&&trip.persons)); return d>=1?d:1; }
+function pax(p,trip){ const s=(p==null?'':String(p)).trim(); if(s!==''){ const n=Math.round(num(s)); if(n>=1) return n; if(n===0) return 0; } const d=Math.round(num(trip&&trip.persons)); return d>=1?d:1; }   /* explicit 0 pax now returns 0 (was: fell back to the default) */
 const BKEYS=['food','entertainment','shopping','localTransport','pocket'];
 function suggestLegDate(trip,fromId,toId){ const fo=trip.hotels.filter(h=>h.cityId===fromId&&h.checkOut).map(h=>h.checkOut).sort(); if(fo.length) return fo[fo.length-1]; const ti=trip.hotels.filter(h=>h.cityId===toId&&h.checkIn).map(h=>h.checkIn).sort(); if(ti.length) return ti[0]; return ''; }
 function tripChecks(trip){ const w=[]; const dep=trip.departDate,ret=trip.returnDate;
@@ -2212,9 +2213,10 @@ function spendNative(s){ return num(s.perPerson)*Math.max(1,Math.round(num(s.per
 function spendBase(s,trip){ return convertAmount(spendNative(s),itemCur(s,trip),trip.baseCurrency||'SAR'); }
 function hotelBase(h,trip){ return convertAmount(hotelCost(h),(h&&h.currency)||trip.baseCurrency||'SAR',trip.baseCurrency||'SAR'); }
 function cityWindows(trip){ const nodes=tripNodes(trip); const dep=trip.departDate,ret=trip.returnDate; const out={};
-  nodes.forEach(n=>out[n.id]={arrive:n.arrive||dep||'',depart:n.depart||ret||dep||''}); if(!dep) return out;
+  const clamp=d=>{ if(!d) return ''; if(dep&&d<dep) return ''; if(ret&&d>ret) return ''; return d; };   /* trip dates are the source of truth: ignore any node date outside [dep,ret] and re-derive it */
+  nodes.forEach(n=>out[n.id]={arrive:clamp(n.arrive)||dep||'',depart:clamp(n.depart)||ret||dep||''}); if(!dep) return out;
   const startN=nodes.find(n=>n.anchor==='start'), endN=nodes.find(n=>n.anchor==='end'); const mids=nodes.filter(n=>!n.anchor);
-  if(startN) out[startN.id]={arrive:startN.arrive||dep,depart:startN.depart||dep};
+  if(startN) out[startN.id]={arrive:clamp(startN.arrive)||dep,depart:clamp(startN.depart)||dep};
 
   /* ── which cities get nights ────────────────────────────────────────────────
      The final city used to be pinned to arrive = depart = returnDate, on the
@@ -2232,9 +2234,9 @@ function cityWindows(trip){ const nodes=tripNodes(trip); const dep=trip.departDa
   if(!staying.length) return out;
   const total=Math.max(0,daysBetween(dep,ret));
   const nightsOf=id=>{ const hs=(trip.hotels||[]).filter(h=>h.cityId===id&&h.checkIn&&h.checkOut); return hs.reduce((a,h)=>{const n=daysBetween(h.checkIn,h.checkOut);return a+(n>0?n:0);},0); };
-  let known=0,unknown=0; const kn={}; staying.forEach(n=>{ let k=nightsOf(n.id); if((!k||k<=0)&&n.arrive&&n.depart) k=Math.max(0,daysBetween(n.arrive,n.depart)); kn[n.id]=k; if(k>0)known+=k; else unknown++; });
+  let known=0,unknown=0; const kn={}; staying.forEach(n=>{ let k=nightsOf(n.id); const na=clamp(n.arrive),nd=clamp(n.depart); if((!k||k<=0)&&na&&nd) k=Math.max(0,daysBetween(na,nd)); kn[n.id]=k; if(k>0)known+=k; else unknown++; });
   let rem=Math.max(0,total-known); const baseN=unknown?Math.floor(rem/unknown):0; let extra=unknown?rem-baseN*unknown:0; let cursor=dep;
-  staying.forEach((n,i)=>{ const arrive=n.arrive||cursor; let depart=n.depart; if(!depart){ let nights=kn[n.id]; if(!nights||nights<=0){ nights=baseN+(extra>0?1:0); if(extra>0)extra--; } const isLast=(i===staying.length-1); depart=isLast?(ret||addDays(arrive,nights)):addDays(arrive,nights); } out[n.id]={arrive,depart}; cursor=depart; });
+  staying.forEach((n,i)=>{ const arrive=clamp(n.arrive)||cursor; let depart=clamp(n.depart); if(!depart){ let nights=kn[n.id]; if(!nights||nights<=0){ nights=baseN+(extra>0?1:0); if(extra>0)extra--; } const isLast=(i===staying.length-1); depart=isLast?(ret||addDays(arrive,nights)):addDays(arrive,nights); } out[n.id]={arrive,depart}; cursor=depart; });
   return out; }
 function CurSel({value,onChange}){ const {dark}=useContext(Theme); return <FancySelect value={value||'SAR'} onChange={onChange} align="right" menuWidth={104} options={Object.keys(CURRENCIES).map(k=>({value:k,label:k}))} btnClass={`rounded-xl pl-3 pr-2 py-2.5 text-sm shrink-0 ${dark?'bg-white/5 border border-white/10 text-lavender-50':'bg-white border border-lavender-200 text-lavender-950'}`}/>; }
 
@@ -2732,7 +2734,7 @@ function PlanView({trip,setTrip,cur,onSave}){
   /* hotel nights booked vs the length of the stay window — two different
      numbers that used to be shown as two bare "Nn" badges side by side */
   const coverage=(n)=>{
-    const w=win[n.id]||{}; const a=n.arrive||w.arrive, d=n.depart||w.depart;
+    const w=win[n.id]||{}; const a=w.arrive, d=w.depart;   /* window is already clamped to the trip range */
     const winN=(a&&d)?Math.max(0,daysBetween(a,d)):0;
     const htl=(trip.hotels||[]).filter(h=>h.cityId===n.id&&h.checkIn&&h.checkOut)
       .reduce((s,h)=>{const x=daysBetween(h.checkIn,h.checkOut);return s+(x>0?x:0);},0);
@@ -2884,7 +2886,7 @@ function PlanView({trip,setTrip,cur,onSave}){
                 </div>
                 <div className="pass-body">
                   <div className="pass-leg">
-                    <span className="pass-when">{n.name?<RangeField start={n.arrive||wd.arrive} end={n.depart||wd.depart} onStart={d=>setNode(n.id,{arrive:d})} onEnd={d=>setNode(n.id,{depart:d})} min={trip.departDate} max={trip.returnDate} labels={['Arrive','Depart']}/>:null}</span>
+                    <span className="pass-when">{n.name?<RangeField start={wd.arrive} end={wd.depart} onStart={d=>setNode(n.id,{arrive:d})} onEnd={d=>setNode(n.id,{depart:d})} min={trip.departDate} max={trip.returnDate} labels={['Arrive','Depart']}/>:null}</span>
                     {/* The origin never accrues nights — you leave from home, you do not stay
                         there — so its badge always read "same day", which says nothing and
                         sits oddly under a single Depart date. Dropped on that row only; a
@@ -2942,7 +2944,7 @@ function PlanView({trip,setTrip,cur,onSave}){
                     <Field label="Hotel name"><Input value={h.name} placeholder="The Savoy" onChange={e=>updH(h.id,{name:e.target.value})}/></Field>
                     <div className="lg:col-span-2"><Field label="Google Maps link / address"><Input value={h.mapLink} placeholder="Paste Maps link or address" onChange={e=>updH(h.id,{mapLink:e.target.value})}/></Field></div>
                     <Field label="Cost / night"><div className="flex gap-2"><Input className="no-spin" type="number" min="0" value={h.perNight} placeholder="0" onChange={e=>updH(h.id,{perNight:e.target.value})}/><CurSel value={h.currency} onChange={v=>updH(h.id,{currency:v})}/></div></Field>
-                    <div className="sm:col-span-2"><Field label="Stay dates" error={h.checkIn&&h.checkOut&&n<0?'Check-out before check-in':null}><RangeField start={h.checkIn} end={h.checkOut} onStart={d=>updH(h.id,{checkIn:d})} onEnd={d=>updH(h.id,{checkOut:d})} min={trip.departDate} max={trip.returnDate} labels={['Check-in','Check-out']}/></Field></div>
+                    <div className="sm:col-span-2"><Field label="Stay dates" error={h.checkIn&&h.checkOut&&n<0?'Check-out before check-in':null}><RangeField start={h.checkIn} end={h.checkOut} onStart={d=>updH(h.id,{checkIn:d})} onEnd={d=>updH(h.id,{checkOut:d})} min={dwin(h.cityId).arrive||trip.departDate} max={dwin(h.cityId).depart||trip.returnDate} labels={['Check-in','Check-out']}/></Field></div>
                     <Field label="Rooms"><Input className="no-spin" type="number" min="1" value={h.rooms} placeholder="1" onChange={e=>updH(h.id,{rooms:e.target.value})}/></Field>
                     <Field label="Guests"><Input className="no-spin" type="number" min="1" value={h.persons||''} placeholder={String(trip.persons||1)} onChange={e=>updH(h.id,{persons:e.target.value})}/></Field>
                     <Field label="Taxes" hint="opt"><Input className="no-spin" type="number" min="0" value={h.taxes} placeholder="0" onChange={e=>updH(h.id,{taxes:e.target.value})}/></Field>
@@ -4068,14 +4070,14 @@ function TripsView({trips,onNew,onEdit,onAction}){ const [menu,setMenu]=useState
               <div className="tv-rail-line"><i className="tv-rail-fill" style={{width:Math.max(0,Math.min(100,cd.pct))+'%'}}/></div>
               {stops.map((n,i)=>{
                 const last=stops.length-1, at=Math.round(i/last*1000)/10, up=i%2===1;   /* 1/7*100 = 14.285714285714285% otherwise */
-                const d=(cwin[n.id]||{}).arrive||(i===0?t.departDate:'')||'';
+                const _w=cwin[n.id]||{}; const _a=_w.arrive||(i===0?t.departDate:'')||''; const _b=_w.depart||''; let d=''; if(_a){ if(!_b||_b===_a){ d=prettyDate(_a); } else { const _da=new Date(_a), _db=new Date(_b); d=(_da.getFullYear()===_db.getFullYear()&&_da.getMonth()===_db.getMonth())?(prettyDate(_a)+'–'+_db.getDate()):(prettyDate(_a)+' – '+prettyDate(_b)); } }  /* final stop shows its arrive–depart range so the card matches the backbone/itinerary */
                 /* same-side neighbours sit 2x the spacing apart, so a label may be that wide */
                 const w=Math.round(Math.min(38, 160/last)*10)/10;   /* 160/7 = 22.857142857142858% otherwise */
                 const align=i===0?'left':(i===last?'right':'center');
                 const dot=<span className="tv-rail-dot"/>;
                 const body=(<>
                   <span className="tv-rail-nm" title={n.name}>{n.name}</span>
-                  <span className="tv-rail-dt">{d?prettyDate(d):'\u2014'}</span>
+                  <span className="tv-rail-dt">{d||'\u2014'}</span>
                 </>);
                 return (<div key={n.id} className={'tv-rail-stop'+(up?' up':'')} data-al={align}
                   style={{left:at+'%',maxWidth:w+'%',
