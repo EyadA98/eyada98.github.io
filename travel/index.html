@@ -2444,7 +2444,7 @@ function useComputed(trip){
     const transportByType={}; transports.forEach(t=>{ const k=(TRANSPORT_TYPES[t.type]||{label:t.type}).label; transportByType[k]=(transportByType[k]||0)+transportBase(t,trip); });
     const flights=transports.filter(t=>t.type==='flight').length; const trains=transports.filter(t=>t.type==='train').length;
     return {days,nights,accommodationTotal,transportTotal,spendTotal,cityBudgetTotal:spendTotal,miscTotal,grand,cityInfo,categoryBreakdown,transportByType,flights,trains,avgDaily:days>0?grand/days:0,persons:defaultPax,win};
-  },[JSON.stringify(trip)]);
+  },[trip&&trip.id, trip&&trip.updatedAt]);   /* perf: recompute on real edits (updatedAt bumps) instead of stringifying the whole trip every render */
 }
 
 /* ============================ INTERACTIVE MAP ============================ */
@@ -3088,7 +3088,7 @@ function BudgetView({trip,cur}){ const {dark}=useContext(Theme); const c=useComp
   const forecast=useMemo(()=>{ if(c.days<=0)return {labels:[],values:[]}; const start=trip.departDate; const arr=new Array(c.days).fill(0);
     c.cityInfo.forEach(ci=>{ const s=ci.arrive||start; const idx=Math.max(0,daysBetween(start,s)); const span=Math.max(1,ci.nights||1); const per=ci.total/span; for(let k=0;k<span&&idx+k<c.days;k++){arr[idx+k]+=per;} });
     (trip.transports||[]).forEach(t=>{ if(t.startDate){const idx=daysBetween(start,t.startDate); if(idx>=0&&idx<c.days)arr[idx]+=transportBase(t,trip);} });
-    return {labels:arr.map((_,i)=>prettyDate(addDays(start,i))),values:arr.map(v=>Math.round(v))}; },[JSON.stringify(trip)]);
+    return {labels:arr.map((_,i)=>prettyDate(addDays(start,i))),values:arr.map(v=>Math.round(v))}; },[trip&&trip.id, trip&&trip.updatedAt]);
 
   /* the five largest single costs, whatever kind of record they came from */
   const topItems=useMemo(()=>{
@@ -3097,7 +3097,7 @@ function BudgetView({trip,cur}){ const {dark}=useContext(Theme); const c=useComp
     (trip.transports||[]).forEach(t=>out.push({label:(t.provider||((t.from||'?')+' → '+(t.to||'?'))),value:transportBase(t,trip)}));
     (trip.spend||[]).forEach(s=>out.push({label:s.name||s.category||'Activity',value:spendBase(s,trip)}));
     return out.filter(x=>x.value>0).sort((a,b)=>b.value-a.value).slice(0,5);
-  },[JSON.stringify(trip)]);
+  },[trip&&trip.id, trip&&trip.updatedAt]);
 
   const cities=c.cityInfo.filter(x=>x.total>0);
   const perNight=c.cityInfo.filter(x=>x.total>0&&x.nights>0)
@@ -3306,7 +3306,7 @@ function useJourney(trip){
     nights:ci.nights, spend:ci.total, arrive:ci.arrive, depart:ci.depart,
     hotel:(ci.hotels[0]&&ci.hotels[0].name)||null,
     inType:(ci.inbound&&ci.inbound.type)||'flight'
-  })),[JSON.stringify(trip)]);
+  })),[trip&&trip.id, trip&&trip.updatedAt]);
   const legs=useMemo(()=>{ const out=[]; let acc=0;
     for(let i=0;i<stops.length-1;i++){
       const a=stops[i], b=stops[i+1], km=mHaversine(a,b), ground=!!M_GROUND[b.inType];
@@ -4157,13 +4157,13 @@ function useCloud(trips,setTrips){
     return ()=>{ try{ sub.subscription.unsubscribe(); }catch(e){} };
   }catch(e){ setStatus('Invalid Supabase config'); setChecked(true); } } else { sb.current=null; setSession(null); setChecked(true); } },[cfg.url,cfg.key]);
   const upsert=async(t)=>{ if(!sb.current||!session)return; const uid=session.user.id; const {error}=await sb.current.from('trips').upsert({id:t.id,user_id:uid,data:t,updated_at:new Date(t.updatedAt||Date.now()).toISOString()}); if(!error) synced.current[t.id]=t.updatedAt||Date.now(); return error; };
-  const del=async(id)=>{ if(!sb.current||!session)return; await sb.current.from('trips').delete().eq('id',id); delete synced.current[id]; };
+  /* removed: unused del() helper — deletions now sync via __deleted tombstones */
   useEffect(()=>{ if(!sb.current||!session)return; let cancel=false; (async()=>{ setStatus('Syncing…'); try{
     const {data:rows,error}=await sb.current.from('trips').select('id,data,updated_at').eq('user_id',session.user.id); if(error)throw error; if(cancel)return;
     const remote={}; (rows||[]).forEach(r=>remote[r.id]=r); const local=tref.current; const updates={}; const toPush=[];
-    Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); const rDel=!!(r.data&&r.data.__deleted), lDel=!!(l&&l.__deleted); if(rDel){ if(!lDel) updates[id]=r.data; } else if(lDel){ /* local delete is sticky: keep the tombstone, don't accept a live remote copy */ } else if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
+    Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); const rDel=!!(r.data&&r.data.__deleted), lDel=!!(l&&l.__deleted); if(rDel){ if(!lDel && (!l || ru>=(l.updatedAt||0))) updates[id]=r.data; } else if(lDel){ /* local delete is sticky: keep the tombstone, don't accept a live remote copy */ } else if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
     Object.values(local).forEach(l=>{ if(updates[l.id]&&updates[l.id].__deleted) return; /* we're accepting a delete for this id — don't push our stale live copy back */ const r=remote[l.id]; const ru=r?new Date(r.updated_at).getTime():0; const rDel=!!(r&&r.data&&r.data.__deleted); if(l.__deleted&&!rDel){ toPush.push(l); } else if(!r||(l.updatedAt||0)>ru){ toPush.push(l); } });
-    if(Object.keys(updates).length) setTrips(ts=>({...ts,...updates}));
+    if(Object.keys(updates).length) setTrips(ts=>{ const next={...ts}; Object.keys(updates).forEach(id=>{ const inc=updates[id], cur=next[id]; if(inc&&inc.__deleted){ next[id]=inc; } else if(!cur||(cur.updatedAt||0)<=(inc&&inc.updatedAt||0)){ next[id]=inc; } /* else: a newer local edit landed during the fetch — keep it */ }); return next; });
     for(const t of toPush){ await upsert(t); }
     if(!cancel){ setStatus('Synced'); setTimeout(()=>setStatus(s=>s==='Synced'?'':s),1800); }
   }catch(e){ if(!cancel) setStatus('Sync error: '+(e.message||e)); } })(); return ()=>{cancel=true;}; },[session]);
@@ -4172,12 +4172,15 @@ function useCloud(trips,setTrips){
     /* Deletions are represented as tombstone trips ({__deleted:true}) that sync like any
        other trip via last-write-wins, so we no longer infer deletes from local absence
        (which resurrected trips and could wipe a peer's freshly-created trip). */
-  }catch(e){} },1200); return ()=>clearTimeout(h); },[JSON.stringify(trips),session]);
+  }catch(e){} },1200); return ()=>clearTimeout(h); },[Object.keys(trips).map(k=>k+":"+((trips[k]&&trips[k].updatedAt)||0)+((trips[k]&&trips[k].__deleted)?":d":"")).sort().join("|"),session]);   /* perf: cheap id:updatedAt signal instead of stringifying every trip tree */
   const signUp=async(email,pw)=>{ if(!sb.current)return; setStatus('Creating account…'); const {error}=await sb.current.auth.signUp({email,password:pw}); setStatus(error?('Error: '+error.message):'Account created. If email confirmation is on, confirm then sign in.'); };
   const signIn=async(email,pw)=>{ if(!sb.current)return; setStatus('Signing in…'); const {error}=await sb.current.auth.signInWithPassword({email,password:pw}); if(!error) _touchAuth(); setStatus(error?('Error: '+error.message):''); };
   const signOut=async()=>{ if(!sb.current)return; try{localStorage.removeItem('hub.authStart');}catch(e){} await sb.current.auth.signOut(); synced.current={}; setStatus(''); };
   useEffect(()=>{ if(!session) return; if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); return; } _touchAuth(); const chk=()=>{ if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); } }; const iv=setInterval(chk,60000); var tt=0; const touch=()=>{ var n=Date.now(); if(n-tt>60000){ tt=n; _touchAuth(); } }; ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,touch,{passive:true})); return ()=>{ clearInterval(iv); ['click','keydown','touchstart'].forEach(e=>document.removeEventListener(e,touch)); }; },[session]);
-  return {cfg,session,status,signInAt,checked,ready:!!sb.current,signUp,signIn,signOut};
+  const resetPassword=async(email)=>{ if(!sb.current)return; if(!email){ setStatus('Enter your email first.'); return; } setStatus('Sending reset link…'); const {error}=await sb.current.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); setStatus(error?('Error: '+error.message):'Reset link sent — check your inbox.'); };
+  /* realtime: reflect a peer's create/edit/delete without a reload (same last-write-wins guard as the pull) */
+  useEffect(()=>{ if(!sb.current||!session) return; let ch; try{ ch=sb.current.channel('trips-'+session.user.id).on('postgres_changes',{event:'*',schema:'public',table:'trips',filter:'user_id=eq.'+session.user.id},payload=>{ const row=payload.new||payload.old; const inc=row&&row.data; if(!inc||!inc.id) return; const ru=new Date((row&&row.updated_at)||Date.now()).getTime(); if(synced.current[inc.id]===(inc.updatedAt||ru)) return; setTrips(ts=>{ const cur=ts[inc.id]; if(inc.__deleted) return {...ts,[inc.id]:inc}; if(!cur||(cur.updatedAt||0)<=(inc.updatedAt||0)) return {...ts,[inc.id]:inc}; return ts; }); synced.current[inc.id]=inc.updatedAt||ru; }).subscribe(); }catch(e){} return ()=>{ try{ if(ch) sb.current.removeChannel(ch); }catch(e){} }; },[session]);
+  return {cfg,session,status,signInAt,checked,ready:!!sb.current,signUp,signIn,signOut,resetPassword};
 }
 /* Cloud sync, rebuilt in the Settings language: same card, same padding, same
    heading size and the same button set as every other panel, so the right
@@ -4236,7 +4239,7 @@ function AvMenu({cloud,onSettings}){
     </div>}
   </div>); }
 function AuthModal({cloud,onClose,onSettings}){
-  const {ready,session,signIn,signUp,status}=cloud;
+  const {ready,session,signIn,signUp,status,resetPassword}=cloud;
   const [email,setEmail]=useState(''); const [pw,setPw]=useState(''); const [mode,setMode]=useState('in'); const [show,setShow]=useState(false);
   /* Hub's auth-card: a full-bleed gradient page, not a dialog floating over the app.
      Signed-in users never see this — they get the avatar dropdown, as in Hub. */
@@ -4267,7 +4270,7 @@ function AuthModal({cloud,onClose,onSettings}){
             </div>
             <div className="tv-autherr">{status&&!/^Sync/.test(status)?status:''}</div>
             <button className="tv-btnfull" onClick={go}>{mode==='up'?'Create account':'Sign in'}</button>
-            <div className="tv-authlinks">{session&&<button onClick={onClose}>Back to trips</button>}</div>
+            <div className="tv-authlinks">{mode==='in'&&<button onClick={()=>resetPassword(email)}>Forgot password?</button>}{session&&<button onClick={onClose}>Back to trips</button>}</div>
           </>)}
     </div>
   </div></Portal>); }
@@ -4390,13 +4393,15 @@ function App(){
     history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash);
   }catch(e){} },[]);
 
-  useEffect(()=>{ document.documentElement.classList.toggle('dark',dark); },[dark]);
+  useEffect(()=>{ document.documentElement.classList.toggle('dark', dark || (cloud.checked && !cloud.session)); },[dark,cloud.checked,cloud.session]);
   useEffect(()=>{ const s=document.getElementById('splash'); if(s){ setTimeout(()=>s.classList.add('hide'),650); setTimeout(()=>s.remove(),1400);} },[]);
   useEffect(()=>{ const f=document.getElementById('favicon'); if(f&&logo) f.href=logo; },[logo]);
   useEffect(()=>{ const h=(e)=>{ if((e.metaKey||e.ctrlKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();setSwOpen(o=>!o);} else if(e.key==='Escape'){setSwOpen(false);setNamePrompt(null);} }; window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h); },[]);
   useEffect(()=>{ if(!swOpen)return; const place=()=>{ if(!swBtnRef.current)return; const r=swBtnRef.current.getBoundingClientRect(); setSwPos({left:Math.round(r.left),top:Math.round(r.bottom+6),width:Math.round(r.width)}); }; place(); const f=()=>place(); window.addEventListener('resize',f); window.addEventListener('scroll',f,true); return ()=>{window.removeEventListener('resize',f);window.removeEventListener('scroll',f,true);}; },[swOpen]);
   // migrate legacy trips to node graph
   useEffect(()=>{ setTrips(ts=>{ let changed=false; const out={}; for(const k in ts){ const m=(ts[k]&&ts[k].__deleted)?ts[k]:migrateTrip(ts[k]); if(m!==ts[k])changed=true; out[k]=m; } return changed?out:ts; }); },[]);
+  /* GC: drop deletion tombstones older than 30 days so they don't accumulate forever (30d assumes devices sync within a month) */
+  useEffect(()=>{ const cutoff=Date.now()-30*864e5; setTrips(ts=>{ let changed=false; const out={}; for(const k in ts){ const t=ts[k]; if(t&&t.__deleted&&(t.updatedAt||0)<cutoff){ changed=true; continue; } out[k]=t; } return changed?out:ts; }); },[]);
 
   const currentTrip=currentId&&trips[currentId]&&!trips[currentId].__deleted?migrateTrip(trips[currentId]):null;
   const cur=currentTrip?currentTrip.baseCurrency||'SAR':'SAR';
@@ -4440,14 +4445,7 @@ function App(){
        That is right, but silent - so say where it went. */
     if(kind==='status'){ const lb=(STATUS_META[val]||{}).label||val; showToast('Moved to '+lb); } };
 
-  function changeCurrency(next){ const from=prevCur.current||cur; if(from===next||!currentTrip)return;
-    const cv=v=>v===''||v==null?v:String(+convertAmount(num(v),from,next).toFixed(2));
-    setTrip(t=>({...t,baseCurrency:next,
-      transports:t.transports.map(x=>({...x,cost:cv(x.cost)})),
-      hotels:t.hotels.map(h=>({...h,perNight:cv(h.perNight),taxes:cv(h.taxes)})),
-      cityBudgets:Object.fromEntries(Object.entries(t.cityBudgets).map(([k,b])=>[k,Object.fromEntries(Object.entries(b||{}).map(([x,v])=>[x,cv(v)]))])),
-      tripExpenses:Object.fromEntries(Object.entries(t.tripExpenses).map(([k,e])=>[k,{...e,amount:cv(e.amount)}])),
-    })); prevCur.current=next; }
+  /* removed: unused changeCurrency() — trip base currency is fixed at SAR; the converter had no caller and was incomplete (skipped spend/perDay) */
 
   const needsTrip=['plan','map','budget','timeline'].includes(view)&&!currentTrip;
   /* ── sidebar switcher: build grouped, searchable trip list ── */
