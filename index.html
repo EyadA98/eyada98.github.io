@@ -576,6 +576,13 @@ html:not(.dark) .badge.k-event{color:#2b7cae}
 html:not(.dark) .badge.k-routine{color:#16704a}
 html:not(.dark) .badge.k-trip{color:#b0632f}
 html:not(.dark) .badge.k-zakat{color:#3f9c8c}
+/* hero is a dark surface in both themes: in light mode keep upcoming-row badges in their dark-mode tints (legible, semantic, no white) */
+html:not(.dark) .hx-hero .badge.k-task{color:#c6b3ef}
+html:not(.dark) .hx-hero .badge.k-subtask{color:#c6b3ef}
+html:not(.dark) .hx-hero .badge.k-event{color:#8ecbf0}
+html:not(.dark) .hx-hero .badge.k-routine{color:#7fd7a8}
+html:not(.dark) .hx-hero .badge.k-trip{color:#e6a875}
+html:not(.dark) .hx-hero .badge.k-zakat{color:#7fd1c4}
 .b-todo{background:rgba(138,100,200,.16);color:var(--lavender)}
 .b-doing{background:rgba(243,185,142,.2);color:var(--peach)}
 .b-done{background:rgba(127,209,196,.2);color:var(--green)}
@@ -1810,6 +1817,10 @@ html:not(.dark) .st-ok .rt-big b{background-image:linear-gradient(115deg,#177a50
 html:not(.dark) .st-soon .rt-big b{background-image:linear-gradient(115deg,#b0632f,#dd824b 55%,#e2a071)}
 html:not(.dark) .st-od .rt-big b{background-image:linear-gradient(115deg,#b8433a,#d6554c 55%,#e0746b)}
 html:not(.dark) .rt-card.v1.st-ok{background-image:linear-gradient(140deg,rgba(30,145,95,.10),rgba(255,255,255,0) 55%)}
+/* Tier-3 light-mode contrast: task-detail tags & status pill were near-invisible; peach-deep used as text failed 3:1 */
+html:not(.dark) .tdp-chip{color:#5c5275}
+html:not(.dark) .cs-btn.tdp-pill-status .cs-val{color:#5c5275}
+html:not(.dark) .b-sched,html:not(.dark) .tp-cd,html:not(.dark) .lib-src2.n,html:not(.dark) .b-doing,html:not(.dark) .ev-event,html:not(.dark) .is-sync,html:not(.dark) .kproj,html:not(.dark) .istate.is-sync,html:not(.dark) .sum-card.acc-peach .sc-n,html:not(.dark) .rt-due.today,html:not(.dark) .ntf-pin-h,html:not(.dark) .ntf-when.soon{color:#b0632f}
 html:not(.dark) .rt-card.v1.st-soon{background-image:linear-gradient(140deg,rgba(221,130,75,.12),rgba(255,255,255,0) 55%)}
 html:not(.dark) .rt-card.v1.st-od{background-image:linear-gradient(140deg,rgba(214,85,76,.12),rgba(255,255,255,0) 55%)}
 html:not(.dark) .to-branch{color:var(--muted)}
@@ -3038,7 +3049,7 @@ let data = (function(){
     return loadLocal(KEY) || JSON.parse(JSON.stringify(DEFAULT));
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); }
 })();
-function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); }catch(e){} scheduleHubSync(); }
+var _saveWarned=false; function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } } scheduleHubSync(); }
 let _hubTimer=null;
 function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
 async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){
@@ -3054,7 +3065,7 @@ async function pushHub(){ if(!user||!supa) return; try{ const {error}=await supa
 var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
-function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; if(tv>0&&((x.id!=null)||tv>=xu)) return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
+function _mergeArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; if(tv>0&&tv>=xu) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
 function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","tasks","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb); }); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
@@ -4052,7 +4063,7 @@ function renderNotifs(){
 }
 function notifItem(n,ns,today){
   var src=NSRC[n.source]||{name:n.source,color:"#8a64c8",icon:""}; var w=notifWhen(n.due,n.time); var unread=!ns.read[n.id]; var pinned=ns.pinned[n.id]; var snoozed=ns.snooze[n.id]&&ns.snooze[n.id]>Date.now();
-  return '<div class="ntf-item'+(unread?" unread":"")+(w.cls==="over"?" over":"")+(pinned?" pinned":"")+'" onmouseenter="notifMarkRead(\''+n.id+'\',this)">'
+  return '<div class="ntf-item'+(unread?" unread":"")+(w.cls==="over"?" over":"")+(pinned?" pinned":"")+'" onmouseenter="notifMarkRead(\''+n.id+'\',this)" onpointerdown="notifMarkRead(\''+n.id+'\',this)">'
     +'<span class="ntf-ic" style="background:'+src.color+'">'+src.icon+'</span>'
     +'<div class="ntf-main"><div class="ntf-row1">'+(unread?'<span class="ntf-unreaddot"></span>':'')+'<span class="ntf-title">'+esc(n.title)+'</span><span class="ntf-src">'+src.name+'</span>'+priFlag(n.priority)+(pinned?'<span class="cat-chip" style="color:var(--peach-deep)">Pinned</span>':'')+'</div>'
     +(n.desc?'<div class="ntf-desc">'+esc(n.desc)+'</div>':'')
@@ -4099,7 +4110,7 @@ function notifDismissed(n){
 function notifDismiss(id){ var ns=notifStore(); var it=buildNotifs().find(function(x){return x.id===id;});
   ns.dismissed[id]={ts:Date.now(),due:(it&&it.due)||""}; save(); renderNotifs(); updateNotifBadge(); }
 function notifSnzMenu(btn){ var pop=btn.parentNode.querySelector(".ntf-snz-pop"); var open=pop.classList.contains("show"); document.querySelectorAll(".ntf-snz-pop.show").forEach(function(p){p.classList.remove("show");}); if(!open)pop.classList.add("show"); }
-function notifSnooze(id,amt){ var ns=notifStore(); var until; if(amt==="tomorrow"){ var t=new Date(); t.setDate(t.getDate()+1); t.setHours(9,0,0,0); until=t.getTime(); } else if(amt==="week"){ var w=new Date(); w.setDate(w.getDate()+7); w.setHours(9,0,0,0); until=w.getTime(); } else if(amt==="custom"){ var v=prompt("Snooze until (YYYY-MM-DD HH:MM):", new Date(Date.now()+86400000).toISOString().slice(0,16).replace("T"," ")); if(!v)return; var dt=new Date(v.replace(" ","T")); if(isNaN(dt)){toast("Invalid date");return;} until=dt.getTime(); } else { until=Date.now()+amt; } ns.snooze[id]=until; save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }
+function notifSnooze(id,amt){ var ns=notifStore(); var until; if(amt==="tomorrow"){ var t=new Date(); t.setDate(t.getDate()+1); t.setHours(9,0,0,0); until=t.getTime(); } else if(amt==="week"){ var w=new Date(); w.setDate(w.getDate()+7); w.setHours(9,0,0,0); until=w.getTime(); } else if(amt==="custom"){ uiPrompt("Format: YYYY-MM-DD HH:MM", new Date(Date.now()+86400000).toISOString().slice(0,16).replace("T"," "), function(v){ if(!v)return; var dt=new Date(v.replace(" ","T")); if(isNaN(dt)){toast("Invalid date");return;} ns.snooze[id]=dt.getTime(); save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }, {title:"Custom snooze", ok:"Snooze"}); return; } else { until=Date.now()+amt; } ns.snooze[id]=until; save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }
 function notifComplete(id){ var p=id.split(":");
   if(p[0]==="sub"){
     /* buildNotifs() emits "sub:<taskId>::<subId>" — notifComplete only ever knew "task"
@@ -4310,7 +4321,7 @@ function mmStore(){ var m=data.mindmap;
 function mmData(){ var m=mmStore(); var b=m.boards.find(function(x){return x.id===m.current;}); if(!b.view)b.view={tx:0,ty:0,s:1}; return b; }
 function mmNewBoard(){ var m=mmStore(); var b={id:uid(),name:"Map "+(m.boards.length+1),nodes:[],edges:[],view:{tx:0,ty:0,s:1},updated:Date.now()}; m.boards.push(b); m.current=b.id; MM.sel=MM.selEdge=null; MM.hist=[]; MM.future=[]; mmSave(); mmDraw(); mmClosePops(); }
 function mmSwitchBoard(id){ var m=mmStore(); m.current=id; MM.sel=MM.selEdge=null; MM.hist=[]; MM.future=[]; mmSave(); mmDraw(); mmClosePops(); }
-function mmRenameBoard(){ var b=mmData(); var nm=prompt("Rename mind map:", b.name); if(nm&&nm.trim()){ b.name=nm.trim(); b.updated=Date.now(); mmSave(); mmDraw(); } mmClosePops(); }
+function mmRenameBoard(){ var b=mmData(); mmClosePops(); uiPrompt("", b.name, function(nm){ if(nm&&nm.trim()){ b.name=nm.trim(); b.updated=Date.now(); mmSave(); mmDraw(); } }, {title:"Rename mind map", ok:"Rename"}); }
 async function mmDeleteBoard(id){ var m=mmStore(); if(m.boards.length<=1){ toast("Keep at least one map"); return; } if(!(await confirmModal("Delete mind map","This mind map and its nodes will be permanently deleted.","Delete",true))) return; tombstone({id:id}); m.boards=m.boards.filter(function(x){return x.id!==id;}); if(m.current===id)m.current=m.boards[0].id; MM.sel=MM.selEdge=null; mmSave(); mmDraw(); mmClosePops(); }
 function mmClosePops(){ document.querySelectorAll(".mm-pop.show").forEach(function(p){p.classList.remove("show");}); }
 function mmBoardPopHtml(){ var m=mmStore(); return m.boards.map(function(b){ return '<button onclick="mmSwitchBoard(\''+b.id+'\')" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:9px">'+(b.id===m.current?'<svg viewBox="0 0 24 24" fill="none" stroke="var(--lavender)" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>':'<span style="width:14px"></span>')+esc(b.name)+'</span><span class="mm-bdel" onclick="event.stopPropagation();mmDeleteBoard(\''+b.id+'\')" style="opacity:.6;padding:2px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>'; }).join("")
@@ -4445,7 +4456,7 @@ function mmBindSvg(){
     var nowt=Date.now(); var dbl=MM._ld&&(nowt-MM._ld.t<330)&&MM._ld.id===kid; MM._ld={t:nowt,id:kid};
     if(dbl){ e.preventDefault(); MM._ld=null;
       if(node){ var dv=node.querySelector(".mm-nt"); if(dv)mmEditText(dv); }
-      else if(eh){ var ed=mmData().edges.find(function(x){return x.id===eh.dataset.id;}); var lab=prompt("Connection label:",(ed||{}).label||""); if(lab!==null&&ed){ mmPush(); ed.label=lab; mmSave(); mmDraw(); } }
+      else if(eh){ var ed=mmData().edges.find(function(x){return x.id===eh.dataset.id;}); if(ed){ uiPrompt("", ed.label||"", function(lab){ mmPush(); ed.label=lab; mmSave(); mmDraw(); }, {title:"Connection label", ok:"Save"}); } }
       else { var w0=mmToWorld(e.clientX,e.clientY); mmPush(); var n0={id:uid(),x:mmSnap(w0.x-75),y:mmSnap(w0.y-32),w:150,h:64,shape:"round",text:"New idea",fill:"rgba(138,100,200,0.16)",stroke:"#8a64c8",textColor:"",fontSize:14,tag:""}; mmData().nodes.push(n0); MM.sel=n0.id; MM.selEdge=null; mmSave(); mmDraw(); setTimeout(function(){ var d2=document.querySelector('.mm-nt[data-id="'+n0.id+'"]'); if(d2)mmEditText(d2); },20); }
       return;
     }
@@ -6453,6 +6464,9 @@ function showModal(html,cls){
   document.addEventListener("keydown",_mdlTrap,true);
 }
 var _mdlPrevFocus=null;
+/* styled replacements for native confirm()/prompt() — keep the app's modal look & focus handling */
+function uiConfirm(msg,onOk,opts){ opts=opts||{}; showModal('<h4>'+esc(opts.title||"Please confirm")+'</h4><p class="muted" style="margin:6px 0 16px;line-height:1.5">'+esc(msg)+'</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn soft" onclick="closeModal()">'+esc(opts.cancel||"Cancel")+'</button><button class="btn'+(opts.danger?" danger":"")+'" id="__uiOk">'+esc(opts.ok||"Confirm")+'</button></div>'); var b=document.getElementById("__uiOk"); if(b) b.onclick=function(){ closeModal(); try{ onOk&&onOk(); }catch(e){} }; }
+function uiPrompt(msg,def,onOk,opts){ opts=opts||{}; showModal('<h4>'+esc(opts.title||"")+'</h4>'+(msg?'<p class="muted" style="margin:6px 0 10px;line-height:1.5">'+esc(msg)+'</p>':"")+'<input class="fld" id="__uiIn" value="'+esc(def==null?"":def)+'"><div class="row" style="justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" id="__uiOk">'+esc(opts.ok||"Save")+'</button></div>'); var i=document.getElementById("__uiIn"); var b=document.getElementById("__uiOk"); if(b) b.onclick=function(){ var v=i?i.value:""; closeModal(); try{ onOk&&onOk(v); }catch(e){} }; if(i){ setTimeout(function(){ try{ i.focus(); i.select(); }catch(_){} },40); } }
 function _mdlTrap(e){
   if(e.key!=="Tab") return;
   var m=document.querySelector(".overlay .modal"); if(!m) return;
@@ -6519,7 +6533,7 @@ var I_EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function togglePw(inId,btnId){ var i=document.getElementById(inId), b=document.getElementById(btnId); if(!i) return; var show=(i.type==="password"); i.type=show?"text":"password"; if(b){ b.innerHTML=show?I_EYEOFF:I_EYE; b.setAttribute("aria-label",show?"Hide password":"Show password"); b.title=show?"Hide password":"Show password"; } try{ i.focus(); var v=i.value; i.value=""; i.value=v; }catch(e){} }
 function authUI(mode){
   mode=mode||"in";
-  const root=document.getElementById("authRoot"); root.style.display="grid";
+  const root=document.getElementById("authRoot"); root.style.display="grid"; document.documentElement.classList.add("dark");
   const tabs=`<div class="auth-tabs"><button class="${mode==='in'?'active':''}" onclick="authUI('in')">Sign in</button><button class="${mode==='up'?'active':''}" onclick="authUI('up')">Create account</button></div>`;
   root.innerHTML=`<div class="auth-card">
     <div class="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
@@ -6533,7 +6547,7 @@ function authUI(mode){
   </div>`;
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
-function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML="";
+function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML=""; try{var _t=localStorage.getItem("hub.theme")||"dark";document.documentElement.classList.toggle("dark",_t!=="light");}catch(e){} try{updThemeIcon();}catch(e){}
   try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(e){}
   try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
        var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
@@ -6657,10 +6671,11 @@ async function saveEvent(id){
   } else {
     var st=document.getElementById("evStart").value||"09:00";
     var et=document.getElementById("evEnd").value||st;
-    if(et<=st){ var pp=st.split(":"); var mm=(+pp[0])*60+(+pp[1])+60; et=_pad2(Math.floor(mm/60)%24)+":"+_pad2(mm%60); }
+    var endDate=date;
+    if(et<=st){ var pp=st.split(":"); var mm=(+pp[0])*60+(+pp[1])+60; et=_pad2(Math.floor(mm/60)%24)+":"+_pad2(mm%60); if(mm>=1440){ var _ed=new Date(date+"T00:00:00"); _ed.setDate(_ed.getDate()+1); endDate=isoLocal(_ed); } /* fix: end time wrapped past midnight -> roll the end date to the next day so end is after start */ }
     var tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||"UTC";
     body.start={dateTime:date+"T"+st+":00",timeZone:tz};
-    body.end={dateTime:date+"T"+et+":00",timeZone:tz};
+    body.end={dateTime:endDate+"T"+et+":00",timeZone:tz};
   }
   var btn=document.getElementById("evSaveBtn"); if(btn){ btn.disabled=true; btn.textContent="Saving…"; }
   try{
@@ -6670,10 +6685,11 @@ async function saveEvent(id){
     var t=getGToken("google")||calToken; if(t) await loadCalEvents(t);
   }catch(e){ if(btn){ btn.disabled=false; btn.textContent=id?"Save":"Create event"; } toast("Couldn't save event — reconnect Google"); }
 }
-async function deleteEvent(id){
-  if(!confirm("Delete this event? Guests will be notified.")) return;
-  try{ await calApi("events/"+encodeURIComponent(id),"DELETE",null,"sendUpdates=all"); closeModal(); toast("Event deleted"); var t=getGToken("google")||calToken; if(t) await loadCalEvents(t); }
-  catch(e){ toast("Couldn't delete event"); }
+function deleteEvent(id){
+  uiConfirm("Delete this event? Guests will be notified.", async function(){
+    try{ await calApi("events/"+encodeURIComponent(id),"DELETE",null,"sendUpdates=all"); toast("Event deleted"); var t=getGToken("google")||calToken; if(t) await loadCalEvents(t); }
+    catch(e){ toast("Couldn't delete event"); }
+  }, {title:"Delete event", ok:"Delete", danger:true});
 }
 /* ============ Gmail compose / send ============ */
 function _b64url(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
