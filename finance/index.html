@@ -1056,6 +1056,137 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
 /* Account names are user-entered and render into a <span> with no wrapping rule;
    a long unbroken name pushed the row's figures off the card. */
 .acc-nm{overflow-wrap:anywhere;min-width:0}
+
+/* ===== Light theme refinement — expanded brand palette =====
+   Fully scoped to light mode: dark mode and the sidebar remain unchanged. */
+html:not(.dark){
+  --brand-indigo:#240852;
+  --periwinkle:#b3a9ff;
+  --lavender-soft:#e9e7ff;
+  --peach-mid:#e9827a;
+  --surface-raised:#faf8ff;
+  --surface-hover:#f4f1fb;
+  --surface-selected:#e9e7ff;
+  --grad-action:linear-gradient(120deg,#6350e0 0%,#817eff 100%);
+}
+/* Accounts + Budget interlock: match the previous site's light lavender tile. */
+html:not(.dark) .card.acc-head::before,
+html:not(.dark) #budgetCards .card::before{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,#f0ebfb;
+  opacity:1;-webkit-mask-image:none;mask-image:none;
+}
+html:not(.dark) .card.acc-head::after,
+html:not(.dark) #budgetCards .card::after{
+  background:var(--border);opacity:1;
+}
+html:not(.dark) body::before{background:
+  radial-gradient(720px 480px at 7% -12%,rgba(129,126,255,.15),transparent 64%),
+  radial-gradient(660px 460px at 96% 4%,rgba(255,179,171,.13),transparent 66%),
+  radial-gradient(820px 580px at 50% 116%,rgba(179,169,255,.10),transparent 72%),
+  linear-gradient(180deg,#faf8ff 0%,#f4f1fb 56%,#e9e7ff 132%)}
+
+html:not(.dark) .topbar{
+  background:rgba(250,248,255,.82);border-bottom:1px solid var(--border);
+  box-shadow:0 8px 28px rgba(36,8,82,.045)}
+
+html:not(.dark) .card,
+html:not(.dark) .alloc-card,
+html:not(.dark) .insight{
+  background:rgba(255,255,255,.86);border-color:var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 10px 30px rgba(36,8,82,.07)}
+html:not(.dark) .card:hover{
+  background:#fff;border-color:rgba(129,126,255,.32);
+  box-shadow:0 18px 40px -18px rgba(74,56,181,.28)}
+
+html:not(.dark) .btn:not(.soft):not(.danger):not(.peach),
+html:not(.dark) .hq-btn,
+html:not(.dark) #avatarChip{
+  background:var(--grad-action)}
+html:not(.dark) .btn.soft{
+  background:var(--lavender-soft);color:var(--violet);
+  border:1px solid rgba(129,126,255,.20);box-shadow:none}
+html:not(.dark) .btn.soft:hover{
+  background:rgba(179,169,255,.28);border-color:rgba(129,126,255,.35);color:var(--brand-indigo)}
+
+html:not(.dark) .seg{
+  background:var(--surface-raised);border-color:var(--border);
+  box-shadow:inset 0 1px 0 #fff,0 5px 16px rgba(36,8,82,.045)}
+html:not(.dark) .seg button:hover{background:var(--lavender-soft);color:var(--brand-indigo)}
+html:not(.dark) .seg button.active{
+  background:var(--grad-action);color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 4px 12px rgba(99,80,224,.24)}
+
+html:not(.dark) td input,
+html:not(.dark) td select,
+html:not(.dark) select.bare,
+html:not(.dark) .tbl-filter,
+html:not(.dark) .tbl-search,
+html:not(.dark) .dp-btn,
+html:not(.dark) .cs-btn{
+  background-color:#fff;border-color:var(--border);color:var(--text);
+  box-shadow:inset 0 1px 0 rgba(36,8,82,.02),0 4px 14px rgba(36,8,82,.025)}
+html:not(.dark) .tbl-search{
+  border:1px solid var(--border);border-radius:12px;padding:0 12px;
+  font-family:inherit;font-weight:600}
+html:not(.dark) td input:hover,
+html:not(.dark) td select:hover,
+html:not(.dark) select.bare:hover,
+html:not(.dark) .tbl-filter:hover,
+html:not(.dark) .tbl-search:hover,
+html:not(.dark) .dp-btn:hover,
+html:not(.dark) .cs-btn:hover{border-color:var(--periwinkle)}
+html:not(.dark) td input:focus,
+html:not(.dark) td select:focus,
+html:not(.dark) select.bare:focus,
+html:not(.dark) .tbl-filter:focus,
+html:not(.dark) .tbl-search:focus,
+html:not(.dark) .dp-btn:focus,
+html:not(.dark) .cs-btn:focus{
+  background:#fff;border-color:rgba(129,126,255,.55);
+  box-shadow:0 0 0 3px rgba(129,126,255,.12)}
+
+html:not(.dark) .chip,
+html:not(.dark) .mile,
+html:not(.dark) .pill{
+  background:var(--lavender-soft);border-color:rgba(129,126,255,.18);color:var(--violet)}
+html:not(.dark) .chip:hover,
+html:not(.dark) .mile:hover{
+  background:rgba(179,169,255,.28);border-color:rgba(129,126,255,.32)}
+
+html:not(.dark) .acc-card,
+html:not(.dark) .bud-env{
+  background:#fff;border-color:var(--border);
+  box-shadow:0 6px 20px rgba(36,8,82,.045)}
+html:not(.dark) .acc-card:hover,
+html:not(.dark) .bud-env:hover{
+  border-color:rgba(129,126,255,.30);
+  box-shadow:0 12px 28px rgba(36,8,82,.08)}
+
+html:not(.dark) .modal,
+html:not(.dark) .auth-card{
+  background:rgba(255,255,255,.96);border-color:var(--border);
+  box-shadow:0 28px 70px rgba(36,8,82,.20),inset 0 1px 0 #fff}
+html:not(.dark) .modal input,
+html:not(.dark) .auth-card input{background:#fff;border-color:var(--border)}
+html:not(.dark) .auth-tabs{background:var(--lavender-soft)}
+html:not(.dark) .auth-tabs button.active{background:#fff;color:var(--violet)}
+
+html:not(.dark) .more-sheet{
+  background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(233,231,255,.98));
+  border-top-color:var(--border);box-shadow:0 -22px 55px rgba(36,8,82,.16)}
+html:not(.dark) .more-title{color:var(--text)}
+html:not(.dark) .more-grip{background:rgba(42,29,68,.22)}
+html:not(.dark) .more-grid button{background:rgba(255,255,255,.72);border-color:var(--border);color:var(--muted)}
+html:not(.dark) .more-grid button.active{background:var(--grad-action);color:#fff;border-color:var(--periwinkle)}
+
+@media(max-width:768px){
+  html:not(.dark) .bottombar{
+    background:rgba(255,255,255,.84);border-color:var(--border);
+    box-shadow:0 18px 45px rgba(36,8,82,.16),inset 0 1px 0 rgba(255,255,255,.95)}
+  html:not(.dark) .bottombar button{color:var(--muted)}
+  html:not(.dark) .bottombar button.active{
+    color:#fff;background:var(--grad-action);box-shadow:0 6px 18px rgba(99,80,224,.30)}
+}
 </style>
 </head>
 <body>
