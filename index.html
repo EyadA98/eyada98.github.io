@@ -2975,7 +2975,7 @@ html:not(.dark) .pw-ring .pw-arc{stroke:#dd824b}
 </div>
 
 <nav class="bottombar">
-  <button data-tab="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
+  <button data-tab="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
   <button data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
   <button data-tab="routines"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>Routines</button>
   <button data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
@@ -4617,11 +4617,17 @@ function renderHome(){
   renderAppCards("appCards");
   try{ renderDashboard(); }catch(e){} renderToday(); renderCalendar(); try{renderCalConn();renderGmail();}catch(e){}
   var hlk=document.getElementById("homeLinks"); if(hlk) hlk.innerHTML = data.links.length? data.links.slice(0,8).map(linkChip).join("") : '<span class="muted">No links yet.</span>';
-  try{ loadWeather(); }catch(e){}
+  /* Location follows you automatically — no tap needed. It detects on load unless you've explicitly
+     picked a city by hand (geoAuto===false). Throttled so it can't re-fire rapidly within a session. */
+  /* only auto-detect location when something actually consumes it (prayer or weather); otherwise a user
+     who turned both widgets off would still get a pointless location-permission prompt */
+  try{ if((data.settings.showPrayer!==false||data.settings.showWeather!==false) && data.settings.geoAuto!==false && !_geoDenied && (Date.now()-_geoLastAttempt>60000) && (!_getGeo() || (Date.now()-((_getGeo()&&_getGeo().at)||0))>1800000)) hubUseMyLocation(true); }catch(e){}
+  /* the Settings "Weather" toggle now actually hides + stops the weather box (it was previously read nowhere) */
+  var _wb=document.querySelector(".hx-weather"); if(_wb) _wb.style.display=(data.settings.showWeather!==false)?"":"none";
+  if(data.settings.showWeather!==false){ try{ loadWeather(); }catch(e){} }
   try{ renderTasksOverview(); }catch(e){ console.error('renderTasksOverview',e); }
   try{ renderRecentNotes(); }catch(e){ console.error('renderRecentNotes',e); }
   var pc=document.getElementById("prayerCard"); if(pc) pc.style.display=(data.settings.showPrayer!==false)?"":"none";
-  var pcty=document.getElementById("prayerCity"); if(pcty) pcty.textContent=data.settings.city?("· "+data.settings.city):"";
   if(data.settings.showPrayer!==false) loadPrayers();
   requestAnimationFrame(syncDashHeights);
 }
@@ -4751,7 +4757,7 @@ function emptyTasks(){return '<div class="empty"><div class="glyph">'+IC.task+'<
 function tickClock(){var el=document.getElementById("clockTime");if(!el)return;var n=new Date();function p(x){return String(x).padStart(2,"0");}var h=n.getHours();var mer=h<12?"AM":"PM";var h12=(h%12)||12;el.innerHTML=h12+":"+p(n.getMinutes())+'<span class="sec">'+p(n.getSeconds())+'</span><span class="mer">'+mer+'</span>';}
 function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;});}
 var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
-function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var now=new Date(),nowS=now.getHours()*3600+now.getMinutes()*60; for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
+function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var nowS=_prayNowSecs(); for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
 function hpill(ic,html,cls){ return '<span class="hpill'+(cls?" "+cls:"")+'">'+ic+'<span>'+html+'</span></span>'; }
 function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var over=op.filter(function(x){return x.due&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));/* travel: renderDailySummary() looks for #dailySummary, which no longer exists in the markup — it returns on the first line, so a row added there is invisible. This hero strip is the summary that actually renders. */try{var _tv=travelDigestPill();if(_tv)parts.push(_tv);}catch(e){}el.innerHTML=parts.join("");}
 
@@ -5523,8 +5529,8 @@ var notesShowArchived=false;
 function toggleArchivedView(){ notesShowArchived=!notesShowArchived; var b=document.getElementById("archToggle"); if(b){ b.textContent=notesShowArchived?"Hide archived":"Show archived"; b.classList.toggle("on",notesShowArchived);} renderNotes(); }
 function addNote(){ noteModal(""); }
 function delNote(id){ var arr=data.notes||[]; var i=arr.findIndex(function(n){return n.id===id;}); if(i<0) return; var it=arr[i]; tombstone({id:id}); arr.splice(i,1); save(); renderNotes(); undoToast("Note deleted", function(){ data.deleted=data.deleted||{}; data.deleted["#"+id]=-Date.now(); data.notes=data.notes||[]; data.notes.splice(Math.min(i,data.notes.length),0,it); save(); renderNotes(); }); }
-function pinNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.pinned=!n.pinned; n.updated=Date.now(); save(); renderNotes(); } }
-function archiveNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.archived=!n.archived; n.updated=Date.now(); save(); renderNotes(); toast(n.archived?"Archived":"Restored"); } }
+function pinNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.pinned=!n.pinned; n.updated=Date.now(); save(); renderNotes(); try{renderRecentNotes();}catch(e){} } }
+function archiveNote(id){ var n=data.notes.find(function(x){return x.id===id;}); if(n){ n.archived=!n.archived; n.updated=Date.now(); save(); renderNotes(); try{renderRecentNotes();}catch(e){} toast(n.archived?"Archived":"Restored"); } }
 function migrateNotes(){
   var ch=false; (data.notes||[]).forEach(function(n){
     if(n.title===undefined){ var body=(n.body||"").trim(); var lines=body.split("\n"); var first=(lines.shift()||"").trim(); n.title=first.slice(0,140); n.desc=lines.join("\n").trim(); if(!Array.isArray(n.checklist)) n.checklist=[]; ch=true; }
@@ -6133,34 +6139,50 @@ var WX_CLOUD='<svg viewBox="0 0 24 24" fill="none" stroke="#bba4e4" stroke-width
 var WX_RAIN='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width="2"><path d="M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 15M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>';
 var WX_STORM='<svg viewBox="0 0 24 24" fill="none" stroke="#8a64c8" stroke-width="2"><path d="M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 18 15M13 11l-3 6h4l-3 5"/></svg>';
 function wxIcon(c){ if(c<=1) return WX_SUN; if(c<48) return WX_CLOUD; if(c>=95) return WX_STORM; return WX_RAIN; }
+function _wxKey(){ var geo=_getGeo(); return (geo&&geo.lat!=null)?("geo:"+geo.lat.toFixed(2)+","+geo.lng.toFixed(2)):(data.settings.city||"Makkah"); }
 async function loadWeather(){
   const box=document.getElementById("ambient"); if(!box) return;
   const sub=document.getElementById("weatherSub");
+  var geo=_getGeo();
   const city=data.settings.city||"Makkah";
-  if(_wxCache[city]){ box.innerHTML=_wxCache[city].v; if(sub) sub.textContent=_wxCache[city].s; return; }
+  const key=_wxKey();
+  const label=(geo&&geo.lat!=null)?(geo.city||"Current location"):city;
+  if(_wxCache[key]){ box.innerHTML=_wxCache[key].v; if(sub) sub.textContent=_wxCache[key].s; return; }
   box.textContent='…'; if(sub) sub.textContent='';
   try{
-    const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(function(r){return r.json();});
-    const loc=g&&g.results&&g.results[0];
-    if(!loc){ box.textContent='—'; if(sub) sub.textContent='Set city in Preferences'; return; }
-    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,weather_code").then(function(r){return r.json();});
+    var lat,lng;
+    if(geo&&geo.lat!=null){ lat=geo.lat; lng=geo.lng; }        /* GPS coords win, so weather follows you as you travel */
+    else{
+      const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en").then(function(r){return r.json();});
+      const loc=g&&g.results&&g.results[0];
+      if(!loc){ box.textContent='—'; if(sub) sub.textContent='Set city in Preferences'; return; }
+      lat=loc.latitude; lng=loc.longitude;
+    }
+    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lng+"&current=temperature_2m,weather_code").then(function(r){return r.json();});
     if(!w||!w.current) throw new Error("x");
     const temp=Math.round(w.current.temperature_2m), desc=wxDesc(w.current.weather_code);
     const val=temp+'°<span class="wx-ic">'+wxIcon(w.current.weather_code)+'</span>';
-    const ssub=desc+' · '+city;
-    _wxCache[city]={v:val,s:ssub}; box.innerHTML=val; if(sub) sub.textContent=ssub;
+    const ssub=desc+' · '+label;
+    _wxCache[key]={v:val,s:ssub}; box.innerHTML=val; if(sub) sub.textContent=ssub;
   }catch(e){
     box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.7rem;-webkit-text-fill-color:initial;color:var(--lavender)">Retry</button>'; if(sub) sub.textContent='';
   }
 }
-function retryWeather(){ var c=data.settings.city||"Makkah"; delete _wxCache[c]; loadWeather(); }
+function retryWeather(){ delete _wxCache[_wxKey()]; loadWeather(); }
 function wxDesc(c){ if(c==0)return"Clear"; if(c<3)return"Sunny"; if(c<50)return"Cloudy"; if(c<70)return"Rain"; if(c<80)return"Showers"; return"Storm"; }
-var _prayList=null;
+var _prayList=null, _prayTz="";
+/* seconds-of-day in the PRAYER LOCATION's own timezone (from the API meta), so the countdown stays
+   correct even when a hand-picked city sits in a different timezone than the device. Falls back to
+   device-local time if the timezone is unknown. */
+function _prayNowSecs(){
+  if(_prayTz){ try{ var p={}; new Intl.DateTimeFormat('en-GB',{timeZone:_prayTz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date()).forEach(function(x){ p[x.type]=x.value; }); var h=+p.hour; if(h===24)h=0; var m=+p.minute, s=+p.second||0; if(isFinite(h)&&isFinite(m)) return h*3600+m*60+s; }catch(e){} }
+  var n=new Date(); return n.getHours()*3600+n.getMinutes()*60+n.getSeconds();
+}
 function pr12(t){ var s=String(t).slice(0,5).split(":"); var h=+s[0]; var h12=h%12||12; return h12+":"+(s[1]||"00"); }
 function renderPrayerNext(){
   var el=document.getElementById("prayerNext"); if(!el) return;
   if(!_prayList||!_prayList.length){ el.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Loading prayer times&hellip;</div></div>'; return; }
-  var now=new Date(); var nowS=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+  var nowS=_prayNowSecs();
   var secs=_prayList.map(function(p){return p.h*3600+p.m*60;});
   var nIdx=-1; for(var i=0;i<secs.length;i++){ if(secs[i]>nowS){ nIdx=i; break; } }
   var cur=(nIdx<0?0:nIdx);
@@ -6175,7 +6197,7 @@ function renderPrayerNext(){
   function fmt(sec){ var s=((sec%86400)+86400)%86400; var h=Math.floor(s/3600), m=Math.floor((s%3600)/60); var ap=h<12?"AM":"PM"; var h12=h%12||12; return h12+":"+(m<10?"0":"")+m+" "+ap; }
   function fmtS(sec){ var s=((sec%86400)+86400)%86400; var h=Math.floor(s/3600), m=Math.floor((s%3600)/60); var h12=h%12||12; return h12+":"+(m<10?"0":"")+m; }
   var C=2*Math.PI*40, off=C*(1-rfrac);
-  var city=esc(data.settings.city||"Makkah");
+  var city=esc((_getGeo()&&_getGeo().city)||data.settings.city||"Makkah");
   var strip=_prayList.map(function(p,idx){ var on=(idx===cur); return '<div class="pw-col'+(on?" on":"")+'"><span class="pw-nm">'+esc(p.name)+'</span><span class="pw-tm">'+fmtS(secs[idx])+'</span></div>'; }).join("");
   el.innerHTML='<div class="pw-wrap">'
     +'<div class="pw-ring"><svg width="100%" height="100%" viewBox="0 0 104 104"><circle class="pw-track" cx="52" cy="52" r="40" fill="none" stroke-width="7"/><circle class="pw-arc" cx="52" cy="52" r="40" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 52 52)"/></svg><div class="pw-ringc"><b>'+esc(cd)+'</b><span>until '+esc(nextName)+'</span></div></div>'
@@ -6187,35 +6209,98 @@ function renderPrayerNext(){
     +'</div>';
 }
 var _prayDay="";
+/* Detect the device's current location once, then let prayer + weather follow it as you travel.
+   Coordinates are the source of truth; a reverse-geocode only supplies a friendly label.
+   Requires a secure context (https/localhost) — on a bare file:// page the browser blocks
+   geolocation, so this falls back silently to the manually-set city. */
+var _geoBusy=false, _geoDenied=false, _geoLastAttempt=0;
+/* geo is DEVICE-LOCAL: each device only ever trusts its OWN GPS, so a location detected on one
+   device can never leak onto another through cloud sync. It lives in its own localStorage key,
+   OUTSIDE the synced `data`. Only the follow-me preference (geoAuto) and the manual city sync —
+   those are user intent, not device state. */
+var _localGeo=null; try{ _localGeo=JSON.parse(localStorage.getItem("hub.geo")||"null"); }catch(e){ _localGeo=null; }
+function _getGeo(){ return _localGeo; }
+function _setGeo(g){ _localGeo=g||null; try{ if(_localGeo) localStorage.setItem("hub.geo",JSON.stringify(_localGeo)); else localStorage.removeItem("hub.geo"); }catch(e){} }
+function hubUseMyLocation(silent){
+  if(_geoBusy) return;
+  if(!silent){ _geoDenied=false; }            /* an explicit tap overrides a prior session refusal */
+  if(!navigator.geolocation){ if(!silent) toast("Location isn't available on this device."); return; }
+  _geoBusy=true; _geoLastAttempt=Date.now();
+  if(!silent){ try{toast("Detecting your location…");}catch(e){} }
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var la=pos.coords.latitude, lo=pos.coords.longitude;
+    _setGeo({lat:la,lng:lo,city:(_localGeo&&_localGeo.city)||"",at:Date.now()});
+    data.settings.geoAuto=true;               /* the follow-me PREFERENCE syncs; the coordinates do NOT */
+    var finish=function(){ _geoBusy=false;
+      try{ delete _wxCache[_wxKey()]; }catch(e){}
+      try{save();}catch(e){}                   /* persists geoAuto; the geo coords are already in their own local key */
+      if(data.settings.showPrayer!==false){ try{loadPrayers();}catch(e){} }
+      if(data.settings.showWeather!==false){ try{loadWeather();}catch(e){} }
+      try{if(typeof closeModal==="function"&&document.querySelector(".overlay .modal")&&!silent)closeModal();}catch(e){}
+    };
+    /* best-effort friendly label; the data works even if this fails */
+    fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la+"&longitude="+lo+"&localityLanguage=en").then(function(r){return r.json();}).then(function(g){
+      var nm=(g&&(g.city||g.locality||g.principalSubdivision))||"";
+      if(nm&&_localGeo){ _localGeo.city=nm; _setGeo(_localGeo); }
+      if(!silent) toast("Location set to "+(nm||"your area"));
+      finish();
+    }).catch(function(){ if(!silent) toast("Using your current location."); finish(); });
+  }, function(err){
+    _geoBusy=false;
+    /* Only a hard permission-denial (code 1) stops auto-follow for the session. A transient
+       timeout/position-unavailable must NOT latch — otherwise one slow GPS fix kills location-follow
+       for the rest of the session; those just rely on the 60s attempt throttle + 30-min freshness. */
+    if(err&&err.code===1){ _geoDenied=true; }
+    if(_localGeo){ _localGeo.at=Date.now(); _setGeo(_localGeo); }   /* back off ~30 min before the next refresh */
+    if(!silent){ toast(err&&err.code===1?"Location permission denied — set a city manually.":"Couldn't get your location — set a city manually."); }
+  }, {enableHighAccuracy:false,timeout:9000,maximumAge:600000});
+}
 async function loadPrayers(){
-  const city=data.settings.city||"Makkah"; const country=data.settings.prayerCountry||"Saudi Arabia"; const method=data.settings.prayerMethod||4;
+  const method=data.settings.prayerMethod||4;
   const host=document.getElementById("prayerNext"); if(!host) return;
-  var today=isoLocal(new Date()); var ckey=city+"|"+country+"|"+method+"|"+today; _prayDay=today;
+  var geo=_getGeo();
+  var today=isoLocal(new Date()); var dstr=today.split("-").reverse().join("-"); _prayDay=today;
+  var url,ckey,label;
+  if(geo&&geo.lat!=null){                                      /* GPS coords win, so prayer times follow you as you travel */
+    url="https://api.aladhan.com/v1/timings/"+dstr+"?latitude="+geo.lat+"&longitude="+geo.lng+"&method="+method;
+    ckey="geo:"+geo.lat.toFixed(2)+","+geo.lng.toFixed(2)+"|"+method+"|"+today;
+    label=geo.city||"Current location";
+  }else{
+    var city=data.settings.city||"Makkah", country=data.settings.prayerCountry||"Saudi Arabia";
+    url="https://api.aladhan.com/v1/timingsByCity?city="+encodeURIComponent(city)+"&country="+encodeURIComponent(country)+"&method="+method+"&date="+dstr;
+    ckey=city+"|"+country+"|"+method+"|"+today;
+    label=city;
+  }
   try{
-    const j= _prayCache[ckey] || await fetch("https://api.aladhan.com/v1/timingsByCity?city="+encodeURIComponent(city)+"&country="+encodeURIComponent(country)+"&method="+method+"&date="+today.split("-").reverse().join("-")).then(r=>r.json());
+    const j= _prayCache[ckey] || await fetch(url).then(r=>r.json());
     if(!j||!j.data||!j.data.timings) throw new Error("bad");
     _prayCache[ckey]=j;
+    try{ _prayTz=(j.data&&j.data.meta&&j.data.meta.timezone)||""; }catch(e){ _prayTz=""; }
     const t=j.data.timings; const order=[["Fajr",t.Fajr],["Dhuhr",t.Dhuhr],["Asr",t.Asr],["Maghrib",t.Maghrib],["Isha",t.Isha]];
     _prayList=order.map(function(o){ var pp=String(o[1]).split(":"); return {name:o[0],h:+pp[0],m:+pp[1]}; });
     renderPrayerNext();
-  }catch(e){ host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(city)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
+  }catch(e){ host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(label)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
 }
 function prayerCityPicker(){
   var cur=data.settings.city||"Makkah", cc=data.settings.prayerCountry||"Saudi Arabia", mcur=data.settings.prayerMethod||4;
   var methods=[[4,"Umm al-Qura (Saudi Arabia)"],[3,"Muslim World League"],[2,"ISNA (North America)"],[5,"Egyptian General Authority"],[1,"University of Karachi"],[8,"Gulf Region"],[9,"Kuwait"],[10,"Qatar"],[11,"Singapore"],[12,"UOIF (France)"],[13,"Diyanet (Turkey)"],[7,"Institute of Geophysics, Tehran"]];
-  var html='<h4>Prayer location</h4><div class="tm"><div class="tm-sec">'
+  var html='<h4>Location</h4><div class="tm"><div class="tm-sec"><div class="muted" style="font-size:.78rem;margin:-4px 0 12px">One place for where you are \u2014 sets your prayer times and weather.</div>'
    +'<div><label class="setlbl">City</label><div class="ac-wrap"><input class="fld" id="pcCity" autocomplete="off" value="'+esc(cur)+'" placeholder="Start typing a city\u2026" oninput="cityAC(this.value,\'pcCity\',\'pcCityList\')" onfocus="cityAC(this.value,\'pcCity\',\'pcCityList\')" onkeydown="cityACKey(event)"><div class="ac-list" id="pcCityList"></div></div></div>'
    +'<div style="margin-top:12px"><label class="setlbl">Country</label><input class="fld" id="pcCountry" value="'+esc(cc)+'" placeholder="e.g. Saudi Arabia"></div>'
    +'<div style="margin-top:12px"><label class="setlbl">Calculation method</label><select class="fld" id="pcMethod">'+methods.map(function(m){return '<option value="'+m[0]+'" '+(m[0]===mcur?"selected":"")+'>'+m[1]+'</option>';}).join("")+'</select></div>'
+   +'<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><button type="button" class="btn soft" onclick="hubUseMyLocation()" style="display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Use my current location</button>'
+   +(_getGeo()?('<div class="muted" style="margin-top:7px;font-size:.72rem">Following your location automatically'+(_getGeo().city?(" &middot; "+esc(_getGeo().city)):"")+' — prayer &amp; weather update as you travel. Saving a city above switches back to manual.</div>'):('<div class="muted" style="margin-top:7px;font-size:.72rem">Prayer &amp; weather follow your location automatically (needs an https page + one-time permission). Tap to grant now, or pick a city above to turn it off.</div>'))+'</div>'
    +'</div></div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="prayerCitySave()">Save</button></div>';
   showModal(html,"wide");
 }
 function prayerCitySave(){
   var c=(document.getElementById("pcCity").value||"").trim(); if(!c){ toast("Enter a city"); return; }
   data.settings.city=c; data.settings.prayerCountry=(document.getElementById("pcCountry").value||"").trim()||"Saudi Arabia"; data.settings.prayerMethod=+document.getElementById("pcMethod").value||4; data.settings.cityUpdated=Date.now();
+  _setGeo(null); data.settings.geoAuto=false;   /* a hand-picked city clears this device's GPS + switches off location-follow */
   save(); closeModal();
+  try{ delete _wxCache[_wxKey()]; }catch(e){}
   var host=document.getElementById("prayerNext"); if(host) host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Loading prayer times&hellip;</div></div>';
-  loadPrayers(); toast("Prayer location updated");
+  loadPrayers(); loadWeather(); toast("Prayer location updated");
 }
 
 /* ============ Finance net worth (Supabase boards) ============ */
@@ -6266,6 +6351,7 @@ function travelItems(){
   var out=[]; var trips=(typeof travelAll!=="undefined"&&travelAll&&travelAll.length)?travelAll:(travelTrips||[]);
   (trips||[]).forEach(function(t){
     if(!t||t.__deleted) return;
+    if((t.status||"draft")!=="active") return;   /* Hub surfaces only show ACTIVE trips — not draft/completed/archived */
     var nodes=t.nodes||[];
     var named=nodes.map(function(n){return n&&n.name;}).filter(Boolean);
     var nameOf=function(id){ var n=nodes.filter(function(x){return x&&x.id===id;})[0]; return (n&&n.name)||""; };
@@ -6419,7 +6505,7 @@ function openSettings(){
   showModal('<h4>Profile &amp; settings</h4><div class="tm">'
     +'<div class="tm-sec"><div class="tm-h">'+ICp+'Profile</div>'
     +'<label class="setlbl">Name</label><input class="fld" id="setName" value="'+esc(data.profile.name||"")+'">'
-    +'<span class="setlbl" style="display:block;margin-top:12px">City — prayer &amp; weather</span><div class="ac-wrap"><input class="fld" id="setCity" autocomplete="off" value="'+esc(s.city||"Makkah")+'" placeholder="Start typing a city…" oninput="cityAC(this.value,\'setCity\',\'cityAClist\')" onfocus="cityAC(this.value,\'setCity\',\'cityAClist\')" onkeydown="cityACKey(event)"><div class="ac-list" id="cityAClist"></div></div>'
+    +'<span class="setlbl" style="display:block;margin-top:12px">Location — prayer &amp; weather</span><div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><span class="muted" style="font-size:.9rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc((_getGeo()&&_getGeo().city)||s.city||"Makkah")+(_getGeo()?' &middot; following you':'')+'</span><button type="button" class="btn soft" onclick="prayerCityPicker()" style="flex:none">Change</button></div>'
     +'<span class="setlbl" style="display:block;margin-top:12px">Language</span><select class="fld" id="setLang"><option value="en" '+(s.lang!=="ar"?"selected":"")+'>English</option><option value="ar" '+(s.lang==="ar"?"selected":"")+'>العربية (RTL)</option></select></div>'
     +'<div class="tm-sec"><div class="tm-h">'+ICi+'Integrations</div>'
     +'<label class="setlbl">Google Client ID — Calendar &amp; Gmail (optional)</label><input class="fld" id="setGcal" value="'+esc(s.gcalId||"")+'" placeholder="…apps.googleusercontent.com">'
@@ -6431,7 +6517,11 @@ function openSettings(){
 var _acTimer=null,_acIdx=-1,_acItems=[],_acInp="setCity",_acList="cityAClist";
 function cityAC(q,inpId,listId){ if(inpId)_acInp=inpId; if(listId)_acList=listId; var box=document.getElementById(_acList); if(!box) return; q=(q||"").trim(); if(q.length<2){ box.classList.remove("show"); box.innerHTML=""; return; } clearTimeout(_acTimer); _acTimer=setTimeout(function(){ fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(q)+"&count=6&language=en").then(function(r){return r.json();}).then(function(j){ _acItems=(j&&j.results)||[]; _acIdx=-1; if(!_acItems.length){ box.classList.remove("show"); box.innerHTML=""; return; } box.innerHTML=_acItems.map(function(r,i){ return '<div class="ac-item" data-i="'+i+'" onmousedown="cityPick('+i+')"><span>'+esc(r.name)+'</span><small>'+esc([r.admin1,r.country].filter(Boolean).join(", "))+'</small></div>'; }).join(""); box.classList.add("show"); }).catch(function(){}); },220); }
 function cityPick(i){ var r=_acItems[i]; if(!r) return; var inp=document.getElementById(_acInp); if(inp) inp.value=r.name; if(_acInp==="pcCity"){ var cf=document.getElementById("pcCountry"); if(cf&&r.country) cf.value=r.country; } var box=document.getElementById(_acList); if(box){ box.classList.remove("show"); box.innerHTML=""; } }
-function cityACKey(e){ var box=document.getElementById(_acList); if(!box||!box.classList.contains("show")) return; var items=box.querySelectorAll(".ac-item"); if(!items.length) return; if(e.key==="ArrowDown"){ _acIdx=Math.min(_acIdx+1,items.length-1); } else if(e.key==="ArrowUp"){ _acIdx=Math.max(_acIdx-1,0); } else if(e.key==="Enter"){ if(_acIdx>=0){ e.preventDefault(); cityPick(_acIdx); } return; } else { return; } e.preventDefault(); items.forEach(function(it,i){ it.classList.toggle("hi",i===_acIdx); }); }
+function cityACKey(e){ var box=document.getElementById(_acList); if(!box||!box.classList.contains("show")) return; var items=box.querySelectorAll(".ac-item"); if(!items.length) return; if(e.key==="ArrowDown"){ _acIdx=Math.min(_acIdx+1,items.length-1); } else if(e.key==="ArrowUp"){ _acIdx=Math.max(_acIdx-1,0); } else if(e.key==="Enter"){ if(_acIdx>=0){ e.preventDefault(); cityPick(_acIdx); } return; } else if(e.key==="Escape"){ e.preventDefault(); _acCloseAll(); return; } else { return; } e.preventDefault(); items.forEach(function(it,i){ it.classList.toggle("hi",i===_acIdx); }); }
+function _acCloseAll(){ try{ document.querySelectorAll(".ac-list.show").forEach(function(b){ b.classList.remove("show"); b.innerHTML=""; }); }catch(_){} _acItems=[]; _acIdx=-1; }
+/* Dismiss the city autocomplete when you click/tap anywhere outside it (or press Esc). Capture
+   phase runs before other handlers; a click on a result stays inside .ac-wrap and still registers. */
+if(!window._acDocBound){ window._acDocBound=true; document.addEventListener("pointerdown",function(e){ try{ if(!(e.target&&e.target.closest&&e.target.closest(".ac-wrap"))) _acCloseAll(); }catch(_){} },true); }
 /* These four toggles were removed from the Settings modal but saveSettings kept
    reading them, so it threw on the first one — before save(), closeModal() and
    the confirmation toast. Settings silently could not be saved at all. Read the
@@ -6440,7 +6530,9 @@ function _qaChk(id,cur){ var e=document.getElementById(id); return e? e.checked 
 function saveSettings(){
   var s=data.settings;
   data.profile.name=document.getElementById("setName").value.trim();
-  s.city=document.getElementById("setCity").value.trim()||"Makkah"; s.cityUpdated=Date.now();
+  /* City/location now live only in the Location dialog (prayerCityPicker) so there's a single
+     source of truth; Settings just links to it. Guard in case an old field is still present. */
+  var _sc=document.getElementById("setCity"); if(_sc){ s.city=_sc.value.trim()||"Makkah"; s.cityUpdated=Date.now(); }
   s.lang=document.getElementById("setLang").value;
   s.gcalId=document.getElementById("setGcal").value.trim();
   s.showPrayer=_qaChk("wPrayer",s.showPrayer);
@@ -7367,10 +7459,15 @@ document.addEventListener("visibilitychange",function(){
 });
 /* another tab (same browser) just wrote: merge it in rather than let the last save win */
 window.addEventListener("storage",function(e){
-  if(!e.key || e.key.indexOf("hub")<0) return;
+  /* Only react to the MAIN data key (hub.v1[:uid]) — not hub.theme/hub.geo/hub.authStart, which
+     also contain "hub". And actually MERGE the incoming data in: mergeHubData is pure and returns a
+     new object, so the result must be assigned (the old code discarded it, making cross-tab sync a
+     silent no-op and risking last-write-wins data loss between tabs). */
+  if(!e.key || e.key.indexOf(KEY)!==0) return;
   try{
     var incoming=JSON.parse(e.newValue||"null"); if(!incoming) return;
-    if(typeof mergeHubData==="function"){ mergeHubData(incoming); } else { data=incoming; }
+    if(typeof mergeHubData==="function" && typeof fill==="function"){ data=fill(mergeHubData(data,incoming)); }
+    else { data=incoming; }
     render();
   }catch(err){}
 });
