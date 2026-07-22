@@ -22,6 +22,9 @@
   --indigo:#2a1d44; --indigo-2:#443163; --indigo-3:#15103a; --violet:#4a38b5; --lavender:#817eff;
   --lilac:#b3a9ff; --lilac-soft:#f3eefc; --peach:#ffb3ab; --peach-deep:#c66a2b;
   --bg:#f4f1fb; --card:#FFFFFF; --border:#e7e0f5; --text:#2a1d44; --muted:#6a5f86;
+  --brand-indigo:#240852; --periwinkle:#b3a9ff; --lavender-soft:#e9e7ff; --peach-mid:#e9827a;
+  --surface-raised:#faf8ff; --surface-hover:#f4f1fb; --surface-selected:#e9e7ff;
+  --grad-action:linear-gradient(120deg,#6350e0 0%,#817eff 100%);
   --green:#0a7c6b; --green-soft:#E3F6ED; --red:#c22940; --red-soft:#FBEAE8;
   --radius:18px;
   --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%);
@@ -1813,10 +1816,10 @@ html:not(.dark) .pflag.p-low{background:rgba(30,145,95,.14);color:#177a50}
 html:not(.dark) .kc-chip.p-high,html:not(.dark) .tl2-prio-pill.p-high{background:rgba(214,85,76,.14);color:#b8433a}
 html:not(.dark) .kc-chip.p-med,html:not(.dark) .tl2-prio-pill.p-med{background:rgba(198,106,43,.16);color:#a85c22}
 html:not(.dark) .kc-chip.p-low,html:not(.dark) .tl2-prio-pill.p-low{background:rgba(30,145,95,.14);color:#177a50}
-html:not(.dark) .st-ok .rt-big b{background-image:linear-gradient(115deg,#177a50,#3f9c8c 55%,#5fb7a8)}
+html:not(.dark) .st-ok .rt-big b{background-image:linear-gradient(115deg,#6350e0,#817eff 55%,#b3a9ff)}
 html:not(.dark) .st-soon .rt-big b{background-image:linear-gradient(115deg,#a1531f,#c66a2b 55%,#e2a071)}
 html:not(.dark) .st-od .rt-big b{background-image:linear-gradient(115deg,#b8433a,#c22940 55%,#e0746b)}
-html:not(.dark) .rt-card.v1.st-ok{background-image:linear-gradient(140deg,rgba(30,145,95,.10),rgba(255,255,255,0) 55%)}
+html:not(.dark) .rt-card.v1.st-ok{background-image:linear-gradient(140deg,rgba(233,231,255,.62),rgba(255,255,255,0) 58%)}
 /* Tier-3 light-mode contrast: task-detail tags & status pill were near-invisible; peach-deep used as text failed 3:1 */
 html:not(.dark) .tdp-chip{color:#5c5275}
 html:not(.dark) .cs-btn.tdp-pill-status .cs-val{color:#5c5275}
@@ -1984,7 +1987,7 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
 .rt-card.v1{position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:230px;padding:18px 18px 18px 21px;border-radius:18px;border:1px solid var(--border);
   background:var(--card);background-repeat:no-repeat;box-shadow:var(--sh-1);transition:transform .15s,box-shadow .2s,border-color .2s}
 .rt-card.v1:hover{transform:translateY(-3px)}
-.rt-card.v1.st-ok{border-color:rgba(30,145,95,.3);background-image:linear-gradient(140deg,rgba(30,145,95,.10),rgba(255,255,255,0) 55%)}
+.rt-card.v1.st-ok{border-color:rgba(129,126,255,.30);background-image:linear-gradient(140deg,rgba(129,126,255,.10),rgba(255,255,255,0) 55%)}
 .rt-card.v1.st-soon{border-color:rgba(255,179,171,.38);background-image:linear-gradient(140deg,rgba(255,179,171,.13),rgba(255,255,255,0) 55%)}
 .rt-card.v1.st-od{border-color:rgba(255,155,146,.44);background-image:linear-gradient(140deg,rgba(255,155,146,.15),rgba(255,255,255,0) 55%)}
 .rt-rail{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:0 3px 3px 0;pointer-events:none}
@@ -2006,17 +2009,17 @@ html:not(.dark) .rt-kind{background:rgba(20,14,45,.05)}
 .rt-big span{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .rt-big b{background-image:linear-gradient(115deg,#817eff,#c9b0ff 45%,#ffb3ab);
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-right:2px}
-.st-ok .rt-big b{background-image:linear-gradient(115deg,#0a7c6b,#74c4b6 55%,#a7e3d4)}
+.st-ok .rt-big b{background-image:linear-gradient(115deg,#6350e0,#817eff 55%,#b3a9ff)}
 .st-soon .rt-big b{background-image:linear-gradient(115deg,#c66a2b,#ffb3ab 55%,#ffd9bb)}
 .st-od .rt-big b{background-image:linear-gradient(115deg,#c22940,#f2596f 55%,#ffc4bd)}
 @supports not ((-webkit-background-clip:text) or (background-clip:text)){
   .rt-big b{color:#ffb3ab;-webkit-text-fill-color:initial}
-  .st-ok .rt-big b{color:#7fd7a8}.st-od .rt-big b{color:#f2596f}
+  .st-ok .rt-big b{color:#817eff}.st-od .rt-big b{color:#f2596f}
 }
 .rt-card.v1 .rt-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:14px;flex:none}
 html:not(.dark) .rt-card.v1 .rt-bar{background:rgba(20,14,45,.08)}
 .rt-card.v1 .rt-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#817eff,#ffb3ab)}
-.st-ok .rt-bar i{background:linear-gradient(90deg,#0a7c6b,#74c4b6)}
+.st-ok .rt-bar i{background:var(--grad-action)}
 .st-od .rt-bar i{background:linear-gradient(90deg,#c22940,#f2596f)}
 .rt-ends{display:flex;justify-content:space-between;gap:8px;font-size:.62rem;font-weight:700;color:var(--muted);margin-top:8px;min-height:15px;opacity:.8}
 .rt-ends span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2745,6 +2748,111 @@ html:not(.dark) .rt-card.v1::before{
 .pw-ring .pw-arc{stroke:#ffb3ab}
 html:not(.dark) .pw-ring .pw-track{stroke:rgba(60,40,100,.16)}
 html:not(.dark) .pw-ring .pw-arc{stroke:#c66a2b}
+
+/* ===== Light theme refinement — expanded brand palette ===== */
+html:not(.dark) body::before{background:
+  radial-gradient(720px 480px at 7% -12%,rgba(129,126,255,.15),transparent 64%),
+  radial-gradient(660px 460px at 96% 4%,rgba(255,179,171,.13),transparent 66%),
+  radial-gradient(820px 580px at 50% 116%,rgba(179,169,255,.10),transparent 72%),
+  linear-gradient(180deg,#faf8ff 0%,#f4f1fb 56%,#e9e7ff 132%)}
+
+html:not(.dark) .topbar{
+  background:rgba(250,248,255,.82);border-bottom:1px solid var(--border);
+  box-shadow:0 8px 28px rgba(36,8,82,.045)}
+
+html:not(.dark) .card{
+  background:rgba(255,255,255,.86);border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 10px 30px rgba(36,8,82,.07)}
+html:not(.dark) .card.lift:hover{
+  background:#fff;border-color:rgba(129,126,255,.32);
+  box-shadow:0 18px 40px -18px rgba(74,56,181,.28)}
+
+html:not(.dark) .btn.soft{
+  background:var(--lavender-soft);color:var(--violet);
+  border:1px solid rgba(129,126,255,.20);box-shadow:none}
+html:not(.dark) .btn.soft:hover{
+  background:rgba(179,169,255,.28);border-color:rgba(129,126,255,.35);color:var(--brand-indigo)}
+html:not(.dark) .fld{
+  background:#fff;border-color:var(--border);
+  box-shadow:inset 0 1px 0 rgba(36,8,82,.02),0 4px 14px rgba(36,8,82,.025)}
+html:not(.dark) .fld:hover{border-color:var(--periwinkle)}
+
+html:not(.dark) .ws-p{background:rgba(255,255,255,.78);border-color:var(--border);color:var(--violet)}
+html:not(.dark) .ws-p:hover{background:var(--lavender-soft);border-color:var(--periwinkle);color:var(--brand-indigo)}
+html:not(.dark) .ws-p.on{background:var(--grad-action);color:#fff;border-color:var(--periwinkle)}
+html:not(.dark) .wchip,html:not(.dark) .pill,html:not(.dark) .nlabel{
+  background:var(--lavender-soft);color:var(--violet)}
+
+html:not(.dark) .link-chip,html:not(.dark) .kcard,html:not(.dark) .tlist .tli,
+html:not(.dark) .lib-card,html:not(.dark) .att-row,html:not(.dark) .rday{background:#fff}
+html:not(.dark) .insight,html:not(.dark) .gchip,html:not(.dark) .prayer-card .pr2,
+html:not(.dark) .cal-cell,html:not(.dark) .rt-checkcard,html:not(.dark) .gm-metric,
+html:not(.dark) .tp-trip{background:var(--surface-raised)}
+html:not(.dark) .kcol,html:not(.dark) .kcol-add{background:rgba(250,248,255,.78)}
+html:not(.dark) .kcard:hover,html:not(.dark) .tlist .tli:hover,
+html:not(.dark) .cal-cell:hover,html:not(.dark) .tl2-row:hover{
+  background:var(--lavender-soft);border-color:rgba(129,126,255,.30)}
+html:not(.dark) .tl2-row.alt{background:rgba(233,231,255,.38)}
+
+html:not(.dark) .modal,html:not(.dark) .tdp-head,html:not(.dark) .tdp-bottom{
+  background:rgba(255,255,255,.98);border-color:var(--border)}
+html:not(.dark) .pw-wrap{
+  background:linear-gradient(135deg,var(--lavender-soft) 0%,var(--surface-raised) 58%,rgba(255,179,171,.30) 140%);
+  color:var(--text)}
+html:not(.dark) .pw-col.on{background:var(--lavender-soft);box-shadow:inset 0 0 0 1px rgba(129,126,255,.26)}
+html:not(.dark) .pw-city:hover{background:var(--lavender-soft);border-color:var(--lavender)}
+html:not(.dark) .note-card.pinned{
+  background:linear-gradient(150deg,rgba(255,179,171,.22),rgba(233,231,255,.72))}
+
+html:not(.dark) .app-card .big,html:not(.dark) .note-card .ntitle{
+  background:linear-gradient(120deg,#4a38b5,#6350e0 58%,#e9827a);
+  -webkit-background-clip:text;background-clip:text}
+html:not(.dark) .tl2-head,html:not(.dark) .tlg-bar.grad{
+  background:linear-gradient(120deg,#4a38b5,#817eff 58%,#e9827a);color:#fff}
+
+/* Tasks overview: light filter surface and counters */
+html:not(.dark) .to-tabs{
+  background:var(--surface-raised);border-color:var(--border);
+  box-shadow:inset 0 1px 0 #fff,0 5px 16px rgba(36,8,82,.045)}
+html:not(.dark) .to-tab{color:var(--muted)}
+html:not(.dark) .to-tab:hover{background:var(--lavender-soft);color:var(--brand-indigo)}
+html:not(.dark) .to-tab.on{
+  background:var(--grad-action);color:#fff;border-color:var(--periwinkle);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 4px 12px rgba(99,80,224,.24)}
+html:not(.dark) .to-tab .to-cnt{
+  background:var(--lavender-soft);color:var(--violet);
+  box-shadow:inset 0 0 0 1px rgba(129,126,255,.10)}
+html:not(.dark) .to-tab.on .to-cnt{
+  background:rgba(255,255,255,.92);color:var(--violet);
+  box-shadow:0 1px 4px rgba(36,8,82,.12)}
+html:not(.dark) .to-tab.to-over:not(.on) .to-cnt{
+  background:rgba(242,89,111,.13);color:#c22940}
+html:not(.dark) .to-tab.to-over.on{
+  background:linear-gradient(120deg,#c22940,#e9827a);color:#fff}
+html:not(.dark) .to-tab.to-over.on .to-cnt{
+  background:rgba(255,255,255,.92);color:#c22940}
+
+html:not(.dark) .more-sheet{
+  background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(233,231,255,.98));
+  border-top-color:var(--border);box-shadow:0 -22px 55px rgba(36,8,82,.16)}
+html:not(.dark) .more-title{color:var(--text)}
+html:not(.dark) .more-grip{background:rgba(42,29,68,.22)}
+html:not(.dark) .more-grid button{background:rgba(255,255,255,.72);border-color:var(--border);color:var(--muted)}
+html:not(.dark) .more-grid button.active{background:var(--grad-action);color:#fff;border-color:var(--periwinkle)}
+
+@media(max-width:768px){
+  html:not(.dark) .bottombar{
+    background:rgba(255,255,255,.84);border-color:var(--border);
+    box-shadow:0 18px 45px rgba(36,8,82,.16),inset 0 1px 0 rgba(255,255,255,.95)}
+  html:not(.dark) .bottombar button{color:var(--muted)}
+  html:not(.dark) .bottombar button.active{
+    color:#fff;background:var(--grad-action);box-shadow:0 6px 18px rgba(99,80,224,.30)}
+}
+
+/* Routine cards: keep completed-state emphasis within the brand palette */
+html:not(.dark) .rt-card.v1.st-ok{
+  border-color:rgba(129,126,255,.26);
+  background-image:linear-gradient(140deg,rgba(233,231,255,.62),rgba(255,255,255,0) 58%)}
 </style>
 <style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style></head>
 <body>
