@@ -1971,6 +1971,155 @@ html:not(.dark) .fld-ctl input:focus-visible,html:not(.dark) .fld-ctl .pv-fsel:f
 html:not(.dark) .fld-ctl .pv-fieldbtn:focus-visible,html:not(.dark) .fld-ctl .pv-rangecell:focus-visible,
 html:not(.dark) .sb-search input:focus-visible,html:not(.dark) .sb-name input:focus-visible,
 html:not(.dark) .bb-name:focus-visible{outline-color:#4a38b5!important}
+
+/* Light theme refinement — expanded brand palette. Kept fully scoped so the
+   dark theme and the fixed sidebar retain their original appearance. */
+html:not(.dark){
+  --brand-indigo:#240852;
+  --periwinkle:#b3a9ff;
+  --lavender-soft:#e9e7ff;
+  --peach-mid:#e9827a;
+  --surface-raised:#faf8ff;
+  --surface-hover:#f4f1fb;
+  --surface-selected:#e9e7ff;
+  --grad-action:linear-gradient(120deg,#6350e0 0%,#817eff 100%);
+  --tile:rgba(233,231,255,.46);
+  --tile-bd:#e7e0f5;
+  --tile-hi:rgba(233,231,255,.82);
+}
+html:not(.dark) .app-bg-light{
+  background:
+    radial-gradient(720px 480px at 7% -12%,rgba(129,126,255,.15),transparent 64%),
+    radial-gradient(660px 460px at 96% 4%,rgba(255,179,171,.13),transparent 66%),
+    radial-gradient(820px 580px at 50% 116%,rgba(179,169,255,.10),transparent 72%),
+    linear-gradient(180deg,#faf8ff 0%,#f4f1fb 56%,#e9e7ff 132%);
+}
+html:not(.dark) .tv-topbar{
+  background:rgba(250,248,255,.82);
+  border-bottom-color:var(--border);
+  box-shadow:0 8px 28px rgba(36,8,82,.045);
+}
+html:not(.dark) .glass-light{
+  background:rgba(255,255,255,.86);
+  border-color:var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 10px 30px rgba(36,8,82,.07)!important;
+}
+html:not(.dark) .lift:hover{
+  border-color:rgba(129,126,255,.30);
+  box-shadow:0 18px 40px -18px rgba(74,56,181,.28);
+}
+html:not(.dark) .iridescent{
+  background:var(--grad-action);
+  border-color:#6350e0!important;
+}
+html:not(.dark) .iridescent-text{
+  background:linear-gradient(110deg,#4a38b5 0%,#6350e0 50%,#e9827a 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+html:not(.dark) .tp-soft{
+  background:var(--lavender-soft);
+  color:#4a38b5;
+  border-color:rgba(129,126,255,.20);
+  box-shadow:none;
+}
+html:not(.dark) .tp-soft:hover{
+  background:rgba(179,169,255,.28);
+  color:var(--brand-indigo);
+  border-color:rgba(129,126,255,.35);
+}
+html:not(.dark) .tv-chip,
+html:not(.dark) .tv-ico{
+  background:rgba(255,255,255,.70);
+  border-color:var(--border);
+}
+html:not(.dark) .tv-chip:hover,
+html:not(.dark) .tv-ico:hover{
+  background:var(--lavender-soft);
+  color:var(--brand-indigo);
+}
+html:not(.dark) .tv-chip.on{
+  background:var(--surface-selected);
+  border-color:rgba(129,126,255,.34);
+  color:var(--brand-indigo);
+}
+html:not(.dark) .tv-trip,
+html:not(.dark) .tv-tripbar{
+  border-color:var(--border);
+}
+html:not(.dark) .tv-tripbar{
+  background:rgba(255,255,255,.90);
+  box-shadow:inset 0 1px 0 #fff,0 10px 30px rgba(36,8,82,.07);
+}
+html:not(.dark) .tv-tabs{
+  background:var(--surface-raised);
+  border-color:var(--border);
+  box-shadow:inset 0 1px 0 #fff,0 5px 16px rgba(36,8,82,.045);
+}
+html:not(.dark) .tv-tab{color:var(--muted)}
+html:not(.dark) .tv-tab:hover{
+  background:var(--lavender-soft);
+  color:var(--brand-indigo);
+}
+html:not(.dark) .tv-tab.on{
+  background:var(--grad-action);
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 4px 12px rgba(99,80,224,.24);
+}
+html:not(.dark) .tv-tab:not(.on) .tv-tab-n{
+  background:var(--lavender-soft);
+  color:#4a38b5;
+  box-shadow:inset 0 0 0 1px rgba(129,126,255,.10);
+}
+html:not(.dark) .tv-tab.on .tv-tab-n{
+  background:rgba(255,255,255,.92);
+  color:#4a38b5;
+  box-shadow:0 1px 4px rgba(36,8,82,.12);
+}
+html:not(.dark) .fld{
+  background:#fff;
+  border-color:var(--border);
+  box-shadow:inset 0 1px 0 rgba(36,8,82,.02),0 4px 14px rgba(36,8,82,.025);
+}
+html:not(.dark) .fld:hover{border-color:var(--periwinkle)}
+html:not(.dark) .fld:focus-within{
+  background:#fff;
+  border-color:rgba(129,126,255,.55);
+  box-shadow:0 0 0 3px rgba(129,126,255,.12);
+}
+html:not(.dark) .fld-lbl{color:#4a38b5}
+html:not(.dark) .tv-btn-ghost,
+html:not(.dark) .tv-btn-soft{
+  background:var(--lavender-soft)!important;
+  border-color:rgba(129,126,255,.22)!important;
+  color:#4a38b5!important;
+}
+html:not(.dark) .tv-btn-ghost:hover,
+html:not(.dark) .tv-btn-soft:hover{
+  background:rgba(179,169,255,.30)!important;
+  border-color:rgba(129,126,255,.35)!important;
+}
+html:not(.dark) .bb,
+html:not(.dark) .tv-wideitem,
+html:not(.dark) .tvb .b-card,
+html:not(.dark) .tvm .m-card,
+html:not(.dark) .tvs .s-card{
+  border-color:var(--border);
+  box-shadow:0 8px 24px rgba(36,8,82,.05);
+}
+html:not(.dark) .tp-bottombar{
+  background:rgba(255,255,255,.84);
+  border-color:var(--border);
+  box-shadow:0 18px 45px rgba(36,8,82,.16),inset 0 1px 0 rgba(255,255,255,.95);
+}
+html:not(.dark) .tp-bottombar button{color:var(--muted)!important}
+html:not(.dark) .tp-bottombar button[style]{color:#fff!important}
+html:not(.dark) .tv-modal{
+  background:rgba(255,255,255,.96);
+  border-color:var(--border);
+  color:var(--brand-indigo);
+  box-shadow:0 28px 70px rgba(36,8,82,.20);
+}
+html:not(.dark) .tv-modal p{color:var(--muted)}
 </style>
 </head>
 <body>
