@@ -130,7 +130,8 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .hero-chips div b{display:block;font-size:1.02rem;font-weight:800}
 .hero-chips div span{font-size:.68rem;opacity:.6;letter-spacing:.09em;text-transform:uppercase;font-weight:600}
 .greet{margin-bottom:18px}
-.greet h2{font-size:1.5rem;font-weight:800;letter-spacing:-.015em;animation:fadeUp .55s var(--ease) .05s backwards}
+.greet h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:800;letter-spacing:-.01em;line-height:1.04;animation:fadeUp .55s var(--ease) .05s backwards}
+.greet h2 #userName{background:linear-gradient(100deg,#cbb0f7,#f3b98e 75%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}   /* match the Hub greeting: name in the lavender->peach gradient */
 .greet p{font-size:.92rem;opacity:.72;font-weight:500;margin-top:5px;max-width:480px;line-height:1.5;animation:fadeUp .55s var(--ease) .16s backwards}
 .name-edit{background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:.95rem;transition:color .2s,transform .2s}
 .name-edit:hover{color:#fff;transform:scale(1.15)}
@@ -353,7 +354,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   .top-logo{display:none}
   .top-actions{flex-wrap:wrap}
   .hero{padding:22px 18px;border-radius:18px;margin-bottom:14px}
-  .greet h2{font-size:1.18rem}
+  .greet h2{font-size:1.5rem}
   .greet p{font-size:.85rem}
   .hero-chips{gap:14px;margin-top:12px}
   .hero-badges .badge{font-size:.7rem;padding:4px 10px}
@@ -1095,7 +1096,7 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
   </div>
   <div class="top-actions">
     <span class="note" id="syncStatus" style="margin:0"></span>
-    <a class="hq-btn" href="../" title="Back to your workspace" aria-label="Back to workspace"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><b>Workspace</b></a>
+    <a class="hq-btn" href="../" title="Back to your workspace" aria-label="Back to workspace"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><b>Workspace</b></a>
     <button class="btn soft tb-more" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light or dark theme" title="Toggle theme"><span id="themeIcon"></span></button>
     <div class="av-wrap">
       <div id="avatarChip" title="Account" onclick="toggleAvMenu(event)"></div>
@@ -1117,6 +1118,7 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
     <div class="hero-stars"></div><div class="hero-moon"></div>
     <div>
       <div class="greet">
+        <div class="eyebrow" style="color:#c6a4f0;opacity:1;margin-bottom:4px">Welcome back</div>
         <h2><span id="greetLine">Welcome back</span>, <span id="userName">Eyad</span>
           <button class="name-edit" onclick="editName()" title="Edit name" aria-label="Edit your name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:block"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></h2>
         <p id="greetSub">Here's a snapshot of your portfolio and financial performance today.</p>
@@ -1274,7 +1276,7 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
 </div>
 
 <nav class="bottombar" id="bottomBar" role="navigation" aria-label="Mobile navigation">
-  <button data-tab="overview" class="active" aria-label="Overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Home</button>
+  <button data-tab="overview" class="active" aria-label="Overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
   <button data-tab="budget" aria-label="Budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h.01"/></svg>Budget</button>
   <button data-tab="portfolio" aria-label="Portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6.2"/></svg>Portfolio</button>
   <button data-tab="zaka" aria-label="Zakat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 3a8.7 8.7 0 1 0 8 12A10 10 0 0 1 13 3z"/></svg>Zakat</button>
@@ -1745,7 +1747,7 @@ function renderBudgetChart(){
   mkChart("budgetChart",{type:"bar",
     data:{labels:exp.map(p=>p.cat),datasets:[
       {label:"Planned",data:exp.map(p=>p.amt),backgroundColor:"#8a64c8",borderRadius:8},
-      {label:"Actual",data:exp.map(p=>act[p.cat]||0),backgroundColor:"#f3b98e",borderRadius:8}]},
+      {label:"Actual",data:exp.map(p=>act[p._id]||0),backgroundColor:"#f3b98e",borderRadius:8}]},
     options:{plugins:{legend:{position:"bottom"}},scales:{x:{ticks:{maxRotation:60,minRotation:40}}}}});
 }
 document.getElementById("trendSeg").addEventListener("click", e=>{
@@ -1831,14 +1833,15 @@ function dismissInsight(id){ (data.dismissed = data.dismissed||{})[id] = true; s
 function dayPart(h){ return (h>=4&&h<12)?"morning":(h>=12&&h<18)?"afternoon":"evening"; }
 function renderGreeting(){
   const h = new Date().getHours();
-  var ksaH=h; try{ ksaH=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',hour12:false}).format(new Date()); }catch(_){ ksaH=h; } ksaH=ksaH%24;
-  /* The greeting used to read the viewer's LOCAL hour while the backdrop read Riyadh's, so
-     outside KSA the words and the picture could contradict. Both now use the same clock. */
-  var slot=dayPart(ksaH);
+  /* Greeting AND sky both follow the viewer's LOCAL clock (like the Hub), so the words and the
+     picture always agree with each other and with the Hub — wherever you open it, incl. while travelling. */
+  var slot=dayPart(h);
   const g = slot==="morning"? "Good morning" : slot==="afternoon"? "Good afternoon" : "Good evening";
   document.getElementById("greetLine").textContent = g;
   try{ var heroEl=document.getElementById("ovHero"); if(heroEl){ heroEl.classList.remove("tr-morning","tr-afternoon","tr-evening"); heroEl.classList.add("tr-"+slot); } }catch(e){}
-  document.getElementById("userName").textContent = data.userName || "there";
+  var _acct=(user&&user.user_metadata&&(user.user_metadata.full_name||user.user_metadata.name))||"";
+  /* show the full name (matches the Hub): a full name typed here wins; otherwise use the account's full name */
+  document.getElementById("userName").textContent = ((data.userName&&/\s/.test(data.userName))?data.userName:(_acct||data.userName))||"there";
   const t = totals();
   const prev = prevSnapshot();
   let insight = "Here's a snapshot of your portfolio and financial performance today.";
@@ -2116,15 +2119,43 @@ function budDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; c
 function budDrop(e,target){ e.preventDefault(); let src=budDragSrc; if(src==null){ const d=+e.dataTransfer.getData("text/plain"); src=isNaN(d)?null:d; } if(src==null||src===target){ _budClean(); budDragSrc=null; return; } const item=data.plan.splice(src,1)[0]; data.plan.splice(target>src?target-1:target,0,item); budDragSrc=null; save(); render(); }
 function budDragEnd(){ _budClean(); budDragSrc=null; }
 function _budClean(){ document.querySelectorAll("#budgetTable .bud-over,#budgetTable .bud-dragging").forEach(x=>x.classList.remove("bud-over","bud-dragging")); }
+/* Budget actuals used to be keyed by category NAME, so two items named the same (every new item
+   defaults to "New item") double-counted, and renaming onto an existing name clobbered its history.
+   Actuals are now keyed by each plan item's stable _id. This one-time migration re-keys existing
+   name-keyed months to ids; it's idempotent (id keys don't match any category name, so a second run
+   is a no-op) and preserves the special "__income" key plus any orphaned/historical entries. */
+function migrateActualsById(){
+  if(!data) return;
+  try{ ensureIds(data); }catch(e){}
+  var plan=Array.isArray(data.plan)?data.plan:[];
+  var nameToId={};
+  plan.forEach(function(p){ if(p&&p._id!=null&&p.cat!=null&&nameToId[p.cat]===undefined) nameToId[p.cat]=p._id; });
+  var acts=data.actuals||{};
+  /* Runs every render (not gated by a one-time flag): it's idempotent — once a month is fully id-keyed
+     no key matches a category name, so nothing changes — but this way a name-keyed month arriving later
+     from an un-migrated device via sync gets re-keyed too, instead of silently rendering blank. */
+  Object.keys(acts).forEach(function(m){
+    var mm=acts[m]; if(!mm||typeof mm!=="object") return;
+    var out={}, changed=false;
+    Object.keys(mm).forEach(function(k){
+      if(k==="__income"){ out[k]=mm[k]; return; }
+      var id=nameToId[k];
+      if(id!=null){ if(out[id]===undefined) out[id]=mm[k]; changed=true; }   /* rekey name -> id (first item with that name wins) */
+      else { out[k]=mm[k]; }                                                 /* orphan/historical (or already an id): keep untouched */
+    });
+    if(changed) acts[m]=out;   /* only touch a month that actually still had a name key to convert */
+  });
+  data.__actById=true;   /* informational only */
+}
 function renderBudget(){
   const pt = planTotals();
   const month = document.getElementById("monthSel").value || Object.keys(data.actuals).sort().pop();
   const act = data.actuals[month]||{};
   const incRows = data.plan.filter(p=>p.group==="Income");
   const incPlanned = incRows.reduce((s,p)=>s+(+p.amt||0),0);
-  const incActual = incRows.reduce((s,p)=>s+(act[p.cat]!==undefined?(+act[p.cat]||0):(+p.amt||0)),0);
+  const incActual = incRows.reduce((s,p)=>s+(act[p._id]!==undefined?(+act[p._id]||0):(+p.amt||0)),0);
   const expPlanned = pt.fix+pt.vr;
-  const actExp = data.plan.filter(p=>p.group!=="Income").reduce((s,p)=>s+(+act[p.cat]||0),0);
+  const actExp = data.plan.filter(p=>p.group!=="Income").reduce((s,p)=>s+(+act[p._id]||0),0);
   document.getElementById("budgetCards").innerHTML =
     kpi(`Income · ${month}`, sar(incActual), `Planned ${fmt(incPlanned)}`, "tile-green", ICONS.wallet) +
     kpi("Planned Expenses", sar(expPlanned), `Fixed ${fmt(pt.fix)} · Variable ${fmt(pt.vr)}`, "tile-ind", ICONS.cart) +
@@ -2146,7 +2177,7 @@ function renderBudget(){
 }
 function budCard(i,month,act){
   const p=data.plan[i]; const isInc=p.group==="Income"; const planned=+p.amt||0;
-  const av=act[p.cat]; const aNum=av!==undefined?(+av||0):(isInc?planned:0);
+  const av=act[p._id]; const aNum=av!==undefined?(+av||0):(isInc?planned:0);
   let cls,color,diffTxt;
   if(isInc){ if(aNum>=planned){ cls='t-under'; color='#5dcca5'; diffTxt=aNum>planned?('+'+fmt(aNum-planned)+' extra'):'received in full'; } else { cls='t-over'; color='#f0a08e'; diffTxt=fmt(planned-aNum)+' short'; } }
   else { if(aNum>planned){ cls='t-over'; color='#f0a08e'; diffTxt='+'+fmt(aNum-planned)+' over'; } else if(aNum<planned){ cls='t-under'; color='#5dcca5'; diffTxt=fmt(planned-aNum)+' left'; } else { cls='t-on'; color='#cbb0f7'; diffTxt='on budget'; } }
@@ -2160,7 +2191,7 @@ function budCard(i,month,act){
 function openBudgetItem(i){
   const p=data.plan[i]; if(!p) return;
   const month=document.getElementById("monthSel").value||Object.keys(data.actuals).sort().pop();
-  const act=data.actuals[month]||{}; const av=act[p.cat];
+  const act=data.actuals[month]||{}; const av=act[p._id];
   showModal(`<h4>Edit budget item</h4><div class="bi-form">`
     +`<label class="bi-l">Category</label><input id="biCat" class="bi-i" value="${esc(p.cat)}">`
     +`<label class="bi-l">Group</label>${sysSelect('biGroup',["Income","Fixed","Variable"],p.group)}`
@@ -2170,38 +2201,20 @@ function openBudgetItem(i){
 }
 function saveBudgetItem(i){
   const p=data.plan[i]; if(!p) return;
+  if(p._id==null){ try{ ensureIds(data); }catch(e){} }   /* actuals key by id, so guarantee one */
   const month=document.getElementById("monthSel").value||Object.keys(data.actuals).sort().pop();
-  const oldCat=p.cat; const newCat=(document.getElementById("biCat").value||"").trim()||oldCat;
+  const newCat=(document.getElementById("biCat").value||"").trim()||p.cat;
   p.group=document.getElementById("biGroup").dataset.val||p.group; p.amt=+document.getElementById("biPlan").value||0;
-  if(newCat!==oldCat){ Object.keys(data.actuals).forEach(m=>{ const mm=data.actuals[m]; if(mm&&mm[oldCat]!==undefined){ mm[newCat]=mm[oldCat]; delete mm[oldCat]; } }); }
-  p.cat=newCat;
+  p.cat=newCat;   /* actuals are keyed by _id now, so a rename needs no data move */
   const av=document.getElementById("biAct").value;
   if(!data.actuals[month]) data.actuals[month]={};
-  if(av===""||av==null) delete data.actuals[month][newCat]; else data.actuals[month][newCat]=+av;
+  if(av===""||av==null) delete data.actuals[month][p._id]; else data.actuals[month][p._id]=+av;
   p._u=Date.now();
   save(); closeModal(); render(); toast("Saved");
 }
 function delBudgetItem(i){ var _p=data.plan[i]; if(_p) ftomb(_p); data.plan.splice(i,1); save(); closeModal(); render(); toast("Item removed"); }
-function _budgetTableLegacy(month,act){ return data.plan.map((p,i)=>{
-    const isInc = p.group==="Income";
-    const av = act[p.cat];
-    const aNum = av!==undefined?(+av||0):(isInc?(+p.amt||0):0);
-    const d = isInc ? (aNum-(+p.amt||0)) : ((+p.amt||0)-aNum);
-    const sec = isInc?'income':'expense';
-    const prevSec = i>0 ? (data.plan[i-1].group==="Income"?'income':'expense') : null;
-    const hdr = (sec!==prevSec) ? `<tr class="bud-section ${isInc?'inc':'exp'}"><td class="bud-dragh"></td><td colspan="6">${isInc?'Income':'Expenses'}</td></tr>` : '';
-    return hdr + `<tr${isInc?' class="bud-income"':''} ondragover="budDragOver(event)" ondrop="budDrop(event,${i})">
-      <td class="bud-drag" draggable="true" ondragstart="budDragStart(event,${i})" ondragend="budDragEnd(event)" title="Drag to reorder" aria-label="Drag to reorder">⠿</td>
-      <td><input value="${esc(p.cat)}" onchange="upd('plan',${i},'cat',this.value)" aria-label="Category"></td>
-      <td><select onchange="upd('plan',${i},'group',this.value)" aria-label="Group">${["Income","Fixed","Variable"].map(g=>`<option ${g===p.group?"selected":""}>${g}</option>`).join("")}</select></td>
-      <td class="num"><input type="number" step="0.01" value="${p.amt}" onchange="upd('plan',${i},'amt',+this.value)" aria-label="Planned"></td>
-      <td class="num"><input type="number" step="0.01" value="${av!==undefined?av:""}" placeholder="${isInc?fmt(p.amt):"0"}" onchange="setActual('${month}','${jsq(p.cat)}',this.value)" aria-label="Actual for ${month}"></td>
-      <td class="num ${d>=0?"pos":"neg"}">${d>=0?"+":""}${fmt(d)}</td>
-      <td><button class="btn danger" onclick="del('plan',${i})" aria-label="Delete item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button></td></tr>`;
-  }).join("");
-}
-function setActual(month,cat,val){ if(!data.actuals[month]) data.actuals[month]={}; if(val===""||val===undefined||val===null) delete data.actuals[month][cat]; else data.actuals[month][cat]=+val; save(); render(); }
-function setMonthIncome(month,val){ if(!data.actuals[month]) data.actuals[month]={}; if(val===""||val==null) delete data.actuals[month].__income; else data.actuals[month].__income=+val; save(); render(); }
+/* (removed dead budget writers _budgetTableLegacy/setActual/setMonthIncome — they were unreferenced
+   and keyed actuals by category NAME, which would have re-introduced the double-count bug if re-wired) */
 async function deleteMonth(){
   const m=document.getElementById("monthSel").value; if(!m) return;
   if(Object.keys(data.actuals).length<=1){ toast("Keep at least one month"); return; }
@@ -2455,7 +2468,7 @@ function _mergeMap(a,b){ var o=Object.assign({}, a||{}); var src=b||{}; Object.k
    tombstoned (data.deleted), edits win by _u timestamp. This fixes deletion resurrection
    and concurrent-edit loss. Watchlist (strings) and actuals (month keys) tombstone by value. */
 function _finKey(x){ if(x==null) return "$null"; if(x._id!=null) return "#"+x._id; return "#"+_hashId(x); }
-function _mergeFinArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null)return; var id=_finKey(x); var xu=+x._u||0; var tv=+tomb[id]||0; if(tv>0&&((x._id!=null)||tv>=xu))return; if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+cur._u||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
+function _mergeFinArr(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null)return; var id=_finKey(x); var xu=+x._u||0; var tv=+tomb[id]||0; if(tv>0&&tv>=xu)return;   /* a delete only wins if it's newer-or-equal than the edit — an edit AFTER a delete survives (matches Hub _mergeArr) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+cur._u||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
 function _mergeWatch(a,b,tomb){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var seen={},out=[]; function add(s){ if(s==null)return; var id="$"+JSON.stringify(s); if((+tomb[id]||0)>0)return; if(!seen[id]){ seen[id]=1; out.push(s); } } a.forEach(add); b.forEach(add); return out; }
 function _mergeActuals(newer,older,tomb){ newer=newer||{}; older=older||{}; tomb=tomb||{}; var out={}; /* month-level last-writer-wins: categories carry no per-item timestamp, so the newer-saved side owns each month it has (this also stops a cleared category being resurrected). */ Object.keys(older).forEach(function(m){ if((+tomb["@"+m]||0)>0) return; out[m]=Object.assign({}, older[m]); }); Object.keys(newer).forEach(function(m){ if((+tomb["@"+m]||0)>0){ delete out[m]; return; } out[m]=Object.assign({}, newer[m]); }); return out; }
 function mergeFinance(local, cloud){
@@ -2775,7 +2788,7 @@ function _dpPlace(pop,btn){var r=btn.getBoundingClientRect();var W=252;var ph=po
 function _dpOpen(inp,btn,relabel){
   _dpClose();
   var pop=document.createElement("div");pop.className="dp-pop";
-  var base=inp.value?new Date(inp.value):new Date();var cur={y:base.getFullYear(),m:base.getMonth()};
+  var base=inp.value?new Date(inp.value+"T00:00:00"):new Date();var cur={y:base.getFullYear(),m:base.getMonth()};   /* parse date-only as LOCAL midnight so the calendar opens on the right month everywhere */
   function draw(){
     var first=new Date(cur.y,cur.m,1),start=first.getDay(),days=new Date(cur.y,cur.m+1,0).getDate();
     var todayISO=new Date().getFullYear()+"-"+_pad2(new Date().getMonth()+1)+"-"+_pad2(new Date().getDate());
@@ -2837,6 +2850,7 @@ function enhanceSelects(){
   });
 }
 function render(){
+  try{ migrateActualsById(); }catch(e){}
   renderGreeting(); renderInsights(); renderKPIs(); renderAccounts(); renderHoldings(); renderPurchases();
   renderMonthSel(); renderBudget(); renderRoi(); renderAssetsInv();
   renderZaka(); renderSnapshots();
