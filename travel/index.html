@@ -2117,7 +2117,7 @@ html:not(.dark) .tp-bottombar{
   box-shadow:0 18px 45px rgba(36,8,82,.16),inset 0 1px 0 rgba(255,255,255,.95);
 }
 html:not(.dark) .tp-bottombar button{color:var(--muted)!important}
-html:not(.dark) .tp-bottombar button[style]{color:#fff!important}
+html:not(.dark) .tp-bottombar button.is-active{color:#fff!important}
 html:not(.dark) .tv-modal{
   background:rgba(255,255,255,.96);
   border-color:var(--border);
@@ -2241,8 +2241,10 @@ html:not(.dark) .tvs .s-rib{
   .auth-card::before,.tv-authcard::before{width:auto;height:26px}
 }
 
-/* Light mobile navigation uses the approved violet action gradient. */
-html:not(.dark) .tp-bottombar button[style]{
+/* Light mobile navigation uses the approved violet action gradient.
+   The active state must be explicit: React can leave style="" behind after a
+   tab changes, so [style] caused every previously visited tab to stay filled. */
+html:not(.dark) .tp-bottombar button.is-active{
   background:var(--grad-action)!important;
   box-shadow:0 6px 18px rgba(99,80,224,.30),inset 0 1px 0 rgba(255,255,255,.35)!important
 }
@@ -5031,7 +5033,7 @@ function App(){
         </div></main>
 
         {showBottomNav&&<nav className="fixed left-3 right-3 z-40 rounded-[28px] tp-bottombar" style={{bottom:'calc(10px + env(safe-area-inset-bottom))'}}>
-          <div className="flex gap-1 px-[7px] py-[7px]">{NAV.map(t=>{ const on=view===t.id; return (<button key={t.id} onClick={()=>setView(t.id)} style={on?{background:'linear-gradient(140deg,#ffb3ab 0%,#ee9270 45%,#c66a2b 100%)',boxShadow:'0 6px 18px rgba(198,106,43,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:undefined} className={`flex-1 flex flex-col items-center gap-1 px-2 py-2 rounded-[18px] text-[11px] font-bold tracking-wide transition ${on?'text-white':'text-white/55 hover:text-white/80'}`}><NavIcon id={t.id} className={`w-[19px] h-[19px] transition`}/>{t.label}</button>); })}</div>
+          <div className="flex gap-1 px-[7px] py-[7px]">{NAV.map(t=>{ const on=view===t.id; return (<button key={t.id} onClick={()=>setView(t.id)} style={on?{background:'linear-gradient(140deg,#ffb3ab 0%,#ee9270 45%,#c66a2b 100%)',boxShadow:'0 6px 18px rgba(198,106,43,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:undefined} aria-current={on?'page':undefined} className={`flex-1 flex flex-col items-center gap-1 px-2 py-2 rounded-[18px] text-[11px] font-bold tracking-wide transition ${on?'is-active text-white':'text-white/55 hover:text-white/80'}`}><NavIcon id={t.id} className={`w-[19px] h-[19px] transition`}/>{t.label}</button>); })}</div>
         </nav>}
 
         {confirmReset&&<div role="dialog" aria-modal="true" className="fixed inset-0 z-[80] bg-black/70 modal-bg flex items-center justify-center p-4" onClick={()=>setConfirmReset(false)}>
