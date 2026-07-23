@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://*.gstatic.com; object-src 'none'; base-uri 'self';">
-<title>Eyad Alfi</title>
+<title>Workspace</title>
 <script>try{var _t=localStorage.getItem('hub.theme')||'dark';document.documentElement.classList.toggle('dark',_t!=='light');}catch(e){document.documentElement.classList.add('dark');}</script>
 <meta name="theme-color" content="#0d0926">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Eyad Alfi">
+<meta name="apple-mobile-web-app-title" content="Workspace">
 <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cdefs%3E%3ClinearGradient id="g" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0%25" stop-color="%238E7FD0"/%3E%3Cstop offset="100%25" stop-color="%2326225C"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="100" height="100" rx="22" fill="url(%23g)"/%3E%3Cg transform="translate(20,21.6) scale(0.3053) translate(-381.64,-176.88)" fill="%23ffffff"%3E%3Cpath d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/%3E%3Cpath d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/%3E%3Cpath d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/%3E%3C/g%3E%3C/svg%3E'>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -29,6 +29,7 @@
   --radius:18px;
   --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%);
   --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);
+  --iw-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
   --glow-lav:0 10px 30px rgba(129,126,255,.34);
   --sh-1:0 1px 2px rgba(42,29,68,.05),0 6px 20px rgba(42,29,68,.07);
   --sh-2:0 6px 14px rgba(42,29,68,.09),0 22px 48px rgba(67,49,99,.16);
@@ -2868,6 +2869,168 @@ html:not(.dark) .rt-card.v1.st-ok{
   .topbar{min-height:74px}
 }
 @keyframes tvLogoIn{from{opacity:0;transform:scale(.8) rotate(-8deg)}to{opacity:1;transform:none}}
+
+/* Topbar geometry and viewport behaviour: identical to Travel and Finance. */
+html{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+body{
+  min-width:0;overflow-x:hidden;
+  grid-template-columns:clamp(214px,16.5vw,278px) minmax(0,1fr)
+}
+@media(max-width:1024px){body{grid-template-columns:minmax(0,1fr)}}
+::-webkit-scrollbar{width:10px;height:10px}
+
+.topbar{flex-wrap:nowrap;line-height:normal}
+.top-actions{flex:none;flex-wrap:nowrap;gap:8px}
+.top-actions>.btn.round{
+  width:40px;height:40px;min-width:40px;min-height:40px;
+  padding:0;border-radius:9999px;display:grid;place-items:center
+}
+#avatarChip{
+  width:40px!important;height:40px!important;min-width:40px;min-height:40px;
+  border-radius:9999px!important;font-size:.875rem!important;line-height:20px;
+  font-weight:700!important;background:var(--grad-iri)!important
+}
+html:not(.dark) #avatarChip{background:var(--grad-action)!important}
+html.dark #avatarChip{box-shadow:0 0 40px -10px rgba(129,126,255,.55)!important}
+
+/* Match Travel's 1024px rail-to-bottom-navigation switch so the topbar never
+   gets pushed down by a temporary horizontal sidebar. */
+@media(min-width:769px) and (max-width:1024px){
+  aside{display:none!important}
+  body{grid-template-columns:minmax(0,1fr)}
+  main{padding-bottom:112px}
+  .bottombar{
+    display:flex;position:fixed;left:12px;right:12px;
+    bottom:calc(10px + env(safe-area-inset-bottom));z-index:80;
+    background:linear-gradient(180deg,rgba(60,48,110,.34),rgba(18,12,48,.46));
+    backdrop-filter:blur(32px) saturate(1.9) brightness(1.06);
+    -webkit-backdrop-filter:blur(32px) saturate(1.9) brightness(1.06);
+    border:1px solid rgba(255,255,255,.20);border-radius:28px;
+    padding:7px;gap:4px;justify-content:space-between;
+    box-shadow:0 20px 50px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.34)
+  }
+  .bottombar button{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    background:none;border:none;color:rgba(255,255,255,.62);font-family:inherit;
+    font-size:.62rem;font-weight:700;letter-spacing:.03em;cursor:pointer;
+    padding:8px 4px;border-radius:18px
+  }
+  .bottombar button svg{width:21px;height:21px}
+  .bottombar button.active{
+    color:#fff;background:linear-gradient(140deg,#ffb3ab 0%,#ec9d6a 45%,#c66a2b 100%);
+    box-shadow:0 6px 18px rgba(198,106,43,.5),inset 0 1px 0 rgba(255,255,255,.35)
+  }
+  html:not(.dark) .bottombar{
+    background:rgba(255,255,255,.84);border-color:var(--border);
+    box-shadow:0 18px 45px rgba(36,8,82,.16),inset 0 1px 0 rgba(255,255,255,.95)
+  }
+  html:not(.dark) .bottombar button{color:var(--muted)}
+  html:not(.dark) .bottombar button.active{
+    color:#fff;background:var(--grad-action);box-shadow:0 6px 18px rgba(99,80,224,.30)
+  }
+}
+
+/* Sign-in page: literal parity with the final Travel/Finance component.
+   Product copy remains Workspace; every visual metric is shared. */
+#authRoot{
+  position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
+  background:linear-gradient(112deg,#15103a 0%,#2a1d44 45%,#4a38b5 85%,#817eff 115%);
+  font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:16px;line-height:normal;
+  font-variant-numeric:tabular-nums;color:#ece7fb
+}
+#authRoot,#authRoot *{box-sizing:border-box}
+#authRoot::before{
+  content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)
+}
+#authRoot .auth-card{
+  position:relative;z-index:1;width:100%;max-width:420px;
+  background:rgba(24,18,60,.92);backdrop-filter:blur(26px) saturate(1.5);
+  -webkit-backdrop-filter:blur(26px) saturate(1.5);border:1px solid rgba(187,164,228,.3);
+  border-radius:24px;padding:64px 34px 28px;box-shadow:0 30px 90px rgba(10,8,30,.55);
+  animation:pop .45s var(--ease);text-align:center;color:#fff
+}
+#authRoot .auth-card::before{
+  content:"";position:absolute;left:0;right:0;top:0;bottom:auto;width:auto;height:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 26px 0 0;
+  -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-position:-6.5px -6.5px;mask-position:-6.5px -6.5px;
+  -webkit-mask-repeat:round repeat;mask-repeat:round repeat
+}
+#authRoot .auth-card::after{display:none}
+#authRoot .auth-logo{
+  width:58px;height:58px;border-radius:17px;
+  background:linear-gradient(135deg,#817eff,#4a38b5);display:grid;place-items:center;
+  margin:0 auto 16px;box-shadow:0 8px 22px rgba(93,79,168,.4)
+}
+#authRoot .auth-logo svg{width:30px;height:30px;color:#fff}
+#authRoot .marc{
+  font-family:'Marcellus',Georgia,'Times New Roman',serif;
+  font-weight:400;letter-spacing:.012em
+}
+#authRoot .auth-card h2{font-size:1.5rem;letter-spacing:.012em;margin:0}
+#authRoot .tag{font-size:.86rem;color:#cbb9ec;margin:6px 0 22px}
+#authRoot .auth-tabs{
+  display:flex;background:rgba(255,255,255,.08);border-radius:99px;
+  padding:4px;margin-top:26px;margin-bottom:18px
+}
+#authRoot .auth-tabs button{
+  flex:1;border:none;background:none;padding:9px;border-radius:99px;
+  font-family:inherit;font-size:13.3333px;line-height:normal;font-weight:700;color:#cbb9ec;
+  cursor:pointer;transition:all .25s
+}
+#authRoot .auth-tabs button.active{background:rgba(255,255,255,.14);color:#fff}
+#authRoot .fld{
+  display:inline-block;width:100%;height:auto;min-height:0;min-width:0;align-self:auto;
+  background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff;
+  padding:10px 13px;border-radius:13px;font-family:inherit;font-size:.93rem;line-height:normal;
+  font-weight:500;transition:border .2s,box-shadow .2s;margin:0 0 11px;
+  text-align:start;justify-content:normal
+}
+#authRoot .fld:focus{
+  outline:none;border-color:#817eff;box-shadow:0 0 0 4px rgba(142,127,208,.16)
+}
+#authRoot .fld::placeholder{color:#a99ccb;opacity:.7}
+#authRoot .pwf{position:relative;margin:0 0 11px}
+#authRoot .pwf .fld{margin-bottom:0!important;padding-right:46px}
+#authRoot .pwf-eye{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:0;padding:0;cursor:pointer;color:#b9a8e0;border-radius:9px;
+  transition:color .18s,background .18s
+}
+#authRoot .pwf-eye:hover{color:#fff;background:rgba(255,255,255,.09)}
+#authRoot .pwf-eye svg{width:18px;height:18px;display:block}
+#authRoot .auth-err{
+  color:#ffb9b0;font-size:.82rem;font-weight:600;line-height:normal;
+  min-height:18px;margin:4px 0;text-align:center
+}
+#authRoot .auth-err.ok{color:#9ff0c8}
+#authRoot .btn{
+  background:var(--grad-iri);color:#fff;border:none;padding:9px 17px;border-radius:99px;
+  cursor:pointer;font-size:.87rem;line-height:normal;font-weight:700;font-family:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 0 40px -10px rgba(129,126,255,.55);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),filter .22s
+}
+#authRoot .btn:hover{
+  transform:translateY(-1.5px) scale(1.02);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 34px rgba(129,126,255,.45);
+  filter:brightness(1.05)
+}
+#authRoot .btn:active{transform:scale(.965)}
+#authRoot .btn.full{
+  display:inline-block;width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px
+}
+#authRoot .auth-links{
+  display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap
+}
+#authRoot .auth-links button{
+  background:none;border:none;color:#b3a9ff;font-family:inherit;
+  font-size:.82rem;line-height:normal;font-weight:600;cursor:pointer;padding:0
+}
+@media(max-width:1024px){#authRoot .auth-card .fld{font-size:16px!important}}
+@media(max-width:420px){#authRoot .auth-card{padding:64px 26px 28px}}
 </style>
 <style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style></head>
 <body>
@@ -4733,7 +4896,7 @@ function renderHome(){
   var ps=document.getElementById("periodSub"); if(ps) ps.textContent=slot.charAt(0).toUpperCase()+slot.slice(1);
   var hc=document.getElementById("heroCard"); if(hc) hc.className="hx-hero hero-"+slot;
   var un=document.getElementById("userName"); if(un) un.textContent=(data.profile.name||(user&&user.email?user.email.split("@")[0]:"")||"there");
-  var bn=document.getElementById("brandName"); if(bn) bn.textContent=data.profile.name?data.profile.name.split(" ")[0]+" Workspace":"Workspace";
+  var bn=document.getElementById("brandName"); if(bn) bn.textContent="Workspace";
   var dl=document.getElementById("dateLine"); if(dl) dl.textContent=now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
   var hl=document.getElementById("hijriLine"); if(hl) hl.textContent=hijri(now);
   tickClock(); renderWelcomeSummary();
