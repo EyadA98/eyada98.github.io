@@ -1440,6 +1440,7 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 @media(max-width:760px){.welcome-hero .whero{grid-template-columns:1fr!important}.wboxes{gap:8px}.wbox{min-height:92px;padding:12px}.wbox .wtime{font-size:1.7rem}.wx-box .wx-ic,.wx-box .wx-ic svg{width:32px;height:32px}.wx-box .wx-t{font-size:1.4rem}}
 /* compact, subtle upcoming */
 #upcomingList{display:flex;flex-direction:column;font-size:.88rem;font-weight:500}
+#upcomingList>.muted{color:#fff!important}
 .up-item{display:contents}
 .up-dot{width:7px;height:7px;border-radius:50%}
 .up-dot.k-task{background:var(--lavender)}.up-dot.k-event{background:var(--peach)}.up-dot.k-zakat{background:var(--green)}.up-dot.k-routine{background:var(--peach-deep)}
@@ -2526,7 +2527,7 @@ main{padding-top:32px!important}
 }
 
 /* ── workspace pattern: the rail ends on a ribbon ─────────────────────────────
-   The same interlocking-circle tile the Travel cards and the boarding pass
+   The same rounded diagonal-lens tile the Travel cards and the boarding pass
    carry, so all three apps close their sidebar the same way.
 
    It is a flex child pinned with margin-top:auto rather than an absolutely
@@ -2546,12 +2547,12 @@ main{padding-top:32px!important}
    have taken that fade away. */
 @media(min-width:1025px){
   aside::after{content:"";display:block;flex:none;height:26px;min-height:26px;
-    margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+    margin:auto -16px -26px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center top/13px 13px repeat,rgba(255,255,255,.035)}
 }
 
 /* ── workspace pattern, applied ───────────────────────────────────────────────
-   Same interlock tile as the sidebar ribbon, the Travel card rib and the
+   Same rounded diagonal-lens interlock as the sidebar ribbon, the Travel card rib and the
    boarding pass. Baked per theme: a data-URI is opaque to the cascade, so a
    var() inside one never resolves and each theme needs its own finished URI. */
 
@@ -2572,10 +2573,9 @@ main{padding-top:32px!important}
    Restated here, after, with padding sized for the narrow layout. */
 @media(max-width:560px){ .pw-wrap{padding:40px 16px 22px;gap:14px} }
 .pw-wrap::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;z-index:-1;
-  border-bottom:1px solid rgba(255,255,255,.10);
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
-html:not(.dark) .pw-wrap::before{border-bottom-color:rgba(129,126,255,.16);
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(129,126,255,.05)}
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center top/13px 13px repeat,rgba(255,255,255,.035)}
+html:not(.dark) .pw-wrap::before{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%238a64c8' fill-opacity='.30'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center top/13px 13px repeat,rgba(129,126,255,.05)}
 
 /* TASK & SUBTASK DETAIL PANELS — vertical ribbon on the far right edge.
    z-index 4 clears .tdp-head's 3; pointer-events:none so nothing under it
@@ -2589,11 +2589,19 @@ html:not(.dark) .pw-wrap::before{border-bottom-color:rgba(129,126,255,.16);
    reset — which is what a display:none block would have caused. */
 @media(min-width:769px){
 .td-panel,.sd-panel{position:relative}
+.modal.side{border-top-width:0;border-bottom-width:0}
+.td-panel .tdp-head,.sd-panel .tdp-head,
+.td-panel .tdp-bottom,.sd-panel .tdp-bottom{position:relative;border-top:0;border-bottom:0}
+.td-panel .tdp-head::after,.sd-panel .tdp-head::after,
+.td-panel .tdp-bottom::before,.sd-panel .tdp-bottom::before{
+  content:"";position:absolute;left:22px;right:48px;height:1px;background:var(--border);pointer-events:none}
+.td-panel .tdp-head::after,.sd-panel .tdp-head::after{bottom:0}
+.td-panel .tdp-bottom::before,.sd-panel .tdp-bottom::before{top:0}
 .td-panel::after,.sd-panel::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
-  z-index:4;pointer-events:none;border-left:1px solid var(--border);
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+  z-index:4;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center/13px 13px repeat,rgba(255,255,255,.035)}
 html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(129,126,255,.05)}
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%238a64c8' fill-opacity='.30'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center/13px 13px repeat,rgba(129,126,255,.05)}
 /* Each of these keeps its own left padding, so the right padding is that
    value plus the 26px rail — otherwise the gap beside the ribbon does not
    match the gap on the other side. head and bottom run 18px, the title 22px. */
@@ -2616,17 +2624,15 @@ html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
    makes it explicit so the rail cannot slip behind the background if that
    transform is ever removed. */
 .sticky{padding-left:42px;isolation:isolate}   /* 26px rail + the note's own 16px */
-.sticky::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
+.sticky::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;border-radius:4px 0 0 4px;
   background:var(--nink);opacity:.20;
-  border-right:1px solid rgba(13,9,38,.14);
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
-          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
-  -webkit-mask-size:26px 26px;mask-size:26px 26px;
-  -webkit-mask-repeat:repeat;mask-repeat:repeat}
-/* the border-right is drawn in the mask layer's own alpha, so it needs its own
-   element to survive masking — a right-edge hairline instead */
-.sticky::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
-  background:rgba(13,9,38,.13)}
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-position:left top;mask-position:left top;
+  -webkit-mask-repeat:repeat round;mask-repeat:repeat round}
+/* No divider: the rail ends on a complete 13px tile boundary. */
+.sticky::after{display:none}
 
 /* ── routine cards: pattern rail beside the priority stripe (option R1) ───────
    The 4px priority rail keeps left:0..4 of the padding box; the pattern takes
@@ -2641,11 +2647,11 @@ html:not(.dark) .td-panel::after,html:not(.dark) .sd-panel::after{
    (overflow:hidden is not one, and its transform only exists on hover), so the
    isolation is doing real work rather than restating a default. */
 .rt-card.v1{padding-left:48px;isolation:isolate}
+.rt-card.v1 .rt-rail{display:block}
 .rt-card.v1::before{content:"";position:absolute;left:4px;top:0;bottom:0;width:26px;z-index:-1;
-  border-right:1px solid var(--border);
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") left top/13px 13px repeat round}
 html:not(.dark) .rt-card.v1::before{
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%238a64c8' stroke-opacity='.42' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(129,126,255,.05)}
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%238a64c8' fill-opacity='.30'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") left top/13px 13px repeat round}
 
 /* ── sign-in card: pattern rail (option S2) ───────────────────────────────────
    One card serves the Hub, Finance and Travel, so this rule is identical in all
@@ -2669,16 +2675,14 @@ html:not(.dark) .rt-card.v1::before{
    left = rail (26) + the card's own 34, right = 34: 34px of air on both
    sides of the content, measured from what the eye actually treats as the
    edges. */
-.auth-card,.tv-authcard{padding-left:60px;padding-right:34px;isolation:isolate}
-.auth-card::before,.tv-authcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;z-index:-1;
-  background:currentColor;opacity:.15;border-radius:26px 0 0 26px;
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
-          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E");
-  -webkit-mask-size:26px 26px;mask-size:26px 26px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
-/* hairline closing the rail — its own element, since the ::before's alpha is
-   spent on the mask and a border there would be masked away with it */
-.auth-card::after,.tv-authcard::after{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;z-index:-1;
-  background:currentColor;opacity:.14}
+.auth-card,.tv-authcard{padding-left:34px;padding-right:34px;padding-top:64px;isolation:isolate}
+.auth-card::before,.tv-authcard::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 26px 0 0;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;-webkit-mask-position:center top;mask-position:center top;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat}
+.auth-card::after,.tv-authcard::after{display:none}
 
 /* Room between the app name and the Sign in / Create account row. Applied to
    the tabs rather than the heading because the Hub and Travel carry a tagline
@@ -2688,9 +2692,7 @@ html:not(.dark) .rt-card.v1::before{
 .auth-tabs,.tv-authtabs{margin-top:26px}
 /* the card is narrow on a phone; give the fields their width back */
 @media(max-width:420px){
-  .auth-card,.tv-authcard{padding-left:48px;padding-right:26px}   /* 22px rail + 26 */
-  .auth-card::after,.tv-authcard::after{left:22px}
-  .auth-card::before,.tv-authcard::before{width:22px}
+  .auth-card,.tv-authcard{padding-left:26px;padding-right:26px;padding-top:64px}
 }
 
 /* A note title is a <div> holding whatever you typed. Without this, one long
@@ -2853,6 +2855,15 @@ html:not(.dark) .more-grid button.active{background:var(--grad-action);color:#ff
 html:not(.dark) .rt-card.v1.st-ok{
   border-color:rgba(129,126,255,.26);
   background-image:linear-gradient(140deg,rgba(233,231,255,.62),rgba(255,255,255,0) 58%)}
+
+/* Desktop header alignment: the brand row and top bar share one centre line.
+   The compensating bottom margin keeps the navigation below it in its original
+   vertical position. */
+@media(min-width:1025px){
+  aside{padding-top:0}
+  .logo{height:74px;padding:0 10px;margin-bottom:20px;flex:none}
+  .topbar{min-height:74px}
+}
 </style>
 <style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style></head>
 <body>
