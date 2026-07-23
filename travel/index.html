@@ -789,6 +789,7 @@ html:not(.dark) .tw-foot{border-top-color:var(--border)}
 /* stub / body divider: a vertical ribbon carrying the interlocking-circles
    relief (the reference motif), a single column tall down the seam */
 .pass-stub::after{content:"";position:absolute;right:-14px;top:0;bottom:0;width:28px;z-index:2;pointer-events:none;
+  box-sizing:border-box;border-left:1px solid rgba(129,126,255,.28);border-right:1px solid rgba(129,126,255,.28);
   background:
    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.24' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='14'/%3E%3Ccircle cx='28' cy='0' r='14'/%3E%3Ccircle cx='0' cy='28' r='14'/%3E%3Ccircle cx='28' cy='28' r='14'/%3E%3Ccircle cx='14' cy='14' r='14'/%3E%3Ccircle cx='14' cy='0' r='14'/%3E%3Ccircle cx='0' cy='14' r='14'/%3E%3Ccircle cx='28' cy='14' r='14'/%3E%3Ccircle cx='14' cy='28' r='14'/%3E%3C/g%3E%3C/svg%3E") center top/28px 28px repeat-y,
    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cg fill='none' stroke='%23000000' stroke-opacity='.18' stroke-width='1'%3E%3Ccircle cx='0.7' cy='0.9' r='14'/%3E%3Ccircle cx='28.7' cy='0.9' r='14'/%3E%3Ccircle cx='0.7' cy='28.9' r='14'/%3E%3Ccircle cx='28.7' cy='28.9' r='14'/%3E%3Ccircle cx='14.7' cy='14.9' r='14'/%3E%3Ccircle cx='14.7' cy='0.9' r='14'/%3E%3Ccircle cx='0.7' cy='14.9' r='14'/%3E%3Ccircle cx='28.7' cy='14.9' r='14'/%3E%3Ccircle cx='14.7' cy='28.9' r='14'/%3E%3C/g%3E%3C/svg%3E") center top/28px 28px repeat-y,
@@ -895,6 +896,7 @@ html:not(.dark) .pass-amt{background:var(--grad-iri);-webkit-background-clip:tex
   /* the tile is set to repeat-y for a vertical seam; a horizontal one has to
      repeat along the other axis or it draws a single square */
   .pass-stub::after{left:0;right:0;top:auto;bottom:-14px;width:auto;height:28px;
+    border-left:0;border-right:0;border-top:1px solid rgba(129,126,255,.28);border-bottom:1px solid rgba(129,126,255,.28);
     background-repeat:repeat-x;background-position:left center}
   .pass-stub{border-radius:16px 16px 0 0}
 }
@@ -1486,6 +1488,7 @@ html:not(.dark) .tvm .m-rib{background:url("data:image/svg+xml,%3Csvg xmlns='htt
 .tvm .tk-rail{width:26px;flex:none;align-self:stretch}
 .tvm .tk-grid{width:330px;flex:none;display:grid;grid-template-columns:1fr 1fr}
 .tvm .tk-g{padding:16px 18px;border-left:1px solid var(--m-rule);border-bottom:1px solid var(--m-rule);min-width:0}
+.tvm .tk-g:nth-child(odd){border-left:0}
 .tvm .tk-g:nth-child(n+3){border-bottom:0}
 .tvm .tk-g .v{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.3rem;color:var(--m-fig);
   margin-top:6px;line-height:1;white-space:nowrap}
@@ -2120,6 +2123,291 @@ html:not(.dark) .tv-modal{
   box-shadow:0 28px 70px rgba(36,8,82,.20);
 }
 html:not(.dark) .tv-modal p{color:var(--muted)}
+
+/* ===== Brand interlock v5 — shared with Workspace =====
+   One source is used everywhere. Horizontal ribbons round only the x repeat;
+   vertical ribbons round only the y repeat, so every edge finishes on a full
+   motif instead of clipping the last tile. */
+:root{
+  --iw-dark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+  --iw-light:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%238a64c8' fill-opacity='.30'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
+  --iw-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23000'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E")
+}
+
+/* Sidebar footer: the sidebar itself stays unchanged. */
+.tv-aside::after{
+  border-top:0;
+  background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
+}
+
+/* Trip cards. */
+html.dark .tv-trip{--tv-rib:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round}
+html:not(.dark) .tv-trip{--tv-rib:var(--iw-light) -6.5px -6.5px/13px 13px repeat round}
+.tv-trip::before{background:var(--tv-rib);border-right:0}
+
+/* City boarding-pass divider. */
+html.dark .pass-stub::after{
+  background:var(--iw-dark) -7px -7px/14px 14px repeat round
+}
+html:not(.dark) .pass-stub::after{
+  background:var(--iw-light) -7px -7px/14px 14px repeat round
+}
+@media(max-width:1240px){
+  html.dark .pass-stub::after{
+    background:var(--iw-dark) -7px -7px/14px 14px round repeat
+  }
+  html:not(.dark) .pass-stub::after{
+    background:var(--iw-light) -7px -7px/14px 14px round repeat
+  }
+}
+
+/* Budget boarding pass. */
+html.dark .bb-rib{
+  background:var(--iw-dark) -7px -7px/14px 14px repeat round
+}
+html:not(.dark) .bb-rib{
+  background:var(--iw-light) -7px -7px/14px 14px repeat round
+}
+@media(max-width:900px){
+  html.dark .bb-rib{
+    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
+  }
+  html:not(.dark) .bb-rib{
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+  }
+}
+
+/* Budget, map and settings ribbons. */
+html.dark .tvb .b-ribbon{
+  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
+}
+html:not(.dark) .tvb .b-ribbon{
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+}
+html.dark .tvm .m-rib{
+  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
+}
+html:not(.dark) .tvm .m-rib{
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+}
+.tvm .spine-rail{width:26px}
+html.dark .tvm .dest-band{
+  background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
+}
+html:not(.dark) .tvm .dest-band{
+  background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+}
+@media(max-width:1000px){
+  html.dark .tvm .tk-rail{
+    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
+  }
+  html:not(.dark) .tvm .tk-rail{
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+  }
+}
+html.dark .tvs .s-rib{
+  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
+}
+html:not(.dark) .tvs .s-rib{
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+}
+@media(max-width:1000px){
+  .tvs .s-head-rail{height:26px}
+  html.dark .tvs .s-head-rail{
+    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
+  }
+  html:not(.dark) .tvs .s-head-rail{
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+  }
+}
+
+/* Sign-in card: ribbon across the top, with no divider line. */
+.auth-card,.tv-authcard{
+  padding-left:34px;padding-right:34px;padding-top:64px;isolation:isolate
+}
+.auth-card::before,.tv-authcard::before{
+  content:"";position:absolute;left:0;right:0;top:0;bottom:auto;width:auto;height:26px;z-index:-1;
+  background:currentColor;opacity:.15;border-radius:26px 26px 0 0;
+  -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-position:-6.5px -6.5px;mask-position:-6.5px -6.5px;
+  -webkit-mask-repeat:round repeat;mask-repeat:round repeat
+}
+.auth-card::after,.tv-authcard::after{display:none}
+@media(max-width:420px){
+  .auth-card,.tv-authcard{padding-left:26px;padding-right:26px;padding-top:60px}
+  .auth-card::before,.tv-authcard::before{width:auto;height:26px}
+}
+
+/* Light mobile navigation uses the approved violet action gradient. */
+html:not(.dark) .tp-bottombar button[style]{
+  background:var(--grad-action)!important;
+  box-shadow:0 6px 18px rgba(99,80,224,.30),inset 0 1px 0 rgba(255,255,255,.35)!important
+}
+
+/* ===== Sign-in parity with Workspace =====
+   Values below are intentionally identical to Workspace; only the product
+   name in the React markup differs. */
+.tv-authroot{
+  position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
+  background:linear-gradient(112deg,#15103a 0%,#2a1d44 45%,#4a38b5 85%,#817eff 115%);
+  font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:16px;line-height:normal;
+  font-variant-numeric:tabular-nums
+}
+.tv-authroot,.tv-authroot *{box-sizing:border-box}
+.tv-authroot::before{
+  content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)
+}
+.tv-authcard{
+  position:relative;z-index:1;width:100%;max-width:420px;background:rgba(24,18,60,.92);
+  backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);
+  border:1px solid rgba(187,164,228,.3);border-radius:26px;
+  padding:64px 34px 28px;
+  box-shadow:0 30px 90px rgba(10,8,30,.55);
+  animation:tvAuthPop .45s var(--ease);text-align:center;color:#fff
+}
+@keyframes tvAuthPop{
+  from{opacity:0;transform:scale(.92) translateY(10px)}
+  to{opacity:1;transform:none}
+}
+.tv-authlogo{
+  width:58px;height:58px;border-radius:17px;background:linear-gradient(135deg,#817eff,#4a38b5);
+  display:grid;place-items:center;margin:0 auto 16px;box-shadow:0 8px 22px rgba(93,79,168,.4)
+}
+.tv-authlogo svg{width:30px;height:30px;color:#fff}
+.tv-authcard h2{
+  font-family:'Marcellus',Georgia,serif;font-weight:400;
+  font-size:1.5rem;letter-spacing:-.01em;margin:0
+}
+.tv-tag{font-size:.86rem;color:#cbb9ec;margin:6px 0 22px}
+.tv-authtabs{
+  display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:4px;
+  margin-top:26px;margin-bottom:18px
+}
+.tv-authtabs button{
+  flex:1;border:none;background:none;padding:9px;border-radius:99px;font-family:inherit;
+  font-weight:700;color:#cbb9ec;cursor:pointer;transition:all .25s
+}
+.tv-authtabs button.active{background:rgba(255,255,255,.14);color:#fff}
+.tv-fld{
+  width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);
+  color:#fff;padding:10px 13px;border-radius:12px;font-size:.93rem;font-weight:500;
+  transition:border .2s,box-shadow .2s;margin-bottom:11px;text-align:left
+}
+.tv-fld::placeholder{color:#a99ccb;opacity:.7}
+.tv-fld:focus{
+  outline:none;border-color:#817eff;box-shadow:0 0 0 3px rgba(129,126,255,.22)
+}
+.tv-fld::placeholder{color:#a99ccb;opacity:.7}
+.tv-pwf{position:relative;margin-bottom:11px}
+.tv-pwf .tv-fld{margin-bottom:0!important;padding-right:46px}
+.tv-pwfeye{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:0;padding:0;cursor:pointer;color:#b9a8e0;border-radius:9px;
+  transition:color .18s,background .18s
+}
+.tv-pwfeye:hover{color:#fff;background:rgba(255,255,255,.09)}
+.tv-autherr{
+  color:#ffb9b0;font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center
+}
+.tv-autherr.ok{color:#9ff0c8}
+.tv-btnfull{
+  width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px;
+  background:var(--grad-iri);color:#fff;border:none;cursor:pointer;font-weight:700;font-family:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),var(--glow-lav);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),filter .22s
+}
+.tv-btnfull:hover{
+  transform:translateY(-1.5px) scale(1.02);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 34px rgba(129,126,255,.45);
+  filter:brightness(1.05)
+}
+.tv-btnfull:active{transform:scale(.965)}
+.tv-authlinks{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.tv-authlinks button{
+  background:none;border:none;color:#b3a9ff;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer
+}
+.tv-authcard::before{
+  left:0;right:0;top:0;bottom:auto;width:auto;height:26px;
+  border-radius:26px 26px 0 0;
+  -webkit-mask-position:-6.5px -6.5px;mask-position:-6.5px -6.5px;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat
+}
+@media(max-width:1024px){
+  .tv-fld{font-size:16px}
+}
+@media(max-width:420px){
+  .tv-authcard{padding:64px 26px 28px}
+}
+
+/* Literal Workspace sign-in component.
+   The ID-scoped rules intentionally reproduce Workspace's actual DOM metrics
+   and override Travel's unrelated .fld form-card class and Tailwind defaults. */
+#authRoot{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
+  background:linear-gradient(112deg,#15103a 0%,#2a1d44 45%,#4a38b5 85%,#817eff 115%);
+  font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:16px;line-height:normal;
+  font-variant-numeric:tabular-nums}
+#authRoot,#authRoot *{box-sizing:border-box}
+#authRoot::before{content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)}
+#authRoot .auth-card{position:relative;z-index:1;width:100%;max-width:420px;
+  background:rgba(24,18,60,.92);backdrop-filter:blur(26px) saturate(1.5);
+  -webkit-backdrop-filter:blur(26px) saturate(1.5);border:1px solid rgba(187,164,228,.3);
+  border-radius:26px;padding:64px 34px 28px;box-shadow:0 30px 90px rgba(10,8,30,.55);
+  animation:tvAuthPop .45s var(--ease);text-align:center;color:#fff}
+#authRoot .auth-card::before{content:"";position:absolute;left:0;right:0;top:0;bottom:auto;
+  width:auto;height:26px;z-index:-1;background:currentColor;opacity:.15;border-radius:26px 26px 0 0;
+  -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-position:center top;mask-position:center top;
+  -webkit-mask-repeat:round repeat;mask-repeat:round repeat}
+#authRoot .auth-card::after{display:none}
+#authRoot .auth-logo{width:58px;height:58px;border-radius:17px;
+  background:linear-gradient(135deg,#817eff,#4a38b5);display:grid;place-items:center;
+  margin:0 auto 16px;box-shadow:0 8px 22px rgba(93,79,168,.4)}
+#authRoot .auth-logo svg{width:30px;height:30px;color:#fff}
+#authRoot .marc{font-family:'Marcellus',Georgia,serif;font-weight:400;letter-spacing:.012em}
+#authRoot .auth-card h2{font-size:1.5rem;letter-spacing:-.01em;margin:0}
+#authRoot .tag{font-size:.86rem;color:#cbb9ec;margin:6px 0 22px}
+#authRoot .auth-tabs{display:flex;background:rgba(255,255,255,.08);border-radius:99px;
+  padding:4px;margin-top:26px;margin-bottom:18px}
+#authRoot .auth-tabs button{flex:1;border:none;background:none;padding:9px;border-radius:99px;
+  font-family:inherit;font-size:13.3333px;line-height:normal;font-weight:700;color:#cbb9ec;
+  cursor:pointer;transition:all .25s}
+#authRoot .auth-tabs button.active{background:rgba(255,255,255,.14);color:#fff}
+#authRoot .fld{display:block;width:100%;height:auto;min-height:0;min-width:0;align-self:auto;
+  background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff;
+  padding:10px 13px;border-radius:12px;font-family:inherit;font-size:.93rem;line-height:normal;
+  font-weight:500;transition:border .2s,box-shadow .2s;margin:0 0 11px;text-align:left}
+#authRoot .fld:focus{outline:none;border-color:#817eff;box-shadow:0 0 0 3px rgba(129,126,255,.22)}
+#authRoot .fld::placeholder{color:#a99ccb;opacity:.7}
+#authRoot .pwf{position:relative;margin:0 0 11px}
+#authRoot .pwf .fld{margin-bottom:0!important;padding-right:46px}
+#authRoot .pwf-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:0;padding:0;cursor:pointer;color:#b9a8e0;border-radius:9px;
+  transition:color .18s,background .18s}
+#authRoot .pwf-eye:hover{color:#fff;background:rgba(255,255,255,.09)}
+#authRoot .pwf-eye svg{width:18px;height:18px;display:block}
+#authRoot .auth-err{color:#ffb9b0;font-size:.82rem;font-weight:600;line-height:normal;
+  min-height:18px;margin:4px 0;text-align:center}
+#authRoot .auth-err.ok{color:#9ff0c8}
+#authRoot .btn{background:var(--grad-iri);color:#fff;border:none;padding:9px 17px;border-radius:99px;
+  cursor:pointer;font-size:.87rem;line-height:normal;font-weight:700;font-family:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),var(--glow-lav);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),filter .22s}
+#authRoot .btn:hover{transform:translateY(-1.5px) scale(1.02);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 34px rgba(129,126,255,.45);
+  filter:brightness(1.05)}
+#authRoot .btn:active{transform:scale(.965)}
+#authRoot .btn.full{display:inline-block;width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px}
+#authRoot .auth-links{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+#authRoot .auth-links button{background:none;border:none;color:#b3a9ff;font-family:inherit;
+  font-size:.82rem;line-height:normal;font-weight:600;cursor:pointer;padding:0}
+@media(max-width:1024px){#authRoot .auth-card .fld{font-size:16px!important}}
+@media(max-width:420px){#authRoot .auth-card{padding:64px 26px 28px}}
 </style>
 </head>
 <body>
@@ -3816,8 +4104,8 @@ function pdfCSS(dark){ const c=PDF_THEME[dark?'dark':'light']; return `
 /* Marcellus ships a single weight - pinning it stops the browser faking a bold */
 .tpdoc .d{font-family:'Marcellus',Georgia,serif;font-weight:400}
 .tpdoc .rib{background:
-  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='${c.ribInk}' stroke-opacity='${c.ribOp}' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E")
-  center top/26px 26px repeat,${c.ribBg};width:26px;flex:none;align-self:stretch}
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='${c.ribInk}' fill-opacity='${c.ribOp}'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E")
+  -6.5px -6.5px/13px 13px repeat round,${c.ribBg};width:26px;flex:none;align-self:stretch}
 .tpdoc .kick{font-size:9.6px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:${c.code}}
 .tpdoc .cap{font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:${c.muted}}
 .tpdoc .capw{color:${c.capw};letter-spacing:.19em}
@@ -3847,9 +4135,12 @@ function pdfCSS(dark){ const c=PDF_THEME[dark?'dark':'light']; return `
 
 .tpdoc .stats{display:flex;margin-top:20px;border-top:1px solid ${c.border};padding:13px 0 16px}
 .tpdoc .st{flex:1;min-width:0;position:relative;padding-left:13px}
+.tpdoc .st-count{flex:.82}
+.tpdoc .st-money{flex:1.18}
 .tpdoc .st:first-child{padding-left:0}
 .tpdoc .st + .st::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1px;background:${c.border}}
 .tpdoc .stv{font-size:18px;color:${c.fig};margin-top:4px;line-height:1;font-variant-numeric:tabular-nums}
+.tpdoc .st-money .stv{font-size:16px;letter-spacing:-.01em;white-space:nowrap}
 .tpdoc .stv.nil{color:${c.nil}}
 
 .tpdoc .body{flex:1;padding:0 44px;min-height:0}
@@ -3893,14 +4184,16 @@ function pdfCSS(dark){ const c=PDF_THEME[dark?'dark':'light']; return `
 
 .tpdoc .total{display:flex;align-items:stretch;margin-top:28px;background:${c.totalBg};
   border:1px solid ${c.totalBd};border-radius:12px;overflow:hidden}
-.tpdoc .total-in{flex:1;display:flex;align-items:center;justify-content:space-between;padding:17px 22px}
-.tpdoc .total-l{font-size:9.3px;font-weight:800;letter-spacing:.19em;text-transform:uppercase;color:${c.capw};line-height:1}
-/* Marcellus sets oldstyle figures — 3, 4, 5, 7 and 9 hang below the baseline —
-   so a box centred on its line box reads low against the label beside it.
-   Lifting by half the descender depth centres the digits optically, which is
-   what the eye is actually judging. */
-.tpdoc .total-v{font-size:28px;color:${c.figStrong};line-height:1;font-variant-numeric:tabular-nums;
-  position:relative;top:-3px}
+.tpdoc .total-in{flex:1;min-height:62px;position:relative;padding:0}
+.tpdoc .total-l{position:absolute;left:22px;top:50%;transform:translateY(calc(-50% - 5px));
+  font-size:9.3px;font-weight:800;letter-spacing:.19em;text-transform:uppercase;
+  color:${c.capw};line-height:1.2}
+/* Keep the amount on the right. Marcellus' visible numerals sit well below
+   the centre of their CSS line box, so the optical correction centres the
+   actual glyphs vertically inside the ticket rather than only its line box. */
+.tpdoc .total-v{position:absolute;left:auto;right:22px;top:50%;
+  transform:translateY(calc(-50% - 11px));font-size:28px;color:${c.figStrong};line-height:1.2;
+  font-variant-numeric:tabular-nums;white-space:nowrap;display:block}
 
 .tpdoc .foot{padding:18px 44px 24px;font-size:9.6px;color:${c.dim};
   border-top:1px solid ${c.border};display:flex;justify-content:space-between;gap:16px}
@@ -3995,8 +4288,8 @@ function pdfHead(m){ return `<header class="head">
         <div class="rend r"><div class="rcode d">${pdfEsc(m.to.code)}</div>
           <div class="rcity">${pdfEsc(m.to.city)}</div><div class="rdate">${pdfEsc(m.to.date)}</div></div>
       </div>
-      <div class="stats">${m.stats.map(([l,v])=>
-        `<div class="st"><div class="cap">${pdfEsc(l)}</div>
+      <div class="stats">${m.stats.map(([l,v],i)=>
+        `<div class="st ${i<3?'st-count':'st-money'}"><div class="cap">${pdfEsc(l)}</div>
          <div class="stv d${v==='—'?' nil':''}">${pdfEsc(v)}</div></div>`).join('')}</div>
     </div>
     <div class="rib"></div>
@@ -4412,34 +4705,36 @@ function AuthModal({cloud,onClose,onSettings}){
   const [email,setEmail]=useState(''); const [pw,setPw]=useState(''); const [mode,setMode]=useState('in'); const [show,setShow]=useState(false);
   /* Hub's auth-card: a full-bleed gradient page, not a dialog floating over the app.
      Signed-in users never see this — they get the avatar dropdown, as in Hub. */
+  useEffect(()=>{ const root=document.documentElement,wasDark=root.classList.contains('dark'); root.classList.add('dark'); return ()=>root.classList.toggle('dark',wasDark); },[]);
   useEffect(()=>{ const esc=e=>{ if(e.key==='Escape'&&session) onClose(); }; document.addEventListener('keydown',esc); return ()=>document.removeEventListener('keydown',esc); },[session,onClose]);
   const go=()=>mode==='in'?signIn(email,pw):signUp(email,pw);
-  return (<Portal><div className="tv-authroot" role="dialog" aria-modal="true">
-    <div className="tv-authcard">
-      <div className="tv-authlogo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
-      <h2 className="font-display">Travel Planner</h2>
+  return (<Portal><div id="authRoot" role="dialog" aria-modal="true">
+    <div className="auth-card">
+      <div className="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
+      <h2 className="marc">Travel Planner</h2>
+      <div className="tag"></div>
       {/* The "cloud isn't set up" branch is gone — the project is bundled, so
           `ready` can no longer be false. What remains is Hub's card, field for
           field, on the same project: signing in here signs you in there. */}
       {(<>
-            <div className="tv-authtabs">
+            <div className="auth-tabs">
               <button className={mode==='in'?'active':''} onClick={()=>setMode('in')}>Sign in</button>
               <button className={mode==='up'?'active':''} onClick={()=>setMode('up')}>Create account</button>
             </div>
-            <input className="tv-fld" type="email" value={email} placeholder="Email" autoComplete="email"
+            <input className="fld" type="email" value={email} placeholder="Email" autoComplete="email"
               onChange={e=>setEmail(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')go();}}/>
-            <div className="tv-pwf">
-              <input className="tv-fld" type={show?'text':'password'} value={pw} placeholder="Password"
+            <div className="pwf">
+              <input className="fld" type={show?'text':'password'} value={pw} placeholder="Password"
                 autoComplete={mode==='up'?'new-password':'current-password'}
                 onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')go();}}/>
-              <button type="button" className="tv-pwfeye" onClick={()=>setShow(v=>!v)} aria-label={show?'Hide password':'Show password'}>
+              <button type="button" className="pwf-eye" onClick={()=>setShow(v=>!v)} aria-label={show?'Hide password':'Show password'}>
                 {show? <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M10.6 6.7A8.9 8.9 0 0 1 12 6.5c6 0 9.5 6 9.5 6a17 17 0 0 1-2.6 3.3M6.2 7.9A16.6 16.6 0 0 0 2.5 12.5s3.5 6 9.5 6a9 9 0 0 0 3.5-.7"/><path d="M9.9 10.4a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>
                      : <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>}
               </button>
             </div>
-            <div className="tv-autherr">{status&&!/^Sync/.test(status)?status:''}</div>
-            <button className="tv-btnfull" onClick={go}>{mode==='up'?'Create account':'Sign in'}</button>
-            <div className="tv-authlinks">{mode==='in'&&<button onClick={()=>resetPassword(email)}>Forgot password?</button>}{session&&<button onClick={onClose}>Back to trips</button>}</div>
+            <div className="auth-err">{status&&!/^Sync/.test(status)?status:''}</div>
+            <button className="btn full" onClick={go}>{mode==='up'?'Create account':'Sign in'}</button>
+            <div className="auth-links">{mode==='in'&&<button onClick={()=>resetPassword(email)}>Forgot password?</button>}{session&&<button onClick={onClose}>Back to trips</button>}</div>
           </>)}
     </div>
   </div></Portal>); }
