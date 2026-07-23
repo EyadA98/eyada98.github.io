@@ -6753,7 +6753,7 @@ function authUI(mode){
   const tabs=`<div class="auth-tabs"><button class="${mode==='in'?'active':''}" onclick="authUI('in')">Sign in</button><button class="${mode==='up'?'active':''}" onclick="authUI('up')">Create account</button></div>`;
   root.innerHTML=`<div class="auth-card">
     <div class="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
-    <h2 class="marc">Eyad Alfi</h2><div class="tag"></div>
+    <h2 class="marc">Workspace</h2><div class="tag"></div>
     ${tabs}
     <input class="fld" id="aEmail" type="email" placeholder="Email" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()">
     <div class="pwf"><input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()"><button type="button" class="pwf-eye" id="aEye" onclick="togglePw('aPass','aEye')" aria-label="Show password" title="Show password">${I_EYE}</button></div>
