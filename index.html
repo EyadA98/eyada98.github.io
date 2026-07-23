@@ -2856,14 +2856,18 @@ html:not(.dark) .rt-card.v1.st-ok{
   border-color:rgba(129,126,255,.26);
   background-image:linear-gradient(140deg,rgba(233,231,255,.62),rgba(255,255,255,0) 58%)}
 
-/* Desktop header alignment: the brand row and top bar share one centre line.
-   The compensating bottom margin keeps the navigation below it in its original
-   vertical position. */
+/* Desktop brand placement: match Travel's sidebar while a trip is open.
+   That state uses 18px/13px rail padding, a 3px rail gap and a 4px gap
+   after the logo button. */
 @media(min-width:1025px){
-  aside{padding-top:0}
-  .logo{height:74px;padding:0 10px;margin-bottom:20px;flex:none}
+  aside{padding:18px 13px;gap:3px;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
+  aside::-webkit-scrollbar{display:none;width:0;height:0}
+  aside::after{margin:auto -13px -18px}
+  .logo{height:auto;padding:4px 10px 24px;margin:0 0 4px;flex:none}
+  .logo-mark{flex:none;animation:tvLogoIn .7s var(--ease)}
   .topbar{min-height:74px}
 }
+@keyframes tvLogoIn{from{opacity:0;transform:scale(.8) rotate(-8deg)}to{opacity:1;transform:none}}
 </style>
 <style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style></head>
 <body>
