@@ -29,7 +29,7 @@
 <style>
   html.dark{ --lavender:#817eff; --lilac:#b3a9ff; --peach:#ffb3ab; --bg:#130a30;color-scheme:dark} html:not(.dark){color-scheme:light}
 /* ---- tokens: one set, flipped once, the way Hub and Finance do it ----------- */
-:root{ --colgap:18px; --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%); --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%); --glow-lav:0 10px 30px rgba(129,126,255,.34); --ease:cubic-bezier(.22,.61,.36,1); --lavender:#817eff; --lilac:#b3a9ff; --peach:#ffb3ab; --bg:#f4f1fb; --text:#240852; --muted:#6a5f86; --dim:#786d95; --border:#e7e0f5; --card:#ffffff;
+:root{ --colgap:18px; --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%); --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%); --top-control-gradient:var(--grad-iri); --glow-lav:0 10px 30px rgba(129,126,255,.34); --ease:cubic-bezier(.22,.61,.36,1); --lavender:#817eff; --lilac:#b3a9ff; --peach:#ffb3ab; --bg:#f4f1fb; --text:#240852; --muted:#6a5f86; --dim:#786d95; --border:#e7e0f5; --card:#ffffff;
   --tile:rgba(129,126,255,.06); --tile-bd:#ece7f6; --tile-hi:rgba(129,126,255,.12); --radius:18px; --ctl:38px; }
 html.dark{ --text:#ece7fb; --muted:#a99ccb; --dim:#8479a8; --border:rgba(255,255,255,.10); --card:#14093a;
   --tile:rgba(255,255,255,.04); --tile-bd:rgba(255,255,255,.08); --tile-hi:rgba(255,255,255,.10); }
@@ -38,7 +38,7 @@ html.dark{ --text:#ece7fb; --muted:#a99ccb; --dim:#8479a8; --border:rgba(255,255
    Hub: grid-template-columns:clamp(214px,16.5vw,278px) 1fr, a gradient rail with
    backdrop blur, and a peach bar on the active item. Travel already has a bottom
    tab bar, so the rail hides below 1024 instead of reflowing like Hub's does. */
-.tv-shell{display:grid;grid-template-columns:clamp(214px,16.5vw,278px) 1fr;min-height:100vh}
+.tv-shell{display:grid;grid-template-columns:clamp(214px,16.5vw,278px) minmax(0,1fr);min-height:100vh;min-width:0}
 .tv-col{min-width:0;display:flex;flex-direction:column;grid-column:2}
 .tv-aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%);
   backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
@@ -261,7 +261,8 @@ html.dark .tv-avmenu .tv-danger{color:#f2596f}
 .tv-toast button:hover{color:#fff}
 .tv-ws{padding:0 16px}
 @media(max-width:600px){ .tv-wslabel{display:none} .tv-ws{padding:0;width:40px;justify-content:center} }
-  body{-webkit-font-smoothing:antialiased;margin:0;font-variant-numeric:tabular-nums}   /* tabular-nums is Hub's; the font-size is NOT — Hub uses the browser default */
+  html{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+  body{-webkit-font-smoothing:antialiased;margin:0;min-width:0;overflow-x:hidden;font-variant-numeric:tabular-nums}   /* tabular-nums is Hub's; the font-size is NOT — Hub uses the browser default */
   /* Hub's page edge. Travel centred everything with mx-auto instead of aligning to a gutter. */
   :root{ --gutter:34px }
   @media(max-width:1100px){ :root{ --gutter:26px } }
@@ -1986,6 +1987,7 @@ html:not(.dark){
   --surface-hover:#f4f1fb;
   --surface-selected:#e9e7ff;
   --grad-action:linear-gradient(120deg,#6350e0 0%,#817eff 100%);
+  --top-control-gradient:var(--grad-action);
   --tile:rgba(233,231,255,.46);
   --tile-bd:#e7e0f5;
   --tile-hi:rgba(233,231,255,.82);
@@ -2142,7 +2144,7 @@ html:not(.dark) .tv-modal p{color:var(--muted)}
 
 /* Trip cards. */
 html.dark .tv-trip{--tv-rib:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round}
-html:not(.dark) .tv-trip{--tv-rib:var(--iw-light) -6.5px -6.5px/13px 13px repeat round}
+html:not(.dark) .tv-trip{--tv-rib:var(--iw-light) -6.5px -6.5px/13px 13px repeat round,#f0ebfb}
 .tv-trip::before{background:var(--tv-rib);border-right:0}
 
 /* City boarding-pass divider. */
@@ -2150,14 +2152,14 @@ html.dark .pass-stub::after{
   background:var(--iw-dark) -7px -7px/14px 14px repeat round
 }
 html:not(.dark) .pass-stub::after{
-  background:var(--iw-light) -7px -7px/14px 14px repeat round
+  background:var(--iw-light) -7px -7px/14px 14px repeat round,#f0ebfb
 }
 @media(max-width:1240px){
   html.dark .pass-stub::after{
     background:var(--iw-dark) -7px -7px/14px 14px round repeat
   }
   html:not(.dark) .pass-stub::after{
-    background:var(--iw-light) -7px -7px/14px 14px round repeat
+    background:var(--iw-light) -7px -7px/14px 14px round repeat,#f0ebfb
   }
 }
 
@@ -2166,14 +2168,14 @@ html.dark .bb-rib{
   background:var(--iw-dark) -7px -7px/14px 14px repeat round
 }
 html:not(.dark) .bb-rib{
-  background:var(--iw-light) -7px -7px/14px 14px repeat round
+  background:var(--iw-light) -7px -7px/14px 14px repeat round,#f0ebfb
 }
 @media(max-width:900px){
   html.dark .bb-rib{
     background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
   }
   html:not(.dark) .bb-rib{
-    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat,#f0ebfb
   }
 }
 
@@ -2182,34 +2184,34 @@ html.dark .tvb .b-ribbon{
   background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
 }
 html:not(.dark) .tvb .b-ribbon{
-  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round,#f0ebfb
 }
 html.dark .tvm .m-rib{
   background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
 }
 html:not(.dark) .tvm .m-rib{
-  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round,#f0ebfb
 }
 .tvm .spine-rail{width:26px}
 html.dark .tvm .dest-band{
   background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
 }
 html:not(.dark) .tvm .dest-band{
-  background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+  background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat,#f0ebfb
 }
 @media(max-width:1000px){
   html.dark .tvm .tk-rail{
     background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
   }
   html:not(.dark) .tvm .tk-rail{
-    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat,#f0ebfb
   }
 }
 html.dark .tvs .s-rib{
   background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round
 }
 html:not(.dark) .tvs .s-rib{
-  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round
+  background:var(--iw-light) -6.5px -6.5px/13px 13px repeat round,#f0ebfb
 }
 @media(max-width:1000px){
   .tvs .s-head-rail{height:26px}
@@ -2217,7 +2219,7 @@ html:not(.dark) .tvs .s-rib{
     background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
   }
   html:not(.dark) .tvs .s-head-rail{
-    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat
+    background:var(--iw-light) -6.5px -6.5px/13px 13px round repeat,#f0ebfb
   }
 }
 
@@ -2348,28 +2350,28 @@ html:not(.dark) .tp-bottombar button[style]{
 #authRoot{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
   background:linear-gradient(112deg,#15103a 0%,#2a1d44 45%,#4a38b5 85%,#817eff 115%);
   font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;font-size:16px;line-height:normal;
-  font-variant-numeric:tabular-nums}
+  font-variant-numeric:tabular-nums;color:#ece7fb}
 #authRoot,#authRoot *{box-sizing:border-box}
 #authRoot::before{content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;
   background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)}
 #authRoot .auth-card{position:relative;z-index:1;width:100%;max-width:420px;
   background:rgba(24,18,60,.92);backdrop-filter:blur(26px) saturate(1.5);
   -webkit-backdrop-filter:blur(26px) saturate(1.5);border:1px solid rgba(187,164,228,.3);
-  border-radius:26px;padding:64px 34px 28px;box-shadow:0 30px 90px rgba(10,8,30,.55);
+  border-radius:24px;padding:64px 34px 28px;box-shadow:0 30px 90px rgba(10,8,30,.55);
   animation:tvAuthPop .45s var(--ease);text-align:center;color:#fff}
 #authRoot .auth-card::before{content:"";position:absolute;left:0;right:0;top:0;bottom:auto;
   width:auto;height:26px;z-index:-1;background:currentColor;opacity:.15;border-radius:26px 26px 0 0;
   -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
   -webkit-mask-size:13px 13px;mask-size:13px 13px;
-  -webkit-mask-position:center top;mask-position:center top;
+  -webkit-mask-position:-6.5px -6.5px;mask-position:-6.5px -6.5px;
   -webkit-mask-repeat:round repeat;mask-repeat:round repeat}
 #authRoot .auth-card::after{display:none}
 #authRoot .auth-logo{width:58px;height:58px;border-radius:17px;
   background:linear-gradient(135deg,#817eff,#4a38b5);display:grid;place-items:center;
   margin:0 auto 16px;box-shadow:0 8px 22px rgba(93,79,168,.4)}
 #authRoot .auth-logo svg{width:30px;height:30px;color:#fff}
-#authRoot .marc{font-family:'Marcellus',Georgia,serif;font-weight:400;letter-spacing:.012em}
-#authRoot .auth-card h2{font-size:1.5rem;letter-spacing:-.01em;margin:0}
+#authRoot .marc{font-family:'Marcellus',Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:.012em}
+#authRoot .auth-card h2{font-size:1.5rem;letter-spacing:.012em;margin:0}
 #authRoot .tag{font-size:.86rem;color:#cbb9ec;margin:6px 0 22px}
 #authRoot .auth-tabs{display:flex;background:rgba(255,255,255,.08);border-radius:99px;
   padding:4px;margin-top:26px;margin-bottom:18px}
@@ -2377,11 +2379,12 @@ html:not(.dark) .tp-bottombar button[style]{
   font-family:inherit;font-size:13.3333px;line-height:normal;font-weight:700;color:#cbb9ec;
   cursor:pointer;transition:all .25s}
 #authRoot .auth-tabs button.active{background:rgba(255,255,255,.14);color:#fff}
-#authRoot .fld{display:block;width:100%;height:auto;min-height:0;min-width:0;align-self:auto;
+#authRoot .fld{display:inline-block;width:100%;height:auto;min-height:0;min-width:0;align-self:auto;
   background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff;
-  padding:10px 13px;border-radius:12px;font-family:inherit;font-size:.93rem;line-height:normal;
-  font-weight:500;transition:border .2s,box-shadow .2s;margin:0 0 11px;text-align:left}
-#authRoot .fld:focus{outline:none;border-color:#817eff;box-shadow:0 0 0 3px rgba(129,126,255,.22)}
+  padding:10px 13px;border-radius:13px;font-family:inherit;font-size:.93rem;line-height:normal;
+  font-weight:500;transition:border .2s,box-shadow .2s;margin:0 0 11px;
+  text-align:start;justify-content:normal}
+#authRoot .fld:focus{outline:none;border-color:#817eff;box-shadow:0 0 0 4px rgba(142,127,208,.16)}
 #authRoot .fld::placeholder{color:#a99ccb;opacity:.7}
 #authRoot .pwf{position:relative;margin:0 0 11px}
 #authRoot .pwf .fld{margin-bottom:0!important;padding-right:46px}
@@ -2396,7 +2399,7 @@ html:not(.dark) .tp-bottombar button[style]{
 #authRoot .auth-err.ok{color:#9ff0c8}
 #authRoot .btn{background:var(--grad-iri);color:#fff;border:none;padding:9px 17px;border-radius:99px;
   cursor:pointer;font-size:.87rem;line-height:normal;font-weight:700;font-family:inherit;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),var(--glow-lav);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 0 40px -10px rgba(129,126,255,.55);
   transition:transform .22s var(--ease),box-shadow .22s var(--ease),filter .22s}
 #authRoot .btn:hover{transform:translateY(-1.5px) scale(1.02);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 34px rgba(129,126,255,.45);
@@ -4693,7 +4696,7 @@ function AvMenu({cloud,onSettings}){
   return (<div className="tv-avwrap" onPointerDown={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()}>
     <button onClick={()=>setOpen(o=>!o)} title={'Account · '+email} aria-label="Account"
       className="rounded-full h-10 w-10 flex items-center justify-center font-bold text-sm shadow-glow"
-      style={{background:'linear-gradient(120deg,#817eff 0%,#9d90ff 40%,#ffb3ab 100%)',color:'#fff'}}>{(email||'?').charAt(0).toUpperCase()}</button>
+      style={{background:'var(--top-control-gradient)',color:'#fff'}}>{(email||'?').charAt(0).toUpperCase()}</button>
     {open&&<div className="tv-avmenu">
       <div className="tv-avmhead"><b>{email.split('@')[0]||'Guest'}</b><span>{email||'Not signed in'}</span></div>
       <button onClick={()=>{setOpen(false);onSettings();}}><Ic.gear/>Settings</button>
@@ -5010,7 +5013,7 @@ function App(){
 <h2 className="tv-title">{TOPNAV.find(t=>t.id===view)?(TOPNAV.find(t=>t.id===view).label):'Trips'}</h2>
 </div></div>
             <div className="flex items-center gap-2">
-              <a href="../" title="Back to your workspace" className="tv-ws rounded-full h-10 flex items-center gap-1.5 font-bold text-sm shadow-glow" style={{textDecoration:'none',background:'linear-gradient(120deg,#817eff 0%,#9d90ff 40%,#ffb3ab 100%)',color:'#fff'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{width:15,height:15}}><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span className="tv-wslabel">Workspace</span></a>
+              <a href="../" title="Back to your workspace" className="tv-ws rounded-full h-10 flex items-center gap-1.5 font-bold text-sm shadow-glow" style={{textDecoration:'none',background:'var(--top-control-gradient)',color:'#fff'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{width:15,height:15}}><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span className="tv-wslabel">Workspace</span></a>
               <button onClick={()=>setDark(!dark)} aria-label="Toggle theme" title="Toggle theme" className="tp-soft tp-round flex items-center justify-center">{dark? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{width:18,height:18}}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg> : <svg viewBox="0 0 24 24" fill="currentColor" style={{width:18,height:18}}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>}</button>
               {cloud.session ? <AvMenu cloud={cloud} onSettings={()=>setView('settings')}/> : <button onClick={()=>setAuthOpen(true)} className="tp-soft rounded-full h-10 px-4 flex items-center text-sm font-semibold">Sign in</button>}
             </div>
