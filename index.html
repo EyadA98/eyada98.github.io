@@ -25,6 +25,27 @@
   --brand-indigo:#240852; --periwinkle:#b3a9ff; --lavender-soft:#e9e7ff; --peach-mid:#e9827a;
   --surface-raised:#faf8ff; --surface-hover:#f4f1fb; --surface-selected:#e9e7ff;
   --grad-action:linear-gradient(120deg,#6350e0 0%,#817eff 100%);
+
+  /* ---- Item-kind inks ----------------------------------------------------
+     The brand guide fixes the kind *fills*: Task #817EFF, Subtask #B3A9FF,
+     Event #5AA2EA, Routine #1E915F, Trip #C66A2B, Money/Zakat #7FD1C4. Those
+     are swatches, not type colours — none of them clears 4.5:1 as small bold
+     uppercase text, and the value that works on a white card is never the
+     value that works on #15103A. So every hue carries two inks, -l and -d,
+     and --ink-<kind> aliases whichever the current theme needs.
+     Anything that paints a kind reads these. Do not inline a hex: that is
+     exactly how the notification map drifted (Task to #9B78D8, Routine to the
+     Trip pink) while the badges stayed correct. */
+  --ink-task-l:#4a38b5;    --ink-task-d:#b3a9ff;
+  --ink-subtask-l:#6b52c9; --ink-subtask-d:#c9c2ff;
+  --ink-event-l:#1b6f9f;   --ink-event-d:#9bc7f2;
+  --ink-routine-l:#16704a; --ink-routine-d:#7fd7a8;
+  --ink-trip-l:#a1531f;    --ink-trip-d:#d98a5a;
+  --ink-zakat-l:#167f70;   --ink-zakat-d:#7fd1c4;
+  --ink-task:var(--ink-task-l);       --ink-subtask:var(--ink-subtask-l);
+  --ink-event:var(--ink-event-l);     --ink-routine:var(--ink-routine-l);
+  --ink-trip:var(--ink-trip-l);       --ink-zakat:var(--ink-zakat-l);
+
   --green:#0a7c6b; --green-soft:#E3F6ED; --red:#c22940; --red-soft:#FBEAE8;
   --radius:18px;
   --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%);
@@ -52,6 +73,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 html.dark{
   --bg:#0d0926; --card:#15103a; --text:#ece7fb; --muted:#a99ccb; --border:rgba(255,255,255,.10);
   --green:#7fd1c4; --red:#f2596f;
+  --ink-task:var(--ink-task-d);       --ink-subtask:var(--ink-subtask-d);
+  --ink-event:var(--ink-event-d);     --ink-routine:var(--ink-routine-d);
+  --ink-trip:var(--ink-trip-d);       --ink-zakat:var(--ink-zakat-d);
   --sh-1:0 2px 10px rgba(0,0,0,.4); --sh-2:0 22px 54px -20px rgba(129,126,255,.6),0 10px 26px rgba(0,0,0,.5);
 }
 html.dark body::before{background:
@@ -93,7 +117,7 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 80px;max-width:1320px}
 
 /* ===== Workspaces ===== */
 .ws-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:2px 0 18px;margin-bottom:18px;border-bottom:1px solid var(--border)}
-.ws-p{display:inline-flex;align-items:center;gap:9px;padding:10px 17px;border-radius:99px;font-size:.85rem;font-weight:700;
+.ws-p{position:relative;display:inline-flex;align-items:center;gap:9px;padding:10px 17px;border-radius:99px;font-size:.85rem;font-weight:700;
   background:rgba(255,255,255,.05);border:1px solid var(--border);color:#c1b5e0;cursor:pointer;font-family:inherit;
   transition:background .18s,border-color .18s,color .18s,transform .18s var(--ease)}
 html:not(.dark) .ws-p{background:rgba(255,255,255,.6);color:var(--violet)}
@@ -139,11 +163,13 @@ html:not(.dark) .wchip{background:rgba(129,126,255,.08);color:var(--violet)}
 .wchip .d{width:6px;height:6px;border-radius:50%;flex:none}
 /* manage modal rows */
 .wsm-row{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:13px;margin-bottom:8px;
-  border:1px solid var(--border);background-color:var(--card);background-repeat:no-repeat;cursor:default}
-.wsm-grip{color:var(--muted);cursor:grab;font-size:.8rem;letter-spacing:-2px;user-select:none;flex:none;opacity:.6}
+  border:1px solid var(--border);background-color:var(--card);background-repeat:no-repeat;cursor:default;
+  position:relative}
+/* was a ⋮⋮ text span driving the HTML5 drag API; it is now the shared .pd-grip
+   button, so everything but placement comes from .pd-grip and the icon matches
+   subtasks and columns exactly. */
+.wsm-grip{flex:none;margin-left:-4px;margin-right:-4px}
 .wsm-row:hover .wsm-grip{opacity:1}
-.wsm-row.wsm-dragging{opacity:.45}
-.wsm-row.wsm-over{box-shadow:inset 0 2px 0 var(--lavender)}
 .wsm-cwrap{position:relative;flex:none;display:flex}
 .wsm-sw{width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.18);flex:none;cursor:pointer;padding:0;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
@@ -310,7 +336,11 @@ html:not(.dark) .pwf-eye:hover{color:#4a38b5;background:rgba(129,126,255,.10)}
 .auth-tabs{display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:4px;margin-bottom:18px}
 .auth-tabs button{flex:1;border:none;background:none;padding:9px;border-radius:99px;font-family:inherit;font-weight:700;color:#cbb9ec;cursor:pointer;transition:all .25s}
 .auth-tabs button.active{background:rgba(255,255,255,.14);color:#fff}
-.auth-err{color:#ffb9b0;font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
+/* An error, not a negative value. The guide splits these: Coral is for negative
+   numbers, --red for errors. #ffb9b0 was neither - it is effectively --peach,
+   the Trip/Medium hue. authRoot force-adds html.dark, so this lands on the dark
+   --red #f2596f over the deep-indigo card. Same fix applied in Finance/Travel. */
+.auth-err{color:var(--red);font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
 .auth-err.ok{color:#9FF0C8}
 .auth-links{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
 .auth-links button{background:none;border:none;color:#b3a9ff;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
@@ -373,7 +403,7 @@ html:not(.dark) .more-sheet{border-top-color:#d9cdf2}
 /* Kanban + Today command view */
 .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:820px){.kanban{grid-template-columns:1fr}}
-.kcol{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;padding:12px;min-height:120px;display:flex;flex-direction:column;max-height:calc(100dvh - 208px)}
+.kcol{position:relative;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;padding:12px;min-height:120px;display:flex;flex-direction:column;max-height:calc(100dvh - 208px)}
 html:not(.dark) .kcol{background:rgba(255,255,255,.5)}
 .kcol-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;overscroll-behavior-x:auto;/* y:contain keeps vertical scroll from leaking to the page. x:auto lets a sideways swipe chain out to .kanban -- the old shorthand contained BOTH axes, so swiping a card could never scroll the board. */margin:0;padding:3px 0 10px;scrollbar-width:none}
 .kcol-body::-webkit-scrollbar{width:0;height:0}
@@ -420,6 +450,14 @@ html:not(.dark) .kcard{background:#fff}
 .kc-chip svg{width:13px;height:13px}
 .kc-date{background:rgba(255,179,171,.15);color:#ffb3ab}
 .kc-date.over{background:rgba(255,155,146,.16);color:#f2596f}
+/* Due today, in the brand green. The peach chip is the ambient "there is a date
+   here" state; green is the one that should catch the eye on a scan of the
+   board, and it is the same green the app already uses for a live/positive
+   state everywhere else. Overdue keeps the red and takes precedence, so a chip
+   is never both. */
+.kc-date.today{background:rgba(127,209,196,.2);color:var(--green);font-weight:700}
+.tl2-d.today{color:var(--green);font-weight:700}
+.kdue.today{color:var(--green);font-weight:700}
 .pdot{width:9px;height:9px;border-radius:50%;flex:none}
 .p-high{background:#c66a2b}.p-med{background:#817eff}.p-low{background:#7fd1c4}
 .kcard .kdel{position:absolute;top:6px;right:6px;padding:1px 7px;opacity:0;transition:opacity .2s}
@@ -537,7 +575,7 @@ html:not(.dark) .cal-cell{background:rgba(255,255,255,.5)}
 .ag-day{font-weight:800;font-size:.78rem;margin:14px 0 6px;color:var(--muted)}
 /* Notes actions */
 .note-card{position:relative}
-.note-card .ntitle{font-family:'Marcellus',serif;font-weight:600;font-size:1.08rem;line-height:1.3;padding-right:18px;background:linear-gradient(120deg,#b3a9ff,#a99bff,#ffb3ab);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.note-card .ntitle{font-family:'Marcellus',serif;font-weight:400;font-size:1.08rem;line-height:1.3;padding-right:18px;background:linear-gradient(120deg,#b3a9ff,#a99bff,#ffb3ab);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 html:not(.dark) .note-card .ntitle{background:linear-gradient(120deg,#5a46d8,#6350e0,#c66a2b);-webkit-background-clip:text;background-clip:text}
 .note-card .nbody{margin-top:6px}
 .note-card .nchk{margin-top:10px;display:flex;flex-direction:column;gap:6px}
@@ -567,26 +605,23 @@ html:not(.dark) .note-card.pinned{background:linear-gradient(150deg,rgba(255,179
 .tc-prog{height:5px;border-radius:99px;background:rgba(129,126,255,.16);margin-top:13px;overflow:hidden}
 .tc-prog i{display:block;height:100%;background:var(--grad-iri)}
 .badge{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:99px;white-space:nowrap}
-/* item-kind badges — one scale */
-.badge.k-task{background:rgba(129,126,255,.18);color:#b3a9ff}
-.badge.k-subtask{background:rgba(198,179,239,.16);color:#b3a9ff}
-.badge.k-event{background:rgba(78,168,222,.18);color:#8ecbf0}
-.badge.k-routine{background:rgba(30,145,95,.18);color:#7fd7a8}
-.badge.k-trip{background:rgba(198,106,43,.18);color:#d98a5a}
-.badge.k-zakat{background:rgba(127,209,196,.2);color:#7fd1c4}
-html:not(.dark) .badge.k-task{color:#4a38b5}
-html:not(.dark) .badge.k-subtask{color:#7d63b8}
-html:not(.dark) .badge.k-event{color:#2b7cae}
-html:not(.dark) .badge.k-routine{color:#16704a}
-html:not(.dark) .badge.k-trip{color:#a1531f}
-html:not(.dark) .badge.k-zakat{color:#3f9c8c}
-/* hero is a dark surface in both themes: in light mode keep upcoming-row badges in their dark-mode tints (legible, semantic, no white) */
-html:not(.dark) .hx-hero .badge.k-task{color:#b3a9ff}
-html:not(.dark) .hx-hero .badge.k-subtask{color:#b3a9ff}
-html:not(.dark) .hx-hero .badge.k-event{color:#8ecbf0}
-html:not(.dark) .hx-hero .badge.k-routine{color:#7fd7a8}
-html:not(.dark) .hx-hero .badge.k-trip{color:#d98a5a}
-html:not(.dark) .hx-hero .badge.k-zakat{color:#7fd1c4}
+/* item-kind badges — one scale. Fill is the guide's kind hue at a fixed tint;
+   ink comes from the --ink-* aliases, which already flip with the theme, so
+   the old html:not(.dark) duplicate block is gone. */
+.badge.k-task{background:rgba(129,126,255,.18);color:var(--ink-task)}
+.badge.k-subtask{background:rgba(179,169,255,.16);color:var(--ink-subtask)}
+.badge.k-event{background:rgba(90,162,234,.18);color:var(--ink-event)}
+.badge.k-routine{background:rgba(30,145,95,.18);color:var(--ink-routine)}
+.badge.k-trip{background:rgba(198,106,43,.18);color:var(--ink-trip)}
+.badge.k-zakat{background:rgba(127,209,196,.2);color:var(--ink-zakat)}
+/* the hero is a dark surface in BOTH themes, so its badges always take the
+   dark ink — reading the -d value directly rather than the theme alias */
+.hx-hero .badge.k-task{color:var(--ink-task-d)}
+.hx-hero .badge.k-subtask{color:var(--ink-subtask-d)}
+.hx-hero .badge.k-event{color:var(--ink-event-d)}
+.hx-hero .badge.k-routine{color:var(--ink-routine-d)}
+.hx-hero .badge.k-trip{color:var(--ink-trip-d)}
+.hx-hero .badge.k-zakat{color:var(--ink-zakat-d)}
 .b-todo{background:rgba(129,126,255,.16);color:var(--lavender)}
 .b-doing{background:rgba(255,179,171,.2);color:var(--peach)}
 .b-done{background:rgba(127,209,196,.2);color:var(--green)}
@@ -652,6 +687,14 @@ html:not(.dark) .tl2{background:#fff}
 @keyframes slideRail{from{transform:translateX(46px);opacity:.4}to{transform:none;opacity:1}}
 .td-panel{height:100%;display:flex;flex-direction:column;overflow:hidden;padding:0}
 .tdp-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 22px 12px}
+/* Hidden, not disabled. The bar was a permanent grey stripe down the right
+   edge of a reading column; the wheel, trackpad, touch drag and keyboard all
+   still scroll, and overscroll-behavior still stops the page behind from
+   moving with it. Same idiom the Finance rail uses. The comment list is the
+   other scroller inside this panel, so it loses its bar too — scoped to
+   .td-panel so a comment list anywhere else keeps one. */
+.tdp-scroll,.td-panel .td-cmt-l{scrollbar-width:none;-ms-overflow-style:none}
+.tdp-scroll::-webkit-scrollbar,.td-panel .td-cmt-l::-webkit-scrollbar{display:none;width:0;height:0}
 .tdp-bottom{flex:none;background:rgba(24,18,60,.98);border-top:1px solid var(--border);padding:10px 18px 12px}
 html:not(.dark) .tdp-bottom{background:rgba(255,255,255,.98)}
 .cmt-send{display:none}
@@ -847,7 +890,7 @@ html:not(.dark) .istate .idot{box-shadow:0 0 0 3px rgba(42,29,68,.05)}
 @media(max-width:560px){.gm-metrics{grid-template-columns:repeat(2,1fr)}}
 .gm-metric{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:13px;padding:12px 10px;text-align:center}
 html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
-.gm-metric b{display:block;font-size:1.45rem;font-weight:800;font-family:'Marcellus',serif;line-height:1.1}
+.gm-metric b{display:block;font-size:1.45rem;font-weight:400;font-family:'Marcellus',serif;line-height:1.1}
 .gm-metric span{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-top:3px;display:block}
 .gm-metric.primary{background:var(--grad-iri);border-color:#c9b0ff;color:#fff}
 .gm-metric.primary span{color:rgba(255,255,255,.88)}
@@ -904,8 +947,14 @@ html:not(.dark) .att-ic.doc,html:not(.dark) .att-ic.file{color:#5a46d8}
 html:not(.dark) .att-ic.img{color:#2f9e79}
 html:not(.dark) .att-ic.sheet{color:#3f9d55}
 html:not(.dark) .att-ic.zip{color:#b8862f}
-html:not(.dark) .att-ic.ppt{color:#cf6f24}
-html:not(.dark) .att-ic.pdf{color:#d0574a}
+/* Snapped onto the guide: #CF6F24 and #D0574A were private near-misses for Trip
+   #C66A2B (d=12.4) and Coral #D6554C (d=6.6). Both are icon fills at the 3:1 bar
+   and both guide values clear it on white (3.82 and 3.99), so the drift bought
+   nothing. The doc/file violet #5A46D8 above is deliberately NOT snapped - it is
+   the dark anchor of the .note-card and .tlg-bar gradient ramps and reads as a
+   family with them. */
+html:not(.dark) .att-ic.ppt{color:#c66a2b}
+html:not(.dark) .att-ic.pdf{color:#d6554c}
 html:not(.dark) .lib-src2.t{color:#6f49b4}
 html:not(.dark) .lib-card:hover{box-shadow:0 12px 26px -14px rgba(129,126,255,.35);border-color:rgba(129,126,255,.5)}
 .att-nm{flex:1;min-width:0;text-align:left;background:none;border:none;color:var(--text);font-family:inherit;font-weight:600;font-size:.86rem;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0}
@@ -970,22 +1019,23 @@ html:not(.dark) .lib-btn{background:rgba(129,126,255,.06)}
 /* Prayer next countdown */
 .prayer-next{display:flex;flex-direction:row;align-items:center;gap:16px;margin-bottom:16px;padding:15px 20px;border-radius:16px;background:var(--grad-iri);color:#fff;box-shadow:var(--glow-lav)}
 .pn-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;opacity:.85;font-weight:800}
-.pn-count{font-family:'Marcellus',Georgia,serif;font-size:1.4rem;font-weight:700;margin-top:3px;white-space:nowrap}
+.pn-count{font-family:'Marcellus',Georgia,serif;font-size:1.4rem;font-weight:400;margin-top:3px;white-space:nowrap}
 .pn-ring{position:relative;width:62px;height:62px;flex:none}
 .pn-moon{position:absolute;inset:0;display:grid;place-items:center;font-size:1.25rem}
 .pn-mid{flex:1;min-width:0}
-.pn-time{font-family:'Marcellus',Georgia,serif;font-size:1.4rem;font-weight:700;flex:none;text-align:right;white-space:nowrap}
+.pn-time{font-family:'Marcellus',Georgia,serif;font-size:1.4rem;font-weight:400;flex:none;text-align:right;white-space:nowrap}
 .prayer-card .pr2.passed{opacity:.5}
 /* Calendar event chips */
 .cal-cell{min-height:88px;display:flex;flex-direction:column}
 .cal-evs{margin-top:5px;display:flex;flex-direction:column;gap:3px;min-width:0}
 .cal-ev{font-size:.63rem;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
-.ev-task{background:rgba(129,126,255,.22);color:var(--lavender)}
-.ev-subtask{background:rgba(198,179,239,.2);color:#b3a9ff}
-.ev-event{background:rgba(78,168,222,.22);color:#8ecbf0}
-.ev-routine{background:rgba(30,145,95,.22);color:#7fd7a8}
-.ev-trip{background:rgba(198,106,43,.22);color:#d98a5a}
-.ev-zakat{background:rgba(127,209,196,.24);color:var(--green)}
+/* calendar chips — same kind hues as the badges, one step heavier tint */
+.ev-task{background:rgba(129,126,255,.22);color:var(--ink-task)}
+.ev-subtask{background:rgba(179,169,255,.2);color:var(--ink-subtask)}
+.ev-event{background:rgba(90,162,234,.22);color:var(--ink-event)}
+.ev-routine{background:rgba(30,145,95,.22);color:var(--ink-routine)}
+.ev-trip{background:rgba(198,106,43,.22);color:var(--ink-trip)}
+.ev-zakat{background:rgba(127,209,196,.24);color:var(--ink-zakat)}
 .cal-cell.sel .cal-ev{background:rgba(255,255,255,.26);color:#fff}
 .cal-more{font-size:.6rem;color:var(--muted);font-weight:800;padding-left:2px}
 .cal-cell.sel .cal-more{color:rgba(255,255,255,.85)}
@@ -1120,7 +1170,10 @@ html:not(.dark) .kcol-add{background:rgba(255,255,255,.4)}
 @media(max-width:560px){.kanban .kcol{min-width:82vw}}
 .kcard[draggable]{touch-action:pan-x pan-y}   /* was none, which forbade the board from scrolling under your finger */
 /* manage statuses rows */
-.st-row{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.st-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;position:relative}
+/* the grip sits outside the gap rhythm so the name field keeps its old left
+   edge — reordering was added to this row, not a new column of chrome */
+.st-grip{margin-left:-5px;margin-right:-2px}
 .st-row .st-name{flex:1}
 .st-mini{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;flex:none;transition:all .15s}
 .st-mini:hover{border-color:var(--lavender);color:var(--lavender)}
@@ -1292,7 +1345,96 @@ html:not(.dark) .toast{background:rgba(255,255,255,.96);border:1px solid var(--b
 .kcol.collapsed{min-width:0;width:auto;max-width:none;flex:0 0 auto}
 .kcol.collapsed .kcol-body{display:none}
 .kcol.collapsed .kcol-head{cursor:pointer}
-.kcol.col-over{border-color:var(--peach)}
+/* ── Drag feedback ─────────────────────────────────────────────────────────
+   Every one of these classes was already being added and removed by the JS;
+   none of them drew anything, so the whole gesture ran blind: you picked a
+   column up and the board looked identical until you let go and it either had
+   moved or had not. Feedback during a drag is not decoration -- it is the only
+   thing that tells you what releasing here will do, and a drop you cannot
+   predict is a drop you undo. Two colours, used consistently: PEACH is the
+   insert edge ("the thing you are dragging goes on this side of this thing"),
+   LAVENDER is the container highlight ("this is what will receive it"). The
+   edge is drawn with an inset box-shadow rather than a pseudo-element so it
+   never affects layout and cannot be clipped by .kcard{overflow:hidden}. */
+.kcol.col-over{border-color:var(--peach);box-shadow:inset 4px 0 0 var(--peach)}
+.kcol.col-over.col-after{box-shadow:inset -4px 0 0 var(--peach)}
+html:not(.dark) .kcol.col-over{background:rgba(255,178,142,.1)}
+/* kDropCard inserts BEFORE the target, so the line sits on the card's TOP edge
+   -- it points at the gap the card will actually land in. */
+.kcard.kc-insert{border-color:var(--lavender);box-shadow:inset 0 3px 0 var(--lavender)}
+/* A pill being reordered fades like a dragged card does; a pill being hovered
+   as a REORDER target gets the peach edge; a pill being hovered as a DROP
+   target for a task card lights up whole, because the card lands "in" it
+   rather than beside it. */
+.ws-p.ws-drag{opacity:.45}
+.ws-p.ws-over{box-shadow:inset 4px 0 0 var(--peach);border-color:var(--peach)}
+.ws-p.ws-drop{border-color:var(--lavender);background:rgba(129,126,255,.22);color:var(--lavender);
+  box-shadow:0 0 0 3px rgba(129,126,255,.25)}
+.ws-p.ws-drop .wsn{background:rgba(129,126,255,.3)}
+html:not(.dark) .ws-p.ws-drop{background:rgba(129,126,255,.16);color:var(--violet)}
+/* Mid-drag the cursor should say "carrying", and an accidental text selection
+   under a drag is noise you then have to click away. */
+body.kdragging{cursor:grabbing;-webkit-user-select:none;user-select:none}
+body.kdragging .kcard,body.kdragging .kcol-head,body.kdragging .ws-p{cursor:grabbing}
+/* While a COLUMN is in flight, cards must not answer -- they would steal the
+   dragover and offer a card-insert line for a drag that cannot insert a card. */
+body.coldragging .kcard{pointer-events:none}
+/* ═══ Press-to-drag: grip, gap line, and the item in flight ═══════════════
+   Visually identical to the subtask reorder on purpose. A grip is a promise
+   about what a press will do, and the promise has to read the same on a column
+   header as it does on a subtask row or it is not a convention, just a
+   coincidence. touch-action:none is the load-bearing line: without it the
+   browser claims the gesture for scrolling and a finger drag never starts. */
+.pd-grip{width:27px;height:28px;min-width:27px;display:grid;place-items:center;padding:0;border:0;border-radius:8px;
+  background:none;color:var(--muted);cursor:grab;touch-action:none;opacity:.5;
+  transition:opacity .15s,background .15s,color .15s,transform .15s}
+.pd-grip:hover{opacity:1;color:var(--lavender);background:rgba(129,126,255,.12)}
+.pd-grip:active{cursor:grabbing;transform:scale(.94)}
+.pd-grip svg{width:15px;height:15px;pointer-events:none}
+@media(pointer:coarse){.pd-grip{width:32px;height:34px;min-width:32px;opacity:.8}}
+/* The column grip only earns its ink on hover -- a board of five columns should
+   not read as five grips. It stays reachable on touch, where there is no hover
+   to reveal it. */
+.kcol-grip{margin-left:2px;margin-right:-4px;opacity:0}
+.kcol:hover .kcol-grip,.kcol-grip:focus-visible{opacity:.55}
+@media(pointer:coarse){.kcol-grip{opacity:.7}}
+/* The thing you picked up steps back so the gap you are opening is what you
+   actually watch. */
+.pd-dragging{opacity:.32!important}
+.kcol.pd-dragging{background:rgba(129,126,255,.09);box-shadow:inset 0 0 0 1px rgba(129,126,255,.28)}
+/* The gap line. Columns and pills sit side by side, so the line is VERTICAL --
+   it marks the seam the item drops into, which a horizontal line here would
+   not. Under 820px the board stacks and the line turns with it. */
+.kcol.pd-before::before,.kcol.pd-after::after,
+.ws-p.pd-before::before,.ws-p.pd-after::after{content:"";position:absolute;top:6%;bottom:6%;width:3px;border-radius:99px;z-index:6;pointer-events:none;
+  background:linear-gradient(180deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%);
+  box-shadow:0 0 12px rgba(129,126,255,.5);animation:pdDropIn .14s ease both}
+.kcol.pd-before::before,.ws-p.pd-before::before{left:-9px}
+.kcol.pd-after::after,.ws-p.pd-after::after{right:-9px}
+@keyframes pdDropIn{from{opacity:0;transform:scaleY(.72)}to{opacity:1;transform:scaleY(1)}}
+@media(max-width:820px){
+  .kcol.pd-before::before,.kcol.pd-after::after{top:auto;bottom:auto;left:0;right:0;width:auto;height:3px;
+    background:linear-gradient(90deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%)}
+  .kcol.pd-before::before{top:-8px}
+  .kcol.pd-after::after{bottom:-8px}
+}
+/* Statuses and Workspaces stack VERTICALLY, so their seam line is horizontal —
+   the same line the subtask reorder draws, for the same reason. The kanban and
+   pill rules above cannot be reused: they mark a left/right seam. */
+.st-row.pd-before::before,.st-row.pd-after::after,
+.wsm-row.pd-before::before,.wsm-row.pd-after::after{content:"";position:absolute;left:0;right:0;height:3px;
+  border-radius:99px;z-index:6;pointer-events:none;
+  background:linear-gradient(90deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%);
+  box-shadow:0 0 12px rgba(129,126,255,.5);animation:subDropIn .14s ease both}
+.st-row.pd-before::before{top:-5px}
+.st-row.pd-after::after{bottom:-5px}
+.wsm-row.pd-before::before{top:-6px}
+.wsm-row.pd-after::after{bottom:-2px}
+html.pd-reordering,html.pd-reordering *{cursor:grabbing!important;user-select:none!important}
+/* Mid-reorder nothing else should light up under the pointer -- a hover state
+   on a column you are only passing over is noise competing with the one signal
+   that matters. */
+html.pd-reordering .kcard:hover{box-shadow:none}
 /* status default star */
 .st-def.on{color:var(--peach);border-color:var(--peach)}
 /* extra mobile */
@@ -1382,6 +1524,13 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .cal-synced .ispin{width:11px;height:11px;border:2px solid var(--peach);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex:none}
 .lnk{background:none;border:none;color:var(--lavender);font-weight:700;cursor:pointer;font-family:inherit;font-size:.76rem;padding:0}
 .lnk:hover{text-decoration:underline}
+/* The only .lnk in the app is the weather "Retry", and it lives inside .hx-val -
+   a hero glass box that is a mid-violet in BOTH themes (sampled rgb(107,90,140)).
+   Lavender #817EFF on that is 1.84:1. Nothing in the lavender ramp rescues it:
+   #B3A9FF is 2.90 and even #DED8FF only reaches 4.43. So the hero instance takes
+   white (6.06:1) and carries a permanent underline - once the hue stops doing the
+   work, the underline has to carry the "this is a link" affordance. */
+.hx-val .lnk{color:#fff;text-decoration:underline;text-underline-offset:2px}
 
 
 /* ===== batch v9: welcome hero + main/rail + prayer fix + remove logo ===== */
@@ -1784,20 +1933,33 @@ html:not(.dark) .tl2-row.alt{background:rgba(129,126,255,.04)}
 html:not(.dark) .tl2-row:hover{background:rgba(129,126,255,.08)}
 html:not(.dark) .tl2-add{color:#6a5f86}
 html:not(.dark) .tl2-add:hover{background:rgba(129,126,255,.07);color:#4a38b5}
-/* calendar chips: the kind colours were tuned for the dark canvas */
-html:not(.dark) .cal-ev.ev-task{background:rgba(129,126,255,.16);color:#5b3f96}
-html:not(.dark) .cal-ev.ev-subtask{background:rgba(160,129,214,.16);color:#4a38b5}
-html:not(.dark) .cal-ev.ev-event{background:rgba(78,168,222,.18);color:#2b6f96}
-html:not(.dark) .cal-ev.ev-routine{background:rgba(30,145,95,.16);color:#146a45}
-html:not(.dark) .cal-ev.ev-trip{background:rgba(198,106,43,.18);color:#a85c22}
-html:not(.dark) .cal-ev.ev-zakat{background:rgba(30,145,95,.16);color:#177a50}
+/* calendar chips on white: the fills were tuned a shade lighter for the pale
+   canvas, but the ink is no longer restated here — --ink-* already resolves to
+   its light value under this selector, so one declaration serves both themes.
+   (This block used to carry six hand-picked hexes, two of which had drifted:
+   subtask sat on a purple that was not #B3A9FF, and zakat was painted green
+   rather than the money teal.) */
+html:not(.dark) .cal-ev.ev-task{background:rgba(129,126,255,.16)}
+html:not(.dark) .cal-ev.ev-subtask{background:rgba(179,169,255,.18)}
+html:not(.dark) .cal-ev.ev-event{background:rgba(90,162,234,.18)}
+html:not(.dark) .cal-ev.ev-routine{background:rgba(30,145,95,.16)}
+html:not(.dark) .cal-ev.ev-trip{background:rgba(198,106,43,.18)}
+html:not(.dark) .cal-ev.ev-zakat{background:rgba(127,209,196,.24)}
 html:not(.dark) .cal-more{color:#5c5275}
 /* ===== light mode: counters, chips and dates that were washing out on white ===== */
 html:not(.dark) .kc-date{background:rgba(198,106,43,.14);color:#a85c22}
 html:not(.dark) .kc-date.over{background:rgba(214,85,76,.14);color:#b8433a}
+html:not(.dark) .kc-date.today{background:rgba(10,124,107,.13);color:var(--green)}
 html:not(.dark) .kcol-head .cnt{background:rgba(129,126,255,.16);color:#4a38b5}
 html:not(.dark) .to-tab .to-cnt{background:rgba(129,126,255,.16);color:#4a38b5}
 html:not(.dark) .ws-p .wsn{background:rgba(129,126,255,.14);color:#5c5275}
+/* ...but the ACTIVE pill is an iridescent violet gradient with white text, and
+   the line above outranks `.ws-p.on .wsn` (0,3,1 beats 0,3,0), so in light mode
+   it was repainting the counter #5c5275 on violet -- a dark purple number on a
+   dark purple field, i.e. gone. The active pill needs its own light-mode rule
+   at higher specificity, not a reordering, because the generic one has to keep
+   winning for every INACTIVE pill. */
+html:not(.dark) .ws-p.on .wsn{background:rgba(255,255,255,.3);color:#fff}
 html:not(.dark) .rt-cat{color:#5c5275}
 html:not(.dark) .tl2-sec{color:inherit}
 html:not(.dark) .kc-chip{background:rgba(129,126,255,.09);color:#5c5275}
@@ -1830,6 +1992,7 @@ html:not(.dark) .pflag.p-low{background:rgba(30,145,95,.14);color:#177a50}
 html:not(.dark) .kc-chip.p-high,html:not(.dark) .tl2-prio-pill.p-high{background:rgba(214,85,76,.14);color:#b8433a}
 html:not(.dark) .kc-chip.p-med,html:not(.dark) .tl2-prio-pill.p-med{background:rgba(198,106,43,.16);color:#a85c22}
 html:not(.dark) .kc-chip.p-low,html:not(.dark) .tl2-prio-pill.p-low{background:rgba(30,145,95,.14);color:#177a50}
+html:not(.dark) .rt-big b{background-image:linear-gradient(120deg,#4a38b5,#6350e0 58%,#e9827a)}
 html:not(.dark) .st-ok .rt-big b{background-image:linear-gradient(115deg,#6350e0,#817eff 55%,#b3a9ff)}
 html:not(.dark) .st-soon .rt-big b{background-image:linear-gradient(115deg,#a1531f,#c66a2b 55%,#e2a071)}
 html:not(.dark) .st-od .rt-big b{background-image:linear-gradient(115deg,#b8433a,#c22940 55%,#e0746b)}
@@ -1864,6 +2027,47 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
      inflate the drawn circle, which is exactly what happened. */
   .kc-check,.tl2-check{min-width:0;min-height:0;position:relative}
   .kc-check::after,.tl2-check::after{content:"";position:absolute;inset:-11px}
+}
+/* ===== QA: touch targets, round two (phones and iPad) =====
+   Everything below is inside @media(pointer:coarse) so the desktop drawing is
+   untouched, and every rule grows the HIT AREA without moving a pixel of ink:
+   either a negative-inset ::after (for elements that do not clip), or padding
+   cancelled by an equal negative margin (for elements that do -- .kcol-name
+   has overflow:hidden for its ellipsis, so an escaping ::after would simply be
+   clipped away and the target would still be 14px tall).                     */
+@media(pointer:coarse){
+  /* Column header. The caret and the name are adjacent flex siblings with a
+     7px gap, so their expanders must not both reach into it -- the name paints
+     later and would swallow the caret's right-hand ring. The caret therefore
+     takes the gap and stops exactly at the name's edge; the name grows only
+     vertically. Padding+negative-margin rather than ::after because the name
+     clips. */
+  .kcol-caret{padding:14px 7px 14px 13px;margin:-14px -7px -14px -13px}
+  .kcol-name{padding:13px 0;margin:-13px 0}
+  /* The grip keeps its 32x34 ink -- five columns of visible grip is already as
+     much as the header can carry -- and gains the rest as reach. */
+  .pd-grip{position:relative}
+  .pd-grip::after{content:"";position:absolute;inset:-3px -4px}
+  /* Add-task strip: 32px of dashed outline is plenty to look at and not enough
+     to hit. */
+  .kadd.kadd-top{min-height:40px}
+  /* Segmented pills: growing the drawn pill would fatten the toolbar, so the
+     reach spills above and below instead. Vertical only -- neighbours sit left
+     and right, and a horizontal ring would overlap them. */
+  .cal-views button{position:relative}
+  .cal-views button::after{content:"";position:absolute;inset:-8px 0}
+  .to-tab{position:relative}
+  .to-tab::after{content:"";position:absolute;inset:-6px 0}
+  /* Mind-map chrome. The zoom bar floats over the canvas with nothing near it,
+     so those three can simply be drawn at 40. */
+  /* #mmZoomBar so this outranks the 30px spec, which lives further down the
+     file than this QA block does. */
+  #mmZoomBar button{width:40px;height:40px}
+  #mmZoomBar button svg{width:17px;height:17px}
+  .mm-tb{min-height:40px}
+  /* "Set city" in the weather hero box: 27x12 of underlined text. */
+  .hx-val .lnk{position:relative}
+  .hx-val .lnk::after{content:"";position:absolute;inset:-14px -10px}
 }
 /* counts read as numbers, not as display glyphs */
 .sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
@@ -2021,7 +2225,7 @@ html:not(.dark) .rt-kind{background:rgba(20,14,45,.05)}
 .rt-big.empty span{font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-transform:none;font-weight:700}
 .rt-big b{font-family:'Marcellus',Georgia,serif;font-size:2.15rem;line-height:1;font-weight:400}
 .rt-big span{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.rt-big b{background-image:linear-gradient(115deg,#817eff,#c9b0ff 45%,#ffb3ab);
+.rt-big b{background-image:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-right:2px}
 .st-ok .rt-big b{background-image:linear-gradient(115deg,#6350e0,#817eff 55%,#b3a9ff)}
 .st-soon .rt-big b{background-image:linear-gradient(115deg,#c66a2b,#ffb3ab 55%,#ffd9bb)}
@@ -2081,6 +2285,14 @@ html:not(.dark) .rt-card.v1 .rt-bar{background:rgba(20,14,45,.08)}
 .ntf-list{display:flex;flex-direction:column;gap:10px}
 .ntf-sec{display:flex;align-items:center;gap:8px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;color:var(--muted)}
 .ntf-sec-ic{display:inline-flex}.ntf-sec-ic svg{width:15px;height:15px}
+/* section headers take the ink, never the fill — this is 10-11px bold caps and
+   the raw kind hues sit around 3:1 on white */
+.ntf-sec.k-task{color:var(--ink-task)}
+.ntf-sec.k-subtask{color:var(--ink-subtask)}
+.ntf-sec.k-event{color:var(--ink-event)}
+.ntf-sec.k-routine{color:var(--ink-routine)}
+.ntf-sec.k-trip{color:var(--ink-trip)}
+.ntf-sec.k-zakat{color:var(--ink-zakat)}
 .ntf-pin-h{color:var(--peach-deep)}
 .ntf-pin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
 .ntf-pin-grid .ntf-item{background:linear-gradient(135deg,rgba(255,179,171,.16),rgba(129,126,255,.1));border-color:rgba(255,179,171,.32)}
@@ -2120,6 +2332,10 @@ html:not(.dark) .td-cmt-b{background:rgba(0,0,0,.025)}
 .ntf-item.unread{border-left:3px solid var(--lavender)}
 .ntf-item.over{border-left:3px solid var(--red)}
 .ntf-ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:#fff;flex:none}
+/* the chip is a solid kind fill, so the glyph has to flip: white holds on the
+   deeper hues but sits at 1.8:1 on the money teal and 2.7:1 on the event blue,
+   which are pale by design. Those take the deep indigo instead. */
+.ntf-ic.k-event,.ntf-ic.k-zakat,.ntf-ic.k-subtask{color:var(--indigo-3)}
 .ntf-ic svg{width:18px;height:18px}
 .ntf-main{flex:1;min-width:0}
 .ntf-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -2337,7 +2553,7 @@ html:not(.dark) .tl-hint .h-chip{background:rgba(20,14,45,.06)}
 .hx-box:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09);box-shadow:0 18px 40px -22px rgba(98,63,148,.95)}
 @keyframes hxRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .hx-lbl{align-self:start;font-size:.62rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:rgba(255,255,255,.6)}
-.hx-val{font-family:'Marcellus',Georgia,serif;font-weight:700;font-size:2.3rem;line-height:1.05;display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;background:linear-gradient(100deg,#b3a9ff,#ffb3ab 55%,#b3a9ff 90%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:hxShimmer 7s linear infinite}
+.hx-val{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:2.3rem;line-height:1.05;display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;background:linear-gradient(100deg,#b3a9ff,#ffb3ab 55%,#b3a9ff 90%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:hxShimmer 7s linear infinite}
 @keyframes hxShimmer{0%{background-position:0% center}100%{background-position:200% center}}
 .hx-box.hx-date .hx-val{font-size:1.7rem}
 .hx-sub{align-self:end;font-size:.74rem;font-weight:600;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -3015,7 +3231,7 @@ html.dark #avatarChip{box-shadow:0 0 40px -10px rgba(129,126,255,.55)!important}
 #authRoot .pwf-eye:hover{color:#fff;background:rgba(255,255,255,.09)}
 #authRoot .pwf-eye svg{width:18px;height:18px;display:block}
 #authRoot .auth-err{
-  color:#ffb9b0;font-size:.82rem;font-weight:600;line-height:normal;
+  color:var(--red);font-size:.82rem;font-weight:600;line-height:normal;
   min-height:18px;margin:4px 0;text-align:center
 }
 #authRoot .auth-err.ok{color:#9ff0c8}
@@ -3043,8 +3259,465 @@ html.dark #avatarChip{box-shadow:0 0 40px -10px rgba(129,126,255,.55)!important}
 }
 @media(max-width:1024px){#authRoot .auth-card .fld{font-size:16px!important}}
 @media(max-width:420px){#authRoot .auth-card{padding:64px 26px 28px}}
+
+/* ── The sign-in gate is a wall, so the page behind it must stop being a page ──
+   #authRoot is position:fixed and covers the viewport, but nothing ever told the
+   document underneath to hold still. The whole signed-in app stays laid out in
+   normal flow behind the overlay, so the document keeps its scrollbar: measured
+   with the gate up, the document overflowed by 1010px at 1440x900 and 1830px at
+   430x932. Spinning the wheel on the sign-in screen moved a scrollbar and
+   nothing else — on a phone it rubber-banded against content you cannot see and
+   are not allowed to reach. Locking html (not body) is what the gate needed:
+   iOS honours overflow:hidden on the root element, and it leaves the scroll
+   POSITION intact, which matters because Hub re-raises this gate mid-session
+   after an inactivity sign-out and closeAuth should return you where you were.
+   #authRoot keeps its own overflow:auto — that one is real, and it is the only
+   scrolling this screen should ever do: at 932x430 the 485px card genuinely
+   does not fit and has to scroll inside the gate. */
+html.auth-open,html.auth-open body{overflow:hidden}
+html.auth-open{overscroll-behavior:none}
+
+/* And the gate must not scroll SIDEWAYS at all. The peach glow behind the card
+   is a 560px circle pinned right:-10%, and a decorative overflow to the right
+   is real scrollable width inside an overflow:auto box — the browser does not
+   know it is only a glow. Measured with the gate up that bought 143px of
+   horizontal scroll at 1440 and 38px at 390, which is why the sign-in screen
+   slid left under a trackpad swipe and showed a band of bare gradient. Clipping
+   x keeps the glow's bleed decorative, which is all it was ever meant to be;
+   y stays auto because a 485px card on a 430px-tall landscape phone has to
+   scroll somewhere. */
+#authRoot{overflow-x:hidden;overflow-y:auto}
+
+/* Clipping stops the swipe, but the 143px of phantom width is still there in
+   the box's scrollWidth, and anything that can move a scroll container without
+   the user asking — focusing a field, a keyboard page, an assistive scroll —
+   can still find it. So the glow is taken out of the scroll box entirely: it is
+   position:fixed, and fixed descendants do not contribute to an ancestor's
+   scrollable overflow. The gate is itself inset:0 fixed, so the circle lands on
+   exactly the same pixels it did before. */
+#authRoot::before{position:fixed}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   batch v14 — reported UI issues (notification rows, Your apps, hero boxes)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Notification rows: a shape that survives its content ───────────────
+   v14 equalised the heights and that part worked, but it bought parity with
+   emptiness: the description div reserved two clamped lines whether or not
+   there was a description, so most rows carried a blank hole under the title,
+   and every row was 104px tall to accommodate text that four rows out of five
+   did not have. Meanwhile the row was icon + everything + actions, so "3 days
+   overdue" — the one thing you scan a reminder list FOR — sat at the bottom
+   left, and the right half of an 1100px row was pure void.
+
+   And v14 had introduced a real break: it made .ntf-list a grid, and a grid
+   item defaults to min-width:auto, so a long title could not shrink. Measured
+   on a 133-character task title at 1440: the row rendered 1588px wide inside a
+   1124px container and its five action buttons sat 700px off the right edge,
+   unreachable. That is the "not good visually" the row was reported for.
+
+   The shape now: four columns — icon | message | when | actions — each with an
+   explicit width behaviour, message capped at minmax(0,1fr) so it is the part
+   that gives. Title one line, description one line, both ellipsised; a missing
+   description collapses instead of reserving space, and the message block is
+   centred, so a one-line row and a two-line row are the same height with no
+   hole in either. min-height is the floor, not the mechanism. */
+.ntf-list{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch}
+.ntf-item{
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) auto auto;
+  column-gap:14px;row-gap:0;
+  align-items:center;
+  /* the fix for the off-screen actions: a grid item must be told it may shrink */
+  min-width:0;
+  min-height:74px;padding:12px 16px;
+  /* .unread/.over swap this for a 3px coloured edge; declaring it here keeps
+     every row's content on the same left inset instead of shifting by 3px */
+  border-left:3px solid transparent
+}
+.ntf-item.unread{border-left-color:var(--lavender)}
+.ntf-item.over{border-left-color:var(--red)}
+.ntf-ic{align-self:center;flex:none}
+
+.ntf-main{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.ntf-row1{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0;overflow:hidden}
+.ntf-title{min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the chips are the row's grammar — source, priority, pinned. They are what a
+   shrinking title used to push out of existence, so they are told not to give */
+.ntf-row1>.ntf-src,.ntf-row1>.pflag,.ntf-row1>.cat-chip,.ntf-row1>.ntf-unreaddot{flex:none}
+.ntf-desc{
+  margin:0;min-height:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  /* v14 clamped to two lines with -webkit-box; one ellipsised line reads the
+     same at a glance and never leaves half a row blank */
+  display:block
+}
+.ntf-desc:empty{display:none}
+
+/* The "when" column. Relative first because that is what gets read; the
+   calendar date under it because that is what gets checked. */
+.ntf-due{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+  gap:1px;text-align:right;white-space:nowrap;min-width:0}
+.ntf-due .ntf-when{font-size:.79rem;font-weight:700;line-height:1.3}
+.ntf-due .ntf-date{font-size:.73rem;color:var(--muted);line-height:1.3}
+.ntf-due .ntf-snoozed{font-size:.68rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted)}
+
+.ntf-acts{display:flex;align-items:center;gap:2px;align-self:center;flex:none;margin-left:2px}
+
+/* Pinned used to be a two-up grid, which meant the same row shape had to work
+   at two different widths on one screen and did neither well. One column, and
+   the pin chip plus the peach section header carry the distinction instead. */
+.ntf-pin-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.ntf-pin-grid .ntf-item{min-height:74px}
+
+/* Tablet: the date under the relative time is the first thing that can go —
+   "Tomorrow" already says it. */
+@media(max-width:1100px){.ntf-due .ntf-date{display:none}}
+
+/* Phone: four columns will not fit — measured at 430 the title was down to
+   "Quar…" because the chips and the when-column were both flex:none and took
+   their width off the top. So the row becomes two lines instead: the message
+   gets the whole width beside the icon, and the when-column drops underneath
+   it as a single horizontal line sharing that row with the actions. */
+@media(max-width:760px){
+  .ntf-item{grid-template-columns:34px minmax(0,1fr) auto;
+    column-gap:11px;row-gap:8px;min-height:0;padding:12px 13px;align-items:start}
+  .ntf-ic{width:34px;height:34px;grid-column:1;grid-row:1}
+  .ntf-main{grid-column:2/-1;grid-row:1;min-height:42px}
+  .ntf-due{grid-column:2;grid-row:2;flex-direction:row;align-items:center;
+    justify-content:flex-start;gap:8px;text-align:left;align-self:center;
+    /* it shares this line with the action cluster and the 1fr column is sized
+       by the message above it, so without a clip the time string paints itself
+       straight over the first icon button */
+    min-width:0;overflow:hidden}
+  .ntf-due>*{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .ntf-due .ntf-date{display:inline}
+  .ntf-acts{grid-column:3;grid-row:2;justify-content:flex-end;margin-left:0;align-self:center}
+}
+/* At the narrowest the source chip goes: the section header two rows up
+   already says "Tasks", so it was spending the title's width on a repeat. */
+@media(max-width:430px){
+  .ntf-item{grid-template-columns:30px minmax(0,1fr) auto;column-gap:9px;padding:11px 12px}
+  .ntf-ic{width:30px;height:30px}
+  .ntf-row1>.ntf-src{display:none}
+  /* and the calendar date goes too — "Tomorrow · 11:00 AM" plus five buttons is
+     already the whole line at this width */
+  .ntf-due .ntf-date{display:none}
+  /* even without the date it does not fit: five icon buttons at the enlarged
+     touch padding are ~180px of a 392px row, which truncated the time to
+     "Tomorrow · 11:0…". The buttons keep their tap targets and take a line of
+     their own; the time is the thing that must stay whole. */
+  .ntf-due{grid-column:2/-1}
+  .ntf-acts{grid-column:1/-1;grid-row:3;gap:0;justify-content:space-between;
+    padding-top:2px;border-top:1px solid var(--border);margin-top:2px}
+}
+
+/* ── 2. "Your apps": one card shape for both apps ──────────────────────────
+   renderAppCards() forks into two unrelated templates. Travel ends in a row of
+   bordered .tp-trip boxes; Finance ended in bare gradient text plus two loose
+   rows underneath, so nothing lined up across the pair. Finance now ends in
+   the same boxed row (see financeCardBody()), and the card itself becomes a
+   flex column so that row sits at the same distance from the card's foot in
+   both — which is what actually makes them read as aligned, since the two
+   cards are grid siblings and already share a height. */
+.app-card{display:flex;flex-direction:column}
+.app-card .tp-trips{margin-top:auto}
+.app-card .nm{margin-bottom:3px}
+/* the Finance figure keeps its size inside the box */
+.tp-trip.feat .tp-cd .riyal{font-size:.86em}
+.tp-trip-sub{font-size:.72rem;color:var(--green);font-weight:700;margin-top:5px;display:inline-flex;align-items:center;gap:6px}
+
+/* ── 3. Hero boxes: bold Marcellus ─────────────────────────────────────────
+   Marcellus ships a single 400 weight, so 700 here is the browser's synthetic
+   bold. That is deliberate and scoped to these three values only — the rest of
+   the app keeps Marcellus at its true weight. */
+.hx-val,.hx-val .wx-t{font-weight:700}
 </style>
-<style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style></head>
+<style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style>
+<style id="apps-v15">
+/* ══════════════════════════════════════════════════════════════════════════
+   batch v15 — "Your apps": equal cards, equal boxes
+   ══════════════════════════════════════════════════════════════════════════
+
+   The renderers now emit one shape for both apps (see appCardHtml). This is
+   the other half: the metrics that make a box the same size whatever is in it.
+
+   Three things do the work.
+
+   1. .tp-trips is a fixed three-column grid rather than a flex row. Flex sized
+      the row by its contents, so Finance's one box stretched to the full card
+      width while Travel's three sat at a third each — the single loudest cause
+      of "the boxes are not equal". Three columns means a box is one third of a
+      card in BOTH cards, and unfilled slots hold their column open.
+
+   2. Every .tp-cd is the same type. It was .78rem bold peach in an ordinary
+      box and 1.35–1.5rem Marcellus gradient in a .feat one, so the first box
+      of Travel's row did not even match the two beside it. One declaration
+      now covers all of them; .feat keeps its violet tint and border and loses
+      the size jump, which is the part that broke the row. The selector carries
+      .tp-trip so it outranks the older `.tp-trip.feat .tp-cd` rules at (0,3,0)
+      rather than tying with them.
+
+   3. The name line reserves two lines whether it needs them or not, and the
+      meta line is pushed to the bottom with margin-top:auto. A one-line label
+      ("Net worth") and a two-line one ("Japan — Cherry Blossom Tour with the
+      family") therefore produce the same box height, in the same card or
+      across the pair — which is what "looks good no matter the info" means
+      here. It also lets a long trip name wrap to two lines instead of being
+      cut mid-word by the old single-line ellipsis.
+
+   Below 760 the two cards go one per row, so the three boxes stay wide enough
+   to read rather than being squeezed into a third of half a phone screen. */
+.app-card{display:flex;flex-direction:column}
+.app-card .nm{margin-bottom:2px}
+.app-desc{font-size:.8rem;line-height:1.35;color:var(--muted);margin:0 0 12px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.app-card .tp-trips{margin-top:auto;display:grid;gap:10px;align-items:stretch;
+  grid-template-columns:repeat(3,minmax(0,1fr))}
+.app-card .tp-trip{display:flex;flex-direction:column;min-width:0;height:100%;
+  padding:11px 12px;border-radius:14px}
+.app-card .tp-trip .tp-cd{font-family:'Marcellus',Georgia,serif;font-weight:400;
+  font-size:1.05rem;line-height:1.22;margin:0 0 3px;
+  background:var(--grad-iri-rev);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:not(.dark) .app-card .tp-trip .tp-cd{
+  background:linear-gradient(120deg,#6f49b4,#6350e0,#cf6f24);
+  -webkit-background-clip:text;background-clip:text}
+.app-card .tp-trip .tp-trip-nm{font-weight:700;font-size:.88rem;line-height:1.25;margin:0;
+  min-height:2.5em;overflow:hidden;overflow-wrap:anywhere;white-space:normal;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.app-card .tp-trip .tp-trip-dt{font-size:.74rem;color:var(--muted);
+  margin:auto 0 0;padding-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* A slot the app cannot fill keeps its column open instead of collapsing the
+   row. The first one speaks (it is the empty state); any others are silent, so
+   "Add a snapshot" is never printed three times. */
+.app-card .tp-trip.ghost{background:none;border-style:dashed;border-color:var(--border)}
+.app-card .tp-trip.ghost .tp-cd{background:none;-webkit-text-fill-color:currentColor;
+  color:var(--muted);opacity:.5}
+.app-card .tp-trip.ghost .tp-trip-nm{font-weight:600;color:var(--muted)}
+.app-card .tp-trip.ghost.blank{opacity:.45}
+
+.app-card .app-foot{display:flex;align-items:center;gap:7px;margin:11px 0 0;
+  font-size:.72rem;font-weight:700}
+.app-card .app-foot .live-dot.off{background:var(--muted);animation:none}
+.app-card .app-foot.off{color:var(--muted);font-weight:600}
+
+/* How many slots fit is a question about the CARD's width, not the window's,
+   and the card is roughly (viewport − rail − padding) ÷ 2. The longest string
+   any slot must hold is the net-worth figure: "SAR 1,284,930" measures ~7.8em,
+   so at the 1.05rem set above it needs ~131px of box interior, i.e. ~155px of
+   box. Three of those plus two gaps plus the card's own padding needs a card
+   about 485px wide — which is a ~1400px window. Under that, both cards drop to
+   two slots together, so they stay level with each other and the figure never
+   ellipsises to "SAR 1,28…", which is the one thing a figure must never do.
+   (Stacking to a single column was the other option and it re-broke the pair:
+   Finance would have shown two rows against Travel's three.) */
+@media(max-width:1400px){
+  .app-card .tp-trips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-card .tp-trip:nth-child(3){display:none}
+}
+/* Below 760 the two cards go one per row, so each one gets the full content
+   width and its two slots are wider than they were on the tablet. */
+@media(max-width:760px){.apps{grid-template-columns:1fr}}
+</style>
+<style id="ntf-apps-v16">
+/* ══════════════════════════════════════════════════════════════════════════
+   batch v16 — the two mockup directions that were chosen
+   ══════════════════════════════════════════════════════════════════════════
+   Notification rows  → B, "pattern gutter"
+   Your apps          → E, "pattern corner"
+
+   Both reuse --iw-mask, the black-fill lens tile already defined at the top of
+   this file for the sidebar ribbon. That tile is a MASK, not a painted image,
+   which is the whole reason one definition can serve dark, light, lavender and
+   peach at once: a data-URI is opaque to the cascade, so a var() inside a
+   painted tile never resolves and each theme needs its own finished URI. Put
+   the same geometry in mask-image over a plain background and the colour is
+   just CSS again.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Notifications · B, the pattern gutter ─────────────────────────────────
+   Six separate cards with 8px of page showing between them is six borders,
+   six shadows and six radii for one list. This makes each SECTION a single
+   panel and runs one masked band down its left edge, so the pattern is
+   architecture rather than a label on every row.
+
+   One band per panel, not one per row: it is a single absolutely positioned
+   child, so adding or removing a reminder never changes it and it costs one
+   paint instead of six. Painted in --lavender rather than per-kind, because
+   kind survives as the tinted icon tile — the only coloured object left in
+   the row apart from the time. */
+.ntf-list,.ntf-pin-grid{
+  position:relative;display:block;gap:0;
+  border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  background:var(--card);box-shadow:var(--sh-1);
+  padding-left:26px}
+.ntf-gutter{position:absolute;left:0;top:0;bottom:0;width:26px;
+  background:var(--lavender);opacity:.28;pointer-events:none;
+  -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat;
+  -webkit-mask-position:left top;mask-position:left top}
+html:not(.dark) .ntf-gutter{opacity:.34}
+/* the pinned panel takes the peach its section header already uses */
+.ntf-pin-grid .ntf-gutter{background:var(--peach-deep)}
+/* ── and a surface behind it ───────────────────────────────────────────────
+   .ntf-gutter is a MASK over a flat colour: the lenses are painted lavender
+   and everything between them is cut away, so the band read as a pattern
+   floating with nothing behind it — the same complaint that was fixed in
+   Travel's city rows and Finance's rail. Both apps back this motif with a
+   surface (#f0ebfb in light, a violet wash in dark); this is that pair,
+   applied here.
+
+   It has to be its own layer: a mask clips the element's background-color
+   along with everything else, so the surface cannot live on .ntf-gutter. As
+   the first child with no z-index, ::before paints under the gutter without
+   either needing one. */
+.ntf-list,.ntf-pin-grid{--iw-surf:rgba(129,126,255,.18);--iw-surf-pin:rgba(255,179,171,.16)}
+html:not(.dark) .ntf-list,html:not(.dark) .ntf-pin-grid{--iw-surf:#f0ebfb;--iw-surf-pin:rgba(255,179,171,.22)}
+.ntf-list::before,.ntf-pin-grid::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:26px;
+  background:var(--iw-surf);pointer-events:none}
+.ntf-pin-grid::before{background:var(--iw-surf-pin)}
+
+/* The row gives up its card. The doubled class is deliberate: the border and
+   the coloured left edge are set at (0,2,0) in two earlier blocks, and a rule
+   that merely ties with them would be decided by source order — which is
+   fragile in a file this long. (0,3,0) settles it. */
+.ntf-list .ntf-item.ntf-item,.ntf-pin-grid .ntf-item.ntf-item{
+  border:0;border-radius:0;background:none;box-shadow:none;
+  grid-template-columns:32px minmax(0,1fr) auto auto;column-gap:13px;
+  /* fixed, not min-height: a row with no description and a row with a
+     130-character one have to occupy the same space, and only a fixed height
+     guarantees that. Everything inside is vertically centred. */
+  height:64px;min-height:0;padding:0 14px}
+.ntf-list .ntf-item+.ntf-item,.ntf-pin-grid .ntf-item+.ntf-item{
+  box-shadow:inset 0 1px 0 var(--border)}
+.ntf-list .ntf-item.ntf-item:hover,.ntf-pin-grid .ntf-item.ntf-item:hover{
+  background:rgba(129,126,255,.06)}
+/* the pinned rows lose their peach gradient — inside a panel with a peach
+   gutter it was the same information twice, and it tinted the hairlines */
+.ntf-pin-grid .ntf-item.ntf-item{background:none}
+.ntf-pin-grid .ntf-item.ntf-item:hover{background:rgba(255,179,171,.08)}
+.ntf-list .ntf-item.pinned.pinned{background:none}
+
+/* The icon stops being a solid kind chip and becomes a soft tinted tile with
+   the kind's INK on it. At 38px solid it was the loudest object in a row it
+   was only meant to file; at 32px and 20% fill it labels without shouting.
+   --kc arrives inline from notifSrc(); --ki is the paired ink token. */
+.ntf-list .ntf-ic.ntf-ic,.ntf-pin-grid .ntf-ic.ntf-ic{
+  width:32px;height:32px;border-radius:10px;
+  background:color-mix(in srgb,var(--kc) 20%,transparent);color:var(--ki)}
+.ntf-list .ntf-ic svg,.ntf-pin-grid .ntf-ic svg{width:16px;height:16px}
+.ntf-ic.k-task{--ki:var(--ink-task)}
+.ntf-ic.k-subtask{--ki:var(--ink-subtask)}
+.ntf-ic.k-event{--ki:var(--ink-event)}
+.ntf-ic.k-routine{--ki:var(--ink-routine)}
+.ntf-ic.k-trip{--ki:var(--ink-trip)}
+.ntf-ic.k-zakat{--ki:var(--ink-zakat)}
+
+/* Below 760 the row already reflows to three lines and cannot hold a fixed
+   height; the gutter and the panel stay. */
+@media(max-width:760px){
+  .ntf-list .ntf-item.ntf-item,.ntf-pin-grid .ntf-item.ntf-item{
+    height:auto;min-height:0;padding:12px 13px;align-items:start}
+  .ntf-list .ntf-ic.ntf-ic,.ntf-pin-grid .ntf-ic.ntf-ic{width:32px;height:32px}
+}
+@media(max-width:430px){
+  .ntf-list,.ntf-pin-grid{padding-left:20px}
+  .ntf-gutter{width:20px}
+  .ntf-list .ntf-item.ntf-item,.ntf-pin-grid .ntf-item.ntf-item{padding:11px 12px}
+  .ntf-list .ntf-ic.ntf-ic,.ntf-pin-grid .ntf-ic.ntf-ic{width:30px;height:30px}
+}
+
+/* ── Your apps · E, the pattern corner ─────────────────────────────────────
+   A masked plate in the top-left corner that the app icon sits on, fading out
+   toward the middle of the card. It gives the icon somewhere to belong
+   instead of floating on empty card, without committing the whole surface to
+   texture.
+
+   The fade lives in the BACKGROUND (a radial gradient) and the lens geometry
+   in the MASK, so the two compose without needing mask-composite. The plate is
+   a sibling behind the content rather than a wash on the card itself, because
+   a mask applies to an element's entire subtree and would have eaten the app
+   name along with everything else. */
+.app-card>.corner{position:absolute;left:0;top:0;width:220px;height:150px;
+  background:radial-gradient(130% 130% at 0% 0%,var(--ar) 0%,transparent 72%);
+  opacity:.55;pointer-events:none;
+  -webkit-mask-image:var(--iw-mask);mask-image:var(--iw-mask);
+  -webkit-mask-size:13px 13px;mask-size:13px 13px;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat;
+  -webkit-mask-position:left top;mask-position:left top}
+html:not(.dark) .app-card>.corner{opacity:.6}
+.app-card.app-finance{--ar:var(--lavender)}
+.app-card.app-travel{--ar:var(--peach-deep)}
+/* the plate is positioned, the content is not, so without this the content
+   paints underneath it */
+.app-card>.ico,.app-card>.nm,.app-card>.app-desc,
+.app-card>.tp-trips,.app-card>.app-foot{position:relative;z-index:1}
+
+/* The figure boxes become three cells of one strip. This is the other half of
+   the original complaint: the pair looked unequal because Finance's spare slot
+   was an empty BOX — a dashed rectangle announcing an absence — while
+   Travel's three were full. An empty CELL is just quiet space, so the
+   asymmetry stops being visible without either card having to pretend it
+   holds something it does not. */
+.app-card .tp-trips{margin-top:auto;display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding-top:14px}
+.app-card .tp-trip.tp-trip{min-width:0;height:auto;position:relative;
+  display:flex;flex-direction:column;gap:3px;
+  padding:0 12px;background:none;border:0;border-radius:0}
+.app-card .tp-trip:first-child{padding-left:0}
+.app-card .tp-trip:last-child{padding-right:0}
+.app-card .tp-trip+.tp-trip::before{content:"";position:absolute;left:0;
+  top:2px;bottom:2px;width:1px;background:var(--border)}
+/* .feat was a violet tint and border on the first box; in a strip there are no
+   boxes to tint and ranking the first figure is not this direction's idea */
+.app-card .tp-trip.feat{background:none;border:0}
+.app-card .tp-trip .tp-cd{font-size:1.16rem;line-height:1.15;margin:0}
+/* the label is the quiet one now and the figure is the loud one, which is the
+   opposite of the boxed version. Two lines are reserved whether or not they
+   are used, so Travel's forty-character trip name and Finance's nine-character
+   one still put their dates on the same baseline. */
+.app-card .tp-trip .tp-trip-nm{font-size:.72rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  line-height:1.3;min-height:2.6em;margin:0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* opacity:.75 on top of --muted is what made these dates hard to read. Muted
+   is ALREADY the dimmed colour; dimming it again lands at #8f87a4 on white,
+   which is 3.4:1 against the card — under the 4.5:1 floor, at 11px. Dropping
+   the multiplier and letting --muted stand measures 5.9:1 in light and 7.1:1
+   in dark. A half-step of size and weight buys the rest. */
+.app-card .tp-trip .tp-trip-dt{font-size:.73rem;font-weight:600;color:var(--muted);
+  margin:auto 0 0;padding-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the currency mark is a glyph, not a word — it needs its own air before the
+   digits, and it rides the same gradient text-clip as the figure it belongs to */
+.app-card .tp-trip .tp-cd .riyal{margin-right:.16em;font-size:.88em}
+.app-card .tp-trip.ghost{opacity:.42;background:none;border:0}
+.app-card .tp-trip.ghost .tp-cd{background:none;
+  -webkit-text-fill-color:currentColor;color:var(--muted);opacity:1}
+.app-card .tp-trip.ghost .tp-trip-nm{font-weight:800;color:var(--muted)}
+.app-card .tp-trip.ghost.blank{opacity:0}
+
+/* At 1400 the third cell is hidden, so the SECOND one becomes the last and has
+   to be the one that drops its right padding. */
+/* The v15 rule that drops the strip to two slots below 1400 lives EARLIER in
+   the document and matches at the same specificity as the block above, so
+   source order alone would let the 3-column template and display:flex win and
+   the third slot would reappear — squeezing the figure until it ellipsised to
+   "SAR 1,28…", the one thing v15 was written to prevent. Re-asserted here one
+   notch higher so it settles outright. */
+@media(max-width:1400px){
+  .app-card .tp-trips.tp-trips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-card .tp-trip.tp-trip:nth-child(3){display:none}
+  .app-card .tp-trip.tp-trip:nth-child(2){padding-right:0}
+}
+</style>
+</head>
 <body>
 <div id="splash"><div style="display:flex;flex-direction:column;align-items:center;gap:12px">
 <svg width="112" height="112" viewBox="0 0 100 100" style="display:block"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8E7FD0"/><stop offset="100%" stop-color="#26225C"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#sg)"/><g transform="translate(20,21.6) scale(0.3053) translate(-381.64,-176.88)" fill="#fff"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></g></svg>
@@ -3332,8 +4005,37 @@ function fill(d){
     d.settings.statusesV=2;
   }
   if(!Array.isArray(d.settings.statuses)||!d.settings.statuses.length) d.settings.statuses=JSON.parse(JSON.stringify(DEFAULT.settings.statuses));
-  var _ids=d.settings.statuses.map(function(x){return x.id;});
-  (d.tasks||[]).forEach(function(t){ if(!t.status)t.status=(t.done?"done":_ids[0]); if(_ids.indexOf(t.status)<0)t.status=(t.done?"done":_ids[0]); t.done=(t.status==="done"); });
+  /* ── Columns belong to a WORKSPACE, so they have to be checked against one ──
+     This loop used to validate every task against d.settings.statuses — the old
+     single global column list, still frozen at To Do / In Progress / Done. Once
+     columns moved onto the workspace, any column the user added or renamed got
+     a fresh uid() for an id, so it was never in that legacy list, and this line
+     quietly rewrote the task back to _ids[0] on the very next fill(). fill()
+     runs on every page load and on every sync merge — which is exactly why
+     changing a task's status looked like it saved (localStorage really did hold
+     "rev7x") and then came back as "To Do" after a reload. Validate against the
+     task's own workspace instead, fall back to the union of all columns when
+     the workspace can't be resolved, and never reset a status we can actually
+     account for. WS_DEFAULT_STATUSES is declared further down the script with
+     var, so on the FIRST fill() — which runs while `data` is still being
+     initialised — it is hoisted-but-undefined; hence the typeof guard. */
+  var _legacyIds=d.settings.statuses.map(function(x){return x.id;});
+  var _WSD=(typeof WS_DEFAULT_STATUSES!=="undefined"&&WS_DEFAULT_STATUSES)?WS_DEFAULT_STATUSES:DEFAULT.settings.statuses;
+  var _wsCols={},_union=[],_useen={};
+  (d.workspaces||[]).forEach(function(w){
+    if(!w||w.id==null) return;
+    var cols=(Array.isArray(w.statuses)&&w.statuses.length)?w.statuses:_WSD;
+    _wsCols[w.id]=cols;
+    cols.forEach(function(c){ if(c&&c.id!=null&&!_useen[c.id]){ _useen[c.id]=1; _union.push(c); } });
+  });
+  d.settings.statuses.forEach(function(c){ if(c&&c.id!=null&&!_useen[c.id]){ _useen[c.id]=1; _union.push(c); } });
+  (d.tasks||[]).forEach(function(t){
+    var cols=(t.ws!=null&&_wsCols[t.ws])?_wsCols[t.ws]:(_union.length?_union:_WSD);
+    var ids=cols.map(function(x){return x.id;});
+    var doneId=stDoneOf(cols);
+    if(!t.status||ids.indexOf(t.status)<0) t.status=(t.done?doneId:ids[0]);
+    t.done=(t.status===doneId);
+  });
   if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
   (d.notes||[]).forEach(function(n){ if(!Array.isArray(n.labels)) n.labels=[]; });
   /* A deleted routine stays deleted. This is the last gate before data is
@@ -3796,7 +4498,7 @@ function renderTimeline(){
     +'<div class="tlg-body" style="background-image:repeating-linear-gradient(90deg,rgba(129,126,255,.08) 0px,rgba(129,126,255,.08) 1px,transparent 1px,transparent '+dw+'px)">'+rowsHtml
     +'<div class="tlg-now" style="left:'+todayX+'px"></div>'
     +'</div></div></div></div>'
-    +'<div class="tlg-legend"><span><i style="background:#817eff"></i>Tasks</span><span><i style="background:#5aa2ea"></i>Events</span><span><i style="background:#c66a2b"></i>Trips</span><span><i style="background:#0a7c6b"></i>Routines</span><span><i style="width:4px;height:14px;border-radius:2px;background:var(--lavender)"></i>Today</span></div>';
+    +'<div class="tlg-legend"><span><i style="background:#817eff"></i>Tasks</span><span><i style="background:#5aa2ea"></i>Events</span><span><i style="background:#c66a2b"></i>Trips</span><span><i style="background:#1e915f"></i>Routines</span><span><i style="width:4px;height:14px;border-radius:2px;background:var(--lavender)"></i>Today</span></div>';
   var sc=document.getElementById("tlScroll"); if(sc){ sc.scrollLeft=Math.max(0, todayX - sc.clientWidth*0.3); }
 }
 function tlToday(){ renderTimeline(); }
@@ -4300,13 +5002,28 @@ function saveRoutine(id){
 
 /* ============ Notifications Center ============ */
 function notifStore(){ if(!data.notif) data.notif={read:{},dismissed:{},snooze:{},pinned:{},settings:{lead:7}}; ["read","dismissed","snooze","pinned"].forEach(function(k){ if(!data.notif[k])data.notif[k]={}; }); if(!data.notif.settings)data.notif.settings={lead:7}; return data.notif; }
+/* Notification sources. Deliberately NO hex here: each source declares which
+   item kind it belongs to and the hue is resolved from KIND (further down —
+   the one source of truth, matching the brand guide's kind swatches). Storing
+   colours locally is how this map drifted: Task had become #9B78D8 instead of
+   #817EFF, and Routine had been painted #FFB3AB, which is the Trip pink, so
+   two different kinds read as the same thing in the notification list. */
 var NSRC={
-  task:{name:"Task",color:"#9b78d8",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>'},
-  routine:{name:"Routine",color:"#ffb3ab",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/></svg>'},
-  event:{name:"Calendar",color:"#5aa2ea",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'},
-  finance:{name:"Finance",color:"#7fd1c4",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'},
-  travel:{name:"Travel",color:"#c66a2b",icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>'}
+  task:{name:"Task",kind:"task",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>'},
+  routine:{name:"Routine",kind:"routine",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/></svg>'},
+  event:{name:"Calendar",kind:"event",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'},
+  /* money is the teal in the guide; the app's teal kind is registered as zakat */
+  finance:{name:"Finance",kind:"zakat",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'},
+  travel:{name:"Travel",kind:"trip",icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>'}
 };
+/* Resolves a source to {name, kind, color, icon}. `color` is the kind FILL —
+   correct for the icon chip, which is a solid tile with a white glyph. Text
+   must not use it; that is what the --ink-* tokens are for. */
+function notifSrc(sk){
+  var s=NSRC[sk];
+  if(!s) return {name:sk,kind:"task",color:kindColor("task"),icon:""};
+  return {name:s.name,kind:s.kind,color:kindColor(s.kind),icon:s.icon};
+}
 function buildNotifs(){
   var out=[]; var today=isoLocal(new Date()); var lead=(notifStore().settings.lead)||7; var horizon=new Date(); horizon.setDate(horizon.getDate()+lead); var horIso=isoLocal(horizon);
   (data.tasks||[]).forEach(function(t){ if((t.done||t.status===completedStatusId(t.ws))||!t.due) return; if(t.due>horIso) return; out.push({id:"task:"+t.id,source:"task",title:t.t,desc:t.desc||"",due:t.due,time:prettyTime(t.time),priority:t.priority||"med",open:"openTask(\'"+t.id+"\')"}); });
@@ -4352,19 +5069,28 @@ function renderNotifs(){
   var rest=list.filter(function(n){return !ns.pinned[n.id];});
   var secNames={task:"Tasks",routine:"Routines",event:"Calendar",finance:"Finance",travel:"Travel"};
   var html="";
-  if(pinnedList.length){ html+='<div class="ntf-sec ntf-pin-h"><span class="ntf-sec-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17v5M9 3h6l-1 7 3 3H7l3-3z"/></svg></span>Pinned &middot; '+pinnedList.length+'</div><div class="ntf-pin-grid">'+pinnedList.map(function(n){return notifItem(n,ns,today);}).join("")+'</div>'; }
+  if(pinnedList.length){ html+='<div class="ntf-sec ntf-pin-h"><span class="ntf-sec-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17v5M9 3h6l-1 7 3 3H7l3-3z"/></svg></span>Pinned &middot; '+pinnedList.length+'</div><div class="ntf-pin-grid"><span class="ntf-gutter"></span>'+pinnedList.map(function(n){return notifItem(n,ns,today);}).join("")+'</div>'; }
   var order=["task","event","routine","finance","travel"]; var groups={}; rest.forEach(function(n){(groups[n.source]=groups[n.source]||[]).push(n);});
   var seen={};
-  order.concat(Object.keys(groups)).forEach(function(sk){ if(seen[sk])return; seen[sk]=1; var g=groups[sk]; if(!g||!g.length)return; var src=NSRC[sk]||{name:sk,color:"#817eff",icon:""}; html+='<div class="ntf-sec" style="color:'+src.color+'"><span class="ntf-sec-ic">'+src.icon+'</span>'+esc(secNames[sk]||src.name)+' &middot; '+g.length+'</div><div class="ntf-list">'+g.map(function(n){return notifItem(n,ns,today);}).join("")+'</div>'; });
+  order.concat(Object.keys(groups)).forEach(function(sk){ if(seen[sk])return; seen[sk]=1; var g=groups[sk]; if(!g||!g.length)return; var src=notifSrc(sk); html+='<div class="ntf-sec k-'+src.kind+'"><span class="ntf-sec-ic">'+src.icon+'</span>'+esc(secNames[sk]||src.name)+' &middot; '+g.length+'</div><div class="ntf-list"><span class="ntf-gutter"></span>'+g.map(function(n){return notifItem(n,ns,today);}).join("")+'</div>'; });
   host.innerHTML=html;
 }
 function notifItem(n,ns,today){
-  var src=NSRC[n.source]||{name:n.source,color:"#817eff",icon:""}; var w=notifWhen(n.due,n.time); var unread=!ns.read[n.id]; var pinned=ns.pinned[n.id]; var snoozed=ns.snooze[n.id]&&ns.snooze[n.id]>Date.now();
+  var src=notifSrc(n.source); var w=notifWhen(n.due,n.time); var unread=!ns.read[n.id]; var pinned=ns.pinned[n.id]; var snoozed=ns.snooze[n.id]&&ns.snooze[n.id]>Date.now();
   return '<div class="ntf-item'+(unread?" unread":"")+(w.cls==="over"?" over":"")+(pinned?" pinned":"")+'" onmouseenter="notifMarkRead(\''+n.id+'\',this)" onpointerdown="notifMarkRead(\''+n.id+'\',this)">'
-    +'<span class="ntf-ic" style="background:'+src.color+'">'+src.icon+'</span>'
+    +'<span class="ntf-ic k-'+src.kind+'" style="--kc:'+src.color+'">'+src.icon+'</span>'
+    /* The row is four columns now — icon, message, when, actions — instead of
+       icon, everything, actions. "When" was the last line of the message block,
+       which put the one thing you scan a reminder list FOR in the least
+       scannable place, and left the right half of a 1100px row completely
+       empty. Moving it out fills that gap and gives every row the same three
+       vertical alignments no matter how much text it carries. */
     +'<div class="ntf-main"><div class="ntf-row1">'+(unread?'<span class="ntf-unreaddot"></span>':'')+'<span class="ntf-title">'+esc(n.title)+'</span><span class="ntf-src">'+src.name+'</span>'+priFlag(n.priority)+(pinned?'<span class="cat-chip" style="color:var(--peach-deep)">Pinned</span>':'')+'</div>'
-    +(n.desc?'<div class="ntf-desc">'+esc(n.desc)+'</div>':'')
-    +'<div class="ntf-meta"><span class="ntf-when '+w.cls+'">'+esc(w.txt)+'</span><span>'+esc(fmtShort(n.due))+'</span>'+(snoozed?'<span class="muted">Snoozed</span>':'')+'</div></div>'
+    /* Still always emitted, but it no longer reserves blank lines: an item with
+       no description now simply has none, and the row centres what it does have.
+       Reserving two empty lines is what made most rows look like holes. */
+    +'<div class="ntf-desc">'+esc(n.desc||"")+'</div></div>'
+    +'<div class="ntf-due"><span class="ntf-when '+w.cls+'">'+esc(w.txt)+'</span><span class="ntf-date">'+esc(fmtShort(n.due))+'</span>'+(snoozed?'<span class="ntf-snoozed">Snoozed</span>':'')+'</div>'
     +'<div class="ntf-acts">'
       +'<button class="icon-btn" title="Open" onclick="'+n.open+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></button>'
       +'<button class="icon-btn'+(pinned?" on":"")+'" title="Pin" onclick="notifPin(\''+n.id+'\')"><svg viewBox="0 0 24 24" fill="'+(pinned?"currentColor":"none")+'" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 3h6l-1 7 3 3H7l3-3z"/></svg></button>'
@@ -4500,7 +5226,7 @@ function buildDigest(){
    +'</tr></table>';
 
   /* --- rows --- */
-  var PILL={ task:["TASK","rgba(129,126,255,.18)",PUR2], sub:["SUB","rgba(179,169,255,.36)","#4a38b5"], event:["EVENT","rgba(90,162,234,.16)","#1f5fc2"], routine:["ROUTINE","rgba(127,209,196,.18)","#0a7c6b"], trip:["TRAVEL","rgba(198,106,43,.18)","#a1531f"] };
+  var PILL={ task:["TASK","rgba(129,126,255,.18)",PUR2], sub:["SUB","rgba(179,169,255,.36)","#4a38b5"], event:["EVENT","rgba(90,162,234,.16)","#1f5fc2"], routine:["ROUTINE","rgba(30,145,95,.16)","#16704a"], trip:["TRAVEL","rgba(198,106,43,.18)","#a1531f"] };
   function whenLbl(it,mode){
     if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
     if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
@@ -4966,46 +5692,141 @@ function travelHref(){
   var u=(data.settings&&data.settings.travelUrl)||"./travel/";
   return u+(u.indexOf("?")>=0?"&":"?")+"view=trips";
 }
-function travelCardHtml(a){
-  var trips=travelTrips||[]; var top=trips[0];
-  var live = "";
-  var body;
-  if(trips.length){
-    var cards=trips.slice(0,3).map(function(t,i){
-      return `<div class="tp-trip${i===0?' feat':''}"><div class="tp-cd">${esc(tripCountdown(t.departDate))}</div><div class="tp-trip-nm">${esc(t.name||"Trip")}</div><div class="tp-trip-dt">${t.departDate?esc(fmtShort(t.departDate)):""}</div></div>`;
-    }).join("");
-    body = `<div class="tp-trips">${cards}</div>`;
-  } else {
-    body = `<div class="muted" style="font-size:.86rem">${esc(a.desc)}</div>`;
-  }
-  /* The card is a way in, not a way back to wherever you left off — so it asks
-     Travel for All trips. Appended rather than baked into the setting, because
-     travelUrl is user-editable and may already carry a query of its own. */
-  const url=a.url||'#';
-  const href = url==='#' ? url : travelHref();
-  return `<a class="card lift app-card" href="${esc(href)}" ${/^https?:/.test(url)?'target="_blank" rel="noopener"':''}>
-    ${ARROW_SVG}
-    <div class="ico ${a.tile}">${a.icon}</div>
-    <div class="nm">${esc(a.nm)}</div>
-    ${body}
-    ${live}
-  </a>`;
+/* ════════════════════════════════════════════════════════════════════════
+   "Your apps" — one card shape, one box shape, for every app
+   ════════════════════════════════════════════════════════════════════════
+
+   What was wrong: the two cards had nothing in common below the title. Travel
+   ended in three narrow boxes (three lines each, the first one carrying a
+   1.35rem Marcellus countdown while its two siblings carried a .78rem bold
+   one); Finance ended in ONE full-width box of four lines. So nothing lined
+   up — not the box count, not the box width, not the box height, not even the
+   type inside two boxes sitting in the same row. Measured at 1440 on the Apps
+   page: Finance .tp-trips 106px tall with 1 box, Travel 87px tall with 3.
+
+   What replaces it: both cards are built by the same function from the same
+   parts — icon, title, one-line description, a fixed three-slot row, and a
+   sync footer. A slot is always the same three lines (figure / label / meta)
+   at the same metrics, so a box is the same size whatever is in it and
+   wherever it is. Slots an app cannot fill are rendered as quiet dashed
+   placeholders rather than left out, which is what keeps the two rows the
+   same width per box instead of one app's single box stretching to full
+   width. The name line reserves two lines whether it needs them or not —
+   that is the "looks good no matter the info" guarantee, and it also means a
+   long trip name now wraps instead of being cut to "Japan — Cherr…".
+
+   Finance can genuinely fill all three: net worth, the change against the
+   previous snapshot (financeSeries is already loaded for the sparkline), and
+   the zakat countdown (zakatDue is already computed). Nothing here invents a
+   figure — a slot with no data behind it stays a placeholder. */
+var APP_SLOTS=3;
+
+function travelSlots(){
+  return (travelTrips||[]).slice(0,APP_SLOTS).map(function(t){
+    return {big:tripCountdown(t.departDate)||"Planned",
+            nm:t.name||"Trip",
+            meta:t.departDate?fmtShort(t.departDate):""};
+  });
+}
+function financeSlots(){
+  var out=[];
+  /* The meta line is a date in Travel's slots, so it is a date here too — the
+     snapshot the figure came from. "Updated 42m ago" used to sit here and it
+     was both longer than the box and a second copy of the card's own footer. */
+  var _fd="";
+  try{ if(financeSeries&&financeSeries.length) _fd=fmtShort(financeSeries[financeSeries.length-1].d)||""; }catch(e){}
+  /* The figure is money and was printing bare — 1,284,930 of nothing. bigHtml
+     carries the mark as markup because appSlotHtml escapes `big`, and a glyph
+     that has to survive esc() is a glyph that will arrive as literal <span>. */
+  if(financeStat) out.push({bigHtml:appCurHtml()+esc(financeStat),big:financeStat,
+                            nm:"Net worth",meta:_fd||"Latest figure"});
+  /* ORDER IS LOAD-BEARING. Below 1400px the strip drops to two slots, so slot
+     three is not "less important", it is INVISIBLE on every phone and every
+     iPad in portrait. Zakat was third and therefore never showed on a phone,
+     which is the bug reported. It is also the only slot with a deadline in it,
+     so it outranks a percentage change that the sparkline right above already
+     draws. Zakat second, change third. */
+  if(zakatDue!=null&&isFinite(zakatDue))
+    out.push({big:zakatDue<=0?"Due now":("In "+zakatDue+" day"+(zakatDue===1?"":"s")),
+              nm:"Zakat due",meta:"Next hawl"});
+  /* change vs the previous snapshot — same array the sparkline reads */
+  try{
+    if(financeSeries&&financeSeries.length>=2){
+      var last=financeSeries[financeSeries.length-1],prev=financeSeries[financeSeries.length-2];
+      if(prev&&prev.v){
+        var pc=((last.v-prev.v)/Math.abs(prev.v))*100;
+        if(isFinite(pc)) out.push({big:(pc>=0?"+":"−")+Math.abs(pc).toFixed(1)+"%",
+          nm:"Since "+(prev.l||fmtShort(prev.d)||"last"),meta:"Net worth change"});
+      }
+    }
+  }catch(e){}
+  return out.slice(0,APP_SLOTS);
+}
+/* SAR gets the Saudi Riyal glyph from the webfont already loaded at the top of
+   this file; anything else falls back to its own code, so a user who switches
+   currency in Settings gets "USD 1,284,930" rather than a riyal mark on
+   dollars. Returns MARKUP, so every caller must place it unescaped. */
+function appCurHtml(){
+  var c=String((data.settings&&data.settings.currency)||"SAR").trim();
+  return /^sar$/i.test(c)
+    ? '<span class="riyal" role="img" aria-label="Saudi Riyal">&#xe900;</span>'
+    : esc(c)+" ";
+}
+/* Two different silences. An app with nothing in it needs its empty state; an
+   app with one figure and two spare slots needs to say what would go in them,
+   not repeat the empty state. Only the FIRST unfilled slot speaks either way —
+   the rest are silent frames, so no line is ever printed twice in a row. */
+var APP_EMPTY={
+  travel :{nm:"No trips yet"  ,meta:"Plan your first one"},
+  finance:{nm:"No figures yet",meta:"Add a snapshot"}};
+var APP_MORE={
+  travel :{nm:"Plan another trip",meta:"Add it in Travel"},
+  finance:{nm:"Snapshots & zakat",meta:"Add in Finance"}};
+
+function appSlotHtml(s,i){
+  if(s.blank) return '<div class="tp-trip ghost blank" aria-hidden="true"></div>';
+  if(s.ghost) return '<div class="tp-trip ghost"><div class="tp-cd">&mdash;</div>'
+    +'<div class="tp-trip-nm">'+esc(s.nm)+'</div><div class="tp-trip-dt">'+esc(s.meta)+'</div></div>';
+  return '<div class="tp-trip'+(i===0?' feat':'')+'"><div class="tp-cd">'+(s.bigHtml||esc(s.big))+'</div>'
+    +'<div class="tp-trip-nm">'+esc(s.nm)+'</div><div class="tp-trip-dt">'+esc(s.meta)+'</div></div>';
+}
+function appCardHtml(a){
+  var slots=a.key==="travel"?travelSlots():a.key==="finance"?financeSlots():[];
+  var real=slots.length;
+  var em=(real===0?APP_EMPTY:APP_MORE)[a.key]||{nm:"Nothing yet",meta:a.desc};
+  while(slots.length<APP_SLOTS)
+    slots.push(slots.length===real?{ghost:1,nm:em.nm,meta:em.meta}:{ghost:1,blank:1});
+
+  var ts=a.key==="travel"?travelUpdated:a.key==="finance"?financeUpdated:"";
+  var rel=ts?relTime(ts):"";
+  /* the footer is the app's sync line; "Not synced yet" is not a live state, so
+     it drops the green ink along with the pulsing dot */
+  var foot='<div class="app-foot tp-trip-sub'+(rel?'':' off')+'">'
+    +(rel?'<span class="live-dot"></span>Live &middot; updated '+esc(rel)
+         :'<span class="live-dot off"></span>Not synced yet')+'</div>';
+  /* Travel does not show a sync line. The ROW it sat on still exists, holding a
+     non-breaking space: the two cards are grid siblings whose figure strips are
+     pushed down by margin-top:auto, so deleting the line outright would drop
+     Travel's strip one line lower than Finance's and re-open exactly the
+     misalignment this card was rebuilt to close. */
+  if(a.key==="travel") foot='<div class="app-foot" aria-hidden="true">&nbsp;</div>';
+
+  var url=a.url||'#';
+  var href=a.key==="travel"?(url==='#'?url:travelHref()):url;
+  return '<a class="card lift app-card app-'+a.key+'" href="'+esc(href)+'" '
+    +(/^https?:/.test(url)?'target="_blank" rel="noopener"':'')+'>'
+    +'<span class="corner" aria-hidden="true"></span>'
+    +ARROW_SVG
+    +'<div class="ico '+a.tile+'">'+a.icon+'</div>'
+    +'<div class="nm">'+esc(a.nm)+'</div>'
+    +'<div class="app-desc">'+esc(a.desc)+'</div>'
+    +'<div class="tp-trips">'+slots.map(appSlotHtml).join("")+'</div>'
+    +foot
+    +'</a>';
 }
 function renderAppCards(id){
-  const el=document.getElementById(id); if(!el) return;
-  el.innerHTML = appDef().map(a=>{
-    if(a.key==="travel") return travelCardHtml(a);
-    const stat = a.key==="finance" ? (financeStat||"") : "";
-    const live = (a.key==="finance"&&financeStat) ? `<div class="live-tag"><span class="live-dot"></span>Live${financeUpdated?` &middot; updated ${esc(relTime(financeUpdated))}`:""}</div>` : "";
-    return `<a class="card lift app-card" href="${esc(a.url||'#')}" ${/^https?:/.test(a.url||'')?'target="_blank" rel="noopener"':''}>
-      ${ARROW_SVG}
-      <div class="ico ${a.tile}">${a.icon}</div>
-      <div class="nm">${esc(a.nm)}</div>
-      ${stat?`<div class="big">${a.key==="finance"?IC.money+" ":""}${esc(stat)}</div>`:`<div class="muted" style="font-size:.86rem">${esc(a.desc)}</div>`}
-      ${stat?`<div class="muted" style="font-size:.78rem;margin-top:4px">${esc(a.desc)}</div>`:""}
-      ${live}
-    </a>`;
-  }).join("");
+  var el=document.getElementById(id); if(!el) return;
+  el.innerHTML=appDef().map(appCardHtml).join("");
 }
 function renderApps(){ renderAppCards("appCardsFull"); }
 
@@ -5023,6 +5844,13 @@ function insight(ic,html){ return `<div class="insight"><div class="ico">${ic}</
 
 /* ---- Today command view ---- */
 function isoLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+/* A date you have to decode is a date you skim past. "Aug 3" only means
+   anything after you work out what today is; "Today" is the one due date on a
+   board that should stop you, so it says so in words and wears the brand green
+   instead of the neutral peach every other date gets. Overdue still wins the
+   chip — a task that is late is not a task that is due. */
+function isTodayIso(iso){ return !!iso && iso===isoLocal(new Date()); }
+function fmtDueShort(iso){ return isTodayIso(iso)?"Today":fmtShort(iso); }
 function fmtShort(iso){if(!iso)return"";var d=new Date(iso+"T00:00:00");return isNaN(d)?iso:d.toLocaleDateString(undefined,{month:"short",day:"numeric"});}
 function fmtFull(iso){if(!iso)return"";var d=new Date(iso+"T00:00:00");return isNaN(d)?iso:d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});}
 var IC={
@@ -5044,7 +5872,7 @@ var KIND={ task   :{c:"#817eff",n:"Task"},
            subtask:{c:"#b3a9ff",n:"Subtask"},
            sub    :{c:"#b3a9ff",n:"Subtask"},
            event  :{c:"#5aa2ea",n:"Event"},
-           routine:{c:"#0a7c6b",n:"Routine"},
+           routine:{c:"#1e915f",n:"Routine"},
            trip   :{c:"#c66a2b",n:"Travel"},
            zakat  :{c:"#7fd1c4",n:"Zakat"} };
 function kindKey(k){ return KIND[k]?k:"task"; }
@@ -5161,9 +5989,17 @@ function renderTaskBoard(host){
     });
     var clp=cc.indexOf(col.id)>=0;
     return '<div class="kcol'+(clp?" collapsed":"")+'" data-col="'+col.id+'" ondragover="kOver(event)" ondrop="kDrop(event,\''+col.id+'\')" ondragleave="kLeave(event)">'
-      +'<div class="kcol-head" draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragend="colDragEnd(event)" ondragover="dOver(event)" ondrop="colDrop(event,\''+col.id+'\')">'
+      /* The column header used to be draggable="true": an HTML5 drag, which on a
+         touch screen does not start at all and on a desktop gives you the browser's
+         ghost image and no say over what happens in between. Subtasks already drag
+         the other way -- press a grip, the list opens a gap and the rows animate
+         around you -- and that is the interaction people here have learned. So the
+         header now carries the same grip and runs on the same pointer engine.
+         The rest of the header keeps its jobs: caret collapses, name renames. */
+      +'<div class="kcol-head">'
       +'<span class="kcol-caret" onclick="event.stopPropagation();toggleCol(\''+col.id+'\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></span>'
-      +'<span class="kcol-name" onclick="event.stopPropagation();colRename(\''+col.id+'\')" title="Click to rename">'+esc(col.name)+'</span><span class="cnt">'+items.length+'</span></div>'
+      +'<span class="kcol-name" onclick="event.stopPropagation();colRename(\''+col.id+'\')" title="Click to rename">'+esc(col.name)+'</span><span class="cnt">'+items.length+'</span>'
+      +gripHtml("kcol-grip","colGrab","column "+col.name)+'</div>'
       +'<button class="kadd kadd-top" onclick="newTaskIn(\''+col.id+'\')" title="Add task" aria-label="Add task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg></button>'
       +'<div class="kcol-body">'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">No tasks yet</div>')
       +'</div></div>';
@@ -5181,20 +6017,20 @@ async function colRename(id){
   save(); render(); toast("Column renamed");
 }
 function addStatusInline(){ promptModal("Add status","Name this status","New status").then(function(nm){ if(nm===null) return; nm=String(nm).trim(); if(!nm) return; var _w=wsActive(); if(!_w){ toast("Pick a workspace to add a column"); return; } var ss=statuses(); ss.push({id:"s"+uid(),name:nm,updated:Date.now()}); _w.statuses=ss; _w.updated=Date.now(); data.settings.statusesV=2; save(); render(); toast("Status added"); }); }
-function dueLabel(t){ if(!t.due&&!t.start) return ""; var d=t.due||t.start; var s=(t.start&&t.due&&t.start!==t.due)?t.start:""; var base=s?(esc(fmtShort(s))+'<span class="dl-arr">&rarr;</span>'+esc(fmtShort(d))):esc(fmtShort(d)); var tm=t.time?'<span class="dl-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'+esc(prettyTime(t.time))+'</span>':''; return '<span class="dl">'+base+tm+'</span>'; }
+function dueLabel(t){ if(!t.due&&!t.start) return ""; var d=t.due||t.start; var s=(t.start&&t.due&&t.start!==t.due)?t.start:""; var base=s?(esc(fmtDueShort(s))+'<span class="dl-arr">&rarr;</span>'+esc(fmtDueShort(d))):esc(fmtDueShort(d)); var tm=t.time?'<span class="dl-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'+esc(prettyTime(t.time))+'</span>':''; return '<span class="dl">'+base+tm+'</span>'; }
 function subBadge(t){ var s=t.subs||[]; if(!s.length) return ""; var done=s.filter(function(x){return x.done;}).length; return '<span class="ksub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+done+'/'+s.length+'</span>'; }
 function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!t.done;
   var asg=((t.assignee||"")+"").trim();
   var av=asg?'<span class="kc-av" title="'+esc(asg)+'">'+esc(_initials(asg))+'</span>':'';
   var dd=t.due||t.start;
-  var dchip=dd?'<span class="kc-chip kc-date'+(over?' over':'')+'">'+esc(fmtShort(dd))+(t.time?' &middot; '+esc(prettyTime(t.time)):'')+'</span>':'';
+  var dchip=dd?'<span class="kc-chip kc-date'+(over?' over':(isTodayIso(dd)?' today':''))+'">'+esc(fmtDueShort(dd))+(t.time?' &middot; '+esc(prettyTime(t.time)):'')+'</span>':'';
   var sN=(t.subs||[]).length, sD=(t.subs||[]).filter(function(x){return x.done;}).length;
   var schip=sN?'<span class="kc-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+sD+'/'+sN+'</span>':'';
   var pchip=priChip(t.priority);
   var chips=(pchip||dchip||schip)?'<div class="kc-chips">'+pchip+dchip+schip+'</div>':'';
   var wsn=wsChip(t);
   var wsfoot=wsn?('<div class="kc-wsfoot">'+wsn+'</div>'):'';
-  return '<div class="kcard nk '+(t.done?"done":"")+'"'+wsWash(t)+' data-id="'+t.id+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" oncontextmenu="taskMenu(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="dOver(event)" ondrop="kDropCard(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kc-check\'))openTask(\''+t.id+'\')">'
+  return '<div class="kcard nk '+(t.done?"done":"")+'"'+wsWash(t)+' data-id="'+t.id+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" oncontextmenu="taskMenu(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="kCardOver(event)" ondragleave="this.classList.remove(\'kc-insert\')" ondrop="kDropCard(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kc-check\'))openTask(\''+t.id+'\')">'
     +'<div class="kc-top"><button class="kc-check" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" aria-label="Toggle complete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></button><div class="kc-title">'+esc(t.t)+'</div>'+av+'</div>'
     +chips
     +wsfoot
@@ -5202,7 +6038,7 @@ function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&
 }
 function renderTaskCards(host){ var arr=taskList(); if(!arr.length){host.innerHTML=emptyTasks();return;} var today=isoLocal(new Date());
   host.innerHTML='<div class="tcards">'+arr.map(function(t){var over=t.due&&t.due<today&&!t.done;var st=taskStatus(t);var prog=st==="done"?100:(st==="doing"?50:5);
-    return '<div class="card tcard" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="tc-top">'+statusBadge(st)+'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div><div class="tcap" style="font-weight:700;font-size:.96rem">'+esc(t.t)+'</div>'+(t.desc?'<div class="muted" style="font-size:.82rem;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(t.desc)+'</div>':'')+'<div class="kmeta" style="margin-top:11px">'+priFlag(t.priority)+subBadge(t)+(t.due?'<span class="kdue '+(over?"over":"")+'">'+dueLabel(t)+'</span>':'')+(t.assignee?'<span class="tag-chip">'+esc(t.assignee)+'</span>':'')+((t.tags||[]).slice(0,2).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div><div class="tc-prog"><i style="width:'+prog+'%"></i></div></div>';
+    return '<div class="card tcard" onclick="if(!event.target.closest(\'.kdel\'))openTask(\''+t.id+'\')"><div class="tc-top">'+statusBadge(st)+'<button class="btn danger kdel" onclick="event.stopPropagation();delTask(\''+t.id+'\')">'+IC.x+'</button></div><div class="tcap" style="font-weight:700;font-size:.96rem">'+esc(t.t)+'</div>'+(t.desc?'<div class="muted" style="font-size:.82rem;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(t.desc)+'</div>':'')+'<div class="kmeta" style="margin-top:11px">'+priFlag(t.priority)+subBadge(t)+(t.due?'<span class="kdue '+(over?"over":(isTodayIso(t.due)?"today":""))+'">'+dueLabel(t)+'</span>':'')+(t.assignee?'<span class="tag-chip">'+esc(t.assignee)+'</span>':'')+((t.tags||[]).slice(0,2).map(function(g){return '<span class="tag-chip">'+esc(g)+'</span>';}).join(""))+'</div><div class="tc-prog"><i style="width:'+prog+'%"></i></div></div>';
   }).join("")+'</div>';
 }
 function taskListRow(t,today,alt){
@@ -5210,7 +6046,7 @@ function taskListRow(t,today,alt){
   var asg=((t.assignee||"")+"").trim();
   var av=asg?'<span class="kc-av">'+esc(_initials(asg))+'</span><span class="tl2-asgn">'+esc(asg)+'</span>':'<span class="tl2-asgn">&mdash;</span>';
   var dd=t.due||t.start;
-  var due=dd?('<span class="tl2-d'+(over?' over':'')+'">'+esc(fmtShort(dd))+'</span>'):'<span class="tl2-d none">&mdash;</span>';
+  var due=dd?('<span class="tl2-d'+(over?' over':(isTodayIso(dd)?' today':''))+'">'+esc(fmtDueShort(dd))+'</span>'):'<span class="tl2-d none">&mdash;</span>';
   var p=priKey(t.priority); var pl=PRI[p].s;
   return '<div class="tl2-row'+(t.done?" done":"")+(alt?" alt":"")+'"'+wsWash(t)+' oncontextmenu="taskMenu(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.tl2-check\'))openTask(\''+t.id+'\')">'
     +'<div class="tl2-task"><button class="tl2-check" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" aria-label="Toggle complete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></button><span class="tl2-title">'+esc(t.t)+'</span></div>'
@@ -5247,11 +6083,36 @@ function renderTaskListView(host){
   host.innerHTML='<div class="tl2">'+head+body+'</div>';
 }
 var kDragId=null;
-function kStart(e,id){ kDragId=id; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",id);}catch(_){}; var c=e.target.closest(".kcard"); if(c)c.classList.add("dragging"); }
-function kOver(e){ e.preventDefault(); var c=e.target.closest(".kcol"); if(c)c.classList.add("over"); }
-function kLeave(e){ var c=e.target.closest(".kcol"); if(c)c.classList.remove("over"); }
-function kEnd(){ document.querySelectorAll(".kcard.dragging,.kcol.over").forEach(function(x){x.classList.remove("dragging","over");}); }
-function kDrop(e,status){ e.preventDefault(); var id=kDragId||e.dataTransfer.getData("text/plain"); moveTask(id,null,status); kDragId=null; kEnd(); }
+function kStart(e,id){ kDragId=id; e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",id);}catch(_){}; var c=e.target.closest(".kcard"); if(c)c.classList.add("dragging"); document.body.classList.add("kdragging"); }
+/* A column and a card are both dragged with the same HTML5 payload, and the
+   column body sat under BOTH — so dropping a column anywhere except exactly on
+   another column's header did nothing at all, silently. The board now reads
+   which kind of drag is in flight and answers accordingly: a column drag gets
+   the whole target column as a drop zone plus a side-aware insert edge, a card
+   drag keeps the column highlight it always had. */
+function kOver(e){ e.preventDefault();
+  var c=e.target.closest(".kcol"); if(!c) return;
+  if(colDragId){ e.dataTransfer.dropEffect="move"; kClearMarks();
+    if(c.getAttribute("data-col")!==colDragId){ c.classList.add("col-over"); c.classList.toggle("col-after", _colAfter(e,c)); }
+    return; }
+  c.classList.add("over"); }
+function kLeave(e){ var c=e.target.closest(".kcol"); if(c)c.classList.remove("over","col-over","col-after"); }
+function kClearMarks(){ document.querySelectorAll(".kcol.col-over,.kcol.over,.kcard.kc-insert,.ws-p.ws-over,.ws-p.ws-drop").forEach(function(x){ x.classList.remove("col-over","col-after","over","kc-insert","ws-over","ws-drop"); }); }
+function kEnd(){ document.querySelectorAll(".kcard.dragging").forEach(function(x){x.classList.remove("dragging");}); kClearMarks(); document.body.classList.remove("kdragging"); }
+function _colAfter(e,el){ var r=el.getBoundingClientRect(); return (e.clientX-r.left) > r.width/2; }
+function kDrop(e,status){ e.preventDefault();
+  var id=kDragId||e.dataTransfer.getData("text/plain");
+  if(colDragId||(typeof id==="string"&&id.indexOf("col:")===0)){ return colDrop(e,status); }
+  moveTask(id,null,status); kDragId=null; kEnd(); }
+/* Where the card will land, drawn on the card it will land in front of —
+   kDropCard has always inserted BEFORE the target, but nothing said so, and a
+   drop you cannot predict is a drop you undo. */
+function kCardOver(e){ e.preventDefault();
+  if(colDragId) return kOver(e);
+  var c=e.target.closest(".kcard"); if(!c||c.classList.contains("dragging")) return;
+  document.querySelectorAll(".kcard.kc-insert").forEach(function(x){ if(x!==c) x.classList.remove("kc-insert"); });
+  c.classList.add("kc-insert");
+  var col=c.closest(".kcol"); if(col) col.classList.add("over"); }
 var _tdId=null,_tdNew=null,_tdReady=false,_tdT=null;
 function openTask(id,presetStatus){ _tdSub=null;
   var t=id?(data.tasks||[]).find(function(x){return x.id===id;}):null; var isNew=!t;
@@ -5563,6 +6424,13 @@ function tdDelComment(id,cid){
   data.deleted=data.deleted||{}; data.deleted["#"+id+"/c::#"+cid]=Date.now(); t.comments=(t.comments||[]).filter(function(x){return x.id!==cid;}); t.updated=Date.now();
   if(_tdEditCid===cid) _tdEditCid=null; save(); tdRenderComments(id);
 }
+/* The subtask grip, minus the assumption that it is a subtask. Same six dots,
+   same size, same aria contract -- because the whole point is that a grip means
+   the same thing everywhere in the app: press here and move, and the list will
+   get out of your way. */
+function gripHtml(cls,handler,label){
+  return '<button type="button" class="pd-grip '+cls+'" title="Drag to reorder" aria-label="Drag to reorder '+esc(label||"item")+'" aria-grabbed="false" onpointerdown="'+handler+'(event,this)"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="6" r="1.7"/><circle cx="8" cy="12" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="8" cy="18" r="1.7"/><circle cx="16" cy="18" r="1.7"/></svg></button>';
+}
 function subGripHtml(label){
   return '<button type="button" class="sub-grip" title="Drag to reorder" aria-label="Drag to reorder '+esc(label||"item")+'" aria-grabbed="false" onpointerdown="subDragStart(event,this)"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="6" r="1.7"/><circle cx="8" cy="12" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="8" cy="18" r="1.7"/><circle cx="16" cy="18" r="1.7"/></svg></button>';
 }
@@ -5791,11 +6659,19 @@ function sdRenderComments(){ var host=document.getElementById("sdComments"); if(
 function sdRenderAttach(){ var host=document.getElementById("sdAttach"); if(!host) return; var key=_sdParent+"::"+_sdId; var arr=_attListOf("sub",key)||[];
   if(!supa||!user){ host.innerHTML='<div class="att-empty">Sign in to add or view attachments.</div>'; return; }
   host.innerHTML=arr.length?_attRows("sub",key,arr):'<div class="att-empty">No attachments yet.</div>'; }
-function completedStatusId(wsid){ var ss=statuses(wsid);
+/* Which column in THIS list means finished. Split out of completedStatusId so
+   fill() and saveStatuses() can ask the same question about a column list they
+   are holding directly — fill() runs before `data` exists, so it cannot go
+   through completedStatusId's statuses(wsid) lookup. Everything downstream of
+   t.done ("Mark complete", the Done badge, notification dismissal) depends on
+   this answer, and the old code hardcoded the literal id "done", which is wrong
+   the moment a workspace names its final column anything else. */
+function stDoneOf(ss){ ss=ss||[];
   for(var f=0;f<ss.length;f++){ if(ss[f].done===true) return ss[f].id; }          /* explicit marker wins */
   for(var i=0;i<ss.length;i++){ if(ss[i].id==="done") return ss[i].id; }
-  for(var j=0;j<ss.length;j++){ if(/done|complete|finish|closed|shipped/i.test(ss[j].name)) return ss[j].id; }
+  for(var j=0;j<ss.length;j++){ if(/done|complete|finish|closed|shipped/i.test(ss[j].name||"")) return ss[j].id; }
   return ss.length?ss[ss.length-1].id:"done"; }
+function completedStatusId(wsid){ return stDoneOf(statuses(wsid)); }
 
 function reopenStatusId(wsid){ var ss=statuses(wsid), done=completedStatusId(wsid);
   for(var i=0;i<ss.length;i++){ if(ss[i].id!==done) return ss[i].id; }
@@ -6527,7 +7403,9 @@ async function loadWeather(){
     const ssub=desc+' · '+label;
     _wxCache[key]={v:val,s:ssub}; box.innerHTML=val; if(sub) sub.textContent=ssub;
   }catch(e){
-    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.7rem;-webkit-text-fill-color:initial;color:var(--lavender)">Retry</button>'; if(sub) sub.textContent='';
+    /* inline `color` cannot be overridden by any stylesheet rule, so the hero ink
+       has to be set here too, not just in .hx-val .lnk above */
+    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.7rem;-webkit-text-fill-color:initial;color:#fff">Retry</button>'; if(sub) sub.textContent='';
   }
 }
 function retryWeather(){ delete _wxCache[_wxKey()]; loadWeather(); }
@@ -6908,9 +7786,28 @@ function saveSettings(){
 }
 
 /* ============ Modal helpers ============ */
+var _mdlBackdropDown=false;
 function showModal(html,cls){
   const r=document.getElementById("modalRoot");
-  r.innerHTML=`<div class="overlay ${cls||''}" onclick="if(event.target===this)closeModal()"><div class="modal ${cls||''}" role="dialog" aria-modal="true" tabindex="-1">${html}</div></div>`;
+  r.innerHTML=`<div class="overlay ${cls||''}"><div class="modal ${cls||''}" role="dialog" aria-modal="true" tabindex="-1">${html}</div></div>`;
+  /* Closing on a backdrop click used to be `if(event.target===this)closeModal()`,
+     and a click's target is the nearest common ancestor of where the press went
+     DOWN and where it came UP. So selecting the task title by pressing just left
+     of the first letter and dragging right — or dragging any text in the panel
+     and letting go past its edge — resolved to the overlay and threw the panel
+     away mid-selection, taking the edit with it. A backdrop click has to mean
+     the press STARTED on the backdrop, so that is what we record. Capture phase,
+     because anything inside the panel that stops propagation would otherwise
+     leave the flag stale from the previous press. */
+  _mdlBackdropDown=false;
+  var _ov=r.querySelector(".overlay");
+  if(_ov){
+    _ov.addEventListener("pointerdown",function(e){ _mdlBackdropDown=(e.target===_ov); },true);
+    _ov.addEventListener("click",function(e){
+      var startedOutside=_mdlBackdropDown; _mdlBackdropDown=false;
+      if(e.target===_ov && startedOutside) closeModal();
+    });
+  }
   document.documentElement.classList.add("modal-open"); document.body.classList.add("modal-open");
   _mdlPrevFocus=document.activeElement;
   var m=r.querySelector(".modal");
@@ -6990,7 +7887,7 @@ var I_EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function togglePw(inId,btnId){ var i=document.getElementById(inId), b=document.getElementById(btnId); if(!i) return; var show=(i.type==="password"); i.type=show?"text":"password"; if(b){ b.innerHTML=show?I_EYEOFF:I_EYE; b.setAttribute("aria-label",show?"Hide password":"Show password"); b.title=show?"Hide password":"Show password"; } try{ i.focus(); var v=i.value; i.value=""; i.value=v; }catch(e){} }
 function authUI(mode){
   mode=mode||"in";
-  const root=document.getElementById("authRoot"); root.style.display="grid"; document.documentElement.classList.add("dark");
+  const root=document.getElementById("authRoot"); root.style.display="grid"; document.documentElement.classList.add("dark"); document.documentElement.classList.add("auth-open");
   const tabs=`<div class="auth-tabs"><button class="${mode==='in'?'active':''}" onclick="authUI('in')">Sign in</button><button class="${mode==='up'?'active':''}" onclick="authUI('up')">Create account</button></div>`;
   root.innerHTML=`<div class="auth-card">
     <div class="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
@@ -7004,7 +7901,7 @@ function authUI(mode){
   </div>`;
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
-function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML=""; try{var _t=localStorage.getItem("hub.theme")||"dark";document.documentElement.classList.toggle("dark",_t!=="light");}catch(e){} try{updThemeIcon();}catch(e){}
+function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML=""; document.documentElement.classList.remove("auth-open"); try{var _t=localStorage.getItem("hub.theme")||"dark";document.documentElement.classList.toggle("dark",_t!=="light");}catch(e){} try{updThemeIcon();}catch(e){}
   try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(e){}
   try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
        var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
@@ -7060,11 +7957,24 @@ async function initAuth(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
-    if(signedIn){ closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back"); }
+    /* stamp the clock on every fresh sign-in, including a session Supabase
+       restores for us. Without this a restored session inherits whatever
+       hub.authStart was left behind, so the 4h timer could already be spent
+       the moment the page finished loading. */
+    if(signedIn){ _touchAuth(); closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); toast("Welcome back"); }
     if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
-  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
+  /* Lower the gate here too. Closing it was left entirely to the signedIn branch
+     of onAuthStateChange, which only fires when the user actually CHANGES
+     (!user || user.id!==u.id) — so if getSession() resolves before that callback
+     runs, this line sets `user` first, the callback then sees the same id, and
+     nothing ever calls closeAuth(). #authRoot is position:fixed, inset:0 and
+     z-index:95 by default, above the modal layer at 90, so a gate nobody closed
+     is an invisible sheet of glass over the whole workspace: every click lands
+     on it and nothing in the app responds. closeAuth() is idempotent, so
+     calling it on both paths costs nothing and removes the race. */
+  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); }
   else authUI("in");
 }
 
@@ -7378,8 +8288,23 @@ function renderWsBar(){
   var host=document.getElementById("wsBar"); if(!host) return;
   var act=(data.settings&&data.settings.activeWs)||"all";
   var h='<button class="ws-p'+(act==="all"?" on":"")+'" onclick="wsSet(\'all\')">All<span class="wsn">'+wsCount("all")+'</span></button>';
+  /* The pills are the only place a workspace is ever visible on this tab, and
+     until now they were buttons and nothing else: reordering them meant opening
+     Manage, and moving a task between workspaces meant opening the task and
+     changing a dropdown. Both are drags you can already see in your head — the
+     pill is right there, the card is right there. So the pill is now a drag
+     handle for itself AND a drop target for a card. */
   wsAll().forEach(function(w){
-    h+='<button class="ws-p'+(act===w.id?" on":"")+'" onclick="wsSet(\''+w.id+'\')">'
+    /* No grip on a pill -- it is a 100px-wide chip and a grip would be most of it.
+       Press and move IS the handle: under 5px of travel it stays a click and
+       switches workspace, past 5px it becomes a reorder and the click that the
+       release would otherwise fire is swallowed. draggable="true" is gone, but
+       ondragover/ondrop stay, because a TASK CARD dropping onto a pill is still
+       a real HTML5 drag coming from the board. */
+    h+='<button class="ws-p'+(act===w.id?" on":"")+'" data-ws="'+w.id+'"'
+      +' onclick="wsSet(\''+w.id+'\')" onpointerdown="wsGrab(event,this)"'
+      +' ondragover="wsPillOver(event,\''+w.id+'\')" ondragleave="wsPillLeave(event)"'
+      +' ondrop="wsPillDrop(event,\''+w.id+'\')">'
       +'<span class="wsd" style="background:'+w.color+'"></span>'+esc(w.name)
       +'<span class="wsn">'+wsCount(w.id)+'</span></button>';
   });
@@ -7400,11 +8325,9 @@ async function wsAdd(){
 }
 function wsmRow(w){
   var n=(w.statuses||[]).length||3;
-  return '<div class="wsm-row" data-ws="'+w.id+'" draggable="true"'
-    +' style="background-image:linear-gradient(100deg,'+_wsRgba(w.color,.15)+',rgba(255,255,255,0) 55%);border-color:'+_wsRgba(w.color,.28)+'"'
-    +' ondragstart="wsDragStart(event,\''+w.id+'\')" ondragover="wsDragOver(event)"'
-    +' ondragleave="wsDragLeave(event)" ondrop="wsDrop(event,\''+w.id+'\')" ondragend="wsDragEnd(event)">'
-    +'<span class="wsm-grip" title="Drag to reorder">&#8942;&#8942;</span>'
+  return '<div class="wsm-row" data-ws="'+w.id+'"'
+    +' style="background-image:linear-gradient(100deg,'+_wsRgba(w.color,.15)+',rgba(255,255,255,0) 55%);border-color:'+_wsRgba(w.color,.28)+'">'
+    +gripHtml("wsm-grip","wsmGrab",w.name)
     +'<div class="wsm-cwrap"><button class="wsm-sw" style="background:'+w.color+'" onclick="wsOpenPalette(\''+w.id+'\',this)" title="Colour"></button>'
     +'<div class="wsm-pal" id="pal-'+w.id+'">'+WS_COLORS.map(function(c){
         return '<button class="wsm-po'+(c.toLowerCase()===(w.color||'').toLowerCase()?' on':'')+'" data-c="'+c+'" style="background:'+c+'" onclick="wsSetColor(\''+w.id+'\',\''+c+'\')" aria-label="Colour"></button>'; }).join("")
@@ -7423,7 +8346,7 @@ function wsmRefresh(){ try{ cpClose(); }catch(_){}
   var l=document.getElementById("wsmList"); if(l) l.innerHTML=wsmRows(); }
 function wsManage(){
   showModal('<h4>Workspaces</h4>'
-    +'<p class="muted" style="font-size:.78rem;margin:-4px 0 14px">Drag to reorder. Click a colour to change it.</p>'
+    +'<p class="muted" style="font-size:.78rem;margin:-4px 0 14px">Drag a row by its grip to reorder. Click a colour to change it.</p>'
     +'<div class="tm" id="wsmList">'+wsmRows()+'</div>'
     +'<div class="wsm-add"><input class="fld" id="wsmNew" placeholder="New workspace\u2026" maxlength="28" '
     +'onkeydown="if(event.key===\'Enter\'){event.preventDefault();wsAddInline();}">'
@@ -7450,28 +8373,34 @@ function wsAddInline(){
   el.value=""; el.focus();
   toast("Workspace created \u2713");
 }
-var _wsDrag=null;
-function wsDragStart(e,id){ _wsDrag=id; e.dataTransfer.effectAllowed="move";
-  try{ e.dataTransfer.setData("text/plain",id); }catch(_){}
-  var r=e.currentTarget; if(r) r.classList.add("wsm-dragging"); }
-function wsDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect="move";
-  var r=e.currentTarget; if(r&&!r.classList.contains("wsm-dragging")) r.classList.add("wsm-over"); }
-function wsDragLeave(e){ var r=e.currentTarget; if(r) r.classList.remove("wsm-over"); }
-function wsDragEnd(){ _wsDrag=null;
-  document.querySelectorAll(".wsm-row").forEach(function(r){ r.classList.remove("wsm-dragging","wsm-over"); }); }
-function wsDrop(e,targetId){
+/* This list used to run on the HTML5 drag-and-drop API: draggable="true" plus
+   five ondrag* attributes per row. That API does not fire from a finger at all,
+   so on an iPad the caption said "Drag to reorder" over rows that could not be
+   dragged — and even on a desktop it looked nothing like the subtask reorder
+   two modals away. It now uses the same press-drag engine as subtasks, columns
+   and the workspace pills, with the same six-dot grip: press the grip, the list
+   opens a gap and animates out of the way, release to drop.
+
+   Unlike the Statuses modal there is no Save button here — every other control
+   in this modal writes through on change — so the order commits on release. */
+function wsmGrab(e,el){
+  var item=el&&el.closest(".wsm-row"); if(!item) return;
   e.preventDefault(); e.stopPropagation();
-  var from=_wsDrag; wsDragEnd();
-  if(!from||from===targetId) return;
-  var arr=data.workspaces;
-  var fi=-1, ti=-1, i;
-  for(i=0;i<arr.length;i++){ if(arr[i].id===from) fi=i; if(arr[i].id===targetId) ti=i; }
-  if(fi<0||ti<0) return;
-  var m=arr.splice(fi,1)[0];
-  m.updated=Date.now();
-  arr.splice(ti,0,m);
-  /* order is the array order — persist it and redraw both the modal and the pills */
-  save(); wsmRefresh(); renderWsBar();
+  try{ cpClose(); }catch(_){}
+  document.querySelectorAll(".wsm-pal.show").forEach(function(p){ p.classList.remove("show"); });
+  pdragBegin(e,item,{sel:".wsm-row",key:"data-ws",grip:el,
+                     commit:wsmOrderCommit,scroller:document.getElementById("wsmList")});
+}
+function wsmOrderCommit(ids){
+  /* pdReorder, not splice: a tombstoned workspace is in data.workspaces but not
+     in the modal, and it has to survive a reorder rather than be dropped. */
+  var tombs=(data.workspaces||[]).filter(function(w){ return w&&w.deleted; });
+  data.workspaces=pdReorder(wsAll(),ids,function(w){ return w.id; }).concat(tombs);
+  save();
+  /* The DOM is already in the new order and has just finished animating there.
+     Rebuilding the list would throw that away and scroll it back to the top, so
+     only the pill bar outside the modal is redrawn. */
+  renderWsBar();
 }
 function wsRename(id,v){
   var w=wsById(id); if(!w) return;
@@ -7600,12 +8529,36 @@ function kTouchDown(e){
     var oc=el&&el.closest?el.closest(".kcard"):null;
     if(oc&&oc!==card){ var cr=oc.getBoundingClientRect(); info.before=(ev.clientY<cr.top+cr.height/2)?oc.getAttribute("data-id"):kNextCardId(oc); }
   }
-  function up(ev){ clearTimeout(timer); document.removeEventListener("pointermove",move); document.removeEventListener("pointerup",up); document.removeEventListener("pointercancel",up);
+  /* THE line that makes a finger drag work at all.
+
+     .kcard carries `touch-action:pan-x pan-y` so that resting a finger on a card
+     and swiping still scrolls the board -- taking that away is not an option,
+     the cards fill the columns and there would be nothing left to scroll by.
+     But `pan-x pan-y` also means the browser is entitled to claim the gesture
+     the instant the finger moves, and when it does it fires `pointercancel` and
+     our whole drag dies one pixel in. That is exactly what was happening: the
+     ghost appeared and then the card snapped back, on every real device.
+
+     preventDefault on POINTERmove does not stop that -- a pointermove is not the
+     cancellable event, the touchmove underneath it is. So once the 500ms hold has
+     made the gesture ours, cancel the touchmove itself. It has to be non-passive
+     to be allowed to, and it has to happen on the FIRST touchmove, before the
+     browser latches the scroll -- which it does, because the hold has already
+     elapsed by then and pointermove for the same frame runs first and sets
+     `held`. Once the pan is latched, preventDefault is ignored. */
+  function tmove(ev){ if(held&&ev.cancelable) ev.preventDefault(); }
+  function up(ev){ clearTimeout(timer); unbind();
     if(dragging){ if(ev.cancelable)ev.preventDefault(); if(info.target) moveTask(id,info.before,info.target); }
     /* held but never moved: the menu is already open and stays open. Lifting must not touch it. */
     cleanup(); }
-  function cleanup(){ if(ghost&&ghost.parentNode)ghost.parentNode.removeChild(ghost); var c=document.querySelector('.kcard[data-id="'+id+'"]'); if(c)c.style.opacity=""; document.querySelectorAll(".kcol.over").forEach(function(c){c.classList.remove("over");}); document.removeEventListener("pointermove",move); document.removeEventListener("pointerup",up); document.removeEventListener("pointercancel",up); }
-  document.addEventListener("pointermove",move,{passive:false}); document.addEventListener("pointerup",up); document.addEventListener("pointercancel",up);
+  /* A cancelled gesture must ABORT, not commit. `up` was bound to pointercancel
+     too, so a cancel arriving mid-drag dropped the card into whatever column the
+     finger happened to be over at that moment -- a move the user never finished
+     and never asked for. Cancel now leaves the task exactly where it was. */
+  function cancel(){ clearTimeout(timer); unbind(); cleanup(); }
+  function unbind(){ document.removeEventListener("pointermove",move); document.removeEventListener("pointerup",up); document.removeEventListener("pointercancel",cancel); document.removeEventListener("touchmove",tmove); }
+  function cleanup(){ if(ghost&&ghost.parentNode)ghost.parentNode.removeChild(ghost); var c=document.querySelector('.kcard[data-id="'+id+'"]'); if(c)c.style.opacity=""; document.querySelectorAll(".kcol.over").forEach(function(c){c.classList.remove("over");}); unbind(); }
+  document.addEventListener("pointermove",move,{passive:false}); document.addEventListener("pointerup",up); document.addEventListener("pointercancel",cancel); document.addEventListener("touchmove",tmove,{passive:false});
 }
 document.addEventListener("pointerdown",function(e){ try{ kTouchDown(e); }catch(_){} });
 
@@ -7643,13 +8596,53 @@ document.addEventListener("pointerdown",function(e){ try{ kTouchDown(e); }catch(
   document.addEventListener("pointercancel", cancel, {passive:true});
 })();
 /* Manage statuses */
-function openStatuses(){ var _w=wsActive(); if(!_w){ toast("Pick a workspace to manage its columns"); return; } var html='<h4>Statuses'+(_w?' &middot; '+esc(_w.name):'')+'</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Rename, reorder or remove the columns your tasks move through.</p><div id="stList" style="max-height:54vh;overflow:auto">'+statuses().map(stRow).join("")+'</div><button class="btn soft" style="margin-top:10px" onclick="addStatus()">+ Add status</button><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveStatuses()">Save</button></div>'; showModal(html,"wide"); }
+function openStatuses(){ var _w=wsActive(); if(!_w){ toast("Pick a workspace to manage its columns"); return; } var html='<h4>Statuses'+(_w?' &middot; '+esc(_w.name):'')+'</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Drag a row by its grip to reorder, or use the arrows. Rename and remove here too.</p><div id="stList" style="max-height:54vh;overflow:auto;padding:6px 3px">'+statuses().map(stRow).join("")+'</div><button class="btn soft" style="margin-top:10px" onclick="addStatus()">+ Add status</button><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveStatuses()">Save</button></div>'; showModal(html,"wide"); }
 var ST_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
 var ST_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
-function stRow(c){ var df=(data.settings.defaultStatus||defaultStatusId())===c.id; return '<div class="st-row" data-id="'+esc(c.id)+'"><input class="fld st-name" value="'+esc(c.name)+'"><button type="button" class="st-mini st-def'+(df?" on":"")+'" title="Default for new tasks" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" title="Move up" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" title="Move down" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" title="Delete" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button></div>'; }
-function addStatus(){ var l=document.getElementById("stList"); if(!l) return; var d=document.createElement("div"); d.className="st-row"; d.dataset.id="s"+uid(); d.innerHTML='<input class="fld st-name" value="New status"><button type="button" class="st-mini st-def" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button>'; l.appendChild(d); var inp=d.querySelector(".st-name"); if(inp){ inp.focus(); inp.select(); } }
+function stRow(c){ var df=(data.settings.defaultStatus||defaultStatusId())===c.id; return '<div class="st-row" data-id="'+esc(c.id)+'">'+gripHtml("st-grip","stGrab",c.name)+'<input class="fld st-name" value="'+esc(c.name)+'"><button type="button" class="st-mini st-def'+(df?" on":"")+'" title="Default for new tasks" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" title="Move up" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" title="Move down" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" title="Delete" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button></div>'; }
+function addStatus(){ var l=document.getElementById("stList"); if(!l) return; var d=document.createElement("div"); d.className="st-row"; d.dataset.id="s"+uid(); d.innerHTML=gripHtml("st-grip","stGrab","New status")+'<input class="fld st-name" value="New status"><button type="button" class="st-mini st-def" onclick="setStDefault(this)">'+STAR+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,-1)">'+ST_UP+'</button><button type="button" class="st-mini" onclick="moveStatusRow(this,1)">'+ST_DN+'</button><button type="button" class="st-mini" onclick="this.closest(\'.st-row\').remove()">'+IC.x+'</button>'; l.appendChild(d); var inp=d.querySelector(".st-name"); if(inp){ inp.focus(); inp.select(); } }
+/* Press-drag for the status list, the same gesture and the same grip icon as
+   subtasks. It commits NOTHING: saveStatuses() already reads #stList .st-row in
+   DOM order, so the drag has done all the work by the time it ends — and Cancel
+   still has to be able to throw the reorder away, which it could not do if the
+   drag wrote through to data. The arrow buttons stay: they are the keyboard and
+   the screen-reader path to the same result. */
+function stGrab(e,el){
+  var item=el&&el.closest(".st-row"); if(!item) return;
+  e.preventDefault(); e.stopPropagation();
+  pdragBegin(e,item,{sel:".st-row",key:"data-id",grip:el,
+                     commit:function(){},scroller:document.getElementById("stList")});
+}
 function moveStatusRow(btn,dir){ var row=btn.closest(".st-row"); if(!row) return; var l=row.parentNode; if(dir<0&&row.previousElementSibling) l.insertBefore(row,row.previousElementSibling); else if(dir>0&&row.nextElementSibling) l.insertBefore(row.nextElementSibling,row); }
-function saveStatuses(){ var rows=document.querySelectorAll("#stList .st-row"); var list=[]; var def=null; rows.forEach(function(r){ var nm=r.querySelector(".st-name").value.trim(); if(nm){ list.push({id:r.dataset.id,name:nm}); if(r.querySelector(".st-def.on")) def=r.dataset.id; } }); if(!list.length){ toast("Keep at least one status"); return; } var ids=list.map(function(x){return x.id;}); var _kp={}; ids.forEach(function(id){_kp[id]=1;}); (data.settings.statuses||[]).forEach(function(s){ if(s&&s.id!=null&&!_kp[s.id]) tombstone({id:s.id}); }); list.forEach(function(s){ s.updated=Date.now(); }); (data.tasks||[]).forEach(function(t){ if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status==="done"); }); var _w=wsActive(); if(!_w){ toast("Pick a workspace first"); return; } _w.statuses=list; _w.updated=Date.now(); data.settings.defaultStatus=(def&&ids.indexOf(def)>=0)?def:ids[0]; data.settings.statusesV=2; save(); closeModal(); render(); toast("Statuses updated"); }
+function saveStatuses(){
+  /* Editing one workspace's columns used to reach across ALL of them: the task
+     loop ran over every task in the file and rewrote any status that was not in
+     THIS workspace's new id list, so renaming a column in Personal silently
+     reset every task in Work to that list's first column. It also tombstoned
+     against data.settings.statuses — the legacy global list — which meant a
+     column you actually deleted here was never tombstoned (so sync resurrected
+     it) while unrelated legacy ids were. And the "Pick a workspace first" bail
+     fired AFTER the tasks had already been rewritten, leaving the damage behind
+     with nothing saved to explain it. Resolve the workspace first, then touch
+     only its own tasks and its own previous columns. */
+  var _w=wsActive(); if(!_w){ toast("Pick a workspace first"); return; }
+  var rows=document.querySelectorAll("#stList .st-row"); var list=[]; var def=null;
+  rows.forEach(function(r){ var nm=r.querySelector(".st-name").value.trim(); if(nm){ list.push({id:r.dataset.id,name:nm}); if(r.querySelector(".st-def.on")) def=r.dataset.id; } });
+  if(!list.length){ toast("Keep at least one status"); return; }
+  var ids=list.map(function(x){return x.id;}); var _kp={}; ids.forEach(function(id){_kp[id]=1;});
+  var _prev=Array.isArray(_w.statuses)?_w.statuses:[];
+  /* carry the done flag across a rename: the column the user is still treating
+     as "finished" keeps meaning finished even if its label changed */
+  var _prevDone=stDoneOf(_prev);
+  list.forEach(function(c){ var o=_prev.find(function(x){return x&&x.id===c.id;}); if(o&&o.done===true) c.done=true; });
+  if(!list.some(function(c){return c.done===true;}) && _kp[_prevDone]){ list.forEach(function(c){ if(c.id===_prevDone) c.done=true; }); }
+  _prev.forEach(function(c){ if(c&&c.id!=null&&!_kp[c.id]) tombstone({id:c.id}); });
+  list.forEach(function(c){ c.updated=Date.now(); });
+  var _doneId=stDoneOf(list);
+  (data.tasks||[]).forEach(function(t){ if(t.ws!==_w.id) return; if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status===_doneId); });
+  _w.statuses=list; _w.updated=Date.now();
+  data.settings.defaultStatus=(def&&ids.indexOf(def)>=0)?def:ids[0]; data.settings.statusesV=2;
+  save(); closeModal(); render(); toast("Statuses updated"); }
 /* Single Google OAuth (one token for Calendar + Gmail) */
 var COMBINED_SCOPE=CAL_SCOPE+" "+GMAIL_SCOPE;
 function googleConnect(){
@@ -7697,9 +8690,218 @@ function setStDefault(btn){ document.querySelectorAll("#stList .st-def").forEach
 /* Column collapse + reorder */
 function toggleCol(id){ var cc=data.settings.collapsedCols||[]; var i=cc.indexOf(id); if(i>=0) cc.splice(i,1); else cc.push(id); data.settings.collapsedCols=cc; save(); renderTasks(); }
 var colDragId=null;
-function colDragStart(e,id){ colDragId=id; try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain","col:"+id); }catch(_){ } var h=e.target.closest(".kcol-head"); if(h) h.classList.add("col-drag"); }
-function colDragEnd(e){ colDragId=null; document.querySelectorAll(".kcol-head.col-drag,.kcol.col-over").forEach(function(x){ x.classList.remove("col-drag","col-over"); }); }
-function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); if(!colDragId||colDragId===targetId){ colDragId=null; return; } if(!wsActive()){ colDragId=null; toast("Pick a workspace to reorder its columns"); return; } var ss=statuses(); var from=-1,to=-1,i; for(i=0;i<ss.length;i++){ if(ss[i].id===colDragId)from=i; if(ss[i].id===targetId)to=i; } if(from<0||to<0){ colDragId=null; return; } var m=ss.splice(from,1)[0]; ss.splice(to,0,m); var _w=wsActive(); if(_w){ _w.statuses=ss; _w.updated=Date.now(); } colDragId=null; save(); render(); }
+function colDragStart(e,id){ colDragId=id; try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain","col:"+id); }catch(_){ }
+  var h=e.target.closest(".kcol-head"); if(h) h.classList.add("col-drag");
+  document.body.classList.add("kdragging","coldragging"); }
+function colDragEnd(e){ colDragId=null; document.querySelectorAll(".kcol-head.col-drag").forEach(function(x){ x.classList.remove("col-drag"); }); kClearMarks(); document.body.classList.remove("kdragging","coldragging"); }
+/* Dropping a column used to mean "take its index" — which reads as a swap when
+   you drag right and as an insert when you drag left, from the same gesture.
+   Now the half of the target you release over decides, so the peach edge you
+   were shown is where the column actually goes. */
+function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation();
+  var drag=colDragId; if(!drag){ colDragEnd(); return; }
+  if(drag===targetId){ colDragEnd(); return; }
+  if(!wsActive()){ colDragEnd(); toast("Pick a workspace to reorder its columns"); return; }
+  var ss=statuses(); var from=-1,to=-1,i;
+  for(i=0;i<ss.length;i++){ if(ss[i].id===drag)from=i; if(ss[i].id===targetId)to=i; }
+  if(from<0||to<0){ colDragEnd(); return; }
+  var tgtEl=document.querySelector('.kcol[data-col="'+targetId+'"]');
+  var after=tgtEl?_colAfter(e,tgtEl):false;
+  var m=ss.splice(from,1)[0];
+  var at=ss.findIndex(function(c){ return c.id===targetId; });
+  ss.splice(after?at+1:at,0,m);
+  var _w=wsActive(); if(_w){ _w.statuses=ss; _w.updated=Date.now(); }
+  colDragEnd(); save(); render(); }
+
+/* ═══ Press-to-drag ════════════════════════════════════════════════════════
+   One engine, two callers (board columns and workspace pills), modelled on the
+   subtask reorder because that is the drag in this app that already feels
+   right: nothing happens until you have travelled 5px, so a press that turns
+   out to be a click is still a click; past that the list itself moves, with the
+   items sliding to their new slots (FLIP) instead of a ghost image floating
+   over a board that never reacts; and a coloured line shows the exact gap you
+   are about to drop into.
+
+   It is deliberately NOT HTML5 drag-and-drop. HTML5 dnd does not fire at all
+   from a touch screen, which is most of the reason the old column reorder felt
+   broken on an iPad, and it hands the visual feedback to the browser. Pointer
+   events work identically for mouse, pen and finger -- `touch-action:none` on
+   the grip is what stops the page scrolling out from under a finger drag.
+
+   Axis is decided per PAIR rather than per list: the kanban is horizontal on a
+   desktop and a single stacked column under 820px, and the pill bar wraps onto
+   several lines, so "is the target to my left or above me" is a question only
+   the two elements involved can answer. Compare the larger of the two deltas
+   and split that side down the middle. */
+var _pdrag=null,_pdSwallow=false;
+function pdragBegin(e,item,opt){
+  if(_pdrag||(e.button!=null&&e.button!==0)) return false;
+  var host=item&&item.parentNode; if(!host) return false;
+  if(host.querySelectorAll(opt.sel).length<2) return false;   /* nothing to reorder against */
+  _pdrag={item:item,host:host,sel:opt.sel,key:opt.key,pid:e.pointerId,
+          sx:e.clientX,sy:e.clientY,moved:false,target:null,
+          grip:opt.grip||item,commit:opt.commit,scroller:opt.scroller||null};
+  try{ _pdrag.grip.setPointerCapture(e.pointerId); }catch(_){}
+  document.addEventListener("pointermove",pdragMove,{passive:false});
+  document.addEventListener("pointerup",pdragEnd,true);
+  document.addEventListener("pointercancel",pdragEnd,true);
+  return true;
+}
+function pdragClear(d){ if(d.target){ d.target.classList.remove("pd-before","pd-after"); d.target=null; } }
+function pdragFlip(d,before){
+  if(before===d.item||before===d.item.nextSibling) return;
+  var rows=[].slice.call(d.host.querySelectorAll(d.sel)),first=[];
+  rows.forEach(function(r){ var b=r.getBoundingClientRect(); first.push({el:r,x:b.left,y:b.top}); });
+  d.host.insertBefore(d.item,before);
+  first.forEach(function(o){
+    var b=o.el.getBoundingClientRect(),dx=o.x-b.left,dy=o.y-b.top;
+    if(Math.abs(dx)<1&&Math.abs(dy)<1) return;
+    try{ if(o.el._pdAnim)o.el._pdAnim.cancel();
+      o.el._pdAnim=o.el.animate(
+        [{transform:"translate3d("+dx+"px,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],
+        {duration:210,easing:"cubic-bezier(.22,.9,.31,1)"});
+    }catch(_){}
+  });
+}
+function pdragMove(e){
+  var d=_pdrag; if(!d||e.pointerId!==d.pid) return;
+  if(!d.moved&&Math.abs(e.clientX-d.sx)<5&&Math.abs(e.clientY-d.sy)<5) return;
+  if(!d.moved){ d.moved=true; d.item.classList.add("pd-dragging");
+    if(d.grip.setAttribute) d.grip.setAttribute("aria-grabbed","true");
+    document.documentElement.classList.add("pd-reordering"); }
+  if(e.cancelable) e.preventDefault();
+  var stack=document.elementsFromPoint?document.elementsFromPoint(e.clientX,e.clientY)
+                                     :[document.elementFromPoint(e.clientX,e.clientY)],target=null;
+  for(var i=0;i<stack.length;i++){
+    var q=stack[i]&&stack[i].closest&&stack[i].closest(d.sel);
+    if(q&&q!==d.item&&q.parentNode===d.host){ target=q; break; }
+  }
+  pdragClear(d);
+  if(target){
+    var r=target.getBoundingClientRect(),ir=d.item.getBoundingClientRect();
+    var horiz=Math.abs(r.left-ir.left)>=Math.abs(r.top-ir.top);
+    var before=horiz?(e.clientX<r.left+r.width/2):(e.clientY<r.top+r.height/2);
+    target.classList.add(before?"pd-before":"pd-after"); d.target=target;
+    pdragFlip(d,before?target:target.nextSibling);
+  }
+  /* Edge auto-scroll, on whichever axis the scroller actually scrolls. The
+     kanban and the pill bar scroll sideways; the two modal lists this engine
+     now also drives (#stList, #wsmList) scroll DOWN, and without this branch a
+     drag to the sixth status in a list capped at 54vh simply cannot reach it. */
+  var sc=d.scroller;
+  if(sc){
+    var sr=sc.getBoundingClientRect(),edge=64;
+    if(sc.scrollWidth>sc.clientWidth+2){
+      if(e.clientX<sr.left+edge) sc.scrollLeft-=Math.min(24,Math.max(6,(sr.left+edge-e.clientX)*.3));
+      else if(e.clientX>sr.right-edge) sc.scrollLeft+=Math.min(24,Math.max(6,(e.clientX-(sr.right-edge))*.3));
+    }
+    if(sc.scrollHeight>sc.clientHeight+2){
+      if(e.clientY<sr.top+edge) sc.scrollTop-=Math.min(24,Math.max(6,(sr.top+edge-e.clientY)*.3));
+      else if(e.clientY>sr.bottom-edge) sc.scrollTop+=Math.min(24,Math.max(6,(e.clientY-(sr.bottom-edge))*.3));
+    }
+  }
+}
+function pdragEnd(e){
+  var d=_pdrag; if(!d||(e.pointerId!=null&&e.pointerId!==d.pid)) return;
+  _pdrag=null;
+  try{ d.grip.releasePointerCapture(d.pid); }catch(_){}
+  pdragClear(d);
+  d.item.classList.remove("pd-dragging");
+  if(d.grip.setAttribute) d.grip.setAttribute("aria-grabbed","false");
+  document.documentElement.classList.remove("pd-reordering");
+  document.removeEventListener("pointermove",pdragMove);
+  document.removeEventListener("pointerup",pdragEnd,true);
+  document.removeEventListener("pointercancel",pdragEnd,true);
+  if(!d.moved) return;
+  /* The pointerup that ends a drag also fires a click on whatever sits under
+     it. On a pill that click would switch workspace -- never what someone who
+     just spent a whole gesture reordering meant. Swallow exactly one, and let
+     it lapse on a timer so a swallow can never strand the next real click. */
+  _pdSwallow=true; setTimeout(function(){ _pdSwallow=false; },400);
+  var ids=[].slice.call(d.host.querySelectorAll(d.sel)).map(function(x){ return x.getAttribute(d.key); });
+  try{ d.commit(ids); }catch(err){ try{ render(); }catch(_){} }
+}
+if(!window._pdClickBound){ window._pdClickBound=true;
+  document.addEventListener("click",function(e){
+    if(!_pdSwallow) return; _pdSwallow=false;
+    e.stopPropagation(); e.preventDefault();
+  },true);
+}
+/* Reorder a LIST OF OBJECTS to match a list of ids, without losing anything the
+   ids did not mention. A column that is filtered out of the DOM, or a workspace
+   the bar does not draw, must survive the reorder rather than quietly vanish. */
+function pdReorder(arr,ids,idOf){
+  var by={},out=[]; (arr||[]).forEach(function(o){ by[idOf(o)]=o; });
+  (ids||[]).forEach(function(id){ if(by[id]){ out.push(by[id]); delete by[id]; } });
+  (arr||[]).forEach(function(o){ if(by[idOf(o)]) out.push(o); });
+  return out;
+}
+function colGrab(e,el){
+  var item=el&&el.closest(".kcol"); if(!item) return;
+  /* "All" shows the union of every workspace's columns -- there is no single
+     list an order could be written back to, so the grip simply does nothing. */
+  if(!wsActive()){ toast("Pick a workspace to reorder its columns"); return; }
+  e.preventDefault(); e.stopPropagation();
+  pdragBegin(e,item,{sel:".kcol",key:"data-col",grip:el,commit:colOrderCommit,
+                     scroller:item.closest(".kanban")});
+}
+function colOrderCommit(ids){
+  var w=wsActive(); if(!w){ render(); return; }
+  w.statuses=pdReorder(statuses(),ids,function(c){ return c.id; });
+  w.updated=Date.now(); save(); render();
+}
+function wsGrab(e,el){
+  if(!el||!el.getAttribute("data-ws")) return;
+  pdragBegin(e,el,{sel:".ws-p[data-ws]",key:"data-ws",grip:el,commit:wsOrderCommit,
+                   scroller:document.getElementById("wsBar")});
+}
+function wsOrderCommit(ids){
+  data.workspaces=pdReorder(wsAll(),ids,function(w){ return w.id; });
+  save(); render();
+}
+/* ---- workspace pills: reorder by drag, and accept a task card ---- */
+var _wsPill=null;
+function wsPillStart(e,id){ _wsPill=id; try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain","wsp:"+id); }catch(_){ }
+  var b=e.currentTarget; if(b) b.classList.add("ws-drag"); document.body.classList.add("kdragging"); }
+function wsPillEnd(e){ _wsPill=null; document.querySelectorAll(".ws-p.ws-drag").forEach(function(x){ x.classList.remove("ws-drag"); }); kClearMarks(); document.body.classList.remove("kdragging"); }
+function wsPillOver(e,id){
+  var b=e.currentTarget; if(!b) return;
+  if(kDragId){ e.preventDefault(); e.dataTransfer.dropEffect="move"; b.classList.add("ws-drop"); return; }
+  if(_wsPill&&_wsPill!==id){ e.preventDefault(); e.dataTransfer.dropEffect="move"; b.classList.add("ws-over"); } }
+function wsPillLeave(e){ var b=e.currentTarget; if(b) b.classList.remove("ws-over","ws-drop"); }
+function wsPillDrop(e,id){ e.preventDefault(); e.stopPropagation();
+  var b=e.currentTarget; if(b) b.classList.remove("ws-over","ws-drop");
+  var raw=""; try{ raw=e.dataTransfer.getData("text/plain")||""; }catch(_){ }
+  if(kDragId||(raw&&raw.indexOf("wsp:")!==0&&raw.indexOf("col:")!==0)){
+    var tid=kDragId||raw; kDragId=null; kEnd(); moveTaskToWs(tid,id); return; }
+  if(_wsPill&&_wsPill!==id){
+    var arr=data.workspaces||[]; var from=arr.findIndex(function(w){return w.id===_wsPill;});
+    var m; if(from<0){ wsPillEnd(e); return; }
+    m=arr.splice(from,1)[0];
+    var at=arr.findIndex(function(w){return w.id===id;});
+    var r=b?b.getBoundingClientRect():null;
+    var after=r?((e.clientX-r.left)>r.width/2):false;
+    arr.splice(after?at+1:at,0,m);
+    wsPillEnd(e); save(); render(); return; }
+  wsPillEnd(e); }
+/* Dropping a card on another workspace's pill has to answer a question the drag
+   itself cannot: which column does it land in over there? Columns are
+   per-workspace and their ids are unique per workspace, so we match by NAME
+   first — "In Progress" in Personal becomes "In Progress" in Work — then fall
+   back to the same id, then to that workspace's first column. */
+function moveTaskToWs(taskId,wsId){
+  var t=(data.tasks||[]).find(function(x){return x.id===taskId;});
+  var w=wsById(wsId); if(!t||!w) return;
+  if(t.ws===wsId){ toast("Already in "+w.name); return; }
+  var curName=((statusesOf(t).find(function(c){return c.id===taskStatus(t);})||{}).name||"").toLowerCase();
+  var to=statuses(wsId);
+  var match=to.find(function(c){ return (c.name||"").toLowerCase()===curName; })
+         || to.find(function(c){ return c.id===t.status; })
+         || to[0];
+  t.ws=wsId; t.status=match?match.id:t.status; t.done=(t.status===completedStatusId(wsId));
+  if(!t.done) notifUndismiss("task:"+t.id);
+  t.updated=Date.now(); save(); render();
+  toast("Moved to "+w.name+" \u00b7 "+(match?match.name:"")); }
 
 /* ===== batch v6 additions: content-aware masonry packer ===== */
 var SPAN={calendar:2,gmail:2,apps:2,notes:2,briefing:1,weather:1,prayer:1,tasks:1,links:1};
@@ -7810,6 +9012,43 @@ window.addEventListener("beforeunload",function(){
   try{ save(true); }catch(e){}
 });
 /* ============ Boot ============ */
+
+/* ── Auth gate, decided BEFORE the workspace is painted ────────────────────
+   The old order was: renderAll() paints the whole workspace, the splash lifts
+   600ms after load, and only then does initAuth()'s `await getSession()`
+   resolve and discover the session is spent — at which point it toasts
+   "signed out after 4h" and swaps in the sign-in card. So you were let in,
+   used the app for a beat, and were thrown out. #authRoot defaults to
+   display:none, which is what made the app optimistically unlocked and
+   retroactively locked.
+
+   Both questions this asks can be answered synchronously from localStorage, so
+   the gate can be up before the first paint. initAuth() still runs and still
+   has the final word — this only stops the workspace from flashing past on the
+   way to a sign-in screen it was always going to reach. */
+function _hasStoredSupaSession(){
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k && k.indexOf("sb-")===0 && k.indexOf("-auth-token")>0){
+        var v=localStorage.getItem(k);
+        if(v && v.length>20) return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
+(function _bootAuthGate(){
+  try{
+    if(!supaReady) return;                              /* local-only build */
+    if(localStorage.getItem(GUEST_FLAG)) return;        /* guest never gated */
+    if(_hasStoredSupaSession() && !_sessionExpired()) return;
+    /* Deliberately does NOT clear hub.authStart: initAuth() re-reads it, and
+       clearing it here would make the session look fresh and let it through. */
+    authUI("in");
+  }catch(e){}
+})();
+
 renderAll();
 if(location.hash && PAGES[location.hash.slice(1)]) { _navInit(); }
 else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
