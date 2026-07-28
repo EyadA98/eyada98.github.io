@@ -13,15 +13,40 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:'saudi_riyal';src:url('https://cdn.jsdelivr.net/gh/emran-alhaddad/Saudi-Riyal-Font@main/fonts/regular/saudi_riyal.woff2') format('woff2'),url('https://cdn.jsdelivr.net/gh/emran-alhaddad/Saudi-Riyal-Font@main/fonts/regular/saudi_riyal.ttf') format('truetype');font-weight:normal;font-style:normal;font-display:swap}
+.riyal{font-family:'saudi_riyal';font-style:normal;font-weight:400;line-height:1;display:inline-block}
+
 :root{
   /* Riyadh Air — Aviation Luxury (refined light): Lavender · Indigo · Sunset Peach */
   --indigo:#2a1d44; --indigo-2:#443163; --indigo-3:#15103a; --violet:#4a38b5; --lavender:#817eff;
   --lilac:#b3a9ff; --lilac-soft:#f3eefc; --peach:#ffb3ab; --peach-deep:#c66a2b;
   --bg:#f4f1fb; --card:#FFFFFF; --border:#e7e0f5; --text:#2a1d44; --muted:#6a5f86;
   --green:#0a7c6b; --green-soft:#E3F6ED; --red:#c22940; --red-soft:#FBEAE8;
+  --coral:#d6554c;   /* guide: negative values take a minus sign and Coral #D6554C - distinct from --red (error) */
+  /* Coral has to carry two inks, the same way the Hub's kind hues do. #D6554C is
+     tuned for a white card; on the hero - which is a dark gradient in BOTH themes -
+     it drops to 2.4:1 and disappears. --coral-d is the same hue axis (3.9deg) lifted
+     to full value at S .40, so it still reads coral rather than the washed pink
+     #FFB9B0 it replaces, and clears 4.97:1 on the delta pill. Not theme-scoped:
+     it belongs to the hero surface, which never turns light. */
+  --coral-d:#ffa099;
+  /* Budget-view inks. The Budget cards carried a private palette (#7fe3c0 /
+     #f3a895 / #b3a9ff as *text*) that had only ever been seen on the dark canvas
+     - and html:not(.dark) .bud-env forces those cards to plain #fff, where the
+     three measure 1.54 / 1.94 / 2.09:1. These are the theme-scoped replacements.
+     #b8433a is the guide's own Priority-grid "High" light ink (5.38:1 on white);
+     #4a38b5 is --violet, the guide's Task light ink that Hub already uses. */
+  --coral-ink:#b8433a; --lav-ink:#4a38b5;
+  --amber:#f0c24b; --amber-ink:#8a6100; --amber-soft:rgba(240,194,75,.18);
+  --sky:#5aa2ea;   --sky-ink:#1f5fc2;   --sky-soft:rgba(90,162,234,.16);
+  /* --peach-deep #C66A2B is the guide's Trip fill; it was being used as ink and
+     misses AA on BOTH surfaces (3.77:1 on the white card, 4.41:1 on the dark).
+     #A85C22 is the guide's own Priority-grid "Medium" light ink; #EC9D6A is a
+     step Finance already carries in PALETTE. --peach-deep stays the fill. */
+  --peach-ink:#a85c22;
   --radius:18px;
   --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%);
-  --grad-iri-rev:linear-gradient(120deg,#ffb3ab 0%,#c9b0ff 58%,#817eff 100%);
+  --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);
   --glow-lav:0 10px 30px rgba(129,126,255,.34);
   --glow-peach:0 10px 30px rgba(198,106,43,.30);
   --sh-1:0 1px 2px rgba(42,29,68,.05),0 6px 20px rgba(42,29,68,.07);
@@ -110,18 +135,32 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .hero .hero-stars,.hero .hero-moon{display:none}
 .hero>.hero-stars,.hero>.hero-moon{z-index:0}
 .hero.tr-morning{background:radial-gradient(55% 60% at 82% 20%,rgba(255,201,150,.55),transparent 60%),radial-gradient(70% 65% at 16% 34%,rgba(129,138,255,.55),transparent 65%),linear-gradient(160deg,#232a66,#15103f)}
-.hero.tr-afternoon{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(255,179,171,.55),transparent 70%),radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.5),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
+.hero.tr-afternoon{background:radial-gradient(42% 45% at 22% 28%,rgba(168,124,245,.6),transparent 70%),radial-gradient(40% 42% at 82% 22%,rgba(255,179,171,.55),transparent 70%),/* blue lobe held at .40, not .5: at mobile the hero is short enough that the
+   P/L chip lands inside this lobe, and .5 lifted the backdrop to rgb(59,76,135)
+   - which put the chip's 16px Marcellus-400 figure at 4.18:1. .40 restores it
+   to 5.02:1 and is the only alpha touched, so the aurora keeps its character. */
+radial-gradient(48% 50% at 72% 88%,rgba(95,140,235,.40),transparent 70%),radial-gradient(40% 42% at 12% 82%,rgba(224,120,180,.42),transparent 70%),linear-gradient(160deg,#1a1538,#120e28)}
 .hero.tr-evening{background:radial-gradient(60% 50% at 78% 22%,rgba(120,110,235,.42),transparent 60%),radial-gradient(50% 42% at 28% 62%,rgba(80,110,220,.28),transparent 60%),linear-gradient(160deg,#0f0a28,#08060f)}
 .hero.tr-evening .hero-stars{display:block;position:absolute;inset:0;background-image:radial-gradient(1.2px 1.2px at 12% 28%,#fff,transparent),radial-gradient(1px 1px at 30% 52%,rgba(255,255,255,.8),transparent),radial-gradient(1.1px 1.1px at 47% 24%,#fff,transparent),radial-gradient(1px 1px at 66% 44%,rgba(255,255,255,.75),transparent),radial-gradient(1.2px 1.2px at 82% 30%,#fff,transparent),radial-gradient(1px 1px at 91% 60%,rgba(255,255,255,.7),transparent);background-repeat:no-repeat}
 .hero.tr-evening .hero-moon{display:block;position:absolute;top:16px;right:18px;left:auto;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#efeaff,#b9aede);box-shadow:0 0 22px rgba(200,190,255,.5)}
 .hero .eyebrow{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.65;font-weight:700;animation:fadeUp .55s var(--ease) .26s backwards}
 .hero .amount{font-size:clamp(1.9rem,3.3vw,3.2rem);font-weight:900;letter-spacing:-.03em;margin:5px 0 6px;animation:fadeUp .6s var(--ease) .34s backwards}
-.hero .delta{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:5px 14px;border-radius:99px;background:rgba(255,255,255,.14);backdrop-filter:blur(4px);animation:fadeUp .6s var(--ease) .44s backwards}
-.hero .delta.up{color:#9FF0C8}.hero .delta.down{color:#FFB9B0}
+/* The pill scrim is DARK, not white. A white scrim lightens the backdrop under
+   light ink, so it worked against both the up-green and the down-coral: on the
+   morning and afternoon heroes at mobile it pulled the pill down to ~3.1-3.6:1.
+   rgba(13,9,38,.28) is --indigo-3 at low alpha; it deepens the backdrop instead,
+   lifting BOTH inks clear of AA in every time-of-day hero at every viewport. */
+.hero .delta{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:5px 14px;border-radius:99px;background:rgba(13,9,38,.28);backdrop-filter:blur(4px);animation:fadeUp .6s var(--ease) .44s backwards}
+.hero .delta.up{color:#9FF0C8}.hero .delta.down{color:var(--coral-d)}
 .hero-badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;animation:fadeUp .6s var(--ease) .54s backwards}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;padding:5px 13px;border-radius:99px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px)}
-.badge.warn{background:rgba(240,194,75,.22);color:#f0c24b}
-.badge.good{background:rgba(159,240,200,.18);color:#9FF0C8}
+/* Same scrim story as .hero .delta above: the base is DARK, and the warn/good
+   tints layer on top of it as a background-image rather than replacing it.
+   (Shorthand `background` would reset background-color, hence the two
+   properties.) On the morning hero at mobile the old white/tint-only scrim put
+   warn at 3.99:1 and good at 4.48:1; this puts them at 4.61 and 5.30. */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;padding:5px 13px;border-radius:99px;background:rgba(13,9,38,.30);backdrop-filter:blur(4px)}
+.badge.warn{background-image:linear-gradient(rgba(240,194,75,.24),rgba(240,194,75,.24));color:#f0c24b}
+.badge.good{background-image:linear-gradient(rgba(159,240,200,.20),rgba(159,240,200,.20));color:#9FF0C8}
 .hero-side{min-width:280px;flex:0 1 320px;animation:fadeUp .65s var(--ease) .4s backwards}
 .hero-side .spark-wrap{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);border-radius:16px;padding:14px 16px 8px;backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
 .hero-side .spark-label{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;opacity:.65;font-weight:700;margin-bottom:4px}
@@ -146,7 +185,7 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
   font-size:.86rem;font-weight:500;line-height:1.5}
 .insight .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:.95rem}
 .insight.tone-good .ico{background:var(--green-soft);color:var(--green)}
-.insight.tone-warn .ico{background:#FDEFE9;color:var(--peach-deep)}
+.insight.tone-warn .ico{background:#FDEFE9;color:var(--peach-ink)}   /* 3.40:1 -> 4.43:1 */
 .insight.tone-info .ico{background:var(--lilac-soft);color:var(--violet)}
 .insight b{font-weight:700}
 .insight .dismiss{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;flex:none;font-size:.8rem;opacity:.55;transition:opacity .2s}
@@ -193,7 +232,7 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .tile-green{background:linear-gradient(135deg,#3FC98A,var(--green))}
 .trend{display:inline-flex;align-items:center;gap:4px;font-size:.73rem;font-weight:800;padding:3px 10px;border-radius:99px;margin-left:8px;vertical-align:middle}
 .trend.up{background:var(--green-soft);color:var(--green)}
-.trend.down{background:var(--red-soft);color:var(--red)}
+.trend.down{background:var(--red-soft);color:var(--coral-ink)}   /* ink, not fill - same reason as .neg */
 .prog{height:7px;border-radius:99px;background:rgba(142,127,208,.16);margin-top:13px;overflow:hidden}
 .prog span{display:block;height:100%;border-radius:99px;animation:growBar 1s var(--ease)}
 .prog-lav span{background:linear-gradient(90deg,var(--lavender),var(--violet))}
@@ -203,7 +242,16 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .ring .track{stroke:var(--lilac-soft)}
 .ring .val{stroke:url(#peachGrad);stroke-linecap:round;transition:stroke-dashoffset 1s var(--ease)}
 .spark-mini{margin-top:10px;height:42px;position:relative}
-.pos{color:var(--green)} .neg{color:var(--red)}
+/* .neg takes --coral-INK, not raw --coral. The guide's rule is "negative values
+   take a minus sign and Coral #D6554C"; #D6554C is the hue, but as 14.7px table
+   text it measures 3.96:1 on the white card and 4.38:1 on the dark card - it
+   misses AA on BOTH surfaces, which is the same two-ink problem section 07
+   already names ("give pale accents a darkened ink variant for light mode").
+   --coral-ink keeps the hue and clears AA either way: #B8433A light, #FFA099
+   dark. Raw --coral stays the FILL value (flow bar, track), where it belongs.
+   The hero P/L is untouched - it sets --coral-d inline, because the hero is dark
+   in both themes and must not follow the theme-scoped ink. */
+.pos{color:var(--green)} .neg{color:var(--coral-ink)}
 .two-col{grid-template-columns:1fr 1fr}
 .chart-card{position:relative;min-height:332px}
 .chart-card canvas{max-height:290px}
@@ -249,7 +297,7 @@ tfoot td{font-weight:800;border-top:2px solid rgba(142,127,208,.2);background:rg
 .btn:focus-visible,aside button:focus-visible,.seg button:focus-visible,.bottombar button:focus-visible,.name-edit:focus-visible,.insight .dismiss:focus-visible{outline:2px solid var(--lavender);outline-offset:2px}
 
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:4px 0 15px;gap:10px;flex-wrap:wrap}
-.section-head h2{font-size:1.07rem;font-weight:800}
+.section-head h2{font-size:1.07rem;font-weight:400}
 .pill{display:inline-block;padding:3px 11px;border-radius:99px;font-size:.72rem;background:rgba(142,127,208,.16);color:var(--violet);font-weight:700}
 .pill.live{background:rgba(34,160,107,.14);color:var(--green)}
 select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.8);color:var(--text);padding:8px 12px;border-radius:10px;font-size:.9rem;font-family:inherit;font-weight:600}
@@ -414,7 +462,9 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   .card,.alloc-card,.insight{box-shadow:none;backdrop-filter:none;background:#fff;border:1px solid #ddd;break-inside:avoid}
   .hero{background:#fff!important;color:var(--indigo);border:1px solid #ddd;box-shadow:none}
   .hero::before,.hero::after{display:none}
-  .hero .delta,.badge{background:#f0f0f0;color:var(--indigo)}
+  /* background-image:none must be explicit now that .badge.warn/.good carry their
+     tint as an image - .badge alone is less specific and would lose to them. */
+  .hero .delta,.badge,.badge.warn,.badge.good{background:#f0f0f0;background-image:none;color:var(--indigo)}
   .greet p{opacity:1;color:var(--muted)}
   .spark-wrap{background:#fafafa;border-color:#eee}
   .tab{display:none}.tab.active{display:block}
@@ -425,6 +475,39 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
   background:linear-gradient(112deg,var(--indigo-3) 0%,var(--indigo) 45%,var(--violet) 85%,var(--lavender) 115%)}
 .auth-wrap::before{content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)}
 .auth-wrap::after{display:none}
+/* ── The sign-in gate is a wall, so the page behind it must stop being a page ──
+   .auth-wrap is position:fixed and covers the viewport, but nothing ever told
+   the document underneath to hold still. The whole Finance Board stays laid out
+   in normal flow behind the overlay, so the document keeps its scrollbar:
+   measured with the gate forced up, the document overflowed by 972px at
+   1440x900, 1886px at 1024x768 and 1900px at 430x932. Spinning the wheel on the
+   sign-in screen moved a scrollbar and nothing else. Locking html (not body) is
+   what the gate needed: iOS honours overflow:hidden on the root element, and it
+   leaves the scroll POSITION intact. .auth-wrap keeps its own overflow:auto —
+   that one is real, and it is the only scrolling this screen should do: at
+   932x430 the 485px card genuinely does not fit and has to scroll inside. */
+html.auth-open,html.auth-open body{overflow:hidden}
+html.auth-open{overscroll-behavior:none}
+
+/* And the gate must not scroll SIDEWAYS at all. The peach glow behind the card
+   is a 560px circle pinned right:-10%, and a decorative overflow to the right
+   is real scrollable width inside an overflow:auto box — the browser does not
+   know it is only a glow. Measured with the gate up that bought 143px of
+   horizontal scroll at 1440 and 38px at 390, which is why the sign-in screen
+   slid left under a trackpad swipe and showed a band of bare gradient. Clipping
+   x keeps the glow's bleed decorative, which is all it was ever meant to be;
+   y stays auto because a 485px card on a 430px-tall landscape phone has to
+   scroll somewhere. */
+.auth-wrap{overflow-x:hidden;overflow-y:auto}
+
+/* Clipping stops the swipe, but the 143px of phantom width is still there in
+   the box's scrollWidth, and anything that can move a scroll container without
+   the user asking — focusing a field, a keyboard page, an assistive scroll —
+   can still find it. So the glow is taken out of the scroll box entirely: it is
+   position:fixed, and fixed descendants do not contribute to an ancestor's
+   scrollable overflow. The gate is itself inset:0 fixed, so the circle lands on
+   exactly the same pixels it did before. */
+.auth-wrap::before{position:fixed}
 .auth-card{position:relative;z-index:1;width:100%;max-width:420px;background:rgba(24,18,60,.92);
   backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);
   border:1px solid rgba(187,164,228,.3);border-radius:26px;padding:38px 34px 28px;
@@ -443,7 +526,12 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
 .auth-tabs button.active{background:rgba(255,255,255,.14);color:#fff;box-shadow:none}
 .auth-card input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff;padding:10px 13px;border-radius:13px;font-family:inherit;font-size:.93rem;font-weight:500;margin-bottom:11px;transition:border .2s,box-shadow .2s}
 .auth-card input:focus{outline:none;border-color:var(--lavender);box-shadow:0 0 0 4px rgba(142,127,208,.16)}
-.auth-err{color:#ffb9b0;font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
+/* An error, not a negative value. The guide splits these: Coral #D6554C is for
+   negative numbers, --red for errors. This was painting the outgoing negative-
+   value pink. authUI() force-adds html.dark, so this always resolves to the dark
+   --red #f2596f on the deep-indigo card - 5.4:1. (The html:not(.dark) .auth-card
+   rule below is dead while the panel is up, for the same reason.) */
+.auth-err{color:var(--red);font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
 .auth-err.auth-ok{color:var(--green)}
 .auth-card .btn.full{width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px}
 .auth-links{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
@@ -556,8 +644,12 @@ html.dark{
   --border:rgba(255,255,255,.10);
   --lilac-soft:rgba(129,126,255,.16);
   --green:#7fd1c4; --green-soft:rgba(79,179,164,.20); --red:#f2596f; --red-soft:rgba(214,85,76,.22);
+  --coral-ink:#ffa099; --lav-ink:#b3a9ff;   /* the dark half of the Budget pair */
+  --peach-ink:#ec9d6a;
+  --amber-ink:#f0c24b; --amber-soft:rgba(240,194,75,.22);
+  --sky-ink:#5aa2ea;   --sky-soft:rgba(90,162,234,.20);
   --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%);
-  --grad-iri-rev:linear-gradient(110deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);
+  --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);
   --glow-lav:0 0 40px -10px rgba(129,126,255,.55);
   --glow-peach:0 0 40px -10px rgba(255,179,171,.5);
   --sh-1:0 2px 10px rgba(0,0,0,.4);
@@ -576,6 +668,13 @@ html.dark .topbar{background:rgba(13,9,38,.6);border-bottom:1px solid rgba(255,2
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 26px rgba(0,0,0,.45)}
 html.dark .seg{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
 html.dark .seg button{color:var(--muted)}
+/* The active pill has to be re-stated at this specificity. `html.dark .seg button`
+   is (0,2,1) and outranks `.seg button.active` (0,2,0) up at line 559, so in dark
+   mode the SELECTED segment was painting --muted (#A99CCB) on the #6350E0 fill -
+   2.21:1, i.e. the one segment meant to read loudest read faintest. White on
+   #6350E0 is the guide's own certified pairing (its contrast table lists 5.6:1).
+   Same shape as the budget-card bug: a themed rule silently outranking a state rule. */
+html.dark .seg button.active{color:#fff}
 html.dark .chip,html.dark .mile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text)}
 html.dark .chip button{color:#a99bff}
 html.dark .btn.soft{background:rgba(255,255,255,.08);color:#d9caf3;border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
@@ -592,9 +691,11 @@ html.dark select option{background:#1b1442;color:#ece7fb}
 html.dark td input[type=checkbox]{accent-color:#817eff}
 html.dark .pill{background:rgba(129,126,255,.22);color:#d4c6ef}
 html.dark .pill.live{background:rgba(79,179,164,.20);color:#7fd1c4}
-html.dark .trend.up{background:rgba(79,179,164,.20);color:#7fd1c4}
-html.dark .trend.down{background:rgba(214,85,76,.22);color:#f2596f}
-html.dark .pos{color:#7fd1c4}html.dark .neg{color:#f2596f}
+html.dark .trend.up{background:rgba(79,179,164,.20);color:var(--green)}
+html.dark .trend.down{background:rgba(214,85,76,.22);color:var(--coral-ink)}
+/* both tokens are already theme-scoped, so these overrides only need to point at
+   them - the hardcoded #7fd1c4 and raw --coral were duplicating/undoing that. */
+html.dark .pos{color:var(--green)}html.dark .neg{color:var(--coral-ink)}
 html.dark .note,html.dark .empty,html.dark .chart-sub,html.dark .card .sub,html.dark .crumb{color:var(--muted)}
 html.dark .prog{background:rgba(255,255,255,.10)}
 html.dark .ring .track{stroke:rgba(255,255,255,.10)}
@@ -671,7 +772,7 @@ input[type=date]:focus,input[type=time]:focus{outline:none;border-color:var(--la
 input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.95}
 /* selects styled exactly like the date inputs, with a lavender chevron */
 select,.tbl-filter,td select,select.bare{-webkit-appearance:none;-moz-appearance:none;appearance:none;border-radius:12px;padding-right:30px;background-repeat:no-repeat;background-position:right 10px center;background-size:14px;font-family:inherit}
-html.dark select,html.dark .tbl-filter,html.dark td select,html.dark select.bare{background-color:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#ece7fb;background-image:url("data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23bba4e4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
+html.dark select,html.dark .tbl-filter,html.dark td select,html.dark select.bare{background-color:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#ece7fb;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23bba4e4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
 html:not(.dark) select,html:not(.dark) .tbl-filter,html:not(.dark) td select,html:not(.dark) select.bare{background-color:#fff;border:1px solid #d4c6ef;color:#2a1d44;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a64c8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
 select:focus,.tbl-filter:focus,td select:focus,select.bare:focus{outline:none;border-color:var(--lavender);box-shadow:0 0 0 3px rgba(129,126,255,.22)}
 html.dark select option,html.dark .tbl-filter option,html.dark td select option,html.dark select.bare option{background:#1b1442;color:#ece7fb}
@@ -757,9 +858,16 @@ html:not(.dark) .bud-income td:first-child input{color:#0a7c6b}
 .bud-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:12px;margin-top:4px}
 .bud-env{border-radius:14px;padding:14px 15px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:transform .2s,box-shadow .2s}
 .bud-env:hover{transform:translateY(-2px);box-shadow:var(--sh-1)}
-.bud-env.t-under{background:linear-gradient(160deg,rgba(93,204,165,.13),transparent);border-color:rgba(93,204,165,.3)}
-.bud-env.t-over{background:linear-gradient(160deg,rgba(240,144,128,.14),transparent);border-color:rgba(240,144,128,.32)}
-.bud-env.t-on{background:linear-gradient(160deg,rgba(129,126,255,.13),transparent);border-color:rgba(129,126,255,.3)}
+/* Rebased on the guide's own hues (Zakat teal #7FD1C4 / Coral #D6554C / Subtask
+   #B3A9FF) instead of the off-guide #5dcca5 / #f0908 0 pair. Carried as
+   background-IMAGE, not the `background` shorthand: html:not(.dark) .bud-env
+   below is more specific (0,2,1 vs 0,2,0), so a shorthand here was being wiped
+   out entirely in light mode - the state tint AND the border colour - leaving
+   every budget card plain white with no signal but the track. Setting only the
+   image lets the light rule own the base colour while the tint still lands. */
+.bud-env.t-under{background-image:linear-gradient(160deg,rgba(127,209,196,.16),transparent);border-color:rgba(127,209,196,.34)}
+.bud-env.t-over{background-image:linear-gradient(160deg,rgba(214,85,76,.13),transparent);border-color:rgba(214,85,76,.30)}
+.bud-env.t-on{background-image:linear-gradient(160deg,rgba(129,126,255,.13),transparent);border-color:rgba(129,126,255,.3)}
 .be-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .be-nm{font-weight:700;font-size:.95rem;color:var(--text)}
 .be-grp{font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(129,126,255,.16);color:var(--muted)}
@@ -804,6 +912,16 @@ html:not(.dark) .bud-income td:first-child input{color:#0a7c6b}
 .acc-ct{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .acc-nm{font-weight:700;font-size:.92rem;color:var(--text)}
 .acc-chip{font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+/* Account-type ink. The chip label and the section icon used to be painted in
+   ACC_META's raw fill hue over a 16% tint of that same hue - a pale accent used
+   as ink, which is the one thing section 07 tells you not to do. On the light
+   card that measured 1.45-2.79:1 across the seven types. The renderer now sets
+   two custom properties per element (--hd = light ink, --h = dark ink) and these
+   rules pick the right one, so a theme toggle re-inks without a re-render. The
+   FILL hue is untouched: it still drives the tint, the allocation bar and the
+   balance track, where a pale value is exactly right. */
+.acc-chip,.acc-sec .acc-ic{color:var(--hd)}
+html.dark .acc-chip,html.dark .acc-sec .acc-ic{color:var(--h)}
 .acc-bal{font-size:1.5rem;margin-top:9px;color:var(--text)}
 .acc-track{height:6px;border-radius:4px;background:rgba(130,130,150,.2);margin-top:10px;overflow:hidden}
 .acc-track>div{height:100%;border-radius:4px}
@@ -849,6 +967,25 @@ html:not(.dark) .bud-income td:first-child input{color:#0a7c6b}
   /* a table's own delete ✕ must stay small but easy to hit */
   td button{position:relative}
   td button::after{content:"";position:absolute;inset:-8px}
+  /* Three that the min-height rule above cannot reach, because what they are
+     short of is WIDTH, or because they are not buttons at all. Each grows only
+     its hit area -- a negative-inset ::after -- so nothing on screen moves. */
+  /* the pencil beside the greeting: 10px of glyph. The blanket min-height
+     above had stretched it to 40px TALL while leaving it 10 wide, which grew
+     the greeting line to 47px for a control the finger still could not find.
+     Give it its glyph size back and put the 40px into the ring instead. */
+  .name-edit{position:relative;min-height:0}
+  .name-edit::after{content:"";position:absolute;inset:-14px}
+  /* the ✕ on a watchlist chip, eleven of them in a row. The ring reaches
+     further left, over the chip's own label, than right, where the next chip
+     starts. */
+  .chip button{position:relative}
+  .chip button::after{content:"";position:absolute;inset:-6px -10px -6px -18px}
+  /* the Sold checkbox in the assets table draws at 15px. It has to stay that
+     size -- a 40px checkbox in a dense table is absurd -- so only the reach
+     grows. Chrome does generate ::after for a checkbox, unlike a text input. */
+  td input[type=checkbox]{position:relative}
+  td input[type=checkbox]::after{content:"";position:absolute;inset:-13px}
 }
 /* ===== keyboard focus is visible (Finance had none) ===== */
 :where(button,a,input,select,textarea,[tabindex]):focus-visible{
@@ -1152,8 +1289,14 @@ html:not(.dark) .mile:hover{
 
 html:not(.dark) .acc-card,
 html:not(.dark) .bud-env{
-  background:#fff;border-color:var(--border);
+  /* background-COLOR, not the shorthand. This rule is more specific than
+     .bud-env.t-under/.t-over/.t-on, so `background:#fff` was resetting their
+     tint gradient to none and their border back to --border - light-mode budget
+     cards had no over/under signal at all. Setting the colour alone leaves the
+     state tint (now a background-image) and its border-color intact. */
+  background-color:#fff;
   box-shadow:0 6px 20px rgba(36,8,82,.045)}
+html:not(.dark) .acc-card{border-color:var(--border)}
 html:not(.dark) .acc-card:hover,
 html:not(.dark) .bud-env:hover{
   border-color:rgba(129,126,255,.30);
@@ -1336,6 +1479,156 @@ html:not(.dark) #zakaCards .card::before{
     color:#fff;background:var(--grad-action);
     box-shadow:0 6px 18px rgba(99,80,224,.30)
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   batch v14 — reported UI issues (sidebar pattern, hero border, iPad)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Sidebar pattern, matched to the Workspace ──────────────────────────
+   The Hub pins a 26px interlock ribbon to the FOOT of its rail (aside::after,
+   margin-top:auto, motif tiled at 13px over a 3.5% white wash) so it is on
+   screen at every scroll position. Finance had the same motif but hung it off
+   body::after as two repeat-x strips at `100%` — i.e. at the end of the whole
+   DOCUMENT, which on a long page is hundreds of pixels below the fold and in
+   practice never seen. Same tile, same 13px step, same wash; the difference is
+   only where it is anchored.
+
+   aside is position:fixed/height:100vh above 1025, so anchoring the ribbon to
+   the rail rather than the document is what makes it behave like the Hub's. */
+@media(min-width:1025px){
+  /* rail surface only — the interlock moves onto the rail itself, below */
+  body::after{
+    background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%) center/100% 100% no-repeat
+  }
+  aside{
+    display:flex;flex-direction:column;
+    overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none
+  }
+  aside::-webkit-scrollbar{display:none;width:0;height:0}
+  /* was display:none. aside padding is 26px 16px, so the negative margins bleed
+     the ribbon to all three rail edges exactly as the Hub's -13px/-18px does. */
+  aside::after{
+    content:"";display:block;flex:none;height:26px;min-height:26px;
+    margin:auto -16px -26px;border-top:0;
+    background:var(--iw-dark) center top/13px 13px repeat,rgba(255,255,255,.035)
+  }
+}
+
+/* ── 2. Hero borders removed ───────────────────────────────────────────────
+   Two things read as a border on .hero: the 1px white outline, and the
+   `inset 0 1px 0` highlight, which draws a bright hairline along the top edge.
+   Both go; var(--sh-2) is a real drop shadow and stays. @media print still
+   adds its own hairline on purpose — untouched. */
+.hero{
+  border:0;
+  box-shadow:var(--sh-2)
+}
+
+/* ── 3. iPad: scrolling ────────────────────────────────────────────────────
+   overflow-x:hidden + overflow-y:auto makes an element a scroll container on
+   BOTH axes per spec, and it was set on html AND body — two nested scroll
+   containers, which is what makes momentum scrolling stall and rubber-band
+   oddly on iPadOS. overflow-x:clip clips without creating a scroll container. */
+html{
+  overflow-x:clip;
+  overscroll-behavior-y:none
+}
+body{
+  overflow-x:clip
+}
+/* the rail is a fixed 100vh box; dvh keeps it honest when Safari's toolbars
+   collapse, and the fallback line above it covers engines without dvh */
+@media(min-width:1025px){
+  aside{height:100vh;height:100dvh}
+}
+/* the "More" bottom sheet had no scroll lock, so the page kept scrolling
+   underneath it. Set by openMore()/closeFinMore(). */
+html.fin-lock,html.fin-lock body{overflow:hidden;touch-action:none}
+
+/* ── 4. iPad: text and icons escaping their cards ──────────────────────────
+   `.card{overflow-x:auto}` at <=1024 combined with a computed overflow-y of
+   `visible` is illegal per spec — the browser promotes overflow-y to auto, so
+   every card became a two-axis scroll container. The decorative band on
+   .acc-head / #budgetCards / #zakaCards cards is absolutely positioned with
+   left:0;right:0, which then resolves against the padding box instead of the
+   scrolled content width — that is the band and icon-tile "escaping" the card.
+   Only cards that actually hold a wide table need to scroll. */
+@media(max-width:1024px){
+  .card{overflow:visible}
+  .card:has(table){overflow-x:auto;overflow-y:hidden}
+  .chart-card{overflow:hidden}
+
+  /* .big is white-space:nowrap with an escape hatch only below 430px, so a
+     7-figure riyal value in a ~266px portrait column could not wrap and simply
+     ran past the card edge (and, being background-clip:text, ran out as a
+     cut-off gradient rather than visible glyphs). */
+  .card .big{white-space:normal;overflow-wrap:anywhere;font-size:1.34rem}
+
+  /* the flex row holding the value and the 44x44 icon tile: without min-width:0
+     its automatic minimum size is the value's intrinsic width, so the row
+     refuses to shrink and pushes the tile out of the card */
+  .kpi-head{min-width:0}
+  .kpi-head>*{min-width:0}
+  .kpi-head>.icon-tile{flex:none;min-width:44px}
+
+  /* grid items default to min-width:auto; the subgrid rule turns cards into
+     grid items too, so both levels need the floor removed */
+  .cards>.card,.two-col>*{min-width:0}
+
+  /* the band's phone step-down was gated at 600px, so iPad kept the full-height
+     band on cards whose padding had already been reduced */
+  .card.acc-head{padding-top:46px}
+  #budgetCards .card,#zakaCards .card{padding-top:42px}
+}
+@media(min-width:769px) and (max-width:1024px){
+  /* two cramped columns at ~480px each in landscape; one column reads better
+     and removes the last of the horizontal overflow */
+  .two-col{grid-template-columns:minmax(0,1fr)}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(232px,1fr))}
+  .chart-card{min-height:286px}
+  .chart-card canvas{max-height:244px}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   batch v15 — sidebar scroll, matched to the Workspace
+   ══════════════════════════════════════════════════════════════════════════
+
+   The Workspace rail carries a block Finance never received:
+
+     aside{height:100dvh;max-height:100vh;overflow-y:auto;
+           overscroll-behavior:contain;padding-bottom:26px}
+
+   Two things were wrong here without it.
+
+   1. The rail was scrolling when it had nothing to scroll. At >=1025 Finance
+      sets `aside{padding:18px 13px}`, but the interlock ribbon still carried
+      `margin:auto -16px -26px` — the negative margin written for the earlier
+      26px padding. 8px of ribbon therefore hung past the padding box, so the
+      rail measured scrollHeight 828 inside a clientHeight of 820 and grew a
+      scroll range it had no business having. Measured on both files: the Hub
+      is 820/820, Finance was 828/820. Matching the margin to the padding that
+      is actually in force takes it back to zero.
+
+   2. `overscroll-behavior` was `auto`, so a wheel gesture that started over
+      the rail chained straight through to the document and scrolled the page
+      behind it. `contain` is what stops that, and it is the single line that
+      makes the rail feel pinned rather than "scrolling".
+
+   height:100dvh with the 100vh max-height is the Hub's own pair: dvh keeps the
+   rail honest when Safari's toolbars collapse, and the max-height stops dvh
+   from ever exceeding the layout viewport on engines where the two disagree. */
+aside{height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;align-self:start}
+@media(min-width:1025px){
+  aside::after{margin:auto -13px -18px}
+}
+/* Below 1025 the rail does not exist in either app — 769–1024 and <=768 both
+   hide it with display:none!important and hand navigation to the bottom bar —
+   so there is deliberately no collapsed-top-bar treatment here. The two stale
+   horizontal-bar rules further up (overflow-x:auto, scrollbar-width:thin) are
+   inert for the same reason and are left alone rather than half-updated. */
+@media(max-width:1024px){
+  aside{height:auto;max-height:none;overflow:visible;align-self:auto;padding-bottom:10px}
 }
 </style>
 </head>
@@ -1731,13 +2024,33 @@ function toast(msg){
 
 /* ---------- Formatting: everything 2 decimals, tabular ---------- */
 const fmt = n => new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
-const sar = n => "SAR " + fmt(n);
+const RY = '<span class="riyal" role="img" aria-label="Saudi Riyal">&#xe900;</span>';
+    /* HTML contexts get the vector mark; canvas tooltips and title="" attributes
+       cannot carry markup, so they fall back to the plain-text form the guide
+       reserves for exports. */
+    const sar = n => RY + " " + fmt(n);
+    const sarTxt = n => "SAR " + fmt(n);
 const pct = n => fmt(n*100) + "%";
 
 /* ---------- Modal system (replaces browser dialogs) ---------- */
+var _mdlBackdropDown=false;
 function showModal(html){
   document.getElementById("modalRoot").innerHTML =
-    `<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+    `<div class="overlay"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  /* A click's target is the nearest common ancestor of press-down and press-up,
+     so `event.target===this` also fired when you started a text selection inside
+     the modal and released past its edge — the dialog vanished mid-drag. Record
+     where the press actually started instead. Capture phase, so a child that
+     stops propagation cannot leave the flag stale. */
+  _mdlBackdropDown=false;
+  var _ov=document.querySelector("#modalRoot .overlay")||document.querySelector(".overlay");
+  if(_ov){
+    _ov.addEventListener("pointerdown",function(e){ _mdlBackdropDown=(e.target===_ov); },true);
+    _ov.addEventListener("click",function(e){
+      var startedOutside=_mdlBackdropDown; _mdlBackdropDown=false;
+      if(e.target===_ov && startedOutside) closeModal();
+    });
+  }
 }
 function closeModal(){ document.getElementById("modalRoot").innerHTML = ""; }
 function confirmModal(title, msg){
@@ -1759,8 +2072,13 @@ function promptModal(title, msg, val){
     setTimeout(()=>{ const i=document.getElementById("mInput"); if(i){i.focus();i.select();} }, 60);
   });
 }
-function openMore(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s)s.classList.add("show"); }
-function closeFinMore(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.remove("show"); if(s)s.classList.remove("show"); }
+/* The sheet is fixed-position, so without a lock the page keeps scrolling
+   behind it — on iPadOS the touch simply passes through to the document.
+   Remember the scroll offset because position:fixed on <html> would otherwise
+   jump the page to the top when the sheet closes. */
+var __finScrollY = 0;
+function openMore(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s)s.classList.add("show"); try{ __finScrollY=window.scrollY||0; document.documentElement.classList.add("fin-lock"); }catch(e){} }
+function closeFinMore(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.remove("show"); if(s)s.classList.remove("show"); try{ document.documentElement.classList.remove("fin-lock"); window.scrollTo(0,__finScrollY); }catch(e){} }
 function finMoreGo(name){ closeFinMore(); goTab(name); }
 
 /* ---------- Live prices ---------- */
@@ -1980,7 +2298,7 @@ function trendCfg(){
       pointBorderColor:vals.map((_,i)=>i===athIdx?"#fff":"rgba(255,255,255,.8)"),
       pointBorderWidth:vals.map((_,i)=>i===athIdx?2:1)}]},
     options:{plugins:{legend:{display:false},tooltip:{callbacks:{
-      label:c=>" "+sar(c.parsed.y)+(c.dataIndex===athIdx?" \u00b7 All-time high":"")}}},
+      label:c=>" "+sarTxt(c.parsed.y)+(c.dataIndex===athIdx?" \u00b7 All-time high":"")}}},
       scales:{y:{ticks:{callback:v=>fmt(v/1000)+"k"}}}}};
 }
 function sparkCfg(values, color, fill){
@@ -1995,13 +2313,13 @@ function renderCharts(){
   const alloc = allocation();
   mkChart("assetsChart",{type:"doughnut",
     data:{labels:alloc.map(a=>a[0]),datasets:[{data:alloc.map(a=>a[1]),backgroundColor:PALETTE,borderColor:(window.DONUT_SEP||"#15103a"),borderWidth:2.5,hoverOffset:9}]},
-    options:{cutout:"63%",plugins:{legend:{position:"bottom"},datalabels:DLBL,tooltip:{callbacks:{label:c=>` ${c.label}: ${sar(c.parsed)} (${fmt(c.parsed/t.net*100)}%)`}}}}});
+    options:{cutout:"63%",plugins:{legend:{position:"bottom"},datalabels:DLBL,tooltip:{callbacks:{label:c=>` ${c.label}: ${sarTxt(c.parsed)} (${fmt(c.parsed/t.net*100)}%)`}}}}});
 
   const banks = data.accounts.filter(a=>["Bank Account","Savings","Wallet"].includes(a.type) && +a.balance>0);
   const bankTotal = banks.reduce((s,a)=>s+ +a.balance,0)||1;
   mkChart("banksChart",{type:"doughnut",
     data:{labels:banks.map(b=>b.name),datasets:[{data:banks.map(b=>+b.balance),backgroundColor:PALETTE,borderColor:(window.DONUT_SEP||"#15103a"),borderWidth:2.5,hoverOffset:9}]},
-    options:{cutout:"63%",plugins:{legend:{position:"bottom"},datalabels:DLBL,tooltip:{callbacks:{label:c=>` ${c.label}: ${sar(c.parsed)} (${fmt(c.parsed/bankTotal*100)}%)`}}}}});
+    options:{cutout:"63%",plugins:{legend:{position:"bottom"},datalabels:DLBL,tooltip:{callbacks:{label:c=>` ${c.label}: ${sarTxt(c.parsed)} (${fmt(c.parsed/bankTotal*100)}%)`}}}}});
 
   mkChart("portfolioChart",{type:"bar",
     data:{labels:hs.map(h=>h.name),datasets:[
@@ -2012,7 +2330,7 @@ function renderCharts(){
   const z = [...data.zaka].sort((a,b)=>a.year.localeCompare(b.year));
   mkChart("zakaChart",{type:"line",
     data:{labels:z.map(r=>r.year),datasets:[{label:"Zakat (SAR)",data:z.map(r=>+r.paid||0),borderColor:"#4a38b5",backgroundColor:lavGradient,fill:true,tension:.35,pointRadius:4,pointBackgroundColor:"#817eff"}]},
-    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+sar(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>"SAR "+fmt(v/1000)+"k"}}}}});
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+sarTxt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>"SAR "+fmt(v/1000)+"k"}}}}});
 
   mkChart("trendChart", trendCfg());
   mkChart("trendChart2", trendCfg());
@@ -2045,11 +2363,11 @@ function animateNumbers(){
   if(booted) return; booted = true;
   document.querySelectorAll("[data-cnt]").forEach(el=>{
     const target = +el.dataset.cnt || 0;
-    const pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+    const pre = el.dataset.ry ? RY + " " : (el.dataset.pre || ""), suf = el.dataset.suf || "";
     const t0 = performance.now(), dur = 950;
     function step(t){
       const p = Math.min((t-t0)/dur, 1), e = 1-Math.pow(1-p,3);
-      el.textContent = pre + fmt(target*e) + suf;
+      el.innerHTML = pre + fmt(target*e) + suf;
       if(p<1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
@@ -2166,8 +2484,8 @@ function renderKPIs(){
   const saveRate = pt.inc? pt.rem/pt.inc : 0;
 
   const ha = document.getElementById("heroAmount");
-  ha.textContent = sar(t.net);
-  ha.dataset.cnt = t.net; ha.dataset.pre = "SAR ";
+  ha.innerHTML = sar(t.net);
+  ha.dataset.cnt = t.net; ha.dataset.ry = "1";
 
   const prev = prevSnapshot();
   const dEl = document.getElementById("heroDelta");
@@ -2189,12 +2507,12 @@ function renderKPIs(){
   document.getElementById("heroChips").innerHTML = `
     <div><b>${sar(t.acc)}</b><span>Liquid</span></div>
     <div><b>${sar(t.inv)}</b><span>Invested</span></div>
-    <div><b style="color:${t.pl>=0?"#9FF0C8":"#FFB9B0"}">${t.pl>=0?"+":""}${sar(t.pl)}</b><span>P/L</span></div>`;
+    <div><b style="color:${t.pl>=0?"#9FF0C8":"var(--coral-d)"}">${t.pl>=0?"+":""}${sar(t.pl)}</b><span>P/L</span></div>`;
 
   const alloc = allocation();
   const total = alloc.reduce((s,a)=>s+a[1],0)||1;
   document.getElementById("allocBar").innerHTML = alloc.map(([k,v],i)=>
-    `<span style="width:${(v/total*100).toFixed(2)}%;background:${PALETTE[i%PALETTE.length]}" title="${k}: ${sar(v)} (${fmt(v/total*100)}%)"></span>`).join("");
+    `<span style="width:${(v/total*100).toFixed(2)}%;background:${PALETTE[i%PALETTE.length]}" title="${k}: ${sarTxt(v)} (${fmt(v/total*100)}%)"></span>`).join("");
   document.getElementById("allocLegend").innerHTML = alloc.map(([k,v],i)=>
     `<div><i style="background:${PALETTE[i%PALETTE.length]}"></i>${k} <b>${fmt(v/total*100)}%</b></div>`).join("");
 
@@ -2202,13 +2520,13 @@ function renderKPIs(){
   const plTrend = t.cost? `<span class="trend ${t.pl>=0?"up":"down"}">${t.pl>=0?"▲":"▼"} ${pct(Math.abs(t.pl/t.cost))}</span>` : "";
   document.getElementById("kpiCards").innerHTML = `
     <div class="card">
-      <div class="kpi-head"><div><h3>Liquid · Banks + Cash</h3><div class="big" data-cnt="${t.acc}" data-pre="SAR ">${sar(t.acc)}</div></div>
+      <div class="kpi-head"><div><h3>Liquid · Banks + Cash</h3><div class="big" data-cnt="${t.acc}" data-ry="1">${sar(t.acc)}</div></div>
         <div class="icon-tile tile-lav">${ICONS.wallet}</div></div>
       <div class="sub">${fmt(liqPct*100)}% of net worth is liquid</div>
       <div class="prog prog-lav"><span style="width:${Math.min(liqPct*100,100).toFixed(2)}%"></span></div>
     </div>
     <div class="card">
-      <div class="kpi-head"><div><h3>Portfolio Value</h3><div class="big"><span data-cnt="${t.inv}" data-pre="SAR ">${sar(t.inv)}</span>${plTrend}</div></div>
+      <div class="kpi-head"><div><h3>Portfolio Value</h3><div class="big"><span data-cnt="${t.inv}" data-ry="1">${sar(t.inv)}</span>${plTrend}</div></div>
         <div class="icon-tile tile-ind">${ICONS.chart}</div></div>
       <div class="sub">Invested ${sar(t.cost)} · ${t.pl>=0?"+":""}${sar(t.pl)} unrealized</div>
       <div class="spark-mini"><canvas id="portSpark"></canvas></div>
@@ -2220,11 +2538,11 @@ function renderKPIs(){
           <circle class="val" cx="29" cy="29" r="${ringR}" fill="none" stroke-width="6"
             stroke-dasharray="${ringC.toFixed(1)}" stroke-dashoffset="${(ringC*(1-Math.min(goldPct,1))).toFixed(1)}"/>
         </svg></div>
-      <div class="sub">${sar(goldVal)} in precious metals${goldPct>0.5?' · <b style="color:var(--peach-deep)">high concentration</b>':""}</div>
+      <div class="sub">${sar(goldVal)} in precious metals${goldPct>0.5?' · <b style="color:var(--peach-ink)">high concentration</b>':""}</div>
       <div class="prog prog-gold"><span style="width:${Math.min(goldPct*100,100).toFixed(2)}%"></span></div>
     </div>
     <div class="card">
-      <div class="kpi-head"><div><h3>Monthly Savings Plan</h3><div class="big" data-cnt="${pt.rem}" data-pre="SAR ">${sar(pt.rem)}</div></div>
+      <div class="kpi-head"><div><h3>Monthly Savings Plan</h3><div class="big" data-cnt="${pt.rem}" data-ry="1">${sar(pt.rem)}</div></div>
         <div class="icon-tile tile-green">${ICONS.piggy}</div></div>
       <div class="sub">${fmt(saveRate*100)}% of ${sar(pt.inc)} income retained</div>
       <div class="prog prog-green"><span style="width:${Math.min(saveRate*100,100).toFixed(2)}%"></span></div>
@@ -2232,15 +2550,28 @@ function renderKPIs(){
 }
 
 /* ---------- Accounts ---------- */
+/* Each account type carries THREE values, not one:
+     c  - the fill. Drives the 16% chip tint, the allocation bar and the balance
+          track. Pale on purpose; blocks of colour don't need contrast headroom.
+     d  - the light-mode ink for the chip label and section icon.
+     k  - the dark-mode ink for the same.
+   Two fills were pulled onto the guide on the way past: Investments #6da8ff was
+   a 12-off near-miss for Event blue #5AA2EA, and Cash #5dcca5 a 21-off near-miss
+   for Zakat teal #7FD1C4 - "teal is money" is the guide's own gloss, so Cash
+   should be sitting on it rather than beside it. The other five have no guide
+   equivalent (the guide has no account taxonomy) and keep their hue; they just
+   gain the ink they were missing. Every d/k clears 4.5:1 on its own tint. */
 const ACC_META={
-  "Bank Account":{c:"#817eff",g:"Banks",ic:ICONS.coins},
-  "Savings":{c:"#9a78d4",g:"Savings",ic:ICONS.piggy},
-  "Investment Account":{c:"#6da8ff",g:"Investments",ic:ICONS.chart},
-  "Wallet":{c:"#ffb3ab",g:"Wallets",ic:ICONS.wallet},
-  "Cash":{c:"#5dcca5",g:"Cash",ic:ICONS.coins},
-  "Credit Account":{c:"#e58fb6",g:"Credit",ic:ICONS.cart},
-  "Receivable":{c:"#e0a0d8",g:"Receivables",ic:ICONS.clock}
+  "Bank Account":{c:"#817eff",d:"#4a38b5",k:"#b3a9ff",g:"Banks",ic:ICONS.coins},
+  "Savings":{c:"#9a78d4",d:"#6f4fb0",k:"#c9b0ff",g:"Savings",ic:ICONS.piggy},
+  "Investment Account":{c:"#5aa2ea",d:"#1f5fc2",k:"#5aa2ea",g:"Investments",ic:ICONS.chart},
+  "Wallet":{c:"#ffb3ab",d:"#a85c22",k:"#ffb3ab",g:"Wallets",ic:ICONS.wallet},
+  "Cash":{c:"#7fd1c4",d:"#0a7c6b",k:"#7fd1c4",g:"Cash",ic:ICONS.coins},
+  "Credit Account":{c:"#e58fb6",d:"#bf3674",k:"#e58fb6",g:"Credit",ic:ICONS.cart},
+  "Receivable":{c:"#e0a0d8",d:"#af41a1",k:"#e0a0d8",g:"Receivables",ic:ICONS.clock}
 };
+/* every ACC_META lookup has a fallback literal, so the fallback needs the inks too */
+const ACC_FB={c:"#817eff",d:"#4a38b5",k:"#b3a9ff"};
 function hexA(h,a){ h=String(h).replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return `rgba(${r},${g},${b},${a})`; }
 function sysSelect(id,opts,val,cb){
   return `<div class="sysel" id="${id}" data-val="${esc(val)}"${cb?` data-cb="${esc(cb)}"`:''}>`
@@ -2265,26 +2596,26 @@ function syselPick(id,opt){ var el=document.getElementById(id); if(!el) return; 
 function renderAccounts(){
   const accs=data.accounts||[];
   const total=accs.reduce((s,a)=>s+(+a.balance||0),0);
-  const bigEl=document.getElementById("accTotalBig"); if(bigEl) bigEl.textContent=sar(total);
+  const bigEl=document.getElementById("accTotalBig"); if(bigEl) bigEl.innerHTML=sar(total);
   const metaEl=document.getElementById("accMeta"); if(metaEl){ const types=new Set(accs.map(a=>a.type)).size; metaEl.textContent=`${accs.length} account${accs.length!==1?"s":""} · ${types} type${types!==1?"s":""}`; }
   const byType={}; accs.forEach(a=>{ byType[a.type]=(byType[a.type]||0)+(+a.balance||0); });
   const present=ACCOUNT_TYPES.filter(t=>(byType[t]||0)>0);
   const allocEl=document.getElementById("accAlloc");
-  if(allocEl) allocEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||{c:"#817eff"}; const w=total>0?byType[t]/total*100:0; return `<div style="width:${w}%;background:${m.c}"></div>`; }).join("")||'<div style="width:100%;background:rgba(130,130,150,.25)"></div>';
+  if(allocEl) allocEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||ACC_FB; const w=total>0?byType[t]/total*100:0; return `<div style="width:${w}%;background:${m.c}"></div>`; }).join("")||'<div style="width:100%;background:rgba(130,130,150,.25)"></div>';
   const legEl=document.getElementById("accLegend");
-  if(legEl) legEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||{c:"#817eff",g:t}; const pc=total>0?byType[t]/total*100:0; return `<span><i style="background:${m.c}"></i>${esc(m.g||t)} · ${fmt(pc)}%</span>`; }).join("");
+  if(legEl) legEl.innerHTML=present.map(t=>{ const m=ACC_META[t]||{...ACC_FB,g:t}; const pc=total>0?byType[t]/total*100:0; return `<span><i style="background:${m.c}"></i>${esc(m.g||t)} · ${fmt(pc)}%</span>`; }).join("");
   const view=document.getElementById("accountsView"); if(!view) return;
   const maxBal=Math.max.apply(null, accs.map(a=>+a.balance||0).concat([1]));
   let html="";
   ACCOUNT_TYPES.forEach(t=>{
     const items=accs.map((a,i)=>({a,i})).filter(o=>o.a.type===t);
     if(!items.length) return;
-    const m=ACC_META[t]||{c:"#817eff",g:t,ic:ICONS.wallet};
+    const m=ACC_META[t]||{...ACC_FB,g:t,ic:ICONS.wallet};
     const sub=items.reduce((s,o)=>s+(+o.a.balance||0),0);
-    html+=`<div class="acc-sec"><span class="acc-ic" style="background:${hexA(m.c,.16)};color:${m.c}">${m.ic||ICONS.wallet}</span><span>${esc(m.g||t)}</span><span class="acc-cnt">${items.length}</span><span class="acc-ssub">${sar(sub)}</span></div>`;
+    html+=`<div class="acc-sec"><span class="acc-ic" style="background:${hexA(m.c,.16)};--hd:${m.d};--h:${m.k}">${m.ic||ICONS.wallet}</span><span>${esc(m.g||t)}</span><span class="acc-cnt">${items.length}</span><span class="acc-ssub">${sar(sub)}</span></div>`;
     html+=`<div class="acc-grid">`+items.map(o=>{
       const bal=+o.a.balance||0, pc=total>0?bal/total*100:0, w=maxBal>0?bal/maxBal*100:0, zero=bal<=0;
-      return `<div class="acc-card${zero?' zero':''}" onclick="editAccount(${o.i})"><div class="acc-ct"><span class="acc-nm">${esc(o.a.name)}</span><span class="acc-chip" style="background:${hexA(m.c,.16)};color:${m.c}">${esc(o.a.type)}</span></div>`
+      return `<div class="acc-card${zero?' zero':''}" onclick="editAccount(${o.i})"><div class="acc-ct"><span class="acc-nm">${esc(o.a.name)}</span><span class="acc-chip" style="background:${hexA(m.c,.16)};--hd:${m.d};--h:${m.k}">${esc(o.a.type)}</span></div>`
         +`<div class="acc-bal marc">${fmt(bal)}</div>`
         +`<div class="acc-track"><div style="width:${w}%;background:${m.c}"></div></div>`
         +`<div class="acc-pc">${zero?'no balance':fmt(pc)+'% of total'}</div></div>`;
@@ -2445,25 +2776,32 @@ function renderBudget(){
 
   const onPlan=Math.min(actExp,expPlanned), over=Math.max(0,actExp-expPlanned), unspent=Math.max(0,incActual-actExp), base=Math.max(incActual,actExp,1);
   const fb=document.getElementById("budgetFlow");
+  // Flow-bar and legend swatches are FILLS, not text, so they take the guide's
+  // published hues directly: Coral #D6554C for overspend (a negative value) and
+  // Zakat teal #7FD1C4 for money left over. #f0a08e/#5dcca5 were off-guide.
   if(fb) fb.innerHTML=`<div class="bud-flow-h"><span>Income flow &middot; ${esc(month)}</span><span>${incActual?fmt(actExp/incActual*100):0}% spent</span></div>`
-    +`<div class="bud-flow-bar"><div style="width:${onPlan/base*100}%;background:linear-gradient(90deg,#817eff,#b3a9ff)"></div><div style="width:${over/base*100}%;background:#f0a08e"></div><div style="width:${unspent/base*100}%;background:#5dcca5"></div></div>`
-    +`<div class="bud-flow-leg"><span><i style="background:#817eff"></i>On-plan ${fmt(onPlan)}</span><span><i style="background:#f0a08e"></i>Overspend ${fmt(over)}</span><span><i style="background:#5dcca5"></i>Unspent ${fmt(unspent)}</span></div>`;
+    +`<div class="bud-flow-bar"><div style="width:${onPlan/base*100}%;background:linear-gradient(90deg,#817eff,#b3a9ff)"></div><div style="width:${over/base*100}%;background:#d6554c"></div><div style="width:${unspent/base*100}%;background:#7fd1c4"></div></div>`
+    +`<div class="bud-flow-leg"><span><i style="background:#817eff"></i>On-plan ${fmt(onPlan)}</span><span><i style="background:#d6554c"></i>Overspend ${fmt(over)}</span><span><i style="background:#7fd1c4"></i>Unspent ${fmt(unspent)}</span></div>`;
   const incIdx=[],expIdx=[]; data.plan.forEach((p,i)=>{ (p.group==="Income"?incIdx:expIdx).push(i); });
   const envs=document.getElementById("budgetEnvs");
   if(envs) envs.innerHTML=
-    `<div class="bud-sec"><span class="be-ic" style="background:rgba(93,204,165,.18);color:#5dcca5">${ICONS.wallet}</span><span>Income</span><span class="be-sub">${sar(incActual)}</span></div>`
+    `<div class="bud-sec"><span class="be-ic" style="background:var(--green-soft);color:var(--green)">${ICONS.wallet}</span><span>Income</span><span class="be-sub">${sar(incActual)}</span></div>`
     +`<div class="bud-grid">${incIdx.map(i=>budCard(i,month,act)).join("")||'<div class="be-empty">No income items yet.</div>'}</div>`
-    +`<div class="bud-sec"><span class="be-ic" style="background:rgba(255,179,171,.2);color:#ffb3ab">${ICONS.cart}</span><span>Expenses</span><span class="be-sub">${sar(actExp)}</span></div>`
+    +`<div class="bud-sec"><span class="be-ic" style="background:rgba(214,85,76,.16);color:var(--coral-ink)">${ICONS.cart}</span><span>Expenses</span><span class="be-sub">${sar(actExp)}</span></div>`
     +`<div class="bud-grid">${expIdx.map(i=>budCard(i,month,act)).join("")||'<div class="be-empty">No expense items yet.</div>'}</div>`;
 }
 function budCard(i,month,act){
   const p=data.plan[i]; const isInc=p.group==="Income"; const planned=+p.amt||0;
   const av=act[p._id]; const aNum=av!==undefined?(+av||0):(isInc?planned:0);
   let cls,color,diffTxt;
-  if(isInc){ if(aNum>=planned){ cls='t-under'; color='#5dcca5'; diffTxt=aNum>planned?('+'+fmt(aNum-planned)+' extra'):'received in full'; } else { cls='t-over'; color='#f0a08e'; diffTxt=fmt(planned-aNum)+' short'; } }
-  else { if(aNum>planned){ cls='t-over'; color='#f0a08e'; diffTxt='+'+fmt(aNum-planned)+' over'; } else if(aNum<planned){ cls='t-under'; color='#5dcca5'; diffTxt=fmt(planned-aNum)+' left'; } else { cls='t-on'; color='#b3a9ff'; diffTxt='on budget'; } }
+  // `color` fills the progress track - a block, so it takes the guide hue neat.
+  // `dc` inks the diff line - 11.5px text, so it takes the theme-scoped ink pair.
+  // These MUST be two different values: the fill teal #7FD1C4 reads 1.6:1 as text
+  // on the white light-mode card, which is exactly what this view used to ship.
+  if(isInc){ if(aNum>=planned){ cls='t-under'; color='#7fd1c4'; diffTxt=aNum>planned?('+'+fmt(aNum-planned)+' extra'):'received in full'; } else { cls='t-over'; color='#d6554c'; diffTxt=fmt(planned-aNum)+' short'; } }
+  else { if(aNum>planned){ cls='t-over'; color='#d6554c'; diffTxt='+'+fmt(aNum-planned)+' over'; } else if(aNum<planned){ cls='t-under'; color='#7fd1c4'; diffTxt=fmt(planned-aNum)+' left'; } else { cls='t-on'; color='#b3a9ff'; diffTxt='on budget'; } }
   const fillPct=planned>0?Math.min(aNum/planned*100,100):(aNum>0?100:0);
-  const dc=cls==='t-over'?'#f3a895':(cls==='t-under'?'#7fe3c0':'#b3a9ff');
+  const dc=cls==='t-over'?'var(--coral-ink)':(cls==='t-under'?'var(--green)':'var(--lav-ink)');
   return `<div class="bud-env ${cls}" onclick="openBudgetItem(${i})"><div class="be-top"><span class="be-nm">${esc(p.cat)}</span><span class="be-grp">${esc(p.group)}</span></div>`
     +`<div class="be-amt"><span class="be-a">${fmt(aNum)}</span><span class="be-p"> / ${fmt(planned)} ${isInc?'expected':'planned'}</span></div>`
     +`<div class="be-track"><div style="width:${fillPct}%;background:${color}"></div></div>`
@@ -2798,6 +3136,7 @@ function authUI(mode){
   mode = mode || "in";
   const root = document.getElementById("authRoot");
   document.documentElement.classList.add("dark");
+  document.documentElement.classList.add("auth-open");
   const tabs = `<div class="auth-tabs">
     <button class="${mode==="in"?"active":""}" onclick="authUI('in')">Sign in</button>
     <button class="${mode==="up"?"active":""}" onclick="authUI('up')">Create account</button></div>`;
@@ -2827,7 +3166,7 @@ function authUI(mode){
 }
 function authErr(msg, ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=msg||""; e.classList.toggle("auth-ok", !!ok); } }
 function authBusy(b, label){ const btn=document.getElementById("aBtn"); if(btn){ btn.disabled=b; if(label) btn.textContent=label; } }
-function closeAuth(){ document.getElementById("authRoot").innerHTML=""; try{applyTheme(localStorage.getItem("financeBoard.theme")||"dark");}catch(e){} }
+function closeAuth(){ document.getElementById("authRoot").innerHTML=""; document.documentElement.classList.remove("auth-open"); try{applyTheme(localStorage.getItem("financeBoard.theme")||"dark");}catch(e){} }
 function guestMode(){ try{ localStorage.setItem(GUEST_FLAG,"1"); }catch(e){} closeAuth(); }
 
 async function doSignIn(){
