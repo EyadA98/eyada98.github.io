@@ -5308,13 +5308,24 @@ function buildDigest(){
     var dd=new Date(it.date+"T00:00:00");
     return dd.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+(it.time?(", "+prettyTime(it.time)):"");
   }
-  function row(it,mode){
+  function row(it,mode,grouped,firstInGroup){
     var p=PILL[it.kind]||PILL.task, isSub=(it.kind==="sub");
     var tcol=mode==="over"?RED:"#4a4066", tw=mode==="over"?800:700;
-    return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(isSub?"":"border-top:1px solid "+LINE+";")+'">'
+    /* The title lives in a cell allowed to collapse (width:100% + max-width:0),
+       so a long name ellipsises to a single line rather than wrapping. Under a
+       workspace header the per-row chip is redundant, so it is dropped there and
+       the first row of the group loses its top border (the header separates it). */
+    var chip=(!grouped&&it.ws)?('<td valign="middle" style="white-space:nowrap;padding-left:12px"><span style="display:inline-block;background:'+wsBg(it.wsColor||"#6350e0")+';color:'+wsFg(it.wsColor||"#6350e0")+';font:700 8px '+F+';line-height:1;border-radius:99px;padding:3px 8px 3px 6px;white-space:nowrap"><span style="display:inline-block;width:5px;height:5px;border-radius:99px;background:'+wsDot(it.wsColor||"#6350e0")+';margin-right:5px;vertical-align:middle"></span><span style="vertical-align:middle">'+esc(it.ws)+'</span></span></td>'):'';
+    var noTop=isSub||(grouped&&firstInGroup);
+    return '<tr><td style="padding:'+(isSub?"6px 0":"9px 0")+';'+(noTop?"":"border-top:1px solid "+LINE+";")+'">'
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>'
-     +'<td width="60" valign="middle" style="width:60px"><div style="background:'+p[1]+';color:'+p[2]+';font:800 8px '+F+';letter-spacing:.05em;text-align:center;padding:3px 0;border-radius:99px">'+p[0]+'</div></td>'
-     +'<td valign="middle" style="padding-left:14px;font:700 13px '+F+';color:'+INK+'">'+esc(it.title)+(it.ws?('<span style="display:inline-block;background:'+wsBg(it.wsColor||"#6350e0")+';color:'+wsFg(it.wsColor||"#6350e0")+';font:700 8px '+F+';line-height:1;border-radius:99px;padding:3px 8px 3px 6px;margin-left:14px;vertical-align:1.8px;white-space:nowrap">'+'<span style="display:inline-block;width:5px;height:5px;border-radius:99px;background:'+wsDot(it.wsColor||"#6350e0")+';margin-right:5px;vertical-align:middle"></span>'+'<span style="vertical-align:middle">'+esc(it.ws)+'</span></span>'):'')+'</td>'
+     +'<td valign="middle" style="width:100%">'
+       +'<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%"><tr>'
+       +'<td width="56" valign="middle" style="width:56px"><div style="width:56px;background:'+p[1]+';color:'+p[2]+';font:800 8.5px '+F+';letter-spacing:.04em;text-align:center;padding:4px 0;border-radius:99px">'+p[0]+'</div></td>'
+       +'<td valign="middle" style="width:100%;max-width:0;padding-left:14px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 13px '+F+';color:'+INK+'">'+esc(it.title)+'</div></td>'
+       +chip
+       +'</tr></table>'
+     +'</td>'
      +'<td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;font:'+tw+' 11px '+F+';color:'+tcol+'">'+esc(whenLbl(it,mode))+'</td>'
      +'</tr></table></td></tr>';
   }
@@ -5325,11 +5336,35 @@ function buildDigest(){
      +(right?'<td align="right" style="white-space:nowrap"><span style="display:inline-block;font:700 11px '+F+';color:#6b5e8c;background:'+BG+';border:1px solid #e7e0f5;border-radius:99px;padding:5px 12px">'+right+'</span></td>':'')
      +'</tr></table>';
   }
+  /* A workspace label above its tasks -- a coloured dot and the name, same as
+     the Tasks overview widget's group headings. */
+  function wsHead(name,color){
+    var c=color||"#6350e0";
+    return '<tr><td style="padding:15px 0 7px"><table cellpadding="0" cellspacing="0" role="presentation"><tr>'
+     +'<td valign="middle" style="width:7px"><div style="width:5px;height:5px;border-radius:99px;background:'+wsDot(c)+'"></div></td>'
+     +'<td valign="middle" style="padding-left:8px;font:800 9.5px '+F+';letter-spacing:.13em;text-transform:uppercase;color:'+wsFg(c)+'">'+esc(name)+'</td>'
+     +'</tr></table></td></tr>';
+  }
   function sect(title,items,mode,od){
     if(!items.length) return "";
+    var rowsHtml;
+    if(multiWs){
+      /* group by workspace (first-appearance order); routines, events and trips
+         have no workspace, so they gather in a neutral "Other" group placed last
+         -- otherwise a routine renders directly under the previous workspace and
+         reads as if it belonged to it. */
+      var order=[],buckets={};
+      items.forEach(function(x){ var k=x.ws?("w:"+x.ws):"_none"; if(!buckets[k]){buckets[k]={ws:x.ws||"",wsColor:x.wsColor||"",items:[]}; if(k!=="_none")order.push(k);} buckets[k].items.push(x); });
+      if(buckets["_none"]) order.push("_none");
+      rowsHtml=order.map(function(k){ var b=buckets[k],hd=(k==="_none")?wsHead("Other","#8a7fb0"):wsHead(b.ws,b.wsColor); return hd+b.items.map(function(x,i){return row(x,mode,true,i===0);}).join(""); }).join("");
+    } else {
+      rowsHtml=items.map(function(x){return row(x,mode,false,false);}).join("");
+    }
     return '<tr><td style="padding:18px 26px;border-bottom:1px solid '+LINE+'">'+head(title,items.length+' item'+(items.length>1?"s":""),od)
-     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+items.map(function(x){return row(x,mode);}).join("")+'</table></td></tr>';
+     +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+rowsHtml+'</table></td></tr>';
   }
+  var _wsSet={}; [].concat(d.today,d.week,d.overdue).forEach(function(x){ if(x&&x.ws) _wsSet[x.ws]=1; });
+  var multiWs=Object.keys(_wsSet).length>=2;   /* headings only when 2+ workspaces, like the overview widget */
   var sections=sect("Today",d.today,"today")+sect("This week",d.week,"week")+sect("Overdue",d.overdue,"over",true);
   if(!any) sections='<tr><td align="center" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
 
