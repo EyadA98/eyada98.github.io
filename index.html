@@ -2377,6 +2377,9 @@ html:not(.dark) .ntf-pin-grid .ntf-item{background:linear-gradient(135deg,rgba(2
 .td-side{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:11px}
 html:not(.dark) .td-side{background:rgba(0,0,0,.02)}
 .td-side .setlbl{display:block;margin-bottom:4px}
+.rt-panel .setlbl{margin-bottom:7px}
+.rt-panel #rSched>div{margin-top:15px}
+.rt-panel #rSched>label:first-child,.rt-panel #rSched>div:first-child{margin-top:0}
 .td-cmts{margin-top:14px}
 .td-cmt-l{display:flex;flex-direction:column;gap:9px;margin:10px 0;max-height:220px;overflow:auto}
 .td-cmt{display:flex;gap:9px}
@@ -3052,7 +3055,7 @@ html:not(.dark) .rt-card.v1::before{
 .pw-ring .pw-track{stroke:rgba(255,255,255,.14)}
 .pw-ring .pw-arc{stroke:#ffb3ab}
 html:not(.dark) .pw-ring .pw-track{stroke:rgba(60,40,100,.16)}
-html:not(.dark) .pw-ring .pw-arc{stroke:#c66a2b}
+html:not(.dark) .pw-ring .pw-arc{stroke:#ff9e88}
 
 /* ===== Light theme refinement — expanded brand palette ===== */
 html:not(.dark) body::before{background:
@@ -4307,6 +4310,7 @@ function rTimeOpen(btn){
   function commit(val){
     var hid=document.getElementById("rTime"); if(hid) hid.value=val;
     var l=document.getElementById("rTimeLab"); if(l) l.textContent=prettyTime(val);
+    if(window._rReady){try{rtCommit();}catch(e){}}
     var b=document.getElementById("rTimeBtn"); if(b) b.classList.add("set");
     var c=document.getElementById("rTimeClr"); if(c) c.classList.remove("hide");
   }
@@ -5000,39 +5004,76 @@ function rtHistory(id){ var r=(data.routines||[]).find(function(x){return x.id==
 }
 function rtDelete(id){ var arr=data.routines||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i<0) return; var it=arr[i]; tombstone({id:id}); arr.splice(i,1); save(); render(); undoToast("Routine deleted", function(){ data.deleted=data.deleted||{}; data.deleted["#"+id]=-Date.now(); data.routines=data.routines||[]; data.routines.splice(Math.min(i,data.routines.length),0,it); save(); render(); }); }
 var _rDays=[];
+var _rId=null,_rNew=null,_rReady=false,_rT=null;
 function openRoutine(id){
   var r=id?(data.routines||[]).find(function(x){return x.id===id;}):null; var isNew=!r;
-  if(isNew) r={id:"",title:"",desc:"",catId:"personal",tags:[],priority:"med",due:"",lastCompleted:"",recur:{type:"weekly",days:[]},links:[],checklist:[],history:[]};
+  if(isNew){ r={id:uid(),title:"",desc:"",catId:((rtCats()[0]||{}).id)||"personal",tags:[],priority:"med",due:"",lastCompleted:"",time:"",recur:{type:"weekly",days:[]},links:[],checklist:[],history:[],created:Date.now(),updated:Date.now()}; data.routines=data.routines||[]; data.routines.push(r); _rNew=r.id; save(); } else { _rNew=null; }
+  _rId=r.id; _rReady=false;
   var rc=normRecur(r.recur||{type:"weekly",days:[]}); _rDays=(rc.days||[]).slice();
   function opt(v,o){return o.map(function(x){return '<option value="'+x[0]+'" '+(String(v)===String(x[0])?"selected":"")+'>'+x[1]+'</option>';}).join("");}
-  var html='<h4>'+(isNew?"New routine":"Edit routine")+'</h4><div class="tm">'
-    +'<div class="tm-sec"><div class="tm-h">Basic info</div>'
-    +'<input class="fld tm-title" id="rTitle" value="'+esc(r.title)+'" placeholder="Routine title">'
-    +'<textarea class="fld" id="rDesc" rows="2" placeholder="Description (optional)" style="margin-top:10px">'+esc(r.desc||"")+'</textarea>'
-    +'<div class="f2" style="margin-top:12px"><div><label class="setlbl">Category</label><select class="fld" id="rCat">'+rtCats().map(function(c){return '<option value="'+c.id+'" '+(r.catId===c.id?"selected":"")+'>'+esc(c.name)+'</option>';}).join("")+'</select></div>'
-    +'<div><label class="setlbl">Priority</label><select class="fld" id="rPrio">'+opt(r.priority||"med",[["high","High"],["med","Medium"],["low","Low"]])+'</select></div></div></div>'
-    +'<div class="tm-sec"><div class="tm-h">Schedule</div>'
-    +'<label class="setlbl">Repeat type</label><select class="fld" id="rType" onchange="rTypeChange()">'+opt(rc.type,[["once","One-time"],["daily","Daily"],["weekly","Weekly / specific days"],["monthly","Monthly"],["yearly","Yearly"],["interval","Custom interval"],["usage","Usage-based"],["distance","Distance-based"],["customUnit","Custom unit"]])+'</select>'
-    +'<div id="rSched" style="margin-top:12px"></div>'
-    +'<div class="f2" style="margin-top:12px"><div><label class="setlbl">Last completed</label><input class="fld" id="rLast" type="date" value="'+esc(r.lastCompleted||"")+'" onchange="rNextPreview()"></div><div><label class="setlbl">Next due</label><input class="fld" id="rDue" type="date" value="'+esc(r.due||"")+'" onchange="rNextPreview()"></div></div>'
-    +'<div class="f2" style="margin-top:12px"><div><label class="setlbl">Time (optional)</label>'
-      +'<input type="hidden" id="rTime" value="'+esc(r.time||"")+'">'
-      +'<div class="rtm-wrap"><button type="button" class="fld rtm-btn'+(r.time?' set':'')+'" id="rTimeBtn" onclick="rTimeOpen(this)">'
-        +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
-        +'<span id="rTimeLab">'+(r.time?esc(prettyTime(r.time)):"Set a time")+'</span></button>'
-        +'<button type="button" class="rtm-clr'+(r.time?'':' hide')+'" id="rTimeClr" onclick="rTimeClear()" title="Clear">'
-        +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
-      +'</div><div></div></div>'
-    +'<div class="rt-next" id="rNextHint"></div></div>'
-    +'<div class="tm-sec"><div class="tm-h">Details</div><div class="f2"><div><label class="setlbl">Tags (comma)</label><input class="fld" id="rTags" value="'+esc((r.tags||[]).join(", "))+'" placeholder="vet, urgent"></div><div><label class="setlbl">Links (comma)</label><input class="fld" id="rLinks" value="'+esc((r.links||[]).join(", "))+'" placeholder="https://…"></div></div>'
-    +'<div class="rt-checkcard"><div style="display:flex;align-items:center;justify-content:space-between"><span class="setlbl" style="margin:0">Checklist</span><button type="button" class="btn soft sm" onclick="rAddCheck(\'\',false)">+ Add item</button></div><div id="rChecks" style="margin-top:9px"></div></div></div>'
+  var icDone='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:14px;height:14px"><path d="M5 12l5 5L20 7"/></svg>';
+  var icCat='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  var icFl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h13l-2.5 4L18 12H5"/></svg>';
+  var icCal='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var icTxt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>';
+  var icTag='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.8 13.8 20.6a2 2 0 0 1-2.8 0l-7.6-7.6V3h10z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
+  var icChk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+  var icHist='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 2"/></svg>';
+  var icClock='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  var icX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var icTr='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+  var html='<div class="td-panel rt-panel"><div class="tdp-head">'
+    +'<button class="btn soft sm" onclick="rtComplete(\''+r.id+'\')">'+icDone+'Mark done</button>'
+    +'<div class="tdp-actions"><button type="button" class="tdp-ic dz" title="Delete routine" onclick="rtDelete(\''+r.id+'\');closeModal()">'+icTr+'</button><button type="button" class="tdp-ic" title="Close" onclick="closeModal()">'+icX+'</button></div></div>'
+    +'<input class="tdp-title" id="rTitle" value="'+esc(r.title)+'" placeholder="Routine title">'
+    +'<div class="tdp-scroll">'
+    +'<div class="tdp-fields">'
+    +'<div class="tdp-row"><span class="tdp-lab">'+icCat+'Category</span><div class="tdp-in"><select class="bare" id="rCat">'+rtCats().map(function(c){return '<option value="'+c.id+'" '+(r.catId===c.id?"selected":"")+'>'+esc(c.name)+'</option>';}).join("")+'</select></div></div>'
+    +'<div class="tdp-row"><span class="tdp-lab">'+icFl+'Priority</span><div class="tdp-in"><select class="bare" id="rPrio">'+opt(r.priority||"med",[["high","High"],["med","Medium"],["low","Low"]])+'</select></div></div>'
     +'</div>'
-    +'<div class="row">'+(isNew?'':'<button class="btn danger" style="margin-right:auto" onclick="rtDelete(\''+r.id+'\');closeModal()">Delete</button>')+'<button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveRoutine(\''+(r.id||"")+'\')">'+(isNew?"Create routine":"Save")+'</button></div>';
-  showModal(html);
+    +'<div class="tdp-sec"><div class="tdp-sechd">'+icCal+'Schedule</div>'
+    +'<label class="setlbl" style="display:block;margin-top:8px">Repeat type</label><select class="fld" id="rType" onchange="rTypeChange()">'+opt(rc.type,[["once","One-time"],["daily","Daily"],["weekly","Weekly / specific days"],["monthly","Monthly"],["yearly","Yearly"],["interval","Custom interval"],["usage","Usage-based"],["distance","Distance-based"],["customUnit","Custom unit"]])+'</select>'
+    +'<div id="rSched" style="margin-top:16px"></div>'
+    +'<div class="f2" style="margin-top:16px"><div><label class="setlbl">Last completed</label><input class="fld" id="rLast" type="date" value="'+esc(r.lastCompleted||"")+'" onchange="rNextPreview()"></div><div><label class="setlbl">Next due</label><input class="fld" id="rDue" type="date" value="'+esc(r.due||"")+'" onchange="rNextPreview()"></div></div>'
+    +'<div style="margin-top:16px"><label class="setlbl">Time (optional)</label><input type="hidden" id="rTime" value="'+esc(r.time||"")+'"><div class="rtm-wrap"><button type="button" class="fld rtm-btn'+(r.time?' set':'')+'" id="rTimeBtn" onclick="rTimeOpen(this)">'+icClock+'<span id="rTimeLab">'+(r.time?esc(prettyTime(r.time)):"Set a time")+'</span></button><button type="button" class="rtm-clr'+(r.time?'':' hide')+'" id="rTimeClr" onclick="rTimeClear()" title="Clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'
+    +'<div class="rt-next" id="rNextHint" style="margin-top:16px"></div></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd">'+icTxt+'Description</div><textarea class="fld" id="rDesc" rows="3" style="margin-top:8px" placeholder="Add a description&hellip;">'+esc(r.desc||"")+'</textarea></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd">'+icTag+'Details</div><div class="f2" style="margin-top:8px"><div><label class="setlbl">Tags (comma)</label><input class="fld" id="rTags" value="'+esc((r.tags||[]).join(", "))+'" placeholder="vet, urgent"></div><div><label class="setlbl">Links (comma)</label><input class="fld" id="rLinks" value="'+esc((r.links||[]).join(", "))+'" placeholder="https://&hellip;"></div></div></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd">'+icChk+'Checklist<button type="button" class="btn soft sm" style="margin-left:auto" onclick="rAddCheck(\'\',false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>Add</button></div><div id="rChecks" style="margin-top:9px"></div></div>'
+    +'<div class="tdp-sec"><div class="tdp-sechd">'+icHist+'History</div><div id="rHist" style="margin-top:9px"></div></div>'
+    +'<div class="muted" style="font-size:.72rem;margin-top:14px">Created '+new Date(r.created||Date.now()).toLocaleDateString()+(r.updated?(' &middot; updated '+new Date(r.updated).toLocaleDateString()):'')+'</div>'
+    +'</div></div>';
+  showModal(html,"side");
   rTypeChange(rc);
   (r.checklist||[]).forEach(function(c){ rAddCheck(c.t,c.done); });
+  try{ rtRenderHistory(r); }catch(e){}
   try{ enhanceDatePickers(); enhanceSelects(); }catch(e){}
+  try{ var _pc=document.getElementById("rCat"); if(_pc&&_pc._csbtn) _pc._csbtn.classList.add("tdp-pill-b");
+       var _pp=document.getElementById("rPrio"); if(_pp&&_pp._csbtn){ var _pb=_pp._csbtn; _pb.classList.add("tdp-pill-b"); _pb.classList.remove("pri-high","pri-med","pri-low","pri-none"); _pb.classList.add(_pp.value?("pri-"+_pp.value):"pri-none"); } }catch(e){}
+  var _pnl=document.querySelector(".td-panel");
+  if(_pnl){ _pnl.addEventListener("input",function(){ rtAutoSave(); }); _pnl.addEventListener("change",function(e){ rtCommit(); if(e.target&&e.target.id==="rPrio"){ var pb=e.target._csbtn; if(pb){ pb.classList.remove("pri-high","pri-med","pri-low","pri-none"); pb.classList.add(e.target.value?("pri-"+e.target.value):"pri-none"); } } }); _pnl.addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".rday,.rday-quick button,.sub-del,.sub-chk")) rtAutoSave(); }); }
+  window._tdCleanup=function(){ try{ if(_rReady) rtCommit(); }catch(e){} if(_rNew){ var rr=(data.routines||[]).find(function(x){return x.id===_rNew;}); if(rr&&!((""+(rr.title||"")).trim())){ try{tombstone({id:_rNew});}catch(_){} data.routines=(data.routines||[]).filter(function(x){return x.id!==_rNew;}); save(); render(); } } _rNew=null; _rId=null; _rReady=false; if(_rT){clearTimeout(_rT);_rT=null;} };
+  _rReady=true;
+  if(_rNew){ try{ render(); }catch(e){} }
+  setTimeout(function(){ if(isNew){ var e=document.getElementById("rTitle"); if(e) e.focus(); } },30);
 }
+function rtCommit(){
+  if(!_rReady) return; var id=_rId; if(!id) return;
+  var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r) return;
+  var te=document.getElementById("rTitle"); if(!te) return;
+  var gv=function(x){var e=document.getElementById(x); return e?e.value:"";};
+  var checks=[]; document.querySelectorAll("#rChecks .sub-row").forEach(function(rw){ var v=(rw.querySelector(".sub-in").value||"").trim(); if(v) checks.push({t:v,done:rw.querySelector(".sub-chk").classList.contains("done")}); });
+  var rec=rReadRecur();
+  if(r.recur&&r.recur.lastKm!=null&&rec.lastKm==null) rec.lastKm=r.recur.lastKm;
+  r.title=te.value.trim(); r.desc=gv("rDesc").trim(); r.catId=gv("rCat"); r.priority=gv("rPrio")||"med";
+  r.recur=rec; r.due=gv("rDue"); r.lastCompleted=gv("rLast"); r.time=gv("rTime");
+  r.tags=gv("rTags").split(",").map(function(x){return x.trim();}).filter(Boolean);
+  r.links=gv("rLinks").split(",").map(function(x){return x.trim();}).filter(Boolean);
+  r.checklist=checks; r.updated=Date.now();
+  save(); try{ renderRoutines(); }catch(e){}
+}
+function rtAutoSave(){ if(_rT) clearTimeout(_rT); _rT=setTimeout(function(){ _rT=null; rtCommit(); },400); }
+function rtRenderHistory(r){ var el=document.getElementById("rHist"); if(!el) return; var h=r.history||[]; el.innerHTML=h.length?h.slice(0,10).map(function(x){return '<div style="display:flex;gap:11px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:6px;flex:none"></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:.82rem">'+esc(new Date(x.ts).toLocaleString())+'</div>'+(x.note?'<div class="muted" style="font-size:.8rem;margin-top:2px">'+esc(x.note)+'</div>':'')+'</div></div>';}).join(""):'<p class="muted" style="font-size:.8rem;padding:4px 0">No completions logged yet.</p>'; }
 function rSchedFields(type,rc){
   function opt(v,o){return o.map(function(x){return '<option value="'+x[0]+'" '+(String(v)===String(x[0])?"selected":"")+'>'+x[1]+'</option>';}).join("");}
   if(type==="once") return '<p class="muted" style="font-size:.82rem;line-height:1.5">A single reminder on the “Next due” date below.</p>';
@@ -5063,7 +5104,7 @@ function rReadRecur(){ var type=(document.getElementById("rType")||{}).value||"w
   else if(type==="customUnit"){ rec.n=+gv("rN")||1; rec.customUnit=gv("rCustomUnit")||"units"; rec.curKm=+gv("rCur")||0; rec.nextKm=+gv("rNextKm")||0; }
   return rec; }
 function rNextPreview(){ var el=document.getElementById("rNextHint"); if(!el)return; var temp={recur:rReadRecur(),lastCompleted:(document.getElementById("rLast")||{}).value||"",due:(document.getElementById("rDue")||{}).value||"",created:Date.now()}; var nx=rtNext(temp); var lab=esc(rtRecurLabel(temp)); el.innerHTML=nx?('<span class="rt-next-l">'+lab+'</span> · Next due <b>'+esc(fmtFull(nx))+'</b>'):('<span class="rt-next-l">'+lab+'</span> · set a “Next due” date to schedule it'); }
-function rAddCheck(text,done){ var host=document.getElementById("rChecks"); if(!host)return; var row=document.createElement("div"); row.className="sub-row"; row.innerHTML='<span class="chk sub-chk'+(done?" done":"")+'" onclick="this.classList.toggle(\'done\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span><input class="fld sub-in" placeholder="Checklist item…" value="'+esc(text||"")+'"><button type="button" class="sub-del" onclick="this.parentNode.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'; host.appendChild(row); if(!text){var i=row.querySelector(".sub-in"); if(i)i.focus();} }
+function rAddCheck(text,done){ var host=document.getElementById("rChecks"); if(!host)return; var row=document.createElement("div"); row.className="sub-row note-check-row"; row.innerHTML=subGripHtml("checklist item")+'<span class="chk sub-chk'+(done?" done":"")+'" onclick="this.classList.toggle(\'done\');var i=this.parentNode.querySelector(\'.sub-in\');if(i)i.classList.toggle(\'done\',this.classList.contains(\'done\'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span><input class="fld sub-in'+(done?" done":"")+'" placeholder="Checklist item&hellip;" value="'+esc(text||"")+'"><button type="button" class="sub-del" onclick="this.parentNode.remove()" aria-label="Remove item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'; host.appendChild(row); if(!text){var i=row.querySelector(".sub-in"); if(i)i.focus();} }
 function saveRoutine(id){
   var title=(((document.getElementById("rTitle")||{}).value||"")||"").trim(); if(!title){ toast("Title is required"); return; }
   var catId=((document.getElementById("rCat")||{}).value||"");
@@ -6097,6 +6138,7 @@ function renderTasks(){
   return renderTaskBoard(host);
 }
 function renderTaskBoard(host){
+  var _kx=0,_kv={}; var _ok=host.querySelector(".kanban"); if(_ok){ _kx=_ok.scrollLeft; _ok.querySelectorAll(".kcol-body").forEach(function(b){ var col=b.closest(".kcol"); if(col&&b.scrollTop) _kv[col.getAttribute("data-col")]=b.scrollTop; }); }
   var arr=taskList(); var cc=data.settings.collapsedCols||[];
   var inAll=!wsActive();
   host.innerHTML='<div class="kanban">'+statuses().map(function(col){
@@ -6122,6 +6164,7 @@ function renderTaskBoard(host){
       +'<div class="kcol-body">'+items.map(kcard).join("")+(items.length?'':'<div class="muted" style="font-size:.8rem;padding:6px 4px">No tasks yet</div>')
       +'</div></div>';
   }).join("")+'<button class="kcol-add" onclick="addStatusInline()" title="Add status" aria-label="Add status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:22px;height:22px"><path d="M12 5v14M5 12h14"/></svg></button></div>';
+  var _nk=host.querySelector(".kanban"); if(_nk){ if(_kx)_nk.scrollLeft=_kx; _nk.querySelectorAll(".kcol").forEach(function(col){ var sv=_kv[col.getAttribute("data-col")]; if(sv){ var b=col.querySelector(".kcol-body"); if(b)b.scrollTop=sv; } }); }
 }
 function newTaskIn(status){ openTask(null,status); }
 async function colRename(id){
@@ -6575,7 +6618,7 @@ function addSubRow(text,done,assignee,due,desc,sid){
    most of its width is a text field, and a press there means editing. */
 function subDragStart(e,grip){
   var row=grip&&grip.closest(".sub-row"), host=row&&row.parentNode;
-  if(!row||!host||(host.id!=="tdSubs"&&host.id!=="enChk")) return;
+  if(!row||!host||(host.id!=="tdSubs"&&host.id!=="enChk"&&host.id!=="rChecks")) return;
   e.preventDefault(); e.stopPropagation();
   pdragBegin(e,row,{sel:".sub-row",key:"data-sid",grip:grip,commit:subDragCommit,
                     rcls:"sub-reordering",scroller:row.closest(".tdp-scroll")});
@@ -6852,8 +6895,10 @@ function migrateNotes(){
   });
   if(ch) save();
 }
+var _nId=null,_nNew=null,_nReady=false,_nT=null;
 function noteModal(id){
   var n=id?data.notes.find(function(x){return x.id===id;}):null; if(id&&!n) return;
+  _nId=id||null; _nNew=null; _nReady=false; if(_nT){clearTimeout(_nT);_nT=null;}
   var t=n||{title:"",desc:"",checklist:[],labels:[]};
   var IClbl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.8 13.8 20.6a2 2 0 0 1-2.8 0l-7.6-7.6V3h10z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   var ICchk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
@@ -6866,12 +6911,31 @@ function noteModal(id){
     +'</div>'
     +'<div class="row" style="justify-content:space-between;gap:8px">'
     +(id?('<div style="display:flex;gap:8px"><button class="btn soft" onclick="archiveNote(\''+id+'\');closeModal()">'+(t.archived?"Unarchive":"Archive")+'</button><button class="btn soft" style="color:var(--red)" onclick="delNoteConfirm(\''+id+'\')">Delete</button></div>'):'<div></div>')
-    +'<div style="display:flex;gap:8px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNoteEdit(\''+(id||"")+'\')">Save</button></div></div>';
+    +'<div style="display:flex;gap:8px"><button class="btn" onclick="closeModal()">Done</button></div></div>';
   showModal(html,"wide");
   (t.checklist||[]).forEach(function(c){ addNoteChkRow(c.t,c.done); });
   if(id){ try{ noteRenderAttach(id); }catch(e){} }
+  var _tm=document.querySelector(".overlay .modal .tm");
+  if(_tm){ _tm.addEventListener("input",function(){ noteAutoSave(); }); _tm.addEventListener("change",function(){ noteCommit(); }); _tm.addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".sub-del,.sub-chk")) noteAutoSave(); }); }
+  window._tdCleanup=function(){ try{ if(_nT){clearTimeout(_nT);_nT=null;} }catch(_){}
+    try{ if(_nReady) noteCommit(); }catch(e){}
+    if(_nNew){ var nn=data.notes.find(function(x){return x.id===_nNew;}); if(nn){ var empty=!((nn.title||"").trim())&&!((nn.desc||"").trim())&&!((nn.checklist||[]).length)&&!((nn.labels||[]).length); if(empty){ try{tombstone({id:_nNew});}catch(_){} data.notes=data.notes.filter(function(x){return x.id!==_nNew;}); save(); if(document.getElementById("notesList"))renderNotes(); try{renderRecentNotes();}catch(_){} } } }
+    _nId=null;_nNew=null;_nReady=false; };
+  _nReady=true;
   setTimeout(function(){ var e=document.getElementById("enTitle"); if(e) e.focus(); },30);
 }
+function noteCommit(){
+  if(!_nReady) return;
+  var te=document.getElementById("enTitle"); if(!te) return;
+  var title=(te.value||"").trim();
+  var desc=(document.getElementById("enDesc")||{}).value||"";
+  var chk=[]; document.querySelectorAll("#enChk .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(v) chk.push({t:v,done:r.querySelector(".sub-chk").classList.contains("done")}); });
+  var li=document.getElementById("enLabels"); var labels=parseLabels(li?li.value:"");
+  if(_nId){ var n=data.notes.find(function(x){return x.id===_nId;}); if(n){ _nestedDiff("#"+_nId+"/k", n.checklist, chk, _subKey); n.title=title; n.desc=desc; n.checklist=chk; n.labels=labels; n.updated=Date.now(); } }
+  else { if(!(title||desc.trim()||chk.length||labels.length)) return; var nid=uid(); data.notes.unshift({id:nid,title:title,desc:desc,checklist:chk,labels:labels,ts:Date.now(),updated:Date.now(),pinned:false,archived:false}); _nId=nid; _nNew=nid; }
+  save(); if(document.getElementById("notesList")) renderNotes(); try{ renderRecentNotes(); }catch(e){}
+}
+function noteAutoSave(){ if(_nT)clearTimeout(_nT); _nT=setTimeout(function(){ try{noteCommit();}catch(e){} },400); }
 function editNote(id){ noteModal(id); }
 /* ================= Attachments (Supabase Storage) ================= */
 var ATTACH_BUCKET="attachments";
