@@ -30,19 +30,9 @@
   html.dark{ --lavender:#817eff; --lilac:#b3a9ff; --peach:#ffb3ab; --bg:#130a30;color-scheme:dark} html:not(.dark){color-scheme:light}
 /* ---- tokens: one set, flipped once, the way Hub and Finance do it ----------- */
 :root{ --colgap:18px; --grad-iri-rev:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%); --grad-iri:linear-gradient(120deg,#7468e2 0%,#8e7ee6 100%); --top-control-gradient:var(--grad-iri); --glow-lav:0 10px 30px rgba(129,126,255,.34); --ease:cubic-bezier(.22,.61,.36,1); --lavender:#817eff; --lilac:#b3a9ff; --peach:#ffb3ab; --bg:#f4f1fb; --text:#240852; --muted:#6a5f86; --dim:#786d95; --border:#e7e0f5; --card:#ffffff;
-  --tile:rgba(129,126,255,.06); --tile-bd:#ece7f6; --tile-hi:rgba(129,126,255,.12); --radius:18px; --ctl:38px;
-  /* semantic, from the guide: warning 43deg amber, info 210deg sky. Light-mode inks. */
-  --amber:#f0c24b; --amber-ink:#8a6100; --amber-soft:rgba(240,194,75,.18);
-  --sky:#5aa2ea;   --sky-ink:#1f5fc2;   --sky-soft:rgba(90,162,234,.16);
-  /* error red - the pair Hub and Finance already carry. Travel was painting its
-     auth errors #ffb9b0, which is --peach: the Trip/Medium hue, not an error. */
-  --red:#c22940; }
+  --tile:rgba(129,126,255,.06); --tile-bd:#ece7f6; --tile-hi:rgba(129,126,255,.12); --radius:18px; --ctl:38px; }
 html.dark{ --text:#ece7fb; --muted:#a99ccb; --dim:#8479a8; --border:rgba(255,255,255,.10); --card:#14093a;
-  --tile:rgba(255,255,255,.04); --tile-bd:rgba(255,255,255,.08); --tile-hi:rgba(255,255,255,.10);
-  /* on the dark canvas the fill is the legible ink - the guide's "tune every hue for the other theme" */
-  --amber-ink:#f0c24b; --amber-soft:rgba(240,194,75,.22);
-  --sky-ink:#5aa2ea;   --sky-soft:rgba(90,162,234,.20);
-  --red:#f2596f; }
+  --tile:rgba(255,255,255,.04); --tile-bd:rgba(255,255,255,.08); --tile-hi:rgba(255,255,255,.10); }
 @media(pointer:coarse){ .tv-actrow{ --ctl:44px } }   /* Hub scopes the 44px bump to .pg-actions, not :root */
 /* ---- shell: Hub's rail, copied value-for-value ------------------------------
    Hub: grid-template-columns:clamp(214px,16.5vw,278px) 1fr, a gradient rail with
@@ -230,7 +220,7 @@ html:not(.dark) .tv-trip{--tv-rib:url("data:image/svg+xml,%3Csvg xmlns='http://w
 .tv-fld{width:100%;padding:10px 13px;border-radius:12px;font-size:16px;font-family:inherit;
   margin-bottom:11px;text-align:left;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);color:#fff}
 .tv-fld::placeholder{color:rgba(255,255,255,.4)}
-.tv-autherr{color:var(--red);font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
+.tv-autherr{color:#ffb9b0;font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center}
 .tv-btnfull{width:100%;padding:13px;font-size:.95rem;border-radius:13px;margin-top:4px;border:none;cursor:pointer;
   font-family:inherit;font-weight:700;color:#fff;background:linear-gradient(110deg,#b3a9ff 0%,#817eff 35%,#8e7ee6 55%,#ffb3ab 100%)}
 .tv-authlinks{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
@@ -378,7 +368,7 @@ html.dark .tv-avmenu .tv-danger{color:#f2596f}
 }
 
 /* ===== trip card: countdown states ===== */
-.tp-num-soon{background-image:linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tp-num-soon{background-image:linear-gradient(115deg,#817eff,#9d90ff 45%,#ffb3ab);-webkit-background-clip:text;background-clip:text;color:transparent}
 .tp-num-live{background-image:linear-gradient(115deg,#1e915f,#74c4b6 55%,#a7e3d4);-webkit-background-clip:text;background-clip:text;color:transparent}
 .tp-num-past{background-image:linear-gradient(115deg,#6a5f86,#8b829f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .tp-bar-soon{background:linear-gradient(90deg,#817eff,#ffb3ab)}
@@ -440,7 +430,7 @@ html.dark .tv-avmenu .tv-danger{color:#f2596f}
 .tv-coll-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px}
 .tv-coll-hit{display:flex;align-items:center;gap:13px;text-align:left;flex:1;min-width:0;background:none;border:0;padding:0;cursor:pointer}
 .tv-step{width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;
-  border-radius:12px;background:var(--grad-iri);
+  border-radius:12px;background:var(--grad-iri,linear-gradient(120deg,#817eff 0%,#9d90ff 40%,#ffb3ab 100%));
   color:#fff;font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:.95rem;line-height:1;
   box-shadow:var(--glow-lav,0 10px 30px rgba(129,126,255,.34))}
 .tv-kicker{display:block;font-size:.71rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.11em;line-height:1.3}
@@ -464,7 +454,7 @@ html.dark .tv-avmenu .tv-danger{color:#f2596f}
   background:var(--grad-iri);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
   overflow-wrap:anywhere}
-html.dark .tv-fig{background:var(--grad-iri-rev);
+html.dark .tv-fig{background:var(--grad-iri-rev,linear-gradient(120deg,#b3a9ff 0%,#a99bff 42%,#ffb3ab 100%));
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .tv-fig-total{font-size:1.56rem;margin-top:-1px;white-space:nowrap}
 @media(max-width:600px){ .tv-fig{font-size:1.32rem} .tv-fig-total{font-size:1.4rem} }
@@ -554,12 +544,7 @@ html.dark .tv-sum2{background:var(--grad-iri-rev);-webkit-background-clip:text;b
 .tv-tile[data-c="peach"]{--c:var(--peach)}
 .tv-tile[data-c="teal"]{--c:#7fd1c4}
 html:not(.dark) .tv-tile[data-c="lilac"]{--c:#7a58b0}
-/* #A85C22 is the guide's published light-mode peach ink (Priority "Medium"
-   ink, and the colour it uses for peach body text throughout). #C96F2E was a
-   private near-miss that measured 3.5:1 on the pale tile; the guide value is
-   4.8:1. Its two siblings already sit on guide hues (#1E915F Routine, and the
-   lilac step), so this was the odd one out. */
-  html:not(.dark) .tv-tile[data-c="peach"]{--c:#a85c22}
+html:not(.dark) .tv-tile[data-c="peach"]{--c:#c96f2e}
 html:not(.dark) .tv-tile[data-c="teal"]{--c:#1E915F}
 .tv-tile-v{font-family:'Marcellus',Georgia,'Times New Roman',serif;font-weight:400;font-size:1.5rem;line-height:1.15;
   letter-spacing:.012em;margin-top:auto;padding-top:7px;color:var(--c);overflow-wrap:anywhere}
@@ -1331,6 +1316,20 @@ html:not(.dark) .tv-citybody .att-strip::before{color:#7a58bd}
 .sb-name-go:hover{filter:brightness(1.08)}
 .sb-name-go svg{width:15px;height:15px}
 html:not(.dark) .sb-search,html:not(.dark) .sb-div,html:not(.dark) .sb-new{border-color:var(--border)}
+/* Light mode: the switcher's row text is tuned for the dark panel (#e6def7 on
+   #14093a). On the light panel (var(--card)=#fff) that lavender is nearly
+   invisible, so the trip names read as blank. Repaint them in the app's own
+   light-mode ink and muted tokens; the current trip keeps a readable warm
+   accent instead of the too-pale peach. */
+html:not(.dark) .sb-row-name{color:#240852}
+html:not(.dark) .sb-row:hover .sb-row-name{color:#12013a}
+html:not(.dark) .sb-row.current .sb-row-name{color:#a1531f}
+html:not(.dark) .sb-row-sub{color:#6a5f86}
+html:not(.dark) .sb-glabel{color:#6a5f86}
+html:not(.dark) .sb-search svg{color:#8a7fb0}
+html:not(.dark) .sb-search input{color:#240852}
+html:not(.dark) .sb-search input::placeholder{color:#8a7fb0}
+html:not(.dark) .sb-row + .sb-row{border-top-color:var(--border)}
 @media(prefers-reduced-motion:reduce){.sb-switch,.sb-trip,.sb-trip-status.pulse,.sb-row{animation:none!important;transition:none!important}}
 /* ══════════════════ BUDGET CONSOLE ══════════════════════════════════════════
    Every panel is the same object: card, Marcellus heading, one-line note,
@@ -2329,7 +2328,7 @@ html:not(.dark) .tp-bottombar button.is-active{
 }
 .tv-pwfeye:hover{color:#fff;background:rgba(255,255,255,.09)}
 .tv-autherr{
-  color:var(--red);font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center
+  color:#ffb9b0;font-size:.82rem;font-weight:600;min-height:18px;margin:4px 0;text-align:center
 }
 .tv-autherr.ok{color:#9ff0c8}
 .tv-btnfull{
@@ -2411,7 +2410,7 @@ html:not(.dark) .tp-bottombar button.is-active{
   transition:color .18s,background .18s}
 #authRoot .pwf-eye:hover{color:#fff;background:rgba(255,255,255,.09)}
 #authRoot .pwf-eye svg{width:18px;height:18px;display:block}
-#authRoot .auth-err{color:var(--red);font-size:.82rem;font-weight:600;line-height:normal;
+#authRoot .auth-err{color:#ffb9b0;font-size:.82rem;font-weight:600;line-height:normal;
   min-height:18px;margin:4px 0;text-align:center}
 #authRoot .auth-err.ok{color:#9ff0c8}
 #authRoot .btn{background:var(--grad-iri);color:#fff;border:none;padding:9px 17px;border-radius:99px;
@@ -2428,245 +2427,6 @@ html:not(.dark) .tp-bottombar button.is-active{
   font-size:.82rem;line-height:normal;font-weight:600;cursor:pointer;padding:0}
 @media(max-width:1024px){#authRoot .auth-card .fld{font-size:16px!important}}
 @media(max-width:420px){#authRoot .auth-card{padding:64px 26px 28px}}
-
-/* ── The sign-in gate is a wall, so the page behind it must stop being a page ──
-   #authRoot is position:fixed and covers the viewport, but nothing ever told the
-   document underneath to hold still. The whole planner stays laid out in normal
-   flow behind the overlay — and this one is portalled into <body>, so the app is
-   still mounted and still tall — which leaves the document scrollbar live.
-   Spinning the wheel on the sign-in screen moved a scrollbar and nothing else.
-   Locking html (not body) is what the gate needed: iOS honours overflow:hidden
-   on the root element, and it leaves the scroll POSITION intact, which matters
-   because AuthModal can be raised over a planner you were already reading.
-   #authRoot keeps its own overflow:auto — that one is real, and it is the only
-   scrolling this screen should do: at 932x430 the 485px card does not fit. */
-html.auth-open,html.auth-open body{overflow:hidden}
-html.auth-open{overscroll-behavior:none}
-
-/* And the gate must not scroll SIDEWAYS at all. The peach glow behind the card
-   is a 560px circle pinned right:-10%, and a decorative overflow to the right
-   is real scrollable width inside an overflow:auto box — the browser does not
-   know it is only a glow. Measured with the gate up that bought 143px of
-   horizontal scroll at 1440 and 38px at 390, which is why the sign-in screen
-   slid left under a trackpad swipe and showed a band of bare gradient. Clipping
-   x keeps the glow's bleed decorative, which is all it was ever meant to be;
-   y stays auto because a 485px card on a 430px-tall landscape phone has to
-   scroll somewhere. */
-#authRoot{overflow-x:hidden;overflow-y:auto}
-
-/* Clipping stops the swipe, but the 143px of phantom width is still there in
-   the box's scrollWidth, and anything that can move a scroll container without
-   the user asking — focusing a field, a keyboard page, an assistive scroll —
-   can still find it. So the glow is taken out of the scroll box entirely: it is
-   position:fixed, and fixed descendants do not contribute to an ancestor's
-   scrollable overflow. The gate is itself inset:0 fixed, so the circle lands on
-   exactly the same pixels it did before. */
-#authRoot::before{position:fixed}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   batch v14 — reported UI issues (ribbon surfaces, content start point)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── 1. A surface behind the interlock motif in dark mode ──────────────────
-   The "Brand interlock v5" block above re-declares the whole `background`
-   shorthand for ten ribbons. Every `html:not(.dark)` variant ends in a solid
-   surface (`,#f0ebfb`); every `html.dark` variant ends with the motif and
-   nothing behind it. Because `background` is a shorthand, re-declaring it
-   also reset background-color, so the surfaces the app used to paint were
-   silently dropped — the city-row perforation lost its violet gradient, the
-   panel ribbons lost their rgba(129,126,255,.18) wash, and the sidebar foot
-   lost the rgba(255,255,255,.035) it shares with the Workspace. In dark mode
-   the motif was therefore floating on whatever card happened to be behind it,
-   which is what makes the city rows read as "pattern with no background".
-
-   Nothing here changes the motif, its size, offset or repeat mode. Each rule
-   is the v5 rule with the element's ORIGINAL surface restored as the bottom
-   layer, so dark now mirrors light's `,#f0ebfb`. Same specificity as v5,
-   later in the sheet, so these win. */
-:root{
-  /* the flat panel wash — Travel's own value, from --b-ribbon (dark),
-     .m-rib (dark) and .s-rib (dark) before v5 overwrote them */
-  --iw-surf-d:rgba(129,126,255,.18);
-  /* the boarding-pass perforation is richer than a flat panel rib; this is
-     the gradient .pass-stub::after and .bb-rib carried originally */
-  --iw-surf-pass:linear-gradient(135deg,rgba(129,126,255,.30),rgba(129,126,255,.16))
-}
-
-/* sidebar foot — the surface here is deliberately the Workspace's, not the
-   panel wash, because this ribbon sits on the rail rather than on a card */
-.tv-aside::after{
-  border-top:0;
-  background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat,rgba(255,255,255,.035)
-}
-
-/* trip cards */
-html.dark .tv-trip{--tv-rib:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round,var(--iw-surf-d)}
-
-/* city boarding-pass divider — the reported issue */
-html.dark .pass-stub::after{
-  background:var(--iw-dark) -7px -7px/14px 14px repeat round,var(--iw-surf-pass)
-}
-@media(max-width:1240px){
-  html.dark .pass-stub::after{
-    background:var(--iw-dark) -7px -7px/14px 14px round repeat,var(--iw-surf-pass)
-  }
-}
-
-/* budget boarding pass */
-html.dark .bb-rib{
-  background:var(--iw-dark) -7px -7px/14px 14px repeat round,var(--iw-surf-pass)
-}
-@media(max-width:900px){
-  html.dark .bb-rib{
-    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat,var(--iw-surf-pass)
-  }
-}
-
-/* budget, map and settings ribbons */
-html.dark .tvb .b-ribbon{
-  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round,var(--iw-surf-d)
-}
-html.dark .tvm .m-rib{
-  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round,var(--iw-surf-d)
-}
-html.dark .tvm .dest-band{
-  background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat,var(--iw-surf-d)
-}
-@media(max-width:1000px){
-  html.dark .tvm .tk-rail{
-    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat,var(--iw-surf-d)
-  }
-}
-html.dark .tvs .s-rib{
-  background:var(--iw-dark) -6.5px -6.5px/13px 13px repeat round,var(--iw-surf-d)
-}
-@media(max-width:1000px){
-  html.dark .tvs .s-head-rail{
-    background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat,var(--iw-surf-d)
-  }
-}
-
-/* ── 2. Content starts where it does in the other two apps ─────────────────
-   Hub and Finance both run main at 32 / 26 / 20 across the same three
-   breakpoints. Travel's .tv-main used `clamp(14px,2.4vw,32px)` for its top
-   padding — which lands on 32 only above 1334px — and then the React markup
-   pinned it with an inline `style={{paddingTop:20}}`, which beats the
-   stylesheet at every width. The net effect was 20px everywhere: -12 against
-   the others on desktop, -6 on tablet, level only on phones. The inline style
-   is removed in the markup; these three rules are the other apps' ladder,
-   verbatim, and !important matches how Hub and Finance declare theirs.
-
-   The first-child margin reset is the analogue of `.tab>:first-child` — a
-   view whose first block carries a top margin would otherwise start lower
-   than the padding says it should. .view-anim is Travel's per-view wrapper. */
-.tv-main{padding-top:32px!important}
-@media(max-width:1024px){ .tv-main{padding-top:26px!important} }
-@media(max-width:760px){  .tv-main{padding-top:20px!important} }
-.view-anim>:first-child{margin-top:0!important}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   batch v15 — city-row perforation: a real surface in dark mode
-   ══════════════════════════════════════════════════════════════════════════
-
-   Light mode gives the tear strip a SOLID plate — `,#f0ebfb` — so the motif
-   always sits on a known surface. Dark mode was given a translucent wash
-   instead (`linear-gradient(135deg,rgba(129,126,255,.30),rgba(129,126,255,.16))`),
-   which is not the same design one stop darker; it is a different design.
-   Two things went wrong with it.
-
-   It is the wrong weight. Measured on the row: the wash composites to
-   rgb(53,44,117) over the #14093A card and the motif on top lands at
-   rgb(103,90,172) — roughly three times the card's luminance, so the strip
-   became the loudest object in the row. Light's plate is 1.17:1 against its
-   white card: a whisper. #26185A is that same whisper on the dark side,
-   1.20:1 against #14093A, computed to match rather than eyeballed.
-
-   And it is translucent, so what it actually looks like depends on whatever
-   is behind it. `.tv-city.anchor .pass-row` paints its own violet wash, and a
-   hovered row paints another — the strip drifted with them. An opaque plate
-   is what light already had; dark now has it too, so the strip is the same
-   colour in every row state.
-
-   The motif needs its own step down to follow. --iw-dark is baked at
-   fill-opacity .32, which over the new plate reads 1.91:1 — stronger than
-   light's 1.41:1 motif-on-plate. --iw-pass-d is the identical geometry at
-   .20, which lands on 1.47:1. It is a separate literal rather than a var()
-   substitution because a custom property inside a data-URI never resolves.
-
-   Bonus: the plate now sits within 2 rgb points of the trip-card and panel
-   ribbons' composited surface (rgb(40,30,93) from --iw-surf-d), so the
-   perforation finally reads as part of the same ribbon family instead of as
-   the one bright outlier. */
-:root{
-  --iw-pass-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.20'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E");
-  --iw-pass-surf-d:#26185a
-}
-html.dark .pass-stub::after{
-  background:var(--iw-pass-d) -7px -7px/14px 14px repeat round,var(--iw-pass-surf-d);
-  border-left-color:rgba(129,126,255,.22);border-right-color:rgba(129,126,255,.22)
-}
-/* Below 1024 the stub goes full width and the seam turns horizontal: the left
-   and right hairlines are set to 0 and the top and bottom ones take over
-   (line ~914). Only those two need re-tinting. The 1240 breakpoint exists
-   only to restate the shorthand the earlier v5/v14 rules restate there. */
-@media(max-width:1240px){
-  html.dark .pass-stub::after{
-    background:var(--iw-pass-d) -7px -7px/14px 14px round repeat,var(--iw-pass-surf-d)
-  }
-}
-@media(max-width:1024px){
-  html.dark .pass-stub::after{
-    border-top-color:rgba(129,126,255,.22);border-bottom-color:rgba(129,126,255,.22)
-  }
-}
-
-/* ═══════════════ QA: touch targets on the planner ══════════════════════════
-   The planner is the one view where the chrome-free fields -- the ones with
-   `border:0;padding:0` so they read as printed text on a boarding pass rather
-   than as form controls -- leave a finger 15 to 23px to aim at. Everything
-   here is scoped to pointer:coarse and moves no ink:
-
-     · a BUTTON grows through a negative-inset ::after, which costs nothing;
-     · an INPUT cannot -- Chrome does not generate pseudo-elements for a text
-       field (it does for a checkbox, which is why Finance can use one) -- so
-       the input grows by real padding cancelled by an equal negative margin.
-       The element's box gets taller, its text and its underline stay exactly
-       where they were, and the parent's height is unchanged.
-
-   Where a field carries a hover underline on its bottom edge, the padding is
-   added on TOP only, so the underline does not slide down the card.
-   ═════════════════════════════════════════════════════════════════════════ */
-@media(pointer:coarse){
-  /* trip name — 27px, and the underline must not move */
-  .bb-name{padding-top:13px!important;margin-top:-13px!important}
-  /* origin / destination city — 21px, same underline constraint */
-  .bb-city input{padding-top:19px!important;margin-top:-19px!important}
-  /* the date beneath it is a button, so it costs nothing. Mostly downward:
-     upward it would eat the city field it sits under. */
-  .bb-date button{position:relative}
-  .bb-date button::after{content:"";position:absolute;inset:-4px 0 -13px}
-  /* the city line on a boarding-pass row is the smallest target in the app
-     at 15px. Nothing sits directly under it, so it grows both ways. */
-  .pass-cityin input{padding:13px 0 12px!important;margin:-13px 0 -12px!important}
-  /* Square icon buttons that the blanket `button{min-height:40px}` above
-     stretched into tall rectangles — 22 wide by 40 tall is not a better
-     target than 22 square, it is just a distorted one. Give them back their
-     proportions and add the reach as a ring instead. */
-  .bb-stp button{width:34px;height:34px;min-height:34px;position:relative}
-  .bb-stp button::after{content:"";position:absolute;inset:-3px}
-  /* 34, not 40: the pass row's action column is a fixed 74px, and two 40px
-     icons plus their gap would widen it and pull the whole stub with it. */
-  .pass-ico{width:34px;height:34px;min-height:34px;position:relative}
-  .pass-ico::after{content:"";position:absolute;inset:-3px}
-  /* the insert-a-city button lives in the rail gutter and is 14px round. The
-     blanket rule had made it 40px TALL while staying 14 wide, so it hung down
-     over the row beneath and swallowed taps meant for that row. */
-  .tv-ins button{min-height:0}
-  .tv-ins button::after{content:"";position:absolute;inset:-11px}
-  /* the rail already carried z-index:2; the card below it sits later in the
-     DOM and was taking the lower half of the ring back. */
-  .tv-ins{z-index:4}
-}
 </style>
 </head>
 <body>
@@ -4580,81 +4340,6 @@ const pdfTotal=m=>`<section class="total"><div class="rib"></div>
   <div class="total-in"><span class="total-l">Grand total</span>
   <span class="total-v d">${pdfEsc(m.M(m.grand))}</span></div></section>`;
 
-/* ── capture resolution ────────────────────────────────────────────────────
-   html2canvas allocates scale² × 794 × 1123 × 4 bytes of RGBA per page. At
-   scale 3 one page is 2382×3369 ≈ 8.0 megapixels ≈ 32 MB, and iOS Safari's
-   canvas budget is both smaller than desktop's and shared across the whole
-   tab. Past it toDataURL() does not throw — it returns the seven characters
-   "data:," — so the page went into the PDF blank with no error anywhere. That
-   is the quiet half of "PDF save doesn't work on mobile".
-
-   Desktop keeps the crisp 3. Touch and small-viewport devices start lower,
-   and the capture loop steps down again if a page still comes back empty. */
-function tpPdfScale(){
-  try{
-    const mem=navigator.deviceMemory||0;
-    if(mem&&mem<=2) return 1.5;
-    const coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches;
-    const small=Math.min(window.innerWidth||0,window.innerHeight||0)<=820;
-    if(coarse||small) return 2;
-  }catch(e){}
-  return 3;
-}
-
-/* ── handing the file to the user ──────────────────────────────────────────
-   jsPDF's save() ends in a synthesised <a download> click. On iOS Safari that
-   click lands long after the tap that started the export — two CDN script
-   loads, a webfont wait and one html2canvas pass per page all sit in between —
-   by which time the transient user activation is spent, so the click is simply
-   ignored and nothing happens at all. That is the loud half of the reported
-   bug. Driving the download ourselves lets us keep the blob alive and, more
-   importantly, leave a real tappable link on screen, so a refused automatic
-   download is a second chance rather than a dead end. */
-function tpPdfFallbackBar(url,filename){
-  try{
-    const old=document.getElementById('tp-pdf-fallback'); if(old) old.remove();
-    const bar=document.createElement('div');
-    bar.id='tp-pdf-fallback';
-    bar.style.cssText='position:fixed;left:50%;transform:translateX(-50%);'+
-      'bottom:calc(18px + env(safe-area-inset-bottom));z-index:9999;display:flex;'+
-      'align-items:center;gap:12px;padding:11px 13px 11px 16px;border-radius:14px;'+
-      'font:600 .86rem/1.2 "Plus Jakarta Sans",system-ui,sans-serif;color:#fff;'+
-      'background:linear-gradient(120deg,#4a38b5,#7468e2);'+
-      'box-shadow:0 14px 38px rgba(20,9,58,.45);max-width:calc(100vw - 28px)';
-    const t=document.createElement('span');
-    t.textContent='Itinerary ready';
-    t.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    const a=document.createElement('a');
-    a.href=url; a.download=filename; a.rel='noopener'; a.textContent='Save PDF';
-    a.style.cssText='color:#fff;background:rgba(255,255,255,.20);border-radius:99px;'+
-      'padding:7px 14px;text-decoration:none;white-space:nowrap;flex:none';
-    a.addEventListener('click',()=>{ setTimeout(()=>{ try{ bar.remove(); }catch(e){} },800); });
-    const x=document.createElement('button');
-    x.type='button'; x.textContent='×'; x.setAttribute('aria-label','Dismiss');
-    x.style.cssText='background:none;border:0;color:#fff;font-size:20px;line-height:1;'+
-      'cursor:pointer;padding:0 4px;flex:none';
-    x.addEventListener('click',()=>{ try{ bar.remove(); }catch(e){} });
-    bar.appendChild(t); bar.appendChild(a); bar.appendChild(x);
-    document.body.appendChild(bar);
-    setTimeout(()=>{ try{ bar.remove(); }catch(e){} },30000);
-  }catch(e){}
-}
-function tpDeliverPDF(blob,filename){
-  const url=URL.createObjectURL(blob);
-  try{
-    const a=document.createElement('a');
-    a.href=url; a.download=filename; a.rel='noopener';
-    a.style.cssText='position:fixed;left:-9999px;top:0';
-    document.body.appendChild(a); a.click(); a.remove();
-  }catch(e){}
-  /* An anchor click is not observable, so we do not try to detect failure —
-     the bar goes up either way. It reads as a confirmation when the download
-     already happened and as the escape hatch when it did not. */
-  tpPdfFallbackBar(url,filename);
-  /* revoked late: the fallback link has to stay usable while the bar is up */
-  setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} },120000);
-}
-
 async function exportTripPDF(trip,cur){
   let jsPDF,h2c;
   try{ const r=await Promise.all([loadJsPDF(),loadHtml2Canvas()]); jsPDF=r[0]; h2c=r[1]; }
@@ -4723,63 +4408,16 @@ async function exportTripPDF(trip,cur){
     try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(_){}
     const pdf=new jsPDF({unit:'pt',format:'a4'});
     const W=pdf.internal.pageSize.getWidth(), H=pdf.internal.pageSize.getHeight();
-
-    /* html2canvas lays the clone out in an iframe sized to `windowWidth` /
-       `windowHeight`, which default to the real viewport. On a phone that is
-       a ~390px box being asked to measure a fixed 794px A4 sheet — less than
-       half the width of the thing it is capturing. Pinning the clone viewport
-       to a desktop width makes the mobile capture identical to the desktop
-       one; width/height then crop it back to exactly one A4 page.
-
-       The old comment here warned against width/windowWidth because a
-       scrollbar inside the clone iframe shaved the last column off. That is
-       still true and is why CLONE_W sits comfortably above PDF_PAGE_W rather
-       than equal to it — the slack is now deliberate instead of accidental.
-       x/y are left alone on purpose: html2canvas reads them as page
-       coordinates, so hard-coding 0,0 would capture page one every time. */
-    const CLONE_W=1280, CLONE_H=PDF_PAGE_H+80;
-    const shot=(el,scale)=>h2c(el,{
-      scale:scale, backgroundColor:pal.page, useCORS:true, logging:false,
-      width:PDF_PAGE_W, height:PDF_PAGE_H,
-      windowWidth:CLONE_W, windowHeight:CLONE_H
-    });
-    /* a refused canvas comes back as the string "data:," — never as a throw */
-    const blank=u=>!u||u.length<256;
-
-    let scale=tpPdfScale();
     for(let i=0;i<pages.length;i++){
-      let data='';
-      for(let attempt=0;attempt<3;attempt++){
-        let cv=null;
-        try{ cv=await shot(pages[i],scale); }catch(err){ cv=null; }
-        if(cv){
-          try{ data=cv.toDataURL('image/jpeg',0.94); }catch(err){ data=''; }
-          /* release the bitmap before the next page allocates its own —
-             without this iOS is holding every page at once */
-          try{ cv.width=0; cv.height=0; }catch(err){}
-        }
-        if(!blank(data)) break;
-        data='';
-        /* step down and retry rather than shipping a blank page */
-        scale = scale>2 ? 2 : (scale>1 ? 1 : 0);
-        if(!scale) break;
-      }
-      if(!data) throw new Error('page '+(i+1)+' of '+pages.length+' would not render — this device ran out of canvas memory');
+      /* no width/height/windowWidth overrides — html2canvas clones into an
+         iframe sized to `windowWidth`, and a scrollbar there shaves the last
+         column off. Letting it size from the element keeps it exact. */
+      const cv=await h2c(pages[i],{scale:3,backgroundColor:pal.page,useCORS:true});
       if(i) pdf.addPage();
-      pdf.addImage(data,'JPEG',0,0,W,H,undefined,'FAST');
+      pdf.addImage(cv.toDataURL('image/jpeg',0.94),'JPEG',0,0,W,H,undefined,'FAST');
     }
-
-    const filename=(trip.name||'trip').replace(/\s+/g,'-').toLowerCase()+'-itinerary.pdf';
-    let blob=null;
-    try{ blob=pdf.output('blob'); }catch(err){ blob=null; }
-    if(blob) tpDeliverPDF(blob,filename);
-    else pdf.save(filename);
-  }catch(e){
-    /* the old handler said "Could not build the PDF" for every one of five
-       unrelated failures and then finally{} destroyed the evidence */
-    try{ window.__tpToast&&window.__tpToast('Could not build the PDF — '+((e&&e.message)||'unknown error')); }catch(_){}
-    try{ console.error('[tp] PDF export failed',e); }catch(_){}
-  }
+    pdf.save((trip.name||'trip').replace(/\s+/g,'-').toLowerCase()+'-itinerary.pdf');
+  }catch(e){ try{ window.__tpToast&&window.__tpToast('Could not build the PDF'); }catch(_){} }
   finally{ host.remove(); }
 }
 
@@ -5086,7 +4724,7 @@ function AuthModal({cloud,onClose,onSettings}){
   const [email,setEmail]=useState(''); const [pw,setPw]=useState(''); const [mode,setMode]=useState('in'); const [show,setShow]=useState(false);
   /* Hub's auth-card: a full-bleed gradient page, not a dialog floating over the app.
      Signed-in users never see this — they get the avatar dropdown, as in Hub. */
-  useEffect(()=>{ const root=document.documentElement,wasDark=root.classList.contains('dark'); root.classList.add('dark'); root.classList.add('auth-open'); return ()=>{ root.classList.toggle('dark',wasDark); root.classList.remove('auth-open'); }; },[]);
+  useEffect(()=>{ const root=document.documentElement,wasDark=root.classList.contains('dark'); root.classList.add('dark'); return ()=>root.classList.toggle('dark',wasDark); },[]);
   useEffect(()=>{ const esc=e=>{ if(e.key==='Escape'&&session) onClose(); }; document.addEventListener('keydown',esc); return ()=>document.removeEventListener('keydown',esc); },[session,onClose]);
   const go=()=>mode==='in'?signIn(email,pw):signUp(email,pw);
   return (<Portal><div id="authRoot" role="dialog" aria-modal="true">
@@ -5398,10 +5036,7 @@ function App(){
           </div>
         </header>
 
-        {/* the top padding now comes from the stylesheet's 32/26/20 ladder, which
-            is Hub's and Finance's. An inline style here beat it at every width
-            and held every breakpoint at 20px. */}
-        <main className="tv-main"><div key={view} className="view-anim">
+        <main className="tv-main" style={{paddingTop:20}}><div key={view} className="view-anim">
           {needsTrip? <Card className="p-10 text-center"><div className="font-display text-2xl iridescent-text mb-2">Pick a trip first</div><p className="text-sm text-lavender-300/70 mb-4">Open or create a trip to view its {view}.</p><div className="flex justify-center gap-2"><Btn onClick={()=>setView('trips')}>Go to Trips</Btn><Btn variant="soft" onClick={newTrip}><Ic.plus className="w-3.5 h-3.5"/>New trip</Btn></div></Card> :
             view==='trips'? <div className="space-y-4"><CloudBanner cloud={cloud} onOpen={()=>setAuthOpen(true)}/><TripsView trips={trips} onNew={newTrip} onEdit={editTrip} onAction={action}/></div> :
             view==='plan'&&currentTrip? <PlanView trip={currentTrip} setTrip={setTrip} cur={cur} onSave={saveTrip}/> :
