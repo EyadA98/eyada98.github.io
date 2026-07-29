@@ -632,11 +632,11 @@ html:not(.dark) .tlist .tli{background:rgba(255,255,255,.5)}
 .tlist .tli:hover{border-color:var(--lavender)}
 .tl2{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.03)}
 html:not(.dark) .tl2{background:#fff}
-.tl2-head,.tl2-row{display:flex;align-items:center;gap:12px;padding:11px 15px}
+.tl2-head,.tl2-row{display:flex;align-items:center;gap:12px;padding:11px 15px 11px 36px}
 .tl2-head{background:linear-gradient(120deg,rgba(129,126,255,.42),rgba(160,129,214,.3),rgba(255,179,171,.3));color:#fff;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
 .tl2-sec{display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1px solid var(--border);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:rgba(255,255,255,.02)}
 .tl2-cnt{background:rgba(129,126,255,.2);color:var(--lavender);border-radius:99px;padding:1px 8px;font-size:.7rem;letter-spacing:0}
-.tl2-row{border-top:1px solid var(--border);cursor:pointer;transition:background .15s;font-size:.9rem}
+.tl2-row{position:relative;border-top:1px solid var(--border);cursor:pointer;transition:background .15s;font-size:.9rem}
 .tl2-row.alt{background:rgba(255,255,255,.028)}
 .tl2-row:hover{background:rgba(129,126,255,.1)}
 .tl2-task{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
@@ -651,6 +651,9 @@ html:not(.dark) .tl2{background:#fff}
 .tl2-asg .kc-av{width:22px;height:22px;font-size:.6rem}
 .tl2-asgn{font-size:.82rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tl2-due{width:78px;flex:none;font-size:.82rem;color:var(--muted)}
+/* ...but the header uses the same cell class, and a heading is a heading: it
+   takes its size, weight and colour from the bar, like Assignee and Priority. */
+.tl2-head .tl2-due{font-size:inherit;font-weight:inherit;letter-spacing:inherit;color:inherit}
 .tl2-d{color:var(--muted);font-weight:600}
 .tl2-d.over{color:var(--red);font-weight:700}
 .tl2-d.none{opacity:.45}
@@ -901,7 +904,7 @@ html:not(.dark) .gm-metric{background:rgba(255,255,255,.5)}
 .gm-item.unread .gm-from,.gm-item.unread .gm-subj{font-weight:800}
 .gm-av{width:34px;height:34px;border-radius:50%;background:var(--grad-iri);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.9rem;flex:none}
 .gm-main{flex:1;min-width:0;cursor:pointer}
-.gm-row1{display:flex;justify-content:space-between;gap:8px}
+.gm-row1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .gm-from{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gm-time{font-size:.72rem;color:var(--muted);flex:none}
 .gm-subj{font-size:.85rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1103,12 +1106,12 @@ html:not(.dark) .dp-btn,html:not(.dark) .cs-btn{background:#fff;border:1px solid
 .sub-grip:hover{opacity:1;color:var(--lavender);background:rgba(129,126,255,.12)}
 .sub-grip:active{transform:scale(.94)}
 .sub-grip svg{width:15px;height:15px;pointer-events:none}
-.sub-row.sub-dragging{z-index:2;opacity:.3;border-radius:10px;background:rgba(129,126,255,.09);box-shadow:inset 0 0 0 1px rgba(129,126,255,.24)}
-.sub-row.sub-drop-before::before,.sub-row.sub-drop-after::after{content:"";position:absolute;left:0;right:0;height:3px;border-radius:99px;z-index:4;pointer-events:none;background:linear-gradient(90deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%);box-shadow:0 0 12px rgba(129,126,255,.5);animation:subDropIn .14s ease both}
-.sub-row.sub-drop-before::before{top:-5px}
-.sub-row.sub-drop-after::after{bottom:-5px}
+.sub-row.pd-dragging{z-index:2;opacity:.3;border-radius:10px;background:rgba(129,126,255,.09);box-shadow:inset 0 0 0 1px rgba(129,126,255,.24)}
+.sub-row.pd-before::before,.sub-row.pd-after::after{content:"";position:absolute;left:0;right:0;height:3px;border-radius:99px;z-index:4;pointer-events:none;background:linear-gradient(90deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%);box-shadow:0 0 12px rgba(129,126,255,.5);animation:subDropIn .14s ease both}
+.sub-row.pd-before::before{top:-5px}
+.sub-row.pd-after::after{bottom:-5px}
 @keyframes subDropIn{from{opacity:0;transform:scaleX(.72)}to{opacity:1;transform:scaleX(1)}}
-html.sub-reordering,html.sub-reordering *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12' fill='%234a38b5' stroke='%23b3a9ff' stroke-width='2'/%3E%3Cpath d='M14 5l-4 5h3v8h-3l4 5 4-5h-3v-8h3z' fill='white'/%3E%3Ccircle cx='22' cy='6' r='2.3' fill='%23ffb3ab'/%3E%3C/svg%3E") 14 14,row-resize!important;user-select:none!important}
+html.pd-reordering.sub-reordering,html.pd-reordering.sub-reordering *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12' fill='%234a38b5' stroke='%23b3a9ff' stroke-width='2'/%3E%3Cpath d='M14 5l-4 5h3v8h-3l4 5 4-5h-3v-8h3z' fill='white'/%3E%3Ccircle cx='22' cy='6' r='2.3' fill='%23ffb3ab'/%3E%3C/svg%3E") 14 14,row-resize!important;user-select:none!important}
 @media(pointer:coarse){.sub-grip{width:31px;height:38px;min-width:31px;margin-left:-8px;opacity:.78}}
 .sub-del{width:26px;height:30px;min-width:26px;background:none;border:none;color:var(--muted);cursor:pointer;padding:0;border-radius:8px;display:grid;place-items:center}
 .sub-del:hover{color:var(--red);background:rgba(214,85,76,.12)}
@@ -1400,7 +1403,7 @@ body.coldragging .kcard{pointer-events:none}
 @media(pointer:coarse){.kcol-grip{opacity:.7}}
 /* The thing you picked up steps back so the gap you are opening is what you
    actually watch. */
-.pd-dragging{opacity:.32!important}
+.pd-dragging{opacity:.25!important;pointer-events:none}
 .kcol.pd-dragging{background:rgba(129,126,255,.09);box-shadow:inset 0 0 0 1px rgba(129,126,255,.28)}
 /* The gap line. Columns and pills sit side by side, so the line is VERTICAL --
    it marks the seam the item drops into, which a horizontal line here would
@@ -1430,11 +1433,66 @@ body.coldragging .kcard{pointer-events:none}
 .st-row.pd-after::after{bottom:-5px}
 .wsm-row.pd-before::before{top:-6px}
 .wsm-row.pd-after::after{bottom:-2px}
+/* ── Task cards and list rows join the same drag ──────────────────────────────
+   Both used to be special: the card ran HTML5 drag-and-drop with a separate
+   500ms-hold-and-float-a-clone path for touch, and the list row could not be
+   dragged at all. They now hang off the same engine as subtasks, so they need
+   the same two pieces of furniture -- a grip to press, and a line showing the
+   seam it will drop into. */
+.tl2-grip{position:absolute;z-index:3;left:7px;top:50%;transform:translateY(-50%);width:22px;min-width:22px;height:24px;opacity:0}
+.tl2-row:hover .tl2-grip,.tl2-grip:focus-visible{opacity:.55}
+.tl2-grip svg{width:13px;height:13px}
+.tl2-grip:active{transform:translateY(-50%) scale(.94)}
+/* A finger has no hover to reveal anything with, and needs a bigger target than
+   a mouse does, so on touch both grips are always visible and full size. */
+@media(pointer:coarse){
+  .tl2-grip{width:30px;min-width:30px;height:32px;left:4px;opacity:.75}
+  .tl2-head,.tl2-row{padding-left:40px}
+  .tl2-grip svg{width:15px;height:15px}
+}
+/* Cards stack down a column and rows stack down a list, so unlike columns and
+   pills the seam here is HORIZONTAL -- the same line subtasks draw. */
+.kcard.pd-before::before,.kcard.pd-after::after,
+.tl2-row.pd-before::before,.tl2-row.pd-after::after,
+.tl2-sec.pd-after::after{content:"";position:absolute;left:0;right:0;height:3px;
+  border-radius:99px;z-index:6;pointer-events:none;
+  background:linear-gradient(90deg,#817eff 0%,#b3a9ff 54%,#ffb3ab 100%);
+  box-shadow:0 0 12px rgba(129,126,255,.5);animation:subDropIn .14s ease both}
+.kcard.pd-before::before{top:-7px}
+.kcard.pd-after::after{bottom:-7px}
+.tl2-row.pd-before::before{top:-2px}
+.tl2-row.pd-after::after{bottom:-1px}
+.tl2-sec{position:relative}
+.tl2-sec.pd-after::after{bottom:-1px}
+/* The narrow layout clips card overflow to stop long content spilling; a seam
+   line sits in the margin outside the card, so the card holding one opts out. */
+.kcard.pd-before,.kcard.pd-after{overflow:visible}
+/* The column currently holding the card lights up, so a drop that changes a
+   status looks different from one that only reorders. Same treatment the board
+   already used for a drag-over, now driven by the engine. */
+.kcol.pd-host{border-color:var(--lavender);background:rgba(129,126,255,.08)}
+/* A finger gets no cursor and no hover, so the moment a hold turns into a drag
+   has to be visible on the item itself -- otherwise you are holding something
+   with no idea whether it took. */
+.pd-held{border-color:var(--lavender)!important;box-shadow:0 10px 26px rgba(0,0,0,.34),0 0 0 2px rgba(129,126,255,.35)!important}
 html.pd-reordering,html.pd-reordering *{cursor:grabbing!important;user-select:none!important}
 /* Mid-reorder nothing else should light up under the pointer -- a hover state
    on a column you are only passing over is noise competing with the one signal
    that matters. */
 html.pd-reordering .kcard:hover{box-shadow:none}
+/* ── The lifted copy ──────────────────────────────────────────────────────────
+   What you are holding is drawn a second time, fixed to the viewport and
+   tracking the pointer exactly, while the original stays in the flow as the gap
+   it will drop into. It has to be a COPY rather than the item itself: the column
+   body and the list both clip their overflow, so an item translated out of one
+   would be sliced in half on its way to the next. */
+.pd-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;
+  will-change:transform;transform:translate3d(0,0,0)}
+.pd-ghost *{pointer-events:none!important}
+.pd-ghost-in{transition:transform .17s cubic-bezier(.22,.9,.31,1),box-shadow .17s ease;
+  transform:scale(1);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.pd-ghost.on .pd-ghost-in{transform:scale(1.03);
+  box-shadow:0 22px 48px rgba(0,0,0,.4),0 0 0 1px rgba(129,126,255,.45)}
 /* status default star */
 .st-def.on{color:var(--peach);border-color:var(--peach)}
 /* extra mobile */
@@ -1739,7 +1797,23 @@ html:not(.dark) .lbl-chip{background:#fff}
 /* Gmail: list fills the equal-height card, Sync/Open Gmail pinned to bottom */
 .dash-row2 #gmailCard{display:flex;flex-direction:column;overflow:hidden;min-height:0}
 .dash-row2 #gmailCard>#gmailBody{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
-.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:620px!important;overflow:auto}
+.dash-row2 #gmailBody .gm-list{flex:1 1 auto;min-height:0;max-height:620px!important;overflow:auto;
+  padding-bottom:4px;--gm-fade:22px;scroll-behavior:smooth}
+/* The list is height-matched to the calendar, so when the calendar expands its
+   own bottom edge lands wherever the pixel math falls -- often part-way through
+   an email row, which reads as "the inbox is chopped." A mask fades whichever
+   ends still have hidden content instead of hard-cutting them; gmUpdateFade()
+   toggles the classes on scroll, so the fade is present only while there is
+   more to see in that direction and the final row is never left dimmed. */
+.dash-row2 #gmailBody .gm-list.gm-fade-t{
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--gm-fade));
+          mask-image:linear-gradient(to bottom,transparent 0,#000 var(--gm-fade))}
+.dash-row2 #gmailBody .gm-list.gm-fade-b{
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--gm-fade)),transparent);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - var(--gm-fade)),transparent)}
+.dash-row2 #gmailBody .gm-list.gm-fade-t.gm-fade-b{
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--gm-fade),#000 calc(100% - var(--gm-fade)),transparent);
+          mask-image:linear-gradient(to bottom,transparent 0,#000 var(--gm-fade),#000 calc(100% - var(--gm-fade)),transparent)}
 .dash-row2 #gmailBody .gm-actions{margin-top:auto}
 @media(max-width:900px){
   .dash-row2 #gmailBody .gm-list{max-height:440px!important}
@@ -3375,42 +3449,43 @@ html.auth-open{overscroll-behavior:none}
    "Tomorrow" already says it. */
 @media(max-width:1100px){.ntf-due .ntf-date{display:none}}
 
-/* Phone: four columns will not fit — measured at 430 the title was down to
-   "Quar…" because the chips and the when-column were both flex:none and took
-   their width off the top. So the row becomes two lines instead: the message
-   gets the whole width beside the icon, and the when-column drops underneath
-   it as a single horizontal line sharing that row with the actions. */
+/* Phone: the four-column desktop row can't keep its width, so it folds. The
+   whole header — icon, task name + chips, and the date pill — becomes one grid
+   row, vertically centred together, so the pill and the icon both sit on the
+   task name's line instead of one floating high and the tall icon tile hanging
+   low. The description drops to a row of its own beneath, and the five actions
+   to a compact right-aligned cluster below that. .ntf-main is display:contents
+   so its title row and its description land directly on the item grid as
+   independent rows — which is what lets the header height be the icon's alone,
+   so the centring holds whether or not a row carries a description.
+   (align-items:center is set on the high-specificity .ntf-list rule below.) */
 @media(max-width:760px){
   .ntf-item{grid-template-columns:34px minmax(0,1fr) auto;
-    column-gap:11px;row-gap:8px;min-height:0;padding:12px 13px;align-items:start}
-  .ntf-ic{width:34px;height:34px;grid-column:1;grid-row:1}
-  .ntf-main{grid-column:2/-1;grid-row:1;min-height:42px}
-  .ntf-due{grid-column:2;grid-row:2;flex-direction:row;align-items:center;
-    justify-content:flex-start;gap:8px;text-align:left;align-self:center;
-    /* it shares this line with the action cluster and the 1fr column is sized
-       by the message above it, so without a clip the time string paints itself
-       straight over the first icon button */
-    min-width:0;overflow:hidden}
+    column-gap:11px;row-gap:6px;min-height:0;padding:11px 13px 9px}
+  .ntf-main{display:contents}
+  .ntf-ic{width:34px;height:34px;grid-column:1;grid-row:1;align-self:center;margin-top:0}
+  .ntf-row1{grid-column:2;grid-row:1;align-self:center;min-width:0}
+  /* the when, right-aligned on the header line, in a soft pill */
+  .ntf-due{grid-column:3;grid-row:1;align-self:center;flex-direction:row;align-items:baseline;
+    justify-content:flex-end;gap:6px;text-align:right;white-space:nowrap;
+    padding:3px 10px;border-radius:999px;background:rgba(129,126,255,.12);
+    max-width:46vw;min-width:0;overflow:hidden;margin-top:0}
   .ntf-due>*{min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .ntf-due .ntf-date{display:inline}
-  .ntf-acts{grid-column:3;grid-row:2;justify-content:flex-end;margin-left:0;align-self:center}
+  .ntf-due .ntf-when{font-size:.74rem}
+  /* the exact date drops on phones: notifWhen already gives the relative word,
+     the scan target, so the pill stays a tight tag. The desktop row keeps it. */
+  .ntf-due .ntf-date{display:none}
+  /* description on its own full-width row under the header */
+  .ntf-desc{grid-column:2/-1;grid-row:2;align-self:start;margin:0}
+  /* one grouped cluster instead of five icons stranded on a bordered bar */
+  .ntf-acts{grid-column:2/-1;justify-content:flex-end;gap:1px;align-self:center;margin:0;padding:0}
 }
-/* At the narrowest the source chip goes: the section header two rows up
+/* At the narrowest the source chip goes — the section header two rows up
    already says "Tasks", so it was spending the title's width on a repeat. */
 @media(max-width:430px){
-  .ntf-item{grid-template-columns:30px minmax(0,1fr) auto;column-gap:9px;padding:11px 12px}
-  .ntf-ic{width:30px;height:30px}
+  .ntf-item{column-gap:9px;padding:11px 12px 9px}
   .ntf-row1>.ntf-src{display:none}
-  /* and the calendar date goes too — "Tomorrow · 11:00 AM" plus five buttons is
-     already the whole line at this width */
-  .ntf-due .ntf-date{display:none}
-  /* even without the date it does not fit: five icon buttons at the enlarged
-     touch padding are ~180px of a 392px row, which truncated the time to
-     "Tomorrow · 11:0…". The buttons keep their tap targets and take a line of
-     their own; the time is the thing that must stay whole. */
-  .ntf-due{grid-column:2/-1}
-  .ntf-acts{grid-column:1/-1;grid-row:3;gap:0;justify-content:space-between;
-    padding-top:2px;border-top:1px solid var(--border);margin-top:2px}
+  .ntf-due{max-width:42vw}
 }
 
 /* ── 2. "Your apps": one card shape for both apps ──────────────────────────
@@ -3624,7 +3699,7 @@ html:not(.dark) .ntf-list,html:not(.dark) .ntf-pin-grid{--iw-surf:#f0ebfb;--iw-s
    height; the gutter and the panel stay. */
 @media(max-width:760px){
   .ntf-list .ntf-item.ntf-item,.ntf-pin-grid .ntf-item.ntf-item{
-    height:auto;min-height:0;padding:12px 13px;align-items:start}
+    height:auto;min-height:0;padding:12px 13px;align-items:center}
   .ntf-list .ntf-ic.ntf-ic,.ntf-pin-grid .ntf-ic.ntf-ic{width:32px;height:32px}
 }
 @media(max-width:430px){
@@ -5656,13 +5731,20 @@ function renderHome(){
   if(data.settings.showPrayer!==false) loadPrayers();
   requestAnimationFrame(syncDashHeights);
 }
+function gmUpdateFade(){
+  var list=document.querySelector("#gmailBody .gm-list"); if(!list) return;
+  var over=list.scrollHeight-list.clientHeight;
+  if(over<=2){ list.classList.remove("gm-fade-t","gm-fade-b"); return; }
+  list.classList.toggle("gm-fade-t", list.scrollTop>2);
+  list.classList.toggle("gm-fade-b", list.scrollTop < over-2);
+}
 function syncDashHeights(){
   var cal=document.getElementById("calCard"), gmCard=document.getElementById("gmailCard"), gmBody=document.getElementById("gmailBody");
   if(!cal||!gmCard||!gmBody) return;
   var list=gmBody.querySelector(".gm-list"); if(!list) return;
-  if(window.innerWidth<901){ list.style.removeProperty("max-height"); return; }
+  if(window.innerWidth<901){ list.style.removeProperty("max-height"); gmUpdateFade(); return; }
   var row=cal.closest(".dash-row2");
-  if(!row||!row.contains(gmCard)||cal.style.display==="none"||gmCard.style.display==="none"){ list.style.removeProperty("max-height"); return; }
+  if(!row||!row.contains(gmCard)||cal.style.display==="none"||gmCard.style.display==="none"){ list.style.removeProperty("max-height"); gmUpdateFade(); return; }
   var prevAlign=row.style.alignItems;
   row.style.alignItems="flex-start";
   cal.style.setProperty("height","auto","important");
@@ -5673,6 +5755,7 @@ function syncDashHeights(){
   row.style.alignItems=prevAlign;
   var cap=Math.max(160,Math.round(calH-chrome));
   list.style.setProperty("max-height",cap+"px","important");
+  gmUpdateFade();
 }
 var _sdhT; window.addEventListener("resize",function(){ clearTimeout(_sdhT); _sdhT=setTimeout(syncDashHeights,150); });
 function appDef(){
@@ -5918,7 +6001,7 @@ function calItemsByDate(){var map={};function add(date,label,kind,time,sk,id,lin
 function evClass(k){ return "ev-"+kindKey(k==="sub"?"subtask":k); }
 function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
-function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;}
+function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';try{requestAnimationFrame(syncDashHeights);}catch(e){}return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;try{requestAnimationFrame(syncDashHeights);}catch(e){}}
 function computeNudges(){
   var out=[], todayISO=isoLocal(new Date());
   var overdue=(data.tasks||[]).filter(function(t){return !t.done&&t.due&&t.due<todayISO;}).length;
@@ -6030,7 +6113,7 @@ function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&
   var chips=(pchip||dchip||schip)?'<div class="kc-chips">'+pchip+dchip+schip+'</div>':'';
   var wsn=wsChip(t);
   var wsfoot=wsn?('<div class="kc-wsfoot">'+wsn+'</div>'):'';
-  return '<div class="kcard nk '+(t.done?"done":"")+'"'+wsWash(t)+' data-id="'+t.id+'" draggable="true" ondragstart="kStart(event,\''+t.id+'\')" oncontextmenu="taskMenu(event,\''+t.id+'\')" ondragend="kEnd(event)" ondragover="kCardOver(event)" ondragleave="this.classList.remove(\'kc-insert\')" ondrop="kDropCard(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kc-check\'))openTask(\''+t.id+'\')">'
+  return '<div class="kcard nk '+(t.done?"done":"")+'"'+wsWash(t)+' data-id="'+t.id+'" oncontextmenu="taskMenu(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.kc-check\'))openTask(\''+t.id+'\')" onpointerdown="kCardPress(event,this)">'
     +'<div class="kc-top"><button class="kc-check" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" aria-label="Toggle complete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></button><div class="kc-title">'+esc(t.t)+'</div>'+av+'</div>'
     +chips
     +wsfoot
@@ -6048,7 +6131,8 @@ function taskListRow(t,today,alt){
   var dd=t.due||t.start;
   var due=dd?('<span class="tl2-d'+(over?' over':(isTodayIso(dd)?' today':''))+'">'+esc(fmtDueShort(dd))+'</span>'):'<span class="tl2-d none">&mdash;</span>';
   var p=priKey(t.priority); var pl=PRI[p].s;
-  return '<div class="tl2-row'+(t.done?" done":"")+(alt?" alt":"")+'"'+wsWash(t)+' oncontextmenu="taskMenu(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.tl2-check\'))openTask(\''+t.id+'\')">'
+  return '<div class="tl2-row'+(t.done?" done":"")+(alt?" alt":"")+'"'+wsWash(t)+' data-id="'+t.id+'" oncontextmenu="taskMenu(event,\''+t.id+'\')" onclick="if(!event.target.closest(\'.tl2-check\'))openTask(\''+t.id+'\')" onpointerdown="tlRowPress(event,this)">'
+    +gripHtml("tl2-grip","tlRowGrab",t.t||"task")
     +'<div class="tl2-task"><button class="tl2-check" onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" aria-label="Toggle complete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></button><span class="tl2-title">'+esc(t.t)+'</span></div>'
     +(wsActive()?'':'<div class="tl2-ws">'+wsChip(t)+'</div>')
     +'<div class="tl2-asg">'+av+'</div>'
@@ -6073,7 +6157,7 @@ function renderTaskListView(host){
   statuses().forEach(function(col,ci){
     var items=arr.filter(function(t){return taskStatus(t)===col.id;});
     var c=TL_PAL[ci%TL_PAL.length];
-    body+='<div class="tl2-sec" style="border-left:3px solid '+c[0]+';background:'+c[0]+'14;color:'+c[1]+'"><span>'+esc(col.name)+'</span><span class="tl2-cnt" style="background:'+c[0]+'2b;color:'+c[1]+'">'+items.length+'</span></div>';
+    body+='<div class="tl2-sec" data-col="'+esc(col.id)+'" style="border-left:3px solid '+c[0]+';background:'+c[0]+'14;color:'+c[1]+'"><span>'+esc(col.name)+'</span><span class="tl2-cnt" style="background:'+c[0]+'2b;color:'+c[1]+'">'+items.length+'</span></div>';
     items.forEach(function(t,i){ body+=taskListRow(t,today,i%2===1); });
     body+='<div class="tl2-add" onclick="newTaskIn(\''+col.id+'\')"><span class="tl2-add-ic">+</span> Add task</div>';
   });
@@ -6449,63 +6533,21 @@ function addSubRow(text,done,assignee,due,desc,sid){
   host.appendChild(row);
   if(!text){ var i=row.querySelector(".sub-in"); if(i) i.focus(); }
 }
-var _subDrag=null;
+/* Subtasks were the first list in the app to get press-to-drag, and for a while
+   they ran their own copy of it -- which is why every other list was asked to
+   feel "like the subtasks". They now run the shared engine instead, so there is
+   one drag to improve rather than two to keep in step. The row keeps its grip:
+   most of its width is a text field, and a press there means editing. */
 function subDragStart(e,grip){
-  if(_subDrag||(e.button!=null&&e.button!==0)) return;
   var row=grip&&grip.closest(".sub-row"), host=row&&row.parentNode;
   if(!row||!host||(host.id!=="tdSubs"&&host.id!=="enChk")) return;
   e.preventDefault(); e.stopPropagation();
-  _subDrag={row:row,host:host,grip:grip,pid:e.pointerId,sx:e.clientX,sy:e.clientY,moved:false,target:null};
-  try{ grip.setPointerCapture(e.pointerId); }catch(_){}
-  document.addEventListener("pointermove",subDragMove,{passive:false});
-  document.addEventListener("pointerup",subDragEnd,true);
-  document.addEventListener("pointercancel",subDragEnd,true);
+  pdragBegin(e,row,{sel:".sub-row",key:"data-sid",grip:grip,commit:subDragCommit,
+                    rcls:"sub-reordering",scroller:row.closest(".tdp-scroll")});
 }
-function subDragActivate(d,e){
-  d.moved=true;
-  d.row.classList.add("sub-dragging"); d.grip.setAttribute("aria-grabbed","true");
-  document.documentElement.classList.add("sub-reordering");
-}
-function subDragClearTarget(d){
-  if(d.target){ d.target.classList.remove("sub-drop-before","sub-drop-after"); d.target=null; }
-}
-function subDragFlip(d,before){
-  if(before===d.row||before===d.row.nextSibling)return;
-  var rows=[].slice.call(d.host.querySelectorAll(".sub-row")), first=[];
-  rows.forEach(function(r){ first.push({el:r,top:r.getBoundingClientRect().top}); });
-  d.host.insertBefore(d.row,before);
-  first.forEach(function(o){
-    var dy=o.top-o.el.getBoundingClientRect().top; if(Math.abs(dy)<1)return;
-    try{ if(o.el._subMoveAnim)o.el._subMoveAnim.cancel(); o.el._subMoveAnim=o.el.animate([{transform:"translate3d(0,"+dy+"px,0)"},{transform:"translate3d(0,0,0)"}],{duration:210,easing:"cubic-bezier(.22,.9,.31,1)"}); }catch(_){}
-  });
-}
-function subDragMove(e){
-  var d=_subDrag; if(!d||e.pointerId!==d.pid) return;
-  if(!d.moved&&Math.abs(e.clientX-d.sx)<5&&Math.abs(e.clientY-d.sy)<5) return;
-  if(!d.moved)subDragActivate(d,e);
-  if(e.cancelable)e.preventDefault();
-  var stack=document.elementsFromPoint?document.elementsFromPoint(e.clientX,e.clientY):[document.elementFromPoint(e.clientX,e.clientY)],target=null;
-  for(var i=0;i<stack.length;i++){ var q=stack[i]&&stack[i].closest&&stack[i].closest(".sub-row"); if(q&&q!==d.row&&q.parentNode===d.host){target=q;break;} }
-  subDragClearTarget(d);
-  if(target){
-    var r=target.getBoundingClientRect(), before=e.clientY<r.top+r.height/2;
-    target.classList.add(before?"sub-drop-before":"sub-drop-after"); d.target=target;
-    subDragFlip(d,before?target:target.nextSibling);
-  }
-  var sc=d.row.closest(".tdp-scroll");
-  if(sc){ var sr=sc.getBoundingClientRect(), edge=54; if(e.clientY<sr.top+edge)sc.scrollTop-=Math.min(18,Math.max(5,(sr.top+edge-e.clientY)*.28)); else if(e.clientY>sr.bottom-edge)sc.scrollTop+=Math.min(18,Math.max(5,(e.clientY-(sr.bottom-edge))*.28)); }
-}
-function subDragEnd(e){
-  var d=_subDrag; if(!d||(e.pointerId!=null&&e.pointerId!==d.pid)) return;
-  _subDrag=null;
-  try{ d.grip.releasePointerCapture(d.pid); }catch(_){}
-  subDragClearTarget(d);
-  d.row.classList.remove("sub-dragging"); d.grip.setAttribute("aria-grabbed","false");
-  document.documentElement.classList.remove("sub-reordering");
-  document.removeEventListener("pointermove",subDragMove);
-  document.removeEventListener("pointerup",subDragEnd,true);
-  document.removeEventListener("pointercancel",subDragEnd,true);
-  if(d.moved&&d.host.id==="tdSubs"&&window.tdCommit&&_tdReady) tdCommit();
+function subDragCommit(ids,ctx){
+  var h=ctx&&ctx.host;
+  if(h&&h.id==="tdSubs"&&window.tdCommit&&_tdReady) tdCommit();
 }
 var SUB_CAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 var SUB_USR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
@@ -7289,6 +7331,7 @@ function renderGmail(){
     +istBadge(st==="connected"?"on":st==="connecting"?"sync":"off")+'</div>';
   var headC='<div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Inbox</h2>'+iconRow+'</div>';
   el.innerHTML=headC+list;
+  var _gl=el.querySelector(".gm-list"); if(_gl) _gl.addEventListener("scroll",gmUpdateFade,{passive:true});
   requestAnimationFrame(syncDashHeights);
 }
 function gmRow(m){
@@ -8491,79 +8534,14 @@ function kDropCard(e,targetId){ e.preventDefault(); e.stopPropagation(); var id=
 function lDrop(e,targetId){ e.preventDefault(); e.stopPropagation(); var id=kDragId||e.dataTransfer.getData("text/plain"); moveTask(id,targetId,null); kDragId=null; kEnd(); }
 /* ---- touch-friendly board drag (pointer events) ---- */
 function kNextCardId(el){ var n=el.nextElementSibling; while(n&&!n.classList.contains("kcard"))n=n.nextElementSibling; return n?n.getAttribute("data-id"):null; }
-function kTouchDown(e){
-  if(e.pointerType!=="touch") return;
-  if(e.target.closest&&(e.target.closest(".kdel")||e.target.closest(".kcheck"))) return;
-  var card=e.target.closest&&e.target.closest(".kcard"); if(!card) return;
-  var id=card.getAttribute("data-id"); if(!id) return;
-  var sx=e.clientX, sy=e.clientY, held=false, dragging=false, ghost=null, info={};
-  /* The menu opens on the 500ms hold, while your finger is still down -- the same way the
-     note and routine cards do it, which is the version that actually works on a phone.
-     It used to open on pointerup, and the browser's compat mousedown/click fired at the
-     card a moment later and killed it. Keep holding and move and the menu steps aside for
-     a drag. Move before 500ms and the gesture was never ours: the board scrolls. */
-  var timer=setTimeout(hold,500);
-  function hold(){
-    held=true; _lpUntil=Date.now()+800;   /* the hold is ours: swallow the native contextmenu echo,
-                                             which lands within ~200ms. Any wider and a real
-                                             right-click on a touchscreen laptop gets eaten too. */
-    if(navigator.vibrate)try{navigator.vibrate(12);}catch(_){}
-    try{ taskMenu({type:"longpress",preventDefault:function(){},stopPropagation:function(){},clientX:sx,clientY:sy,target:card}, id); }catch(_){}
-  }
-  function startDrag(){
-    dragging=true; cardMenusClose();   /* you cannot drag under an open menu */
-    var r=card.getBoundingClientRect(); ghost=card.cloneNode(true);
-    ghost.style.cssText="position:fixed;left:"+r.left+"px;top:"+r.top+"px;width:"+r.width+"px;margin:0;pointer-events:none;z-index:9999;opacity:.94;transform:scale(1.03);box-shadow:0 20px 44px rgba(0,0,0,.55);border-radius:15px";
-    document.body.appendChild(ghost); card.style.opacity=".35";
-    info.ox=sx-r.left; info.oy=sy-r.top; if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){}
-  }
-  function move(ev){
-    if(!held){ if(Math.abs(ev.clientX-sx)>12||Math.abs(ev.clientY-sy)>12){ clearTimeout(timer); cleanup(); } return; }
-    if(!dragging){ if(Math.abs(ev.clientX-sx)>8||Math.abs(ev.clientY-sy)>8) startDrag(); else return; }
-    ev.preventDefault();
-    ghost.style.left=(ev.clientX-info.ox)+"px"; ghost.style.top=(ev.clientY-info.oy)+"px";
-    ghost.style.visibility="hidden"; var el=document.elementFromPoint(ev.clientX,ev.clientY); ghost.style.visibility="";
-    document.querySelectorAll(".kcol.over").forEach(function(c){c.classList.remove("over");});
-    var col=el&&el.closest?el.closest(".kcol"):null; if(col)col.classList.add("over");
-    info.target=col?col.getAttribute("data-col"):null; info.before=null;
-    var oc=el&&el.closest?el.closest(".kcard"):null;
-    if(oc&&oc!==card){ var cr=oc.getBoundingClientRect(); info.before=(ev.clientY<cr.top+cr.height/2)?oc.getAttribute("data-id"):kNextCardId(oc); }
-  }
-  /* THE line that makes a finger drag work at all.
-
-     .kcard carries `touch-action:pan-x pan-y` so that resting a finger on a card
-     and swiping still scrolls the board -- taking that away is not an option,
-     the cards fill the columns and there would be nothing left to scroll by.
-     But `pan-x pan-y` also means the browser is entitled to claim the gesture
-     the instant the finger moves, and when it does it fires `pointercancel` and
-     our whole drag dies one pixel in. That is exactly what was happening: the
-     ghost appeared and then the card snapped back, on every real device.
-
-     preventDefault on POINTERmove does not stop that -- a pointermove is not the
-     cancellable event, the touchmove underneath it is. So once the 500ms hold has
-     made the gesture ours, cancel the touchmove itself. It has to be non-passive
-     to be allowed to, and it has to happen on the FIRST touchmove, before the
-     browser latches the scroll -- which it does, because the hold has already
-     elapsed by then and pointermove for the same frame runs first and sets
-     `held`. Once the pan is latched, preventDefault is ignored. */
-  function tmove(ev){ if(held&&ev.cancelable) ev.preventDefault(); }
-  function up(ev){ clearTimeout(timer); unbind();
-    if(dragging){ if(ev.cancelable)ev.preventDefault(); if(info.target) moveTask(id,info.before,info.target); }
-    /* held but never moved: the menu is already open and stays open. Lifting must not touch it. */
-    cleanup(); }
-  /* A cancelled gesture must ABORT, not commit. `up` was bound to pointercancel
-     too, so a cancel arriving mid-drag dropped the card into whatever column the
-     finger happened to be over at that moment -- a move the user never finished
-     and never asked for. Cancel now leaves the task exactly where it was. */
-  function cancel(){ clearTimeout(timer); unbind(); cleanup(); }
-  function unbind(){ document.removeEventListener("pointermove",move); document.removeEventListener("pointerup",up); document.removeEventListener("pointercancel",cancel); document.removeEventListener("touchmove",tmove); }
-  function cleanup(){ if(ghost&&ghost.parentNode)ghost.parentNode.removeChild(ghost); var c=document.querySelector('.kcard[data-id="'+id+'"]'); if(c)c.style.opacity=""; document.querySelectorAll(".kcol.over").forEach(function(c){c.classList.remove("over");}); unbind(); }
-  document.addEventListener("pointermove",move,{passive:false}); document.addEventListener("pointerup",up); document.addEventListener("pointercancel",cancel); document.addEventListener("touchmove",tmove,{passive:false});
-}
-document.addEventListener("pointerdown",function(e){ try{ kTouchDown(e); }catch(_){} });
+/* The board used to run its own touch gesture here: a 500ms hold opened the
+   card menu, and holding then moving floated a cloned ghost of the card across
+   the columns. Both are gone. One press now does everything -- hold 330ms and
+   the card lifts into the shared drag; let go without moving and the same hold
+   opens the menu. See pdragPress. */
 
 /* Long-press = right-click, for the cards that have no drag to compete with.
-   Task cards are handled inside kTouchDown, because there the hold has to arbitrate
+   Task cards are handled by pdragPress, because there the hold has to arbitrate
    between dragging and the menu. Notes and routines just need the menu. */
 (function(){
   var LP=null, lx=0, ly=0;
@@ -8734,25 +8712,115 @@ function colDrop(e,targetId){ e.preventDefault(); e.stopPropagation();
    the two elements involved can answer. Compare the larger of the two deltas
    and split that side down the middle. */
 var _pdrag=null,_pdSwallow=false;
+/* Every container this drag may cross. One list unless `hosts` says otherwise. */
+function _pdHosts(d){ return d.hosts?[].slice.call(document.querySelectorAll(d.hosts)):[d.host]; }
+function _pdOwns(d,el){ var h=el&&el.parentNode; if(!h) return false;
+  return d.hosts?!!(h.matches&&h.matches(d.hosts)):(h===d.host); }
+/* FLIP has to measure every item that could move, and across a board that is
+   every card in every column -- a card leaving column A shifts the cards below
+   it there as well as the ones it pushes down in column B. */
+function _pdItems(d){ var out=[]; _pdHosts(d).forEach(function(h){ out=out.concat([].slice.call(h.querySelectorAll(d.sel))); }); return out; }
+function _pdHi(d){ if(!d.hi) return;
+  document.querySelectorAll("."+d.hi.cls).forEach(function(x){ x.classList.remove(d.hi.cls); });
+  var p=d.item.parentNode, a=p&&p.closest&&p.closest(d.hi.sel); if(a) a.classList.add(d.hi.cls); }
 function pdragBegin(e,item,opt){
   if(_pdrag||(e.button!=null&&e.button!==0)) return false;
   var host=item&&item.parentNode; if(!host) return false;
-  if(host.querySelectorAll(opt.sel).length<2) return false;   /* nothing to reorder against */
+  /* One card in one column is still worth dragging -- it can go to another
+     column. Only a single-container list has nothing to reorder against. */
+  if(!opt.hosts&&host.querySelectorAll(opt.sel).length<2) return false;
   _pdrag={item:item,host:host,sel:opt.sel,key:opt.key,pid:e.pointerId,
           sx:e.clientX,sy:e.clientY,moved:false,target:null,
-          grip:opt.grip||item,commit:opt.commit,scroller:opt.scroller||null};
+          hosts:opt.hosts||null,hi:opt.hi||null,zones:opt.zones||null,zone:null,win:!!opt.win,
+          anchors:opt.anchors||null,
+          grip:opt.grip||item,commit:opt.commit,scroller:opt.scroller||null,tap:opt.tap||null,held:false,
+          px:e.clientX,py:e.clientY,ox:0,oy:0,gx:null,gy:null,ghost:null,lifted:false,tflip:0,
+          hx:0,hy:0,lockX:false,lockY:false,
+          rcls:opt.rcls||null};
   try{ _pdrag.grip.setPointerCapture(e.pointerId); }catch(_){}
   document.addEventListener("pointermove",pdragMove,{passive:false});
+  document.addEventListener("touchmove",_pdNoScroll,{passive:false});
   document.addEventListener("pointerup",pdragEnd,true);
   document.addEventListener("pointercancel",pdragEnd,true);
   return true;
 }
+/* A grip can claim the gesture on the first pixel because pressing one has no
+   other meaning. Pressing a CARD does: it might open the task, and on a phone
+   the same downward swipe is how the board is scrolled. So when the item is its
+   own handle the press has to earn the drag -- a mouse only for the 5px the
+   engine already asks for, a finger for a hold it must sit still through. Move
+   during that hold and the gesture was never ours; the page scrolls as usual. */
+var _pdHold=null;
+function pdragHoldOff(){
+  var h=_pdHold; if(!h) return; _pdHold=null;
+  clearTimeout(h.timer);
+  document.removeEventListener("pointermove",h.move,true);
+  document.removeEventListener("pointerup",h.off,true);
+  document.removeEventListener("pointercancel",h.off,true);
+}
+/* touch-action cannot be changed once a gesture is under way, so a drag that
+   starts mid-gesture has to hold the scroll off by hand. Safe to do only
+   because the hold requires a still finger: nothing has begun scrolling yet. */
+function _pdNoScroll(ev){ if(ev.cancelable) ev.preventDefault(); }
+function pdragPress(e,item,opt){
+  if(_pdrag||_pdHold||!item||(e.button!=null&&e.button!==0)) return;
+  /* Anything with a job of its own -- the checkbox, the delete button, a link,
+     the grip -- keeps it. */
+  if(e.target.closest&&e.target.closest("button,a,input,textarea,select,label,.pd-grip")) return;
+  if(e.pointerType!=="touch"&&e.pointerType!=="pen"){
+    try{ cardMenusClose(); }catch(_){}
+    pdragBegin(e,item,opt); return;
+  }
+  /* Below here the gesture is a finger's, and only a finger's hold earns the
+     tap-menu: see the held flag set once the hold has actually lifted the item. */
+  var sx=e.clientX, sy=e.clientY, pid=e.pointerId, h=_pdHold={timer:0};
+  h.move=function(ev){ if(ev.pointerId!==pid) return;
+    if(Math.abs(ev.clientX-sx)>10||Math.abs(ev.clientY-sy)>10) pdragHoldOff(); };
+  h.off=function(ev){ if(ev.pointerId!==pid) return; pdragHoldOff(); };
+  document.addEventListener("pointermove",h.move,true);
+  document.addEventListener("pointerup",h.off,true);
+  document.addEventListener("pointercancel",h.off,true);
+  h.timer=setTimeout(function(){
+    pdragHoldOff();
+    try{ cardMenusClose(); }catch(_){}
+    /* The hold is ours, so the native long-press context menu that lands a
+       moment later is just an echo of it. */
+    _lpUntil=Date.now()+800;
+    if(navigator.vibrate) try{ navigator.vibrate(12); }catch(_){}
+    if(pdragBegin({button:0,pointerId:pid,pointerType:"touch",clientX:sx,clientY:sy},item,opt)){
+      item.classList.add("pd-held");
+      if(_pdrag){ _pdrag.held=true; pdragLift(_pdrag); }
+    }
+  },330);
+}
 function pdragClear(d){ if(d.target){ d.target.classList.remove("pd-before","pd-after"); d.target=null; } }
-function pdragFlip(d,before){
-  if(before===d.item||before===d.item.nextSibling) return;
-  var rows=[].slice.call(d.host.querySelectorAll(d.sel)),first=[];
+/* A heading with no rows beneath it is still a place to drop. Without this an
+   empty status in the list view could never receive a task, even though the
+   same status on the board can. Dropping on a heading lands directly under it. */
+function _pdAnchor(d,stack){
+  for(var i=0;i<stack.length;i++){
+    var a=stack[i]&&stack[i].closest&&stack[i].closest(d.anchors);
+    if(a&&a.parentNode===d.host){
+      a.classList.add("pd-after"); d.target=a;
+      pdragFlip(d,d.host,a.nextSibling);
+      return true;
+    }
+  }
+  return false;
+}
+function pdragZone(d,z){ if(z===d.zone) return;
+  if(d.zone) d.zone.classList.remove(d.zones.cls);
+  d.zone=z||null; if(z) z.classList.add(d.zones.cls); }
+function pdragFlip(d,host,before){
+  host=host||d.host;
+  if(host===d.item.parentNode&&(before===d.item||before===d.item.nextSibling)) return;
+  /* A pointer resting exactly on a midpoint would otherwise re-insert on every
+     frame, and the list would buzz between two slots. One insert per 55ms is
+     still faster than anyone can aim. */
+  var _now=Date.now(); if(_now-d.tflip<55) return; d.tflip=_now;
+  var rows=_pdItems(d),first=[];
   rows.forEach(function(r){ var b=r.getBoundingClientRect(); first.push({el:r,x:b.left,y:b.top}); });
-  d.host.insertBefore(d.item,before);
+  host.insertBefore(d.item,before); _pdHi(d);
   first.forEach(function(o){
     var b=o.el.getBoundingClientRect(),dx=o.x-b.left,dy=o.y-b.top;
     if(Math.abs(dx)<1&&Math.abs(dy)<1) return;
@@ -8763,41 +8831,212 @@ function pdragFlip(d,before){
     }catch(_){}
   });
 }
+/* Smoothness turned out to be three separate problems.
+
+   A fast drag fires several pointermoves between two paints, and running the
+   hit-test and the FLIP for each one is work nobody ever sees -- so the pointer
+   stream is coalesced and the whole pass runs once per frame instead.
+
+   The same frame clock drives the edge scroll, which means holding still near
+   the edge of the board keeps it moving; before, the scroll only advanced when
+   another move event arrived, so reaching a column off-screen meant wiggling
+   the pointer to pump it along.
+
+   And the thing you are holding is now drawn as a lifted copy that tracks the
+   pointer exactly, so the gesture stops looking like it is catching up with
+   your hand: the copy follows, the gap slides, and on release the copy settles
+   into the gap. */
+var _pdRaf=0;
+function _pdTick(){
+  var d=_pdrag;
+  if(!d||!d.lifted){ _pdRaf=0; return; }
+  _pdRaf=requestAnimationFrame(_pdTick);
+  pdragGhostAt(d); pdragScan(d); pdragEdge(d);
+}
+function pdragLift(d){
+  if(d.lifted) return; d.lifted=true;
+  pdragGhostMake(d);
+  d.item.classList.add("pd-dragging");
+  if(d.grip.setAttribute) d.grip.setAttribute("aria-grabbed","true");
+  document.documentElement.classList.add("pd-reordering");
+  if(d.rcls) document.documentElement.classList.add(d.rcls);
+  if(!_pdRaf) _pdRaf=requestAnimationFrame(_pdTick);
+}
+/* The copy is built with a shallow clone of the item's own parent wrapped round
+   it, so selectors written as "row inside list" still match and it looks like
+   what it came from rather than an unstyled orphan on the body. */
+/* Which way this list runs, read off the item and the sibling beside it. A
+   drag that can change container (a board card) is free on both axes; anything
+   else is pinned to its list's own direction, so the copy you are holding stays
+   in the lane the drop can actually land in. */
+function pdragAxis(d){
+  d.lockX=d.lockY=false;
+  if(d.hosts||d.zones) return;
+  var it=d.item,sib=it.previousElementSibling;
+  while(sib&&!(sib.matches&&sib.matches(d.sel))) sib=sib.previousElementSibling;
+  if(!sib){ sib=it.nextElementSibling;
+    while(sib&&!(sib.matches&&sib.matches(d.sel))) sib=sib.nextElementSibling; }
+  if(!sib){ d.lockX=true; return; }
+  var a=it.getBoundingClientRect(),b=sib.getBoundingClientRect();
+  if(Math.abs(b.left-a.left)>Math.abs(b.top-a.top)) d.lockY=true; else d.lockX=true;
+}
+/* A row whose own background is transparent -- the list rows and the subtask
+   rows both are -- would be a see-through copy with the list showing through
+   its text. So would a kanban column, whose tint is four percent white. Neither
+   is a bug in place, because in place there is something solid underneath; the
+   copy floats over the page instead, and has to bring that solid with it. */
+function _pdRgba(c){
+  var m=String(c||"").match(/rgba?\(([^)]+)\)/);
+  if(!m) return null;
+  var p=m[1].split(",").map(parseFloat);
+  return {r:p[0]||0,g:p[1]||0,b:p[2]||0,a:p.length>3?p[3]:1};
+}
+function _pdAlpha(c){ var v=_pdRgba(c); return v?v.a:1; }
+/* Composite the item's own tint over the solid colour it normally sits on, so
+   the copy shows the exact colour the eye reads in place. */
+function _pdBlend(fg,bg){
+  var f=_pdRgba(fg),b=_pdRgba(bg);
+  if(!f) return bg; if(!b) return fg;
+  var a=f.a, mix=function(x,y){ return Math.round(x*a+y*(1-a)); };
+  return "rgb("+mix(f.r,b.r)+","+mix(f.g,b.g)+","+mix(f.b,b.b)+")";
+}
+function _pdSolidBg(el){
+  var n=el;
+  while(n&&n!==document.documentElement){
+    var c=getComputedStyle(n).backgroundColor;
+    if(c&&c!=="transparent"&&c.indexOf("rgba(0, 0, 0, 0)")<0){
+      var m=c.match(/^rgba?\(([^)]+)\)/);
+      if(m){ var p=m[1].split(","); if(p.length<4||parseFloat(p[3])>=.9) return c; }
+      else return c;
+    }
+    n=n.parentNode&&n.parentNode.nodeType===1?n.parentNode:null;
+  }
+  return getComputedStyle(document.documentElement).getPropertyValue("--card")||"#fff";
+}
+function pdragGhostMake(d){
+  try{
+    var it=d.item,r=it.getBoundingClientRect();
+    d.ox=d.px-r.left; d.oy=d.py-r.top;
+    d.hx=r.left; d.hy=r.top;
+    pdragAxis(d);
+    var g=document.createElement("div");
+    g.className="pd-ghost"; g.style.width=r.width+"px";
+    var host=g,par=it.parentNode;
+    if(par&&par.nodeType===1){
+      var pc=par.cloneNode(false); pc.removeAttribute("id");
+      pc.style.cssText="padding:0;margin:0;width:100%;height:auto;max-height:none;min-height:0;overflow:visible;background:none;border:0;box-shadow:none";
+      g.appendChild(pc); host=pc;
+    }
+    var c=it.cloneNode(true);
+    c.classList.remove("pd-dragging","pd-held","pd-before","pd-after");
+    c.classList.add("pd-ghost-in");
+    /* A copy carrying the original's ids would shadow them for as long as the
+       drag lasts, and getElementById would start answering with the copy. */
+    c.removeAttribute("id");
+    [].forEach.call(c.querySelectorAll("[id]"),function(x){ x.removeAttribute("id"); });
+    c.style.margin="0"; c.style.width="100%";
+    c.style.height=r.height+"px"; c.style.maxHeight=r.height+"px"; c.style.overflow="hidden";
+    host.appendChild(c);
+    g.style.transform="translate3d("+r.left+"px,"+r.top+"px,0)";
+    d.gx=r.left; d.gy=r.top;
+    document.body.appendChild(g); d.ghost=g;
+    /* Read the colour off the COPY once it is in the document, not off the row
+       being held: that row is under the pointer, so it is wearing its :hover
+       background and would claim to be opaque when the copy is not. */
+    var _bg=getComputedStyle(c).backgroundColor;
+    if(_pdAlpha(_bg)<.98) c.style.backgroundColor=_pdBlend(_bg,_pdSolidBg(it.parentNode||it));
+    requestAnimationFrame(function(){ if(d.ghost===g) g.classList.add("on"); });
+  }catch(_){ d.ghost=null; }
+}
+function pdragGhostAt(d){
+  if(!d.ghost) return;
+  var x=d.lockX?d.hx:d.px-d.ox, y=d.lockY?d.hy:d.py-d.oy;
+  if(x===d.gx&&y===d.gy) return;
+  d.gx=x; d.gy=y;
+  d.ghost.style.transform="translate3d("+x+"px,"+y+"px,0)";
+}
+/* On release the copy flies to wherever the gap ended up and lands in it. A
+   zone drop has no gap to land in -- the item is leaving the list -- so there
+   it fades out where it was let go. */
+function pdragGhostDrop(d,rect){
+  var g=d.ghost; if(!g) return; d.ghost=null;
+  g.classList.remove("on");
+  g.style.transition="transform .19s cubic-bezier(.22,.9,.31,1),opacity .19s ease";
+  if(rect) g.style.transform="translate3d("+rect.left+"px,"+rect.top+"px,0)";
+  else g.style.opacity="0";
+  setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); },240);
+}
 function pdragMove(e){
   var d=_pdrag; if(!d||e.pointerId!==d.pid) return;
   if(!d.moved&&Math.abs(e.clientX-d.sx)<5&&Math.abs(e.clientY-d.sy)<5) return;
-  if(!d.moved){ d.moved=true; d.item.classList.add("pd-dragging");
-    if(d.grip.setAttribute) d.grip.setAttribute("aria-grabbed","true");
-    document.documentElement.classList.add("pd-reordering"); }
+  if(!d.moved) d.moved=true;
+  pdragLift(d);
   if(e.cancelable) e.preventDefault();
-  var stack=document.elementsFromPoint?document.elementsFromPoint(e.clientX,e.clientY)
-                                     :[document.elementFromPoint(e.clientX,e.clientY)],target=null;
+  d.px=e.clientX; d.py=e.clientY;
+}
+function pdragScan(d){
+  var stack=document.elementsFromPoint?document.elementsFromPoint(d.px,d.py)
+                                     :[document.elementFromPoint(d.px,d.py)],target=null;
   for(var i=0;i<stack.length;i++){
     var q=stack[i]&&stack[i].closest&&stack[i].closest(d.sel);
-    if(q&&q!==d.item&&q.parentNode===d.host){ target=q; break; }
+    if(q&&q!==d.item&&_pdOwns(d,q)){ target=q; break; }
   }
   pdragClear(d);
+  /* A drop zone is not a list position -- dropping a card on a workspace pill
+     moves it to that workspace. While the pointer is over one, the reorder
+     stops competing for the gesture. */
+  if(d.zones){
+    var z=null;
+    for(i=0;i<stack.length;i++){ var zz=stack[i]&&stack[i].closest&&stack[i].closest(d.zones.sel); if(zz){ z=zz; break; } }
+    pdragZone(d,z);
+    if(z) return;
+  }
   if(target){
     var r=target.getBoundingClientRect(),ir=d.item.getBoundingClientRect();
+    /* Axis per pair, not per list: two cards in one column are stacked, but a
+       card and the card it is passing in the next column sit side by side. */
     var horiz=Math.abs(r.left-ir.left)>=Math.abs(r.top-ir.top);
-    var before=horiz?(e.clientX<r.left+r.width/2):(e.clientY<r.top+r.height/2);
+    var sameCol=d.hosts&&target.parentNode!==d.item.parentNode;
+    if(sameCol) horiz=false;   /* arriving in another column: the seam is a row gap */
+    var before=horiz?(d.px<r.left+r.width/2):(d.py<r.top+r.height/2);
     target.classList.add(before?"pd-before":"pd-after"); d.target=target;
-    pdragFlip(d,before?target:target.nextSibling);
+    pdragFlip(d,target.parentNode,before?target:target.nextSibling);
+  }else if(d.anchors&&_pdAnchor(d,stack)){
+    /* _pdAnchor did the insert */
+  }else if(d.hosts){
+    /* An empty column, or the dead space under the last card, is still a place
+       to drop -- without this branch a board with one empty status could never
+       receive anything. */
+    var h=null;
+    for(i=0;i<stack.length;i++){ var hh=stack[i]&&stack[i].closest&&stack[i].closest(d.hosts); if(hh){ h=hh; break; } }
+    if(h&&h!==d.item.parentNode) pdragFlip(d,h,null);
   }
   /* Edge auto-scroll, on whichever axis the scroller actually scrolls. The
      kanban and the pill bar scroll sideways; the two modal lists this engine
      now also drives (#stList, #wsmList) scroll DOWN, and without this branch a
      drag to the sixth status in a list capped at 54vh simply cannot reach it. */
+  /* A long grouped list scrolls the PAGE, not a box, so the edge nudge has to
+     reach the window too or a drag from the bottom group can never get up to
+     the top one. */
+}
+/* Runs off the frame clock, not the pointer, so a pointer parked at the edge
+   keeps the board coming. */
+function pdragEdge(d){
+  if(d.win){
+    var vh=window.innerHeight||document.documentElement.clientHeight,we=72;
+    if(d.py<we) window.scrollBy(0,-Math.min(22,Math.max(5,(we-d.py)*.26)));
+    else if(d.py>vh-we) window.scrollBy(0,Math.min(22,Math.max(5,(d.py-(vh-we))*.26)));
+  }
   var sc=d.scroller;
   if(sc){
     var sr=sc.getBoundingClientRect(),edge=64;
     if(sc.scrollWidth>sc.clientWidth+2){
-      if(e.clientX<sr.left+edge) sc.scrollLeft-=Math.min(24,Math.max(6,(sr.left+edge-e.clientX)*.3));
-      else if(e.clientX>sr.right-edge) sc.scrollLeft+=Math.min(24,Math.max(6,(e.clientX-(sr.right-edge))*.3));
+      if(d.px<sr.left+edge) sc.scrollLeft-=Math.min(20,Math.max(5,(sr.left+edge-d.px)*.26));
+      else if(d.px>sr.right-edge) sc.scrollLeft+=Math.min(20,Math.max(5,(d.px-(sr.right-edge))*.26));
     }
     if(sc.scrollHeight>sc.clientHeight+2){
-      if(e.clientY<sr.top+edge) sc.scrollTop-=Math.min(24,Math.max(6,(sr.top+edge-e.clientY)*.3));
-      else if(e.clientY>sr.bottom-edge) sc.scrollTop+=Math.min(24,Math.max(6,(e.clientY-(sr.bottom-edge))*.3));
+      if(d.py<sr.top+edge) sc.scrollTop-=Math.min(20,Math.max(5,(sr.top+edge-d.py)*.26));
+      else if(d.py>sr.bottom-edge) sc.scrollTop+=Math.min(20,Math.max(5,(d.py-(sr.bottom-edge))*.26));
     }
   }
 }
@@ -8806,20 +9045,39 @@ function pdragEnd(e){
   _pdrag=null;
   try{ d.grip.releasePointerCapture(d.pid); }catch(_){}
   pdragClear(d);
-  d.item.classList.remove("pd-dragging");
+  var zone=d.zone; if(zone){ zone.classList.remove(d.zones.cls); d.zone=null; }
+  if(_pdRaf){ cancelAnimationFrame(_pdRaf); _pdRaf=0; }
+  var _home=null; try{ _home=d.item.getBoundingClientRect(); }catch(_){}
+  pdragGhostDrop(d,zone?null:_home);
+  if(d.hi) document.querySelectorAll("."+d.hi.cls).forEach(function(x){ x.classList.remove(d.hi.cls); });
+  d.item.classList.remove("pd-dragging","pd-held");
   if(d.grip.setAttribute) d.grip.setAttribute("aria-grabbed","false");
   document.documentElement.classList.remove("pd-reordering");
+  if(d.rcls) document.documentElement.classList.remove(d.rcls);
   document.removeEventListener("pointermove",pdragMove);
+  document.removeEventListener("touchmove",_pdNoScroll,{passive:false});
   document.removeEventListener("pointerup",pdragEnd,true);
   document.removeEventListener("pointercancel",pdragEnd,true);
-  if(!d.moved) return;
+  if(!d.moved){
+    /* Held, then let go without moving anywhere. On a phone that press is the
+       only way left to reach the card menu, so it opens one -- and the click
+       the release fires has to be eaten or the task would open behind it. */
+    if(d.tap&&d.held){ _pdSwallow=true; setTimeout(function(){ _pdSwallow=false; },400);
+               try{ d.tap(d.item,d.sx,d.sy); }catch(_){} }
+    return;
+  }
   /* The pointerup that ends a drag also fires a click on whatever sits under
      it. On a pill that click would switch workspace -- never what someone who
      just spent a whole gesture reordering meant. Swallow exactly one, and let
      it lapse on a timer so a swallow can never strand the next real click. */
   _pdSwallow=true; setTimeout(function(){ _pdSwallow=false; },400);
-  var ids=[].slice.call(d.host.querySelectorAll(d.sel)).map(function(x){ return x.getAttribute(d.key); });
-  try{ d.commit(ids); }catch(err){ try{ render(); }catch(_){} }
+  /* A zone drop is not a reorder: it hands the element over and the commit for
+     the list never runs. The DOM is left as the drag made it, and whatever the
+     zone does will redraw. */
+  if(zone){ try{ d.zones.drop(zone,d.item); }catch(err){ try{ render(); }catch(_){} } return; }
+  var _h=d.item.parentNode||d.host;
+  var ids=[].slice.call(_h.querySelectorAll(d.sel)).map(function(x){ return x.getAttribute(d.key); });
+  try{ d.commit(ids,{host:_h,item:d.item}); }catch(err){ try{ render(); }catch(_){} }
 }
 if(!window._pdClickBound){ window._pdClickBound=true;
   document.addEventListener("click",function(e){
@@ -8835,6 +9093,54 @@ function pdReorder(arr,ids,idOf){
   (ids||[]).forEach(function(id){ if(by[id]){ out.push(by[id]); delete by[id]; } });
   (arr||[]).forEach(function(o){ if(by[idOf(o)]) out.push(o); });
   return out;
+}
+/* A card may sit in any column body, and a workspace pill will take it out of
+   the board entirely. Both are handed to the shared engine rather than to a
+   bespoke card drag, so the gap, the line and the animation are the subtask
+   ones. */
+function kCardPress(e,el){
+  var item=el&&el.closest(".kcard"); if(!item) return;
+  pdragPress(e,item,{sel:".kcard",key:"data-id",commit:kCardCommit,
+                     hosts:".kcol-body",hi:{sel:".kcol",cls:"pd-host"},
+                     zones:{sel:".ws-p",cls:"ws-drop",drop:function(z,it){
+                       var w=z.getAttribute("data-ws"); if(w) moveTaskToWs(it.getAttribute("data-id"),w); else render(); }},
+                     scroller:item.closest(".kanban"),
+                     tap:taskPressMenu});
+}
+/* The card menu, reached the way a right-click reaches it on a desktop. */
+function taskPressMenu(item,x,y){
+  var id=item.getAttribute("data-id"); if(!id) return;
+  try{ taskMenu({type:"longpress",preventDefault:function(){},stopPropagation:function(){},
+                 clientX:x,clientY:y,target:item}, id); }catch(_){}
+}
+function kCardCommit(ids,ctx){
+  var id=ctx.item.getAttribute("data-id");
+  var col=ctx.host&&ctx.host.closest?ctx.host.closest(".kcol"):null;
+  /* moveTask re-resolves this against the task's OWN workspace, which is what
+     makes a drop legal in the "All" view where columns are a union by name. */
+  moveTask(id,kNextCardId(ctx.item),col?col.getAttribute("data-col"):null);
+}
+/* The list is one flat container with status headings interleaved, so the
+   column a row landed in is simply the nearest heading above it. */
+function tlRowOpts(grip){
+  return {sel:".tl2-row",key:"data-id",grip:grip,commit:tlRowCommit,win:true,
+          anchors:".tl2-sec",tap:taskPressMenu};
+}
+function tlRowGrab(e,el){
+  var item=el&&el.closest(".tl2-row"); if(!item) return;
+  e.preventDefault(); e.stopPropagation();
+  try{ cardMenusClose(); }catch(_){}
+  pdragBegin(e,item,tlRowOpts(el));
+}
+function tlRowPress(e,el){
+  var item=el&&el.closest(".tl2-row"); if(!item) return;
+  pdragPress(e,item,tlRowOpts(item));
+}
+function tlRowCommit(ids,ctx){
+  var item=ctx.item,id=item.getAttribute("data-id"),st=null,p=item.previousElementSibling;
+  while(p){ if(p.classList&&p.classList.contains("tl2-sec")){ st=p.getAttribute("data-col"); break; } p=p.previousElementSibling; }
+  var n=item.nextElementSibling; while(n&&!(n.classList&&n.classList.contains("tl2-row"))) n=n.nextElementSibling;
+  moveTask(id,n?n.getAttribute("data-id"):null,st);
 }
 function colGrab(e,el){
   var item=el&&el.closest(".kcol"); if(!item) return;
