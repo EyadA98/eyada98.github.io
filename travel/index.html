@@ -41,7 +41,6 @@ html.dark{ --text:#ece7fb; --muted:#a99ccb; --dim:#8479a8; --border:rgba(255,255
 .tv-shell{display:grid;grid-template-columns:clamp(214px,16.5vw,278px) minmax(0,1fr);min-height:100vh;min-width:0}
 .tv-col{min-width:0;display:flex;flex-direction:column;grid-column:2}
 .tv-aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%);
-  backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
   border-right:1px solid rgba(255,255,255,.08);color:#fff;padding:26px 16px;
   /* FIXED, not sticky. Hub's grid is on <body>, so its sticky aside resolves against the
      viewport. Travel's grid is a div inside #root, and sticky kept losing — the rail
