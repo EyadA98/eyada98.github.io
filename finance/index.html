@@ -49,7 +49,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%);
   backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
   border-right:1px solid rgba(255,255,255,.08);
-  color:#fff;padding:26px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+  color:#fff;padding:26px 16px;position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
 .logo{display:flex;align-items:center;gap:12px;padding:4px 10px 24px}
 .logo-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--lavender),var(--violet));display:grid;place-items:center;font-weight:900;font-size:1.05rem;box-shadow:0 4px 14px rgba(141,127,208,.45);letter-spacing:-.02em;animation:logoIn .7s var(--ease)}
 .logo-mark svg{width:21px;height:21px;color:#fff}
@@ -84,7 +84,7 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
 .tab{display:none}
 .tab.active{display:block;animation:fadeUp .42s var(--ease)}
 .grid{display:grid;gap:18px}
-.cards{grid-template-columns:repeat(auto-fit,minmax(248px,1fr))}
+.cards{grid-template-columns:repeat(auto-fit,minmax(288px,1fr))}
 @supports (grid-template-rows: subgrid){
   .cards{grid-template-rows:auto auto 1fr}
   .cards > .card{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0}
@@ -185,6 +185,8 @@ main{padding:clamp(14px,2.4vw,32px) var(--gutter) 56px;max-width:1280px}
    bar then sits on the text. Own the gap from the text side; auto still absorbs the rest. */
 .cards .card .sub{margin-bottom:13px}
 .kpi-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.kpi-head>div:first-child{min-width:0}
+.kpi-head .big{overflow-wrap:normal}
 .icon-tile{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(38,34,92,.14)}
 .icon-tile svg{width:21px;height:21px;color:#fff}
 .tile-lav{background:linear-gradient(135deg,var(--lavender),var(--violet))}
