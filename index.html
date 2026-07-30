@@ -2035,6 +2035,7 @@ html:not(.dark) .ws-p .wsn{background:rgba(129,126,255,.14);color:#5c5275}
    winning for every INACTIVE pill. */
 html:not(.dark) .ws-p.on .wsn{background:rgba(255,255,255,.3);color:#fff}
 html:not(.dark) .rt-cat{color:#5c5275}
+html:not(.dark) .rt-cat.on{color:#fff}
 html:not(.dark) .tl2-sec{color:inherit}
 html:not(.dark) .kc-chip{background:rgba(129,126,255,.09);color:#5c5275}
 html:not(.dark) .wchip{color:#5c5275}
@@ -7379,14 +7380,10 @@ async function gFetchEmail(token){ try{ var j=await fetch("https://www.googleapi
 /* ---- Calendar connection ---- */
 function renderCalConn(){
   var el=document.getElementById("calConn"); if(!el) return;
-  var st=intState("cal");
-  if(st==="connected"||st==="stale"){
-    el.innerHTML=""; el.style.margin="0";
-  } else if(st==="connecting"){
-    el.innerHTML='<div class="cal-synced"><span class="ispin"></span>Connecting to Google…</div>'; el.style.marginBottom="12px";
-  } else {
-    el.innerHTML='<button class="btn soft" onclick="googleConnect()" style="width:100%;justify-content:center">Connect Google Calendar</button>'+(st==="error"?'<div class="cal-synced" style="margin-top:6px;color:var(--red)">Couldn&rsquo;t connect &mdash; check your Client ID in Preferences</div>':''); el.style.marginBottom="12px";
-  }
+  /* The calendar widget no longer shows its own connect/status line -- connecting
+     Google is handled by the Inbox widget and Settings (one combined sign-in), so
+     a line here just duplicated that and spilled in from the Inbox connect flow. */
+  el.innerHTML=""; el.style.margin="0";
 }
 function calConnect(){ googleConnect(); }
 async function loadCalEvents(token){
