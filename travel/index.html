@@ -47,7 +47,7 @@ html.dark{ --text:#ece7fb; --muted:#a99ccb; --dim:#8479a8; --border:rgba(255,255
      viewport. Travel's grid is a div inside #root, and sticky kept losing — the rail
      scrolled away and you saw its bottom edge. Fixed cannot lose; the column below
      reserves the space, and .tv-col is pinned to column 2 so the empty track stays. */
-  position:fixed;top:0;left:0;width:clamp(214px,16.5vw,278px);height:100vh;z-index:40;
+  position:fixed;top:0;left:0;width:clamp(214px,16.5vw,278px);height:100vh;height:100dvh;z-index:40;
   display:flex;flex-direction:column;gap:6px;overflow-y:auto;overscroll-behavior-y:contain}
 .tv-logo{padding:0;background:none;border:none;cursor:pointer;width:100%;text-align:left}
 .tv-logorow{display:flex;align-items:center;gap:12px;padding:4px 10px 24px}
