@@ -972,8 +972,8 @@ main{ padding-left:var(--gutter)!important; padding-right:var(--gutter)!importan
    have taken that fade away. */
 @media(min-width:1025px){
   aside::after{content:"";display:block;flex:none;height:26px;min-height:26px;
-    margin:auto -16px -26px;border-top:1px solid rgba(255,255,255,.10);
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cg fill='none' stroke='%23bba4e4' stroke-opacity='.40' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='13'/%3E%3Ccircle cx='26' cy='0' r='13'/%3E%3Ccircle cx='0' cy='26' r='13'/%3E%3Ccircle cx='26' cy='26' r='13'/%3E%3Ccircle cx='13' cy='13' r='13'/%3E%3Ccircle cx='13' cy='0' r='13'/%3E%3Ccircle cx='0' cy='13' r='13'/%3E%3Ccircle cx='26' cy='13' r='13'/%3E%3Ccircle cx='13' cy='26' r='13'/%3E%3C/g%3E%3C/svg%3E") center top/26px 26px repeat,rgba(255,255,255,.035)}
+    margin:auto -16px -26px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0%200%2026%2026'%3E%3Cg fill='%23bba4e4' fill-opacity='.32'%3E%3Cpath d='M13,13Q3,13,0,0Q13,3,13,13Z'/%3E%3Cpath d='M13,13Q13,3,26,0Q23,13,13,13Z'/%3E%3Cpath d='M13,13Q23,13,26,26Q13,23,13,13Z'/%3E%3Cpath d='M13,13Q13,23,0,26Q3,13,13,13Z'/%3E%3C/g%3E%3C/svg%3E") center top/13px 13px repeat,rgba(255,255,255,.035)}
 }
 
 /* ── sign-in card: pattern rail (option S2) ───────────────────────────────────
@@ -1264,24 +1264,13 @@ aside::after{
   background:var(--iw-dark) -6.5px -6.5px/13px 13px round repeat
 }
 
-/* Desktop rail spans the complete document, not only the first 100vh.
-   The sticky aside carries the navigation while this body layer carries the
-   continuous rail surface and places the interlock once, at the real page end. */
+/* Fixed rail carrying its own gradient + blur + pattern over exactly 100vh —
+   identical to Hub & Travel (the old body::after span made the gradient darker). */
 @media(min-width:1025px){
-  body{position:relative;isolation:isolate}
-  body::after{
-    content:"";position:absolute;left:0;top:0;bottom:0;
-    width:clamp(214px,16.5vw,278px);z-index:0;pointer-events:none;
-    background:
-      var(--iw-dark) -6.5px calc(100% - 13px)/13px 13px repeat-x,
-      var(--iw-dark) -6.5px 100%/13px 13px repeat-x,
-      linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%) center/100% 100% no-repeat
-  }
   aside{
     position:fixed;left:0;top:0;width:clamp(214px,16.5vw,278px);
-    height:100vh;background:transparent;z-index:40
+    height:100vh;height:100dvh;z-index:40
   }
-  aside::after{display:none}
   .content{grid-column:2;position:relative;z-index:1;min-width:0}
 }
 .auth-card::before,.tv-authcard::before{
