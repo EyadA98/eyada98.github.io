@@ -5281,7 +5281,7 @@ document.addEventListener("click",function(e){ if(!e.target.closest(".ntf-snz"))
 /* ============ Daily Productivity Email Digest ============ */
 function digestData(){
   var t=isoLocal(new Date());
-  var we=new Date(); we.setDate(we.getDate()+7); var weekEnd=isoLocal(we);
+  var we=new Date(); we.setDate(we.getDate()+(6-we.getDay())); var weekEnd=isoLocal(we);  /* "This week" = through Saturday of the current Sun–Sat week (matches the Tasks overview widget; today if it's already Sat) */
   var today=[], week=[], overdue=[];
   function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
   /* Only tasks and subtasks belong to a workspace — events come from Google and routines
