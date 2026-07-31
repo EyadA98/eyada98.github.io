@@ -1115,7 +1115,8 @@ html.pd-reordering.sub-reordering,html.pd-reordering.sub-reordering *{cursor:url
 .sub-del{width:26px;height:30px;min-width:26px;background:none;border:none;color:var(--muted);cursor:pointer;padding:0;border-radius:8px;display:grid;place-items:center}
 .sub-del:hover{color:var(--red);background:rgba(214,85,76,.12)}
 .sub-del svg{width:15px;height:15px}
-.sub-meta{display:grid;grid-auto-flow:column;grid-auto-columns:26px;align-items:center;gap:3px}
+.sub-meta{display:grid;grid-auto-flow:column;grid-auto-columns:auto;align-items:center;gap:5px}
+.sub-date-btn{width:48px}   /* fixed slot for the date (icon when empty, "Jul 31" badge when set) so every subtask input stays the same width */
 .sub-ic{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:3px;border-radius:8px;display:grid;place-items:center;min-width:26px;height:26px;font-family:inherit}
 .sub-ic svg{width:15px;height:15px}
 .sub-ic:hover{color:var(--lavender);background:rgba(129,126,255,.12)}
