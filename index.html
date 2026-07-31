@@ -5281,7 +5281,7 @@ document.addEventListener("click",function(e){ if(!e.target.closest(".ntf-snz"))
 /* ============ Daily Productivity Email Digest ============ */
 function digestData(){
   var t=isoLocal(new Date());
-  var we=new Date(); we.setDate(we.getDate()+(6-we.getDay())); var weekEnd=isoLocal(we);  /* "This week" = through Saturday of the current Sun–Sat week (matches the Tasks overview widget; today if it's already Sat) */
+  var we=new Date(); we.setDate(we.getDate()+7); var weekEnd=isoLocal(we);
   var today=[], week=[], overdue=[];
   function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
   /* Only tasks and subtasks belong to a workspace — events come from Google and routines
@@ -5407,7 +5407,7 @@ function buildDigest(){
      +'<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top:12px">'+rowsHtml+'</table></td></tr>';
   }
   var _wsSet={}; [].concat(d.today,d.week,d.overdue).forEach(function(x){ if(x&&x.ws) _wsSet[x.ws]=1; });
-  var multiWs=Object.keys(_wsSet).length>=2;   /* headings only when 2+ workspaces, like the overview widget */
+  var multiWs=true;   /* always group: workspace name is a heading ABOVE its tasks (never an inline chip); events/routines/trips fall under an "Other" heading */
   var sections=sect("Today",d.today,"today")+sect("This week",d.week,"week")+sect("Overdue",d.overdue,"over",true);
   if(!any) sections='<tr><td align="center" style="padding:46px 26px;border-bottom:1px solid '+LINE+'"><div style="font:400 22px '+D+';color:'+INK+'">You&rsquo;re all caught up.</div><div style="font:500 13px '+F+';color:'+SOFT+';margin-top:6px">Nothing on the board today &mdash; enjoy it.</div></td></tr>';
 
