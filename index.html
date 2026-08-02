@@ -131,6 +131,9 @@ html:not(.dark) .ws-p .wsn{background:rgba(129,126,255,.12)}
 .ws-p.ghost{border-style:dashed;color:var(--muted);font-weight:800}
 .ws-p.gear{margin-left:auto;padding:10px 12px;color:var(--muted)}
 .ws-p.gear svg{width:16px;height:16px;display:block}
+.wsgear-wrap{position:relative;margin-left:auto}
+.wsgear-wrap .ws-p.gear{margin-left:0}
+.wsgear-wrap .av-menu{min-width:212px}
 /* the workspace chip on cards/rows */
 .tdp-pill-ws{background:color-mix(in srgb, var(--wsc) 16%, transparent)!important;
   border:1px solid color-mix(in srgb, var(--wsc) 38%, transparent)!important;color:var(--text)!important}
@@ -2745,6 +2748,7 @@ main{padding-top:32px!important}
 .pg-actions .fld{padding-top:0;padding-bottom:0}
 .pg-actions .tvsearch>.fld{padding-inline-start:33px}
 .pg-actions .cs-btn{width:auto;padding:0 12px;gap:8px;font-weight:600}
+.pg-actions .cs-btn.cs-pill{border-radius:99px;padding:0 15px;margin-inline-start:auto}
 .pg-actions .tv-switch,.pg-actions .tlg-view{padding:3px;align-items:stretch}
 .pg-actions .tv-switch button,.pg-actions .tlg-view button{height:100%;padding:0 13px;font-size:.8rem;gap:7px}
 .pg-actions select.fld{flex:0 1 auto}
@@ -2774,6 +2778,8 @@ main{padding-top:32px!important}
 .tvsearch>svg{position:absolute;inset-inline-start:11px;top:50%;transform:translateY(-50%);
   width:14px;height:14px;color:var(--muted);opacity:.7;pointer-events:none}
 .tvsearch>.fld{flex:1;min-width:0;max-width:none!important;padding-inline-start:33px}
+.cs-btn .cs-ic{display:inline-flex;align-items:center;flex:none;margin-inline-end:2px;color:var(--lavender)}
+.cs-btn .cs-ic svg{width:15px;height:15px}
 
 /* 3 ── Chrome that earns its place.
    Buttons never hide — they are the page's job. Search and filters do,
@@ -4007,10 +4013,7 @@ html:not(.dark) .app-card>.corner{opacity:.6}
         <button id="tv-board" class="on" onclick="setTaskView('board')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="14" rx="1"/></svg>Board</button>
         <button id="tv-list" onclick="setTaskView('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button>
       </div>
-      <button class="btn soft" onclick="openStatuses()" aria-label="Manage statuses">Statuses</button>
-      <span class="tvsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="fld" id="taskSearch" placeholder="Search&hellip;" oninput="renderTasks()"></span>
-      <select class="fld bare" aria-label="Filter tasks by priority" id="taskFilterP" style="max-width:140px" onchange="renderTasks()"><option value="">All priorities</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option><option value="none">No priority</option></select>
-      <select class="fld bare" aria-label="Sort tasks" id="taskSort" style="max-width:160px" onchange="renderTasks()"><option value="manual">Manual order</option><option value="priority">Priority</option><option value="due">Due date</option><option value="updated">Recently updated</option></select>
+      <select class="fld bare" aria-label="Sort tasks" id="taskSort" onchange="renderTasks()"><option value="manual">Sort</option><option value="priority">Priority</option><option value="due">Due date</option><option value="updated">Recently updated</option></select>
     </div>
   </div>
   <div id="taskViewBody"></div>
@@ -6135,7 +6138,7 @@ function taskList(){
 }
 function renderTasks(){
   try{ renderWsBar(); }catch(e){}
-  try{ syncTools("tasks", taskList().length, ["taskSearch","taskFilterP","taskSort"]); }catch(e){}
+  try{ syncTools("tasks", taskList().length, ["taskSort"]); }catch(e){}
   var host=document.getElementById("taskViewBody"); if(!host) return;
   if(taskView==="list") return renderTaskListView(host);
   return renderTaskBoard(host);
@@ -8326,7 +8329,8 @@ function _csPlace(pop,btn){var r=btn.getBoundingClientRect();var W=Math.max(r.wi
 function _csRelabel(sel){var btn=sel._csbtn;if(!btn)return;var o=sel.options[sel.selectedIndex];
   var dot="";
   if(sel.id==="tdWs"){ var w=wsById(sel.value); if(w){ btn.style.setProperty("--wsc",w.color); dot='<span class="tdp-wsdot"></span>'; } }
-  btn.innerHTML=dot+'<span class="cs-val">'+((o?o.textContent:"")||"").replace(/</g,"&lt;")+'</span>'+CS_CHEV;}
+  var ic=(sel.id==="taskSort")?'<span class="cs-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h13M4 12h9M4 18h5"/><path d="M17 15l3 3 3-3M20 18V9"/></svg></span>':"";
+  btn.innerHTML=dot+ic+'<span class="cs-val">'+((o?o.textContent:"")||"").replace(/</g,"&lt;")+'</span>'+CS_CHEV;}
 function _csOpen(sel,btn){
   _csClose();
   var pop=document.createElement("div");pop.className="cs-pop";var html="";
@@ -8341,7 +8345,7 @@ function enhanceSelects(){
     if(!sel.dataset.cs){
       sel.dataset.cs="1";sel.style.display="none";
       var btn=document.createElement("button");btn.type="button";
-      btn.className="cs-btn"+((sel.classList.contains("bare"))?" cs-auto":"")+(sel.classList.contains("tool-off")?" tool-off":"");
+      btn.className="cs-btn"+((sel.classList.contains("bare"))?" cs-auto":"")+(sel.classList.contains("tool-off")?" tool-off":"")+((sel.id==="taskSort")?" cs-pill":"");
       btn.setAttribute("aria-label",sel.getAttribute("aria-label")||"Select");
       sel.parentNode.insertBefore(btn,sel);sel._csbtn=btn;
       btn.addEventListener("click",function(e){e.stopPropagation();if(_cs&&_cs.btn===btn){_csClose();return;}_csOpen(sel,btn);});
@@ -8450,10 +8454,19 @@ function renderWsBar(){
       +'<span class="wsn">'+wsCount(w.id)+'</span></button>';
   });
   h+='<button class="ws-p ghost" onclick="wsAdd()">+ New</button>';
-  h+='<button class="ws-p gear" onclick="wsManage()" title="Manage workspaces" aria-label="Manage workspaces">'
-    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg></button>';
+  h+='<div class="wsgear-wrap">'
+    +'<button class="ws-p gear" onclick="toggleWsMenu(event)" title="Settings" aria-label="Board settings">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg></button>'
+    +'<div class="av-menu" id="wsGearMenu">'
+      +'<button onclick="closeWsMenu();openStatuses()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="14" rx="1"/></svg> Statuses</button>'
+      +'<button onclick="closeWsMenu();wsManage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg> Manage workspaces</button>'
+    +'</div>'
+    +'</div>';
   host.innerHTML=h;
 }
+function toggleWsMenu(e){ if(e) e.stopPropagation(); var m=document.getElementById("wsGearMenu"); if(!m) return; m.classList.toggle("show"); }
+function closeWsMenu(){ var m=document.getElementById("wsGearMenu"); if(m) m.classList.remove("show"); }
+document.addEventListener("click",function(e){ if(!e.target.closest(".wsgear-wrap")) closeWsMenu(); });
 async function wsAdd(){
   var name=await promptModal("New workspace","Name","");
   if(!name||!name.trim()) return;
