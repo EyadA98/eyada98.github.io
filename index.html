@@ -1094,6 +1094,10 @@ html.dark .td-sys-reopen{color:var(--peach)}
 html.dark .td-sys-reopen .td-cmt-sys-ic{background:var(--peach)}
 .td-sys-field{color:var(--muted);background:color-mix(in srgb,var(--muted) 10%,transparent);border-color:var(--border)}
 .td-sys-field .td-cmt-sys-ic{background:var(--muted)}
+.td-upd-toggle{display:inline-flex;align-items:center;gap:4px;border:none;background:none;color:var(--violet);font-family:inherit;font-weight:800;font-size:.74rem;cursor:pointer;padding:7px 2px 2px;text-align:left}
+html.dark .td-upd-toggle{color:var(--lilac)}
+.td-upd-toggle:hover{text-decoration:underline}
+.td-upd-toggle svg{width:13px;height:13px}
 @media(max-width:680px){ .tc2-hint{display:none} .tc2-cell{min-height:84px} .tc2-ev .tc2-t{display:none} .tc2-month{min-width:150px;font-size:1.2rem} }
 /* calendar chips — same kind hues as the badges, one step heavier tint */
 .ev-task{background:rgba(129,126,255,.22);color:var(--ink-task)}
@@ -5348,7 +5352,7 @@ document.addEventListener("click",function(e){ if(!e.target.closest(".ntf-snz"))
 /* ============ Daily Productivity Email Digest ============ */
 function digestData(){
   var t=isoLocal(new Date());
-  var we=new Date(); we.setDate(we.getDate()+7); var weekEnd=isoLocal(we);
+  var we=new Date(); we.setDate(we.getDate()+(6-we.getDay())); var weekEnd=isoLocal(we);   /* Saturday of the current week — "This week" stays Sun–Sat, matches server digest */
   var today=[], week=[], overdue=[];
   function push(it){ if(!it.date) return; if(it.date<t) overdue.push(it); else if(it.date===t) today.push(it); else if(it.date<=weekEnd) week.push(it); }
   /* Only tasks and subtasks belong to a workspace — events come from Google and routines
@@ -6398,7 +6402,7 @@ function kCardOver(e){ e.preventDefault();
   c.classList.add("kc-insert");
   var col=c.closest(".kcol"); if(col) col.classList.add("over"); }
 var _tdId=null,_tdNew=null,_tdReady=false,_tdT=null,_tdPresetDue=null;
-function openTask(id,presetStatus){ _tdSub=null;
+function openTask(id,presetStatus){ _tdSub=null; _tdUpdOpen=false;   /* Task Updates start collapsed (latest only) each time a task opens */
   var t=id?(data.tasks||[]).find(function(x){return x.id===id;}):null; var isNew=!t;
   _tdNew=null;
   if(isNew){ t={id:uid(),ws:wsDefault(),t:"",desc:"",status:presetStatus||defaultStatusId(),priority:"med",start:"",due:(_tdPresetDue||""),time:"",tags:[],assignee:(data.profile&&data.profile.name)||"",subs:[],comments:[],project:"",created:Date.now(),updated:Date.now()}; _tdPresetDue=null; data.tasks=data.tasks||[]; data.tasks.push(t); _tdNew=t.id; save(); }
@@ -6710,10 +6714,24 @@ function tdRenderUpdates(id){
     var _tm=new Date(ts).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
     return '<div class="td-cmt-sys td-sys-'+kind+'"><span class="td-cmt-sys-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px">'+_ic+'</svg></span><span class="td-cmt-sys-tx">'+esc(text)+'</span><span class="td-cmt-sys-tm">'+esc(_tm)+'</span></div>';
   }
-  var sys=cs.filter(function(c){return c.system;});
-  var ulist=(t.created?sysRow("create","Created",t.created):"")+sys.map(function(c){ return sysRow(c.kind||"log", c.text, c.ts); }).join("");
-  elU.innerHTML='<div class="td-upd-l">'+(ulist||'<div class="muted" style="font-size:.8rem;padding:4px 0 2px">No updates yet.</div>')+'</div>';
+  /* entries oldest→newest (Created first, then system logs in push order) */
+  var entries=[];
+  if(t.created) entries.push({kind:"create",text:"Created",ts:t.created});
+  cs.filter(function(c){return c.system;}).forEach(function(c){ entries.push({kind:c.kind||"log",text:c.text,ts:c.ts}); });
+  if(!entries.length){ elU.innerHTML='<div class="td-upd-l"><div class="muted" style="font-size:.8rem;padding:4px 0 2px">No updates yet.</div></div>'; return; }
+  var ordered=entries.slice().reverse();                 /* newest first */
+  var shown=_tdUpdOpen?ordered:ordered.slice(0,1);        /* collapsed = latest only */
+  var rows=shown.map(function(e){ return sysRow(e.kind,e.text,e.ts); }).join("");
+  var toggle="";
+  if(entries.length>1){
+    toggle=_tdUpdOpen
+      ? '<button type="button" class="td-upd-toggle" onclick="tdToggleUpdates(\''+id+'\')">Show less</button>'
+      : '<button type="button" class="td-upd-toggle" onclick="tdToggleUpdates(\''+id+'\')">Show all '+entries.length+' updates<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>';
+  }
+  elU.innerHTML='<div class="td-upd-l">'+rows+'</div>'+toggle;
 }
+var _tdUpdOpen=false;
+function tdToggleUpdates(id){ _tdUpdOpen=!_tdUpdOpen; tdRenderUpdates(id); }
 var _tdEditCid=null;
 function tdAddComment(id){
   var inp=document.getElementById("tdCmtIn"); if(!inp) return; var v=inp.value.trim(); if(!v) return;
