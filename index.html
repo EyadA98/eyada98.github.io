@@ -104,6 +104,7 @@ aside button.nav.active::before{content:"";position:absolute;left:-16px;top:20%;
   background:rgba(11,7,32,.9);
   border-bottom:1px solid rgba(255,255,255,.08);transition:transform .38s var(--ease)}
 html:not(.dark) .topbar{background:rgba(247,245,252,.92);border-bottom:1px solid rgba(255,255,255,.65)}
+.topbar.hide{transform:translateY(-110%)}   /* slides fully out of view on scroll-down (see scroll listener) */
 .tb-left{display:flex;align-items:center;gap:14px;min-width:0}
 .topbar h2{font-size:1.22rem;font-weight:800}.topbar .crumb{font-size:.74rem;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .top-actions{display:flex;gap:8px;align-items:center}
@@ -2713,7 +2714,7 @@ html:not(.dark) .tl-hint .h-chip{background:rgba(20,14,45,.06)}
 .up2-day:last-child{border-bottom:none;padding-bottom:2px}
 .up2-date{text-align:center}
 .up2-num{font-family:'Marcellus',Georgia,serif;font-size:1.7rem;color:#fff;line-height:1}
-.up2-wk{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-top:3px}
+.up2-wk{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-top:3px;white-space:nowrap}
 .up2-day.today .up2-wk{color:#ffb3ab}
 .up2-items{display:flex;flex-direction:column;gap:11px;min-width:0}
 .up2-more{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.5)}
@@ -2740,8 +2741,9 @@ html:not(.dark) .tl-hint .h-chip{background:rgba(20,14,45,.06)}
   .hx-val svg,.hx-val .wx-ic,.hx-val .wx-ic svg{width:21px;height:21px}
   .hx-sub{font-size:.64rem}
   .hx-lbl{font-size:.56rem}
-  .up2-day{grid-template-columns:48px 1fr;gap:11px}
+  .up2-day{grid-template-columns:66px 1fr;gap:11px}
   .up2-num{font-size:1.4rem}
+  .up2-wk{letter-spacing:.02em}
   .up2-row{grid-template-columns:minmax(0,1fr) 58px 58px;gap:7px}
   .up2-title{font-size:.85rem}
   .up2-row .badge{font-size:.5rem;padding:3px 5px;justify-self:stretch;text-align:center;box-sizing:border-box}
@@ -8061,9 +8063,79 @@ async function loadFinance(){
     if(net==null && Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
     if(net!=null) financeStat=Number(net).toLocaleString("en-US",{maximumFractionDigits:0});
+    /* prefer a freshly-priced value if the hub computed one in the last 10 min,
+       so the 30s reload doesn't flick back to the saved (stale) number */
+    if(_nwLive!=null && (Date.now()-_nwLiveAt)<600000) financeStat=Number(_nwLive).toLocaleString("en-US",{maximumFractionDigits:0});
     if(Array.isArray(d.zaka)&&d.zaka.length){ var last=d.zaka.map(function(z){return z.dateG;}).filter(Boolean).sort().pop(); if(last){ var nx=new Date(last); nx.setDate(nx.getDate()+354); zakatDue=Math.ceil((nx-new Date())/86400000); } }
     renderAppCards("appCards"); renderAppCards("appCardsFull"); try{ renderToday(); renderWelcomeSummary(); renderCalendar(); }catch(e){}
+    try{ refreshNetWorthLive(d); }catch(e){}   /* fetch live gold/stock prices and recompute net worth right here in the hub */
   }catch(e){}
+}
+/* ── Live net worth from the hub ─────────────────────────────────────────────
+   The finance board only recomputes net worth with live gold/stock prices when
+   its Portfolio tab is open and saved, so the hub used to show the last-saved
+   value. This revalues the holdings we read from `boards` using the same
+   sources the board uses (gold-api.com for metals, Yahoo Finance for stocks,
+   USD→SAR FX). Read-only: nothing is written back to the boards table. */
+const NW_OZ_GRAMS=31.1034768, NW_USD_SAR=3.75;
+const NW_FX_SAR={SAR:1,USD:3.75,AED:1.021,EUR:4.06,GBP:4.77,KWD:12.2};
+const NW_PROXIES=[
+  function(u){return u;},
+  function(u){return "https://api.allorigins.win/raw?url="+encodeURIComponent(u);},
+  function(u){return "https://corsproxy.io/?url="+encodeURIComponent(u);},
+  function(u){return "https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(u);},
+  function(u){return "https://api.allorigins.win/get?url="+encodeURIComponent(u);}   /* wrap variant */
+];
+async function nwFetchJSON(url){
+  var lastErr;
+  for(var i=0;i<NW_PROXIES.length;i++){
+    var wrap=(i===NW_PROXIES.length-1);
+    try{
+      var ctrl=new AbortController(); var timer=setTimeout(function(){ctrl.abort();},9000);
+      var r=await fetch(NW_PROXIES[i](url),{cache:"no-store",signal:ctrl.signal}); clearTimeout(timer);
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      if(wrap){ var w=await r.json(); var body=(w&&typeof w.contents==="string")?w.contents:""; if(!body) throw new Error("empty wrap"); return JSON.parse(body); }
+      return await r.json();
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr||new Error("all routes failed");
+}
+function nwHoldings(d){
+  var map={}; (d.purchases||[]).forEach(function(p){ if(p.status!=="Owned"||!p.item) return; var m=map[p.item]=map[p.item]||{name:p.item,qty:0,invested:0}; m.qty+=(+p.qty||0); m.invested+=(+p.qty||0)*(+p.unit||0); });
+  return Object.keys(map).map(function(k){ var m=map[k]; var meta=(d.meta&&d.meta[m.name])||{assetType:"Stock",price:0}; return {name:m.name,qty:m.qty,assetType:meta.assetType||"Stock",price:+meta.price||0,symbol:meta.symbol||""}; });
+}
+function nwNet(d){
+  var acc=(d.accounts||[]).reduce(function(s,a){return s+(+a.balance||0);},0);
+  var inv=nwHoldings(d).reduce(function(s,h){ var pr=(d.meta&&d.meta[h.name]&&+d.meta[h.name].price)||h.price||0; return s+h.qty*pr; },0);
+  return acc+inv;
+}
+let _nwLive=null, _nwLiveAt=0, _nwFetching=false, _nwLastFetch=0;
+async function refreshNetWorthLive(d){
+  if(_nwFetching || !d) return;
+  if(Date.now()-_nwLastFetch < 240000) return;                 /* throttle: at most once / 4 min */
+  var hs=nwHoldings(d).filter(function(h){ return h.symbol || (h.assetType==="Precious Metals" && /gold|silver|ذهب|فضة/i.test(h.name)); });
+  if(!hs.length) return;                                        /* nothing priceable → saved value is already right */
+  _nwFetching=true; _nwLastFetch=Date.now();
+  try{
+    for(var i=0;i<hs.length;i++){ var h=hs[i]; var m=d.meta&&d.meta[h.name]; if(!m) continue;
+      try{
+        if(h.assetType==="Precious Metals" && /gold|silver|ذهب|فضة/i.test(h.name)){
+          var sym=/silver|فضة/i.test(h.name)?"XAG":"XAU";
+          var j=await nwFetchJSON("https://api.gold-api.com/price/"+sym);
+          var usdOz=+(j&&(j.price!=null?j.price:j.Price));
+          if(isFinite(usdOz)&&usdOz>0){ var gp=usdOz*NW_USD_SAR/NW_OZ_GRAMS; if(!(m.price>0)||(gp<=m.price*10&&gp>=m.price/10)) m.price=gp; }
+        } else if(m.symbol){
+          var y="https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(m.symbol)+"?interval=1d&range=1d";
+          var jj=await nwFetchJSON(y);
+          var mm=jj&&jj.chart&&jj.chart.result&&jj.chart.result[0]&&jj.chart.result[0].meta;
+          var p=mm&&(mm.regularMarketPrice!=null?mm.regularMarketPrice:mm.previousClose);
+          if(isFinite(+p)&&+p>0){ p=+p; if(!/\.SR$/i.test(m.symbol)) p*=((m.priceCur&&NW_FX_SAR[m.priceCur]!=null)?NW_FX_SAR[m.priceCur]:NW_USD_SAR); if(!(m.price>0)||(p<=m.price*10&&p>=m.price/10)) m.price=p; }
+        }
+      }catch(e){}
+    }
+    var net=nwNet(d);
+    if(isFinite(net)&&net>0){ _nwLive=net; _nwLiveAt=Date.now(); financeStat=Number(net).toLocaleString("en-US",{maximumFractionDigits:0}); try{ renderWelcomeSummary(); renderToday(); renderDailySummary(); }catch(e){} }
+  } finally { _nwFetching=false; }
 }
 
 /* ============ Settings ============ */
@@ -9656,6 +9728,14 @@ else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
 setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); } },30000);
 setInterval(function(){ try{ updateNotifBadge(); }catch(e){} },60000);
+/* Topbar hides on scroll-down, returns on scroll-up (mobile) — same as the finance board,
+   so the semi-transparent bar never sits over scrolling content. */
+(function(){ var _lastY=0; window.addEventListener("scroll",function(){
+  var tb=document.querySelector(".content .topbar")||document.querySelector(".topbar"); if(!tb) return;
+  var y=window.scrollY||window.pageYOffset||0;
+  tb.classList.toggle("hide", y>_lastY && y>90);
+  _lastY=y;
+},{passive:true}); })();
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="visible"&&user&&supa){
     loadFinance(); loadTravel();
