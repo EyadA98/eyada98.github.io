@@ -459,6 +459,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
 
 /* ================= Refined top bar (Liquid Glass, native mobile) ================= */
 .topbar{transition:transform .38s var(--ease),box-shadow .3s var(--ease)}
+.topbar.hide{transform:translateY(-110%)}   /* hide on scroll-down at every width (was mobile-only) — matches the hub */
 .tb-left{display:flex;align-items:center;gap:14px;min-width:0}
 .tb-titles{min-width:0}
 .tb-titles h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1917,6 +1918,7 @@ function goTab(name){
   try{ localStorage.setItem("financeBoard.view", name); }catch(e){}
   render();
   window.scrollTo({top:0});
+  try{ autoRefreshPrices(); }catch(e){}   /* landing on any tab re-prices (throttled) so net worth is current, not just on Portfolio */
 }
 document.getElementById("sideNav").addEventListener("click", e=>{
   const b = e.target.closest("button[data-tab]");
@@ -3273,12 +3275,26 @@ function openTopMenu(){
 }
 let _lastY = 0;
 window.addEventListener("scroll", ()=>{
-  if(window.innerWidth > 768) return;
   const tb = document.getElementById("topbar"); if(!tb) return;
   const y = window.scrollY;
   tb.classList.toggle("hide", y > _lastY && y > 90);
   _lastY = y;
 }, {passive:true});
+
+/* Keep net worth fresh without a manual Portfolio visit: re-price on tab change
+   (goTab), whenever the board regains focus, and on a periodic timer while open.
+   Throttled so the 90s window can't be hammered. refreshPrices() already guards
+   against overlapping runs and falls back to saved prices if a quote fails. */
+let _lastAutoPrice = 0;
+function autoRefreshPrices(){
+  if(typeof refreshPrices!=="function") return;
+  if(Date.now() - _lastAutoPrice < 90000) return;   // at most once / 90s
+  _lastAutoPrice = Date.now();
+  try{ refreshPrices(false); }catch(e){}
+}
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") autoRefreshPrices(); });
+window.addEventListener("focus", autoRefreshPrices);
+setInterval(function(){ if(document.visibilityState==="visible") autoRefreshPrices(); }, 180000);   // every 3 min while open
 /* Finance Board v9 — Supabase accounts · per-user cloud data */
 </script>
 <script>(function(){var s=document.getElementById("splash");if(!s)return;function go(){setTimeout(function(){s.classList.add("hide");},650);setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},1400);}if(document.readyState==="complete")go();else window.addEventListener("load",go);})();</script>
