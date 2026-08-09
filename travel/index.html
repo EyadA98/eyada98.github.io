@@ -2161,14 +2161,18 @@ html:not(.dark) .tv-trip{--tv-rib:var(--iw-light) -6.5px -6.5px/13px 13px repeat
 
 /* City boarding-pass divider. */
 html.dark .pass-stub::after{
-  background:var(--iw-dark) -7px -7px/14px 14px round repeat
+  /* backing fades from the stub's colour (left edge) to the body's colour (right edge)
+     so each edge matches the panel it meets — no visible border on either side. */
+  background:var(--iw-dark) -7px -7px/14px 14px round repeat,linear-gradient(90deg,#362b5a,#1d1847);
+  border-color:transparent
 }
 html:not(.dark) .pass-stub::after{
   background:var(--iw-light) -7px -7px/14px 14px round repeat,#f0ebfb
 }
 @media(max-width:1240px){
   html.dark .pass-stub::after{
-    background:var(--iw-dark) -7px -7px/14px 14px round repeat
+    background:var(--iw-dark) -7px -7px/14px 14px round repeat,linear-gradient(180deg,#362b5a,#1d1847);   /* horizontal seam here → fade top(stub)→bottom(body) */
+    border-color:transparent
   }
   html:not(.dark) .pass-stub::after{
     background:var(--iw-light) -7px -7px/14px 14px round repeat,#f0ebfb
