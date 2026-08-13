@@ -4246,7 +4246,17 @@ var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","tasks","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,k==="routines"); }); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
+function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,k==="routines"); });
+  /* Task ORDER is tracked separately from content freshness. `tasksOrderAt` is bumped
+     ONLY by real reorders/adds, never by a plain content edit or a load-time save — so a
+     reorder on one device survives an unrelated edit (or a stale newer-updatedAt blob) on
+     another. Whoever reordered most recently owns the order; each task's CONTENT still
+     merges per-id by its own `updated`. Legacy data (no tasksOrderAt) keeps the old
+     newer-blob behaviour until the first reorder writes the field. */
+  var _lto=+local.tasksOrderAt||0, _cto=+cloud.tasksOrderAt||0;
+  var _tsrc=(_lto||_cto)?((_lto>=_cto)?local:cloud):_newer;
+  base.tasks=_mergeArr(_tsrc.tasks,(_tsrc===local?cloud:local).tasks,tomb,false);
+  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
@@ -5991,13 +6001,17 @@ function financeSlots(){
   /* The meta line is a date in Travel's slots, so it is a date here too — the
      snapshot the figure came from. "Updated 42m ago" used to sit here and it
      was both longer than the box and a second copy of the card's own footer. */
+  /* Is the headline a freshly-priced live figure? If so the meta/change must describe
+     THAT number, not the last saved snapshot — otherwise a live 1.30M shows "+0.2% since
+     Jul" describing a stale value. */
+  var _liveNet=(typeof _nwLive!=="undefined"&&_nwLive!=null&&(Date.now()-_nwLiveAt)<600000)?_nwLive:null;
   var _fd="";
   try{ if(financeSeries&&financeSeries.length) _fd=fmtShort(financeSeries[financeSeries.length-1].d)||""; }catch(e){}
   /* The figure is money and was printing bare — 1,284,930 of nothing. bigHtml
      carries the mark as markup because appSlotHtml escapes `big`, and a glyph
      that has to survive esc() is a glyph that will arrive as literal <span>. */
   if(financeStat) out.push({bigHtml:appCurHtml()+esc(financeStat),big:financeStat,
-                            nm:"Net worth",meta:_fd||"Latest figure"});
+                            nm:"Net worth",meta:_liveNet!=null?"Live now":(_fd||"Latest figure")});
   /* ORDER IS LOAD-BEARING. Below 1400px the strip drops to two slots, so slot
      three is not "less important", it is INVISIBLE on every phone and every
      iPad in portrait. Zakat was third and therefore never showed on a phone,
@@ -6007,13 +6021,16 @@ function financeSlots(){
   if(zakatDue!=null&&isFinite(zakatDue))
     out.push({big:zakatDue<=0?"Due now":("In "+zakatDue+" day"+(zakatDue===1?"":"s")),
               nm:"Zakat due",meta:"Next hawl"});
-  /* change vs the previous snapshot — same array the sparkline reads */
+  /* change vs the previous snapshot — but if the headline is live, measure the live
+     value against the most recent snapshot so the % matches the number shown above */
   try{
-    if(financeSeries&&financeSeries.length>=2){
-      var last=financeSeries[financeSeries.length-1],prev=financeSeries[financeSeries.length-2];
+    if(financeSeries&&financeSeries.length>=(_liveNet!=null?1:2)){
+      var last=financeSeries[financeSeries.length-1];
+      var curV=_liveNet!=null?_liveNet:last.v;
+      var prev=_liveNet!=null?last:financeSeries[financeSeries.length-2];
       if(prev&&prev.v){
-        var pc=((last.v-prev.v)/Math.abs(prev.v))*100;
-        if(isFinite(pc)) out.push({big:(pc>=0?"+":"−")+Math.abs(pc).toFixed(1)+"%",
+        var pc=((curV-prev.v)/Math.abs(prev.v))*100;
+        if(isFinite(pc)&&Math.abs(pc)>=0.05) out.push({big:(pc>=0?"+":"−")+Math.abs(pc).toFixed(1)+"%",
           nm:"Since "+(prev.l||fmtShort(prev.d)||"last"),meta:"Net worth change"});
       }
     }
@@ -6158,7 +6175,7 @@ function renderOvTasks(){
   el.innerHTML=items.length?items.map(function(x){var over=x.due<t;var chk=x.sub?("ovToggleSub(\'"+x.id+"\',\'"+x.sid+"\')"):("toggleTask(\'"+x.id+"\')");var opn=x.sub?("openSubFromLib(\'"+x.id+"\',\'"+x.sid+"\')"):("openTask(\'"+x.id+"\')");return '<div class="mini-item"><div class="chk" onclick="event.stopPropagation();'+chk+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></div><div style="flex:1;min-width:0;cursor:pointer" onclick="'+opn+'"><div style="font-weight:600">'+esc(x.t)+(x.sub?' <span class="badge b-doing" style="font-size:.58rem;padding:1px 6px;vertical-align:middle">Subtask</span>':'')+'</div>'+(over?'<div class="kdue over" style="font-size:.72rem">Overdue &middot; '+esc(fmtShort(x.due))+'</div>':'')+'</div><span class="pdot p-'+x.priority+'"></span></div>';}).join(""):'<div class="muted" style="padding:8px 0;font-size:.86rem">Nothing due today &mdash; you are clear.</div>';
 }
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
-function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});i.value="";save();render();toast("Task added");}
+function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});_bumpTaskOrder();i.value="";save();render();toast("Task added");}
 function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));/* moved: #dailySummary is not in the markup, so nothing here ever rendered */if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
@@ -6172,7 +6189,7 @@ function _calLo(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(ca
   var d=new Date(c.getFullYear(), c.getMonth(), 1); d.setDate(d.getDate()-7); return isoLocal(d); }
 function _calHi(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(calCursor):new Date();
   var d=new Date(c.getFullYear(), c.getMonth()+1, 0); d.setDate(d.getDate()+7); return isoLocal(d); }
-function calItemsByDate(){var map={};function add(date,label,kind,time,sk,id,link,full){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||"",full:full||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task",prettyTime(x.time),x.time||"");});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due)add(sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"");});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _calLo(), _calHi()).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
+function calItemsByDate(loArg,hiArg){var map={};var _rlo=loArg||_calLo(),_rhi=hiArg||_calHi();function add(date,label,kind,time,sk,id,link,full){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||"",full:full||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task",prettyTime(x.time),x.time||"");});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due)add(sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"");});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _rlo, _rhi).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
 function evClass(k){ return "ev-"+kindKey(k==="sub"?"subtask":k); }
 function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
@@ -6207,7 +6224,7 @@ function renderCapModes(){ var el=document.getElementById("capModes"); if(!el) r
 function setCapMode(m){ capMode=m; renderCapModes(); }
 function capture(){ var el=document.getElementById("capInput"); var v=el.value.trim(); if(!v) return; var mode=capMode;
   if(mode==="note") data.notes.unshift({id:uid(),body:v,ts:Date.now(),updated:Date.now()});
-  else data.tasks.push({id:uid(),ws:wsDefault(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now(),updated:Date.now()});
+  else { data.tasks.push({id:uid(),ws:wsDefault(),t:v,due:"",priority:"med",project:"",status:"backlog",done:false,created:Date.now(),updated:Date.now()}); _bumpTaskOrder(); }
   el.value=""; save(); render(); toast(mode==="note"?"Note saved":"Task added");
 }
 /* ---- Tasks: multi-view (board / cards / list / table) ---- */
@@ -6258,7 +6275,7 @@ function taskCalDay(iso){
 var gcalCursor=new Date();
 function gcalNav(d){ gcalCursor=(d===0)?new Date():new Date(gcalCursor.getFullYear(),gcalCursor.getMonth()+d,1); renderFullCalendar(); }
 function gcalDay(iso){
-  var map=calItemsByDate(); var items=(map[iso]||[]).slice();
+  var map=calItemsByDate(iso,iso); var items=(map[iso]||[]).slice();   /* window covers the day being opened, so routines show even off the dashboard month */
   var d=new Date(iso+"T00:00:00");
   var h='<h4 class="marc" style="margin:0 0 12px">'+esc(d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h4>';
   h+=items.length? items.map(function(it){ var c=kindColor(it.kind);
@@ -6275,8 +6292,12 @@ function gcalDay(iso){
 var GCAL_LEG=[["task","Tasks"],["event","Events"],["routine","Routines"],["trip","Travel"],["subtask","Subtasks"],["zakat","Zakat"]];
 function renderFullCalendar(){
   var host=document.getElementById("gcalWrap"); if(!host) return;
-  var map=calItemsByDate(); var today=isoLocal(new Date());
   var y=gcalCursor.getFullYear(), m=gcalCursor.getMonth();
+  /* routine occurrences are generated within a window, so it must track THIS calendar's
+     month (gcalCursor), not the dashboard mini-calendar's cursor */
+  var _glo=new Date(y,m,1); _glo.setDate(_glo.getDate()-7);
+  var _ghi=new Date(y,m+1,0); _ghi.setDate(_ghi.getDate()+7);
+  var map=calItemsByDate(isoLocal(_glo),isoLocal(_ghi)); var today=isoLocal(new Date());
   var startDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), prevDim=new Date(y,m,0).getDate();
   var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   function chip(it){ var c=kindColor(it.kind);
@@ -6499,7 +6520,7 @@ var _tdId=null,_tdNew=null,_tdReady=false,_tdT=null,_tdPresetDue=null;
 function openTask(id,presetStatus){ _tdSub=null; _tdUpdOpen=false;   /* Task Updates start collapsed (latest only) each time a task opens */
   var t=id?(data.tasks||[]).find(function(x){return x.id===id;}):null; var isNew=!t;
   _tdNew=null;
-  if(isNew){ t={id:uid(),ws:wsDefault(),t:"",desc:"",status:presetStatus||defaultStatusId(),priority:"med",start:"",due:(_tdPresetDue||""),time:"",tags:[],assignee:(data.profile&&data.profile.name)||"",subs:[],comments:[],project:"",created:Date.now(),updated:Date.now()}; _tdPresetDue=null; data.tasks=data.tasks||[]; data.tasks.push(t); _tdNew=t.id; save(); }
+  if(isNew){ t={id:uid(),ws:wsDefault(),t:"",desc:"",status:presetStatus||defaultStatusId(),priority:"med",start:"",due:(_tdPresetDue||""),time:"",tags:[],assignee:(data.profile&&data.profile.name)||"",subs:[],comments:[],project:"",created:Date.now(),updated:Date.now()}; _tdPresetDue=null; data.tasks=data.tasks||[]; data.tasks.push(t); _bumpTaskOrder(); _tdNew=t.id; save(); }
   _tdId=t.id; _tdReady=false;
   function sel(v,o){ return o.map(function(x){return '<option value="'+x[0]+'" '+(v===x[0]?"selected":"")+'>'+x[1]+'</option>';}).join(""); }
   var ICs='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>';
@@ -6944,7 +6965,7 @@ function taskAct(a){
     copy.comments=[];   /* a copy shouldn't inherit the conversation or the files */
     copy.atts=[];
     var i=(data.tasks||[]).indexOf(t);
-    data.tasks.splice(i<0?data.tasks.length:i+1, 0, copy);
+    data.tasks.splice(i<0?data.tasks.length:i+1, 0, copy); _bumpTaskOrder();
     save(); render(); toast("Task duplicated");
   }
 }
@@ -7111,7 +7132,8 @@ var _fxLast=null;
 document.addEventListener("click",function(e){ _fxLast=e.target; },true);
 function celebrateHere(){ celebrate(_fxLast); }
 
-function _moveTaskFront(id){ var arr=data.tasks||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i>0){ arr.unshift(arr.splice(i,1)[0]); } }
+function _bumpTaskOrder(){ try{ data.tasksOrderAt=Date.now(); }catch(e){} }   /* marks the task ARRAY ORDER as freshly changed — merges use this (not content edits) to decide whose order wins across devices */
+function _moveTaskFront(id){ var arr=data.tasks||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i>0){ arr.unshift(arr.splice(i,1)[0]); } _bumpTaskOrder(); }
 /* ---- Task change log (append-only, shown in the task's activity) ---- */
 function _taskLog(t,text,kind){ if(!t) return; t.comments=t.comments||[]; t.comments.push({id:uid(),text:text,ts:Date.now(),author:(data.profile&&data.profile.name)||"You",system:true,kind:kind||"log"}); }
 function _logStatusChange(t,oldId,newId){ if(!t||oldId===newId) return; var doneId=completedStatusId(t.ws);
@@ -7148,11 +7170,11 @@ function saveTask(id){
   var _wsSel=document.getElementById("tdWs"); var f={ws:(_wsSel?_wsSel.value:wsDefault()),t:title,desc:document.getElementById("tdDesc").value.trim(),status:document.getElementById("tdStatus").value,priority:document.getElementById("tdPrio").value,start:document.getElementById("tdStart").value,due:document.getElementById("tdDue").value,time:tm?tm.value:"",assignee:document.getElementById("tdAssignee").value.trim(),tags:document.getElementById("tdTags").value.split(",").map(function(x){return x.trim();}).filter(Boolean),subs:subs};
   f.done=(f.status===completedStatusId(f.ws));
   if(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ _nestedDiff("#"+id+"/s", t.subs, subs, _subKey); Object.assign(t,f); t.updated=Date.now(); } }
-  else { data.tasks.push(Object.assign({id:uid(),project:"",created:Date.now(),updated:Date.now()},f)); }
+  else { data.tasks.push(Object.assign({id:uid(),project:"",created:Date.now(),updated:Date.now()},f)); _bumpTaskOrder(); }
   save(); closeModal(); render(); toast(id?"Task updated":"Task created");
 }
 function toggleTask(id){ var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(t){ var dn=completedStatusId(t.ws); if(t.done||t.status===dn){ t.status=reopenStatusId(t.ws); t.done=false; _taskLog(t,"Reopened","reopen"); notifUndismiss("task:"+t.id); } else { t.status=dn; t.done=true; _moveTaskFront(id); _taskLog(t,"Completed","done"); celebrateHere(); } t.updated=Date.now(); save(); render(); } }
-function delTask(id){ var arr=data.tasks||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i<0) return; var it=arr[i]; tombstone({id:id}); arr.splice(i,1); save(); render(); undoToast("Task deleted", function(){ data.deleted=data.deleted||{}; data.deleted["#"+id]=-Date.now(); data.tasks=data.tasks||[]; data.tasks.splice(Math.min(i,data.tasks.length),0,it); save(); render(); }); }
+function delTask(id){ var arr=data.tasks||[]; var i=arr.findIndex(function(x){return x.id===id;}); if(i<0) return; var it=arr[i]; tombstone({id:id}); arr.splice(i,1); save(); render(); undoToast("Task deleted", function(){ data.deleted=data.deleted||{}; data.deleted["#"+id]=-Date.now(); data.tasks=data.tasks||[]; data.tasks.splice(Math.min(i,data.tasks.length),0,it); _bumpTaskOrder(); save(); render(); }); }
 
 /* ---- Notes ---- */
 var notesShowArchived=false;
@@ -8155,9 +8177,11 @@ async function loadFinance(){
     if(net==null && Array.isArray(d.snapshots)&&d.snapshots.length){ const s=[...d.snapshots].sort((a,b)=>String(a.date).localeCompare(String(b.date))).pop(); net=s&&(s.net??s.value); }
     if(net==null && Array.isArray(d.accounts)){ net=d.accounts.reduce((s,a)=>s+(+a.balance||0),0); }
     if(net!=null) financeStat=Number(net).toLocaleString("en-US",{maximumFractionDigits:0});
-    /* prefer a freshly-priced value if the hub computed one in the last 10 min,
-       so the 30s reload doesn't flick back to the saved (stale) number */
-    if(_nwLive!=null && (Date.now()-_nwLiveAt)<600000) financeStat=Number(_nwLive).toLocaleString("en-US",{maximumFractionDigits:0});
+    /* prefer a freshly-priced value if the hub computed one in the last 10 min, so the
+       30s reload doesn't flick back to the saved (stale) number — and keep the "updated"
+       time pointing at that live recompute instead of the last cloud save, or the footer
+       would say "3 days ago" next to a live figure */
+    if(_nwLive!=null && (Date.now()-_nwLiveAt)<600000){ financeStat=Number(_nwLive).toLocaleString("en-US",{maximumFractionDigits:0}); financeUpdated=new Date(_nwLiveAt).toISOString(); }
     if(Array.isArray(d.zaka)&&d.zaka.length){ var last=d.zaka.map(function(z){return z.dateG;}).filter(Boolean).sort().pop(); if(last){ var nx=new Date(last); nx.setDate(nx.getDate()+354); zakatDue=Math.ceil((nx-new Date())/86400000); } }
     renderAppCards("appCards"); renderAppCards("appCardsFull"); try{ renderToday(); renderWelcomeSummary(); renderCalendar(); }catch(e){}
     try{ refreshNetWorthLive(d); }catch(e){}   /* fetch live gold/stock prices and recompute net worth right here in the hub */
@@ -8974,15 +8998,26 @@ function moveTask(dragId,beforeId,status){
   var arr=data.tasks||[]; var di=-1,i;
   for(i=0;i<arr.length;i++){ if(arr[i].id===dragId){ di=i; break; } }
   if(di<0) return; var t=arr[di]; var _oldSt=t.status; arr.splice(di,1);
+  var _statusChanged=false;
   if(status!=null){
     var resolved=wsResolveStatus(t,status);
     if(resolved==null){ arr.splice(di,0,t); toast("“"+statusName(status)+"” doesn't exist in "+(wsOf(t)?wsOf(t).name:"that workspace")); return; }
-    t.status=resolved; t.done=(resolved===completedStatusId(t.ws)); try{ _logStatusChange(t,_oldSt,resolved); }catch(e){}
-    if(!t.done) notifUndismiss("task:"+t.id);   /* dragged out of Done */
+    if(resolved!==_oldSt){   /* only a real column change is a CONTENT change; a same-column drag is order-only */
+      t.status=resolved; t.done=(resolved===completedStatusId(t.ws)); try{ _logStatusChange(t,_oldSt,resolved); }catch(e){}
+      if(!t.done) notifUndismiss("task:"+t.id);   /* dragged out of Done */
+      _statusChanged=true;
+    }
   }
   var bi=-1; if(beforeId){ for(i=0;i<arr.length;i++){ if(arr[i].id===beforeId){ bi=i; break; } } }
   if(bi<0) arr.push(t); else arr.splice(bi,0,t);
-  t.updated=Date.now();
+  /* a pure reorder must NOT bump t.updated — otherwise it wins the per-id content merge
+     (clobbering another device's edit) and can even revive a task another device deleted
+     (its bumped timestamp beats the tombstone). Order freshness is tracked by tasksOrderAt. */
+  if(_statusChanged) t.updated=Date.now();
+  _bumpTaskOrder();
+  /* if the task landed in a section that's collapsed in the list view, expand it so the
+     moved task stays visible instead of silently vanishing under a collapsed header */
+  try{ var _lc=data.settings.collapsedListCols; if(_lc){ var _li=_lc.indexOf(t.status); if(_li>=0) _lc.splice(_li,1); } }catch(e){}
   var ss=document.getElementById("taskSort"); if(ss) ss.value="manual";
   save(); render();
 }
