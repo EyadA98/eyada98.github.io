@@ -299,7 +299,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
    RESPONSIVE: Mobile <768 · Tablet 768–1024 · Laptop · >1440
    ============================================================ */
 @media(min-width:1441px){
-  main{max-width:1660px}   /* the 44px gutter is now :root{--gutter} so the topbar gets it too */
+  main{max-width:2400px}   /* fill wide monitors from the left instead of stranding empty space on the right */
   .cards{grid-template-columns:repeat(4,1fr)}
   .chart-card{min-height:392px}
   .chart-card canvas{max-height:348px}
@@ -1822,7 +1822,7 @@ async function fetchJSON(url){
 function liveable(h){ return !!h.symbol || (h.assetType==="Precious Metals" && /gold|silver|ذهب|فضة/i.test(h.name)); }
 var _lastAutoPrice = 0;   /* any real price run (startup/manual/auto) stamps this, so the background auto-refresh throttle can't double-fetch right after a startup fetch */
 async function refreshPrices(manual, quiet){
-  if(priceLoading) return;                       // guard against double-taps
+  if(priceLoading){ if(manual) toast("Already updating…"); return; }   // guard against double-taps; give manual clicks feedback instead of a silent no-op
   _lastAutoPrice = Date.now();                    // a fetch is committing — reset the auto-refresh window off the actual run, not a no-op call
   const btn = document.getElementById("refreshBtn");
   if(btn){ if(!btn.dataset.label) btn.dataset.label = btn.innerHTML;
@@ -1865,7 +1865,9 @@ async function refreshPrices(manual, quiet){
   if(manual || (fail.length && !quiet)){   /* background auto-refreshes stay silent — no repeated "couldn't fetch" toasts every few minutes */
     toast(ok.length
       ? "Live prices updated: "+ok.join(", ")+(fail.length? " · couldn't reach: "+fail.join(", "):"")
-      : "Couldn't fetch live prices — using saved values. Tap a price cell to edit manually.");
+      : fail.length
+        ? "Couldn't fetch live prices — using saved values. Tap a price cell to edit manually."
+        : "No live-priced holdings to update.");
   }
 }
 
@@ -3039,7 +3041,7 @@ async function initAuth(){
     updateAcctBtn();
     try{ const c = localStorage.getItem(KEY+":"+user.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
     pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
-  } else { authUI("in"); refreshPrices(false); }
+  } else { authUI("in"); }   /* don't fetch prices behind the sign-in screen — goTab()->autoRefreshPrices already primed the cached board, and a fetch here only risked an error toast over the login card */
 }
 
 /* ---------- Render ---------- */
