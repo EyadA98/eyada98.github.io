@@ -1820,8 +1820,10 @@ async function fetchJSON(url){
   throw lastErr || new Error("all routes failed");
 }
 function liveable(h){ return !!h.symbol || (h.assetType==="Precious Metals" && /gold|silver|ذهب|فضة/i.test(h.name)); }
-async function refreshPrices(manual){
+var _lastAutoPrice = 0;   /* any real price run (startup/manual/auto) stamps this, so the background auto-refresh throttle can't double-fetch right after a startup fetch */
+async function refreshPrices(manual, quiet){
   if(priceLoading) return;                       // guard against double-taps
+  _lastAutoPrice = Date.now();                    // a fetch is committing — reset the auto-refresh window off the actual run, not a no-op call
   const btn = document.getElementById("refreshBtn");
   if(btn){ if(!btn.dataset.label) btn.dataset.label = btn.innerHTML;
            btn.disabled = true; btn.innerHTML = '<span class="spin" style="display:inline-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg></span>Updating…'; }
@@ -1860,7 +1862,7 @@ async function refreshPrices(manual){
   if(ok.length) data.lastPriceUpdate = new Date().toISOString();
   save(true); render();
   setTimeout(()=>{ flashSet.clear(); }, 1800);
-  if(manual || fail.length){
+  if(manual || (fail.length && !quiet)){   /* background auto-refreshes stay silent — no repeated "couldn't fetch" toasts every few minutes */
     toast(ok.length
       ? "Live prices updated: "+ok.join(", ")+(fail.length? " · couldn't reach: "+fail.join(", "):"")
       : "Couldn't fetch live prices — using saved values. Tap a price cell to edit manually.");
@@ -3285,12 +3287,11 @@ window.addEventListener("scroll", ()=>{
    (goTab), whenever the board regains focus, and on a periodic timer while open.
    Throttled so the 90s window can't be hammered. refreshPrices() already guards
    against overlapping runs and falls back to saved prices if a quote fails. */
-let _lastAutoPrice = 0;
 function autoRefreshPrices(){
   if(typeof refreshPrices!=="function") return;
-  if(Date.now() - _lastAutoPrice < 90000) return;   // at most once / 90s
-  _lastAutoPrice = Date.now();
-  try{ refreshPrices(false); }catch(e){}
+  var ar=document.getElementById("authRoot"); if(ar && ar.childNodes.length) return;   /* don't fetch behind the sign-in screen */
+  if(Date.now() - _lastAutoPrice < 90000) return;   // at most once / 90s (stamp is set by refreshPrices itself)
+  try{ refreshPrices(false, true); }catch(e){}       // quiet: no error toast on background refreshes
 }
 document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") autoRefreshPrices(); });
 window.addEventListener("focus", autoRefreshPrices);
