@@ -108,7 +108,7 @@ html:not(.dark) .topbar{background:rgba(247,245,252,.92);border-bottom:1px solid
 .tb-left{display:flex;align-items:center;gap:14px;min-width:0}
 .topbar h2{font-size:1.22rem;font-weight:800}.topbar .crumb{font-size:.74rem;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .top-actions{display:flex;gap:8px;align-items:center}
-main{padding:clamp(14px,2.4vw,32px) var(--gutter) 80px;max-width:1320px}
+main{padding:clamp(14px,2.4vw,32px) var(--gutter) 80px;max-width:2400px}
 .tab{display:none}.tab.active{display:block;animation:fadeUp .42s var(--ease)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .td-donebtn{background:var(--grad-iri)!important;background-clip:padding-box!important;color:#fff!important;border:none!important;box-shadow:var(--glow-lav)!important;border-radius:99px!important;overflow:hidden}
@@ -642,7 +642,7 @@ html:not(.dark) .tl2{background:#fff}
 .tl2-sec-tog:hover{opacity:1}
 .tl2-sec.collapsed .tl2-sec-tog{transform:rotate(-90deg)}
 /* Global calendar tab */
-.gcal-wrap{max-width:1180px}
+.gcal-wrap{max-width:none}
 .gcal-legend{display:flex;flex-wrap:wrap;gap:8px 16px;padding:12px 16px;border-top:1px solid color-mix(in srgb,var(--muted) 26%,transparent);background:color-mix(in srgb,var(--lavender) 5%,var(--card))}
 .gcal-leg{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;color:var(--muted)}
 .gcal-leg-dot{width:9px;height:9px;border-radius:50%;flex:none}
@@ -1254,7 +1254,7 @@ html:not(.dark) .b-doing,html:not(.dark) .ev-event,html:not(.dark) .is-sync,html
 .b-arch{background:rgba(106,95,134,.2);color:var(--muted)}
 /* status board -> horizontal scroll for many columns */
 .kanban{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
-.kanban .kcol{min-width:330px;max-width:380px;flex:0 0 auto}
+.kanban .kcol{min-width:330px;max-width:520px;flex:1 1 340px}   /* grow to fill the board width when there are few columns; still scroll horizontally when many */
 .kcol-add{flex:0 0 auto;align-self:stretch;min-width:54px;min-height:120px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:18px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s var(--ease)}
 .kcol-add:hover{border-color:var(--lavender);color:var(--lavender);background:rgba(129,126,255,.07)}
 html:not(.dark) .kcol-add{background:rgba(255,255,255,.4)}
@@ -4258,7 +4258,7 @@ function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return c
   var _lto=+local.tasksOrderAt||0, _cto=+cloud.tasksOrderAt||0;
   var _tsrc=(_lto||_cto)?((_lto>=_cto)?local:cloud):_newer;
   base.tasks=_mergeArr(_tsrc.tasks,(_tsrc===local?cloud:local).tasks,tomb,false);
-  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","dismissed","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
+  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
@@ -4602,16 +4602,16 @@ function rtOccurrences(r, loISO, hiISO){
     if(ty==="daily"){ d.setDate(d.getDate()+dir); return d; }
     if(ty==="interval"){
       if(u==="weeks") d.setDate(d.getDate()+dir*7*n);
-      else if(u==="months") d.setMonth(d.getMonth()+dir*n);
-      else if(u==="years") d.setFullYear(d.getFullYear()+dir*n);
+      else if(u==="months"){ var _md=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+dir*n); d.setDate(Math.min(_md,daysInMonth(d.getFullYear(),d.getMonth()))); }
+      else if(u==="years"){ var _yd=d.getDate(); d.setDate(1); d.setFullYear(d.getFullYear()+dir*n); d.setDate(Math.min(_yd,daysInMonth(d.getFullYear(),d.getMonth()))); }
       else d.setDate(d.getDate()+dir*n);
       return d; }
     if(ty==="weekly"){
       var dd=days||[d.getDay()];
       for(var k=1;k<=7;k++){ var c=new Date(d); c.setDate(c.getDate()+dir*k); if(dd.indexOf(c.getDay())>-1) return c; }
       return null; }
-    if(ty==="monthly"){ d.setMonth(d.getMonth()+dir); return d; }
-    if(ty==="yearly"){ d.setFullYear(d.getFullYear()+dir); return d; }
+    if(ty==="monthly"){ var _mmd=+rc.monthDay||d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+dir); d.setDate(Math.min(_mmd,daysInMonth(d.getFullYear(),d.getMonth()))); return d; }
+    if(ty==="yearly"){ var _yyd=+rc.yearDay||d.getDate(); d.setDate(1); d.setFullYear(d.getFullYear()+dir); d.setDate(Math.min(_yyd,daysInMonth(d.getFullYear(),d.getMonth()))); return d; }
     return null;
   }
   var base=new Date(first+"T00:00:00"); if(isNaN(base)) return out;
@@ -4836,7 +4836,7 @@ function rtNext(r){
   var base=new Date(baseStr+"T00:00:00"); if(isNaN(base)) base=new Date(today); base.setHours(0,0,0,0);
   if(!r.lastCompleted&&r.due) return r.due;
   if(ty==="daily"){ base.setDate(base.getDate()+1); return isoLocal(base); }
-  if(ty==="interval"){ var n=+rc.n||1, u=rc.unit||"days"; if(u==="days")base.setDate(base.getDate()+n); else if(u==="weeks")base.setDate(base.getDate()+7*n); else if(u==="months")base.setMonth(base.getMonth()+n); else if(u==="years")base.setFullYear(base.getFullYear()+n); else base.setDate(base.getDate()+n); return isoLocal(base); }
+  if(ty==="interval"){ var n=+rc.n||1, u=rc.unit||"days"; if(u==="days")base.setDate(base.getDate()+n); else if(u==="weeks")base.setDate(base.getDate()+7*n); else if(u==="months"){ var _bd=base.getDate(); base.setDate(1); base.setMonth(base.getMonth()+n); base.setDate(Math.min(_bd,daysInMonth(base.getFullYear(),base.getMonth()))); } else if(u==="years"){ var _by=base.getDate(); base.setDate(1); base.setFullYear(base.getFullYear()+n); base.setDate(Math.min(_by,daysInMonth(base.getFullYear(),base.getMonth()))); } else base.setDate(base.getDate()+n); return isoLocal(base); }   /* clamp month/year steps so a day-29-31 base doesn't overflow into the next month and skip a period */
   if(ty==="weekly"){ var days=(rc.days&&rc.days.length)?rc.days.slice():[base.getDay()]; var ref=r.lastCompleted?base:today; var startI=r.lastCompleted?1:0; for(var i=startI;i<=7;i++){ var nd=new Date(ref); nd.setDate(ref.getDate()+i); if(days.indexOf(nd.getDay())>=0) return isoLocal(nd); } var x=new Date(ref); x.setDate(x.getDate()+7); return isoLocal(x); }
   if(ty==="monthly"){ var md=+rc.monthDay||1; var ref2=r.lastCompleted?base:today; var cand; if(r.lastCompleted){ cand=new Date(ref2.getFullYear(),ref2.getMonth()+1,1); } else { cand=new Date(ref2.getFullYear(),ref2.getMonth(),1); } cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); if(!r.lastCompleted&&cand<today){ cand=new Date(today.getFullYear(),today.getMonth()+1,1); cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); } return isoLocal(cand); }
   if(ty==="yearly"){ var ym=(rc.yearMonth!=null?rc.yearMonth:0), yd=+rc.yearDay||1; var ref3=r.lastCompleted?base:today; var c; if(r.lastCompleted){ c=new Date(ref3.getFullYear()+1,ym,1); } else { c=new Date(today.getFullYear(),ym,1); } c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); if(!r.lastCompleted&&c<today){ c=new Date(today.getFullYear()+1,ym,1); c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); } return isoLocal(c); }
@@ -5336,7 +5336,7 @@ function notifMarkAllRead(){ var ns=notifStore(); notifActive().forEach(function
 function notifPin(id){ var ns=notifStore(); if(ns.pinned[id])delete ns.pinned[id]; else ns.pinned[id]=1; save(); renderNotifs(); }
 /* A dismissal must not outlive the thing it dismissed. Reopen a task and its reminder
    is live again — every path that un-completes something calls this. */
-function notifUndismiss(id){ try{ var ns=notifStore(); if(ns.dismissed[id]){ delete ns.dismissed[id]; return true; } }catch(_){} return false; }
+function notifUndismiss(id){ try{ var ns=notifStore(); var d=ns.dismissed[id]; if(d && !(typeof d==="object" && d.un)){ ns.dismissed[id]={ts:Date.now(),un:1}; return true; } }catch(_){} return false; }   /* write a timestamped un-dismiss TOMBSTONE, not a delete — a plain delete can't survive the sync union and a stale cloud dismissal re-hides the reminder */
 
 /* One-time repair. notifComplete() used to write a PERMANENT dismissal, so anything ever
    completed from the Notifications page is still buried in saved data — re-opened tasks,
@@ -5359,6 +5359,7 @@ function notifRepair(){
    the flag lapse the moment that thing changes. */
 function notifDismissed(n){
   var d=notifStore().dismissed[n.id]; if(!d) return false;
+  if(typeof d==="object" && d.un) return false;   /* un-dismiss tombstone — the reminder is live */
   if(typeof d==="object" && d.due!==undefined) return d.due===(n.due||"");
   return true;   /* legacy numeric flag — notifRepair() clears these once */
 }
@@ -5430,7 +5431,7 @@ function digestData(){
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(nx) push({kind:"routine",title:r.title||"Routine",date:nx,time:(r.time||""),recur:rtRecurLabel(r)}); });
   /* travel. travelItems() is the same extractor the calendar and Upcoming use,
      so the digest cannot disagree with what the rest of the Hub shows. */
-  try{ travelItems().forEach(function(x){ push({kind:"trip",title:x.label,date:x.date,time:x.time||""}); }); }catch(e){}
+  try{ travelItems().forEach(function(x){ if(x.date>=t) push({kind:"trip",title:x.label,date:x.date,time:x.time||""}); }); }catch(e){}   /* only upcoming milestones — a trip you're already on must not land in "Overdue" as "N days late" */
   function srt(a,b){ return (a.date||"").localeCompare(b.date||"")||((a.time||"zz").localeCompare(b.time||"zz")); }
   today.sort(srt); week.sort(srt); overdue.sort(srt);
   function cnt(a,k){ return a.filter(function(x){return x.kind===k;}).length; }
@@ -5962,7 +5963,21 @@ function syncDashHeights(){
   list.style.setProperty("max-height",cap+"px","important");
   gmUpdateFade();
 }
-var _sdhT; window.addEventListener("resize",function(){ clearTimeout(_sdhT); _sdhT=setTimeout(syncDashHeights,150); });
+var _sdhT;
+function _relayout(){ try{ syncDashHeights(); }catch(e){} try{ scheduleMasonry(); }catch(e){} }
+/* measure AFTER the browser has reflowed the new viewport (two frames), otherwise a
+   resize fired mid-reflow reads stale heights and the calendar/mail cards misalign. */
+function _relayoutSoon(){ clearTimeout(_sdhT); _sdhT=setTimeout(function(){ requestAnimationFrame(function(){ requestAnimationFrame(_relayout); }); },150); }
+window.addEventListener("resize",_relayoutSoon);
+/* Dragging the window to another monitor can change devicePixelRatio WITHOUT firing a
+   resize (same CSS size, different OS scaling), which left widget heights measured for
+   the old screen until some later re-render happened to correct them. Re-run layout the
+   instant the pixel ratio changes, then re-arm the watcher for the next change. */
+function _watchDPR(){ try{ matchMedia("(resolution:"+(window.devicePixelRatio||1)+"dppx)").addEventListener("change",function(){ _relayoutSoon(); _watchDPR(); },{once:true}); }catch(e){} }
+_watchDPR();
+/* also self-heal when the window regains visibility after being moved around */
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) _relayoutSoon(); });
+window.addEventListener("pageshow",_relayoutSoon);
 function appDef(){
   return [
     {key:"finance",nm:"Finance Board",tile:"tile-lav",url:data.settings.financeUrl,desc:"Net worth, budget, portfolio & zakat",
@@ -6599,7 +6614,7 @@ function tdCommit(){
   if(_tdSub){ try{ sdCommit(); }catch(e){} return; }
   var id=_tdId; if(!id) return; var t=(data.tasks||[]).find(function(x){return x.id===id;}); if(!t) return;
   var te=document.getElementById("tdTitle"); if(!te) return;
-  var subs=[]; var _pv=(t.subs||[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; var _a=r.getAttribute("data-asg"); if(_a)_sd.assignee=_a; var _u=r.getAttribute("data-due"); if(_u)_sd.due=_u; var _d=r.getAttribute("data-desc"); if(_d)_sd.desc=_d; subs.push(_sd); });
+  var subs=[]; var _pv=(t.subs||[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; _sd.assignee=r.getAttribute("data-asg")||""; _sd.due=r.getAttribute("data-due")||""; _sd.desc=r.getAttribute("data-desc")||"";   /* assign unconditionally so CLEARING an assignee/due/desc actually persists (the row always mirrors the current value) */ subs.push(_sd); });
   var tm=document.getElementById("tdTime"), st=document.getElementById("tdStatus"), pr=document.getElementById("tdPrio"), de=document.getElementById("tdDesc"), ag=document.getElementById("tdAssignee"), tg=document.getElementById("tdTags"), sd=document.getElementById("tdStart"), du=document.getElementById("tdDue");
   var _wsel=document.getElementById("tdWs"); var f={t:te.value.trim(),ws:(_wsel&&_wsel.value)?_wsel.value:t.ws,desc:de?de.value.trim():t.desc,status:st?st.value:t.status,priority:pr?pr.value:t.priority,start:sd?sd.value:t.start,due:du?du.value:t.due,time:tm?tm.value:t.time,assignee:ag?ag.value.trim():t.assignee,tags:tg?tg.value.split(",").map(function(x){return x.trim();}).filter(Boolean):t.tags,subs:subs};
   f.done=(f.status===completedStatusId(f.ws));
@@ -7193,7 +7208,7 @@ function completeTask(id){ var t=(data.tasks||[]).find(function(x){return x.id==
   t.status=doneId; t.done=true; t.updated=Date.now(); _moveTaskFront(id); _taskLog(t,"Completed","done"); try{ celebrateHere(); }catch(e){} save(); closeModal(); render(); toast("Task completed"); }
 function saveTask(id){
   var title=document.getElementById("tdTitle").value.trim(); if(!title){ toast("Title is required"); return; }
-  var subs=[]; var _pv=(id?(((data.tasks||[]).find(function(x){return x.id===id;})||{}).subs||[]):[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; var _a=r.getAttribute("data-asg"); if(_a)_sd.assignee=_a; var _u=r.getAttribute("data-due"); if(_u)_sd.due=_u; var _d=r.getAttribute("data-desc"); if(_d)_sd.desc=_d; subs.push(_sd); });
+  var subs=[]; var _pv=(id?(((data.tasks||[]).find(function(x){return x.id===id;})||{}).subs||[]):[]); document.querySelectorAll("#tdSubs .sub-row").forEach(function(r){ var inp=r.querySelector(".sub-in"); var v=inp?inp.value.trim():""; if(!v) return; var _id=r.getAttribute("data-sid")||""; var _b=_id?_pv.find(function(x){return x&&x.id===_id;}):null; var _sd=_b?Object.assign({},_b):{}; _sd.t=v; _sd.done=r.querySelector(".sub-chk").classList.contains("done"); if(_id)_sd.id=_id; _sd.assignee=r.getAttribute("data-asg")||""; _sd.due=r.getAttribute("data-due")||""; _sd.desc=r.getAttribute("data-desc")||"";   /* assign unconditionally so CLEARING an assignee/due/desc actually persists (the row always mirrors the current value) */ subs.push(_sd); });
   var tm=document.getElementById("tdTime");
   var _wsSel=document.getElementById("tdWs"); var f={ws:(_wsSel?_wsSel.value:wsDefault()),t:title,desc:document.getElementById("tdDesc").value.trim(),status:document.getElementById("tdStatus").value,priority:document.getElementById("tdPrio").value,start:document.getElementById("tdStart").value,due:document.getElementById("tdDue").value,time:tm?tm.value:"",assignee:document.getElementById("tdAssignee").value.trim(),tags:document.getElementById("tdTags").value.split(",").map(function(x){return x.trim();}).filter(Boolean),subs:subs};
   f.done=(f.status===completedStatusId(f.ws));
@@ -7577,7 +7592,7 @@ function travelStat(){ var d=data.settings.nextTripDate; if(!d) return ""; var d
 
 /* ---- Goals & habits ---- */
 function fmtNum(x){ return Number(x||0).toLocaleString("en-US",{maximumFractionDigits:2}); }
-function goalCur(g){ if(g.linkNet){ var nx=parseFloat(String(financeStat).replace(/[^0-9.]/g,"")); return isNaN(nx)?0:nx; } return +g.current||0; }
+function goalCur(g){ if(g.linkNet){ var nx=parseFloat(String(financeStat).replace(/[^0-9.-]/g,"")); return isNaN(nx)?0:nx; } return +g.current||0; }
 function ring(pct){ var r=26,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(1,pct))); return '<svg width="68" height="68" viewBox="0 0 68 68"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#817eff"/><stop offset="100%" stop-color="#ffb3ab"/></linearGradient></defs><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="rgba(129,126,255,.18)" stroke-width="7"/><circle cx="34" cy="34" r="'+r+'" fill="none" stroke="url(#gr)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 34 34)"/></svg>'; }
 function renderGoals(){
   var el=document.getElementById("goalsList"); if(!el) return;
