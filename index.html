@@ -6307,10 +6307,10 @@ function taskCalCell(iso,n){ /* phone: dots view — tap a day with events opens
   taskCalAdd(iso);
 }
 function taskCalDay(iso){
-  var items=(taskList()||[]).filter(function(t){return t.due===iso;}).sort(function(a,b){ return (a.time||"zz").localeCompare(b.time||"zz"); });
+  var items=(taskList()||[]).filter(function(t){ if(!t.due) return false; if(t.due===iso) return true; var st=(t.start&&t.start<t.due)?t.start:t.due; return st<=iso&&iso<t.due; }).sort(function(a,b){ return ((a.due===iso?0:1)-(b.due===iso?0:1))||(a.time||"zz").localeCompare(b.time||"zz"); });
   var d=new Date(iso+"T00:00:00");
   var h='<h4 class="marc" style="margin:0 0 12px">'+esc(d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h4>';
-  h+=items.map(function(t){ var k=priKey(t.priority); var done=_taskDone(t); return '<div class="tc5-dayrow'+(done?" done":"")+'" onclick="closeModal();openTask(\''+t.id+'\')"><span class="tc5-dot" style="background:'+PRI[k].c+'"></span><span class="tc5-dayt">'+esc(t.t||"Untitled")+'</span>'+(t.time?'<span class="muted" style="font-size:.78rem;font-weight:700">'+esc(prettyTime(t.time))+'</span>':'')+'</div>'; }).join("");
+  h+=items.map(function(t){ var k=priKey(t.priority); var done=_taskDone(t); var _later=(t.due!==iso); return '<div class="tc5-dayrow'+(done?" done":"")+'" onclick="closeModal();openTask(\''+t.id+'\')"><span class="tc5-dot" style="background:'+PRI[k].c+(_later?';opacity:.5':'')+'"></span><span class="tc5-dayt"'+(_later?' style="opacity:.7"':'')+'>'+esc(t.t||"Untitled")+(_later?'<span class="muted" style="font-weight:600;font-size:.74rem"> · due '+esc(fmtShort(t.due))+'</span>':'')+'</span>'+(!_later&&t.time?'<span class="muted" style="font-size:.78rem;font-weight:700">'+esc(prettyTime(t.time))+'</span>':'')+'</div>'; }).join("");
   h+='<div class="row" style="margin-top:14px;display:flex;gap:9px"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn" onclick="closeModal();taskCalAdd(\''+iso+'\')">+ Add task</button></div>';
   showModal(h);
 }
@@ -6377,19 +6377,31 @@ function renderFullCalendar(){
 }
 function renderTaskCalendar(host){
   var arr=taskList(); var today=isoLocal(new Date());
-  var byDate={}; arr.forEach(function(t){ if(t.due){ (byDate[t.due]=byDate[t.due]||[]).push(t); } });
   var y=taskCalCursor.getFullYear(), m=taskCalCursor.getMonth();
   var startDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), prevDim=new Date(y,m,0).getDate();
+  /* visible 6-week grid window, so a ranged task only generates keys for the days actually shown */
+  var _glo=new Date(y,m,1); _glo.setDate(_glo.getDate()-startDow);
+  var _cells=startDow+dim+((7-((startDow+dim)%7))%7); var _ghi=new Date(_glo); _ghi.setDate(_ghi.getDate()+_cells-1);
+  var gloISO=isoLocal(_glo), ghiISO=isoLocal(_ghi);
+  var byDate={}; arr.forEach(function(t){
+    if(!t.due) return;
+    var st=(t.start&&t.start<t.due)?t.start:t.due;
+    if(st===t.due){ (byDate[t.due]=byDate[t.due]||[]).push({t:t,cont:0}); return; }
+    /* ranged task spans start..due: the DUE day is the solid anchor, the run-up days show faded "due later" */
+    var lo=(st<gloISO)?gloISO:st, hi=(t.due>ghiISO)?ghiISO:t.due;
+    var d=new Date(lo+"T00:00:00"), end=new Date(hi+"T00:00:00"), g=0;
+    while(d<=end && g++<420){ var iso=isoLocal(d); (byDate[iso]=byDate[iso]||[]).push({t:t, cont:(iso===t.due?0:3)}); d.setDate(d.getDate()+1); }
+  });
   var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  function evChip(t){ var k=priKey(t.priority); var done=_taskDone(t); var over=t.due<today&&!done;
-    return '<button type="button" class="tc5-ev'+(done?' done':'')+(over?' over':'')+'" style="--pc:'+PRI[k].c+';--pb:'+PRI[k].bg+'" title="'+esc(t.t||"Untitled")+(t.time?' · '+esc(prettyTime(t.time)):'')+'" onclick="event.stopPropagation();openTask(\''+t.id+'\')">'+(t.time?'<span class="tc5-t">'+esc(prettyTime(t.time))+'</span>':'')+'<span class="tc5-et">'+esc(t.t||"Untitled")+'</span></button>';
+  function evChip(e){ var t=e.t, k=priKey(t.priority), done=_taskDone(t); var over=!e.cont&&t.due<today&&!done; var _ct=e.cont?' · due later':'';
+    return '<button type="button" class="tc5-ev'+(done?' done':'')+(over?' over':'')+(e.cont?' cont':'')+'" style="--pc:'+PRI[k].c+';--pb:'+PRI[k].bg+'" title="'+esc(t.t||"Untitled")+_ct+(t.time?' · '+esc(prettyTime(t.time)):'')+'" onclick="event.stopPropagation();openTask(\''+t.id+'\')">'+(!e.cont&&t.time?'<span class="tc5-t">'+esc(prettyTime(t.time))+'</span>':'')+'<span class="tc5-et">'+esc(t.t||"Untitled")+'</span></button>';
   }
   function cell(dt,out){
     var iso=isoLocal(dt), dow=dt.getDay(); var isToday=iso===today;
-    var items=(byDate[iso]||[]).slice().sort(function(a,b){ return (a.time||"zz").localeCompare(b.time||"zz"); });
+    var items=(byDate[iso]||[]).slice().sort(function(a,b){ return (a.t.time||"zz").localeCompare(b.t.time||"zz"); });
     var chips=items.slice(0,3).map(evChip).join("");
     var more=items.length>3?'<button type="button" class="tc5-more" onclick="event.stopPropagation();taskCalDay(\''+iso+'\')">+'+(items.length-3)+' more</button>':'';
-    var dots=items.length?'<div class="tc5-dots">'+items.slice(0,4).map(function(t){ var k=priKey(t.priority); return '<span class="tc5-dot2'+(_taskDone(t)?' done':'')+'" style="background:'+PRI[k].c+'"></span>'; }).join("")+(items.length>4?'<span class="tc5-dotmore">+'+(items.length-4)+'</span>':'')+'</div>':'';
+    var dots=items.length?'<div class="tc5-dots">'+items.slice(0,4).map(function(e){ var t=e.t, k=priKey(t.priority); return '<span class="tc5-dot2'+(_taskDone(t)?' done':'')+'" style="background:'+PRI[k].c+'"></span>'; }).join("")+(items.length>4?'<span class="tc5-dotmore">+'+(items.length-4)+'</span>':'')+'</div>':'';
     return '<div class="tc5-cell'+(out?' out':'')+(isToday?' today':'')+((dow===0||dow===6)?' wknd':'')+(items.length?' has-ev':'')+'" onclick="taskCalCell(\''+iso+'\','+items.length+')" title="'+(items.length?'View this day':'Add a task on this day')+'"><span class="tc5-num">'+dt.getDate()+'</span><div class="tc5-evs">'+chips+more+'</div>'+dots+'</div>';
   }
   var monthLbl=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
