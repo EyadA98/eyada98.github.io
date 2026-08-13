@@ -266,7 +266,7 @@ html.dark .tv-avmenu .tv-danger{color:#f2596f}
   @media(max-width:1100px){ :root{ --gutter:26px } }
   @media(max-width:820px){  :root{ --gutter:16px } }
   @media(max-width:600px){  :root{ --gutter:14px } }
-  .tv-main{padding:clamp(14px,2.4vw,32px) var(--gutter) 80px;max-width:1320px;min-width:0}
+  .tv-main{padding:clamp(14px,2.4vw,32px) var(--gutter) 80px;max-width:2400px;min-width:0}   /* fill wide monitors from the left, widening to the right */
   @media(max-width:1024px){ .tv-main{padding-bottom:110px} }
   .app-bg-dark{background:radial-gradient(1200px 600px at 12% -10%,rgba(129,126,255,.22),transparent 55%),radial-gradient(1000px 700px at 112% 8%,rgba(255,179,171,.13),transparent 50%),linear-gradient(180deg,#0c0820 0%,#120c30 50%,#0c0820 100%);}
   .app-bg-light{background:radial-gradient(680px 460px at 8% -10%,rgba(129,126,255,.26),transparent 64%),radial-gradient(600px 440px at 92% 6%,rgba(255,179,171,.22),transparent 64%),radial-gradient(760px 560px at 50% 114%,rgba(98,63,148,.18),transparent 70%),linear-gradient(180deg,#faf8ff,#f3eefc);}
@@ -5094,6 +5094,20 @@ window.addEventListener("storage",function(e){
   if(e.key==="tp_trips_v1" || e.key==="tp_current_v1"){ try{ location.reload(); }catch(_){}
   }
 });
+</script>
+<script>
+/* Wide-monitor robustness: dragging the window to a screen with different OS scaling
+   changes devicePixelRatio WITHOUT firing a resize, so the rail connector line and the
+   globe (both resize-driven) stayed measured for the old screen until the next redraw.
+   Re-fire layout on ratio change and when the window regains visibility. Framework-agnostic
+   — it just re-dispatches the resize event the app already listens to, after reflow. */
+(function(){
+  function kick(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} }); }); }
+  function watch(){ try{ matchMedia("(resolution:"+(window.devicePixelRatio||1)+"dppx)").addEventListener("change",function(){ kick(); watch(); },{once:true}); }catch(e){} }
+  watch();
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) kick(); });
+  window.addEventListener("pageshow",kick);
+})();
 </script>
 </body>
 </html>
