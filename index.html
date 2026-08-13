@@ -1046,6 +1046,7 @@ html:not(.dark) .lib-btn{background:rgba(129,126,255,.06)}
 .cal-cell{min-height:88px;display:flex;flex-direction:column}
 .cal-evs{margin-top:5px;display:flex;flex-direction:column;gap:3px;min-width:0}
 .cal-ev{font-size:.63rem;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.cal-ev.cont{opacity:.58}
 /* ===== Tasks · Calendar view (colored month row) ===== */
 .tc5-card{position:relative;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--card);box-shadow:var(--sh-1)}
 .tc5-band{position:relative;display:flex;align-items:center;gap:14px;padding:9px 16px;overflow:hidden;
@@ -1080,6 +1081,7 @@ html.dark .tc5-dow.wknd{color:var(--peach)}
 .tc5-ev .tc5-t{font-weight:800;opacity:.85;flex:none;font-size:.67rem}
 .tc5-ev .tc5-et{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .tc5-ev.done{opacity:.5}
+.tc5-ev.cont{opacity:.62;border-left-style:dashed;font-weight:600}
 .tc5-ev.done .tc5-et{text-decoration:line-through}
 .tc5-ev.over{box-shadow:inset 0 0 0 1px color-mix(in srgb,#f2596f 60%,transparent)}
 /* light mode: the priority hues are tuned for dark bg (light text on dark). On the
@@ -4150,7 +4152,7 @@ const SUPABASE_URL = "https://vulzuubswllmeypxwznq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bHp1dWJzd2xsbWV5cHh3em5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyOTY2MjYsImV4cCI6MjA5Nzg3MjYyNn0.Lmrf-2I-jFaof--__snquTrpa-992y7S1hBhowQtvFY";
 const supaReady = /^https:\/\//.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20 && !!window.supabase;
 const supa = supaReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-const TEST_MODE = false;   /* LIVE — real hub.v1 store, cloud pull + push enabled */
+const TEST_MODE = false;   /* LIVE */
 const KEY = TEST_MODE ? "hubTEST.v1" : "hub.v1";
 const GUEST_FLAG = TEST_MODE ? "hubTEST.guest" : "hub.guest";
 let user = null;
@@ -4673,7 +4675,12 @@ function renderTimeline(){
   }
   var laneBars={};
   items.forEach(function(it){
-    var left=tlDayIdx(it.s,start)*dw; var span=tlDayIdx(it.e,it.s)+1; var w=Math.max(span*dw-6,150);
+    var left=tlDayIdx(it.s,start)*dw; var span=tlDayIdx(it.e,it.s)+1;
+    /* multi-day bars must end at their real last day — a 150px floor here would push a
+       short span (e.g. a 3-day event at 38px/day = 108px) a full day past its end,
+       so an Aug 6->8 event looks like it reaches the 9th. Only single-day point items
+       keep the readable floor; multi-day bars use their true span width (label truncates). */
+    var w=(span>1)?Math.max(span*dw-6,34):Math.max(dw-6,150);
     var active=(it.s<=today && today<=it.e);
     var multi=tlDayIdx(it.e,it.s)>0; var range=fmtShort(isoLocal(it.s))+(multi?(' \u2192 '+fmtShort(isoLocal(it.e))):'');
     var ln=laneFor(left,w);
@@ -5396,16 +5403,29 @@ function digestData(){
      builder feeds the preview and the test email; if the two drift, the preview lies. */
   var _WS={}; (data.workspaces||[]).forEach(function(w){ if(w&&w.id) _WS[w.id]={name:w.name||"",color:w.color||"#817eff"}; });
   function _wsOf(id){ return (id&&_WS[id]&&_WS[id].name)?_WS[id]:null; }
+  /* A ranged task (start..due) that is already under way lands in TODAY as "in progress" —
+     the deadline stays in the label; it is NOT also listed under This week. Anchor is the due date. */
+  function pushTask(kind,title,startRaw,due,time,wsn,wsc){
+    var it={kind:kind,title:title,time:time||"",ws:wsn||"",wsColor:wsc||"",due:due};
+    var st=(startRaw&&startRaw<due)?startRaw:due;
+    if(due<t){ it.date=due; overdue.push(it); }
+    else if(st<=t&&t<due){ it.date=t; it.ongoing=true; today.push(it); }
+    else { it.date=due; push(it); }
+  }
   (data.tasks||[]).forEach(function(x){
     var _w=_wsOf(x.ws);
-    if(x.status!=="done"&&!x.done&&x.due) push({kind:"task",title:x.t||"(task)",date:x.due,time:x.time||"",ws:_w?_w.name:"",wsColor:_w?_w.color:""});
-    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) push({kind:"sub",title:sb.t||"Subtask",date:sb.due,time:sb.time||"",ws:_w?_w.name:"",wsColor:_w?_w.color:""}); });
+    if(x.status!=="done"&&!x.done&&x.due) pushTask("task",x.t||"(task)",x.start,x.due,x.time,_w?_w.name:"",_w?_w.color:"");
+    (x.subs||[]).forEach(function(sb){ if(!sb.done&&sb.due) pushTask("sub",sb.t||"Subtask",sb.start,sb.due,sb.time,_w?_w.name:"",_w?_w.color:""); });
   });
   (Array.isArray(calEvents)?calEvents:[]).forEach(function(e){
     var w=(e.start&&(e.start.dateTime||e.start.date))||""; if(!w) return;
-    var dt=e.start&&e.start.dateTime, ed=w.slice(0,10);
-    if(ed<t) return; /* a past event isn't overdue — it already happened */
-    push({kind:"event",title:e.summary||"(event)",date:ed,time:dt?w.slice(11,16):""});
+    var wend=(e.end&&(e.end.dateTime||e.end.date))||w;
+    var dt=e.start&&e.start.dateTime, sISO=w.slice(0,10), eISO=wend.slice(0,10);
+    if(e.end&&e.end.date&&eISO>sISO){ var _d=new Date(eISO+"T00:00:00"); _d.setDate(_d.getDate()-1); eISO=isoLocal(_d); } /* all-day end is exclusive */
+    if(eISO<t) return; /* fully past — it already happened */
+    var it={kind:"event",title:e.summary||"(event)",time:dt?w.slice(11,16):""};
+    if(sISO<=t&&t<=eISO){ it.date=t; if(sISO<t) it.ongoing=true; today.push(it); }  /* covers today (ongoing if it began earlier) */
+    else { it.date=sISO; push(it); }   /* starts later this week */
   });
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(nx) push({kind:"routine",title:r.title||"Routine",date:nx,time:(r.time||""),recur:rtRecurLabel(r)}); });
   /* travel. travelItems() is the same extractor the calendar and Upcoming use,
@@ -5454,7 +5474,7 @@ function buildDigest(){
   var PILL={ task:["TASK","rgba(129,126,255,.18)",PUR2], sub:["SUB","rgba(179,169,255,.36)","#4a38b5"], event:["EVENT","rgba(90,162,234,.16)","#1f5fc2"], routine:["ROUTINE","rgba(30,145,95,.16)","#16704a"], trip:["TRAVEL","rgba(198,106,43,.18)","#a1531f"] };
   function whenLbl(it,mode){
     if(mode==="over"){ var a=new Date(d.t+"T00:00:00"), b=new Date(it.date+"T00:00:00"); var n=Math.round((a-b)/86400000); return n<=1?"1 day late":(n+" days late"); }
-    if(mode==="today"){ if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
+    if(mode==="today"){ if(it.ongoing){ if(it.kind==="event") return "Ongoing"; var _od=new Date((it.due||it.date)+"T00:00:00"); return "In progress · due "+_od.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}); } if(it.kind==="routine") return it.recur||"Today"; if(it.time) return prettyTime(it.time); if(it.kind==="event") return "All day"; return "Due today"; }
     var dd=new Date(it.date+"T00:00:00");
     return dd.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+(it.time?(", "+prettyTime(it.time)):"");
   }
@@ -6183,15 +6203,23 @@ function renderDailySummary(){var el=document.getElementById("dailySummary");if(
 var calView="month",calCursor=new Date(),calSel=null;
 function setCalView(v){calView=v;var m=document.getElementById("calV-month"),a=document.getElementById("calV-agenda");if(m)m.classList.toggle("on",v==="month");if(a)a.classList.toggle("on",v==="agenda");renderCalendar();}
 function calStep(d){if(calView==="month"){calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth()+d,1);}else{calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth(),calCursor.getDate()+d*7);}renderCalendar();}
+function _contTxt(c){return c===2?'ends':c===3?'due later':c?'continues':'';}
 function evTime(e){var dt=e&&e.start&&e.start.dateTime;if(!dt)return"";var d=new Date(dt);return prettyTime(String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"));}
 function meetLink(e){if(!e)return"";if(e.hangoutLink)return e.hangoutLink;var cd=e.conferenceData;if(cd&&cd.entryPoints){for(var i=0;i<cd.entryPoints.length;i++){var ep=cd.entryPoints[i];if(ep&&ep.entryPointType==="video"&&ep.uri)return ep.uri;}}return"";}
 function _calLo(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(calCursor):new Date();
   var d=new Date(c.getFullYear(), c.getMonth(), 1); d.setDate(d.getDate()-7); return isoLocal(d); }
 function _calHi(){ var c=(typeof calCursor!=="undefined"&&calCursor)?new Date(calCursor):new Date();
   var d=new Date(c.getFullYear(), c.getMonth()+1, 0); d.setDate(d.getDate()+7); return isoLocal(d); }
-function calItemsByDate(loArg,hiArg){var map={};var _rlo=loArg||_calLo(),_rhi=hiArg||_calHi();function add(date,label,kind,time,sk,id,link,full){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||"",full:full||""});}(data.tasks||[]).forEach(function(x){if(x.due)add(x.due,x.t,"task",prettyTime(x.time),x.time||"");});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due)add(sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"");});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;add(w.slice(0,10),e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _rlo, _rhi).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
+function calItemsByDate(loArg,hiArg){var map={};var _rlo=loArg||_calLo(),_rhi=hiArg||_calHi();function add(date,label,kind,time,sk,id,link,full,cont){if(!date)return;(map[date]=map[date]||[]).push({label:label,kind:kind,time:time||"",sk:sk||"zz",id:id||"",link:link||"",full:full||"",cont:cont||0});}
+/* multi-day items land on EVERY day they cover, not just the start: cont 0=start/single, 1=middle, 2=last day.
+   Clamped to the visible window [_rlo,_rhi] so a long span never generates hundreds of off-screen entries. */
+function addSpan(sISO,eISO,label,kind,time,sk,id,link,full,anchor){if(!sISO)return;if(!eISO||eISO<=sISO){add(sISO,label,kind,time,sk,id,link,full,0);return;}anchor=anchor||sISO;var endAnc=(anchor===eISO);var lo=(_rlo&&sISO<_rlo)?_rlo:sISO,hi=(_rhi&&eISO>_rhi)?_rhi:eISO;var d=new Date(lo+"T00:00:00"),ed=new Date(hi+"T00:00:00"),g=0;while(d<=ed&&g++<420){var iso=isoLocal(d);var cont=(iso===anchor)?0:(endAnc?3:((iso===eISO)?2:1));add(iso,label,kind,(iso===anchor?time:""),sk,id,link,full,cont);d.setDate(d.getDate()+1);}}
+/* Tasks/subtasks with a start..due range span every day too, but the DUE day is the solid anchor
+   (that's the deadline, and where the time belongs); the lead-up days show a faded "due later" chip. */
+(data.tasks||[]).forEach(function(x){if(x.due){var st=(x.start&&x.start<x.due)?x.start:x.due;addSpan(st,x.due,x.t,"task",prettyTime(x.time),x.time||"","","","",x.due);}});
+(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due){var st=(sb.start&&sb.start<sb.due)?sb.start:sb.due;addSpan(st,sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"","","","",sb.due);}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var we=(e.end&&(e.end.dateTime||e.end.date))||w;var dt=e.start&&e.start.dateTime;var sISO=w.slice(0,10),eISO=we.slice(0,10);/* all-day events store an EXCLUSIVE end date, so the real last day is one earlier */if(e.end&&e.end.date&&eISO>sISO){var _ed=new Date(eISO+"T00:00:00");_ed.setDate(_ed.getDate()-1);eISO=isoLocal(_ed);}addSpan(sISO,eISO,e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _rlo, _rhi).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
 function evClass(k){ return "ev-"+kindKey(k==="sub"?"subtask":k); }
-function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
+function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+(it.cont?' cont':'')+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+(it.cont?' ('+_contTxt(it.cont)+')':'')+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
 function renderCalendar(){var card=document.getElementById("calCard");if(!card)return;card.style.display=(data.settings.showCalendar!==false)?"":"none";var cc=document.getElementById("calConnect");if(cc)cc.style.display=(data.settings.gcalId&&calEvents===null)?"":"none";var body=document.getElementById("calBody"),title=document.getElementById("calTitle");if(!body||!title)return;var map=calItemsByDate(),today=isoLocal(new Date());if(calView==="agenda"){title.textContent="Next 30 days";var rows=[];for(var i=0;i<30;i++){var dd=new Date();dd.setDate(dd.getDate()+i);var iso=isoLocal(dd);if(map[iso])rows.push({iso:iso,items:map[iso]});}body.innerHTML=rows.length?rows.map(function(r){return '<div class="ag-day">'+esc(fmtFull(r.iso))+'</div>'+r.items.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join("");}).join(""):'<div class="muted" style="padding:14px 0">No events in the next 30 days.</div>';try{requestAnimationFrame(syncDashHeights);}catch(e){}return;}var y=calCursor.getFullYear(),m=calCursor.getMonth();title.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});var startDow=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),prevDim=new Date(y,m,0).getDate();var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var html='<div class="cal-grid">'+dows.map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join("");for(var k=startDow-1;k>=0;k--){html+=calCell(new Date(y,m-1,prevDim-k),map,today,true);}for(var dn=1;dn<=dim;dn++){html+=calCell(new Date(y,m,dn),map,today,false);}var trail=(7-((startDow+dim)%7))%7;for(var tr=1;tr<=trail;tr++){html+=calCell(new Date(y,m+1,tr),map,today,true);}html+='</div>';var selISO=calSel||today;var sit=map[selISO]||[];html+='<div style="margin-top:16px"><div class="ag-day">'+esc(fmtFull(selISO))+'</div>'+(sit.length?sit.map(function(it){return '<div class="mini-item"'+(it.id?' style="cursor:pointer" onclick="openEventEdit(\''+it.id+'\')" title="Edit event"':'')+'>'+kindBadge(it.kind)+'<div style="flex:1;min-width:0">'+esc(it.label)+'</div><span class="agenda-time" style="min-width:78px;margin-left:8px;text-align:right">'+(it.time?esc(it.time):'')+'</span>'+(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'<span class="cal-meet-empty"></span>')+'</div>';}).join(""):'<div class="muted" style="font-size:.85rem;padding:6px 0">No events this day.</div>')+'</div>';body.innerHTML=html;try{requestAnimationFrame(syncDashHeights);}catch(e){}}
 function computeNudges(){
@@ -6281,7 +6309,7 @@ function gcalDay(iso){
   h+=items.length? items.map(function(it){ var c=kindColor(it.kind);
       return '<div class="gcal-dayrow"'+(it.id?' style="cursor:pointer" onclick="closeModal();openEventEdit(\''+esc(it.id)+'\')" title="Edit event"':'')+'>'
         +'<span class="tc5-dot" style="background:'+c+'"></span>'
-        +'<span class="gcal-dayt">'+esc(it.label)+'</span>'+kindBadge(it.kind)
+        +'<span class="gcal-dayt">'+esc(it.label)+(it.cont?'<span class="muted" style="font-weight:600;font-size:.74rem"> · '+_contTxt(it.cont)+'</span>':'')+'</span>'+kindBadge(it.kind)
         +(it.time?'<span class="muted" style="font-size:.76rem;font-weight:700;margin-left:auto;white-space:nowrap">'+esc(it.time)+'</span>':'')
         +(it.link?'<a class="cal-meet" href="'+esc(it.link)+'" target="_blank" rel="noopener" title="Join Google Meet" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 10l5-3v10l-5-3v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></a>':'')
         +'</div>';
@@ -6300,8 +6328,8 @@ function renderFullCalendar(){
   var map=calItemsByDate(isoLocal(_glo),isoLocal(_ghi)); var today=isoLocal(new Date());
   var startDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), prevDim=new Date(y,m,0).getDate();
   var dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  function chip(it){ var c=kindColor(it.kind);
-    return '<button type="button" class="tc5-ev" style="--pc:'+c+';--pb:color-mix(in srgb,'+c+' 22%,transparent)" title="'+esc(it.label)+(it.time?' · '+esc(it.time):'')+'" onclick="event.stopPropagation();gcalDay(\''+it._iso+'\')">'+(it.time?'<span class="tc5-t">'+esc(it.time)+'</span>':'')+'<span class="tc5-et">'+esc(it.label)+'</span></button>';
+  function chip(it){ var c=kindColor(it.kind); var _ct=it.cont?' · '+_contTxt(it.cont):'';
+    return '<button type="button" class="tc5-ev'+(it.cont?' cont':'')+'" style="--pc:'+c+';--pb:color-mix(in srgb,'+c+' 22%,transparent)" title="'+esc(it.label)+_ct+(it.time?' · '+esc(it.time):'')+'" onclick="event.stopPropagation();gcalDay(\''+it._iso+'\')">'+(it.time?'<span class="tc5-t">'+esc(it.time)+'</span>':'')+'<span class="tc5-et">'+esc(it.label)+'</span></button>';
   }
   function cell(dt,out){
     var iso=isoLocal(dt), dow=dt.getDay(); var isToday=iso===today;
