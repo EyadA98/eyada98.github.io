@@ -10232,8 +10232,12 @@ renderAll();
 if(location.hash && PAGES[location.hash.slice(1)]) { _navInit(); }
 else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
 setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
-setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); } },30000);
+setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); if(!document.querySelector(".overlay")){ try{ pullHub(); }catch(e){} } } },30000);   /* the Hub now polls too (tasks/notes/routines), skipped while a modal is open so a periodic pull can't disrupt an active edit */
 setInterval(function(){ try{ updateNotifBadge(); }catch(e){} },60000);
+/* Mobile browsers usually restore the app from the back-forward cache when you return to it,
+   which fires `pageshow` (persisted) but often NOT `visibilitychange` — so the Hub never re-pulled.
+   Pull on a cache-restore wake too, so tasks are fresh the moment you reopen on another device. */
+window.addEventListener("pageshow",function(e){ if(e&&e.persisted&&user&&supa&&!document.querySelector(".overlay")){ try{ pullHub(); }catch(_){} } });
 /* Topbar hides on scroll-down, returns on scroll-up (mobile) — same as the finance board,
    so the semi-transparent bar never sits over scrolling content. */
 (function(){ var _lastY=0; window.addEventListener("scroll",function(){
