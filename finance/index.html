@@ -3295,9 +3295,16 @@ function autoRefreshPrices(){
   if(Date.now() - _lastAutoPrice < 90000) return;   // at most once / 90s (stamp is set by refreshPrices itself)
   try{ refreshPrices(false, true); }catch(e){}       // quiet: no error toast on background refreshes
 }
-document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") autoRefreshPrices(); });
-window.addEventListener("focus", autoRefreshPrices);
-setInterval(function(){ if(document.visibilityState==="visible") autoRefreshPrices(); }, 180000);   // every 3 min while open
+/* On wake, refresh prices AND re-pull cloud board data — the wake used to refresh only prices,
+   so edits made on another device (accounts, budgets) stayed stale until a full reload. Skipped
+   while a modal is open so a background pull can't disrupt an active edit. */
+function _finWakePull(){ if(user && !document.querySelector(".overlay")){ try{ pullCloud(); }catch(e){} } }
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible"){ autoRefreshPrices(); _finWakePull(); } });
+window.addEventListener("focus", function(){ autoRefreshPrices(); _finWakePull(); });
+/* mobile returns from the back-forward cache with pageshow (persisted), often without visibilitychange */
+window.addEventListener("pageshow", function(e){ if(e&&e.persisted) _finWakePull(); });
+setInterval(function(){ if(document.visibilityState==="visible") autoRefreshPrices(); }, 180000);   // prices every 3 min (unchanged)
+setInterval(function(){ if(document.visibilityState==="visible") _finWakePull(); }, 60000);        // cloud board data every minute while open
 /* Finance Board v9 — Supabase accounts · per-user cloud data */
 </script>
 <script>(function(){var s=document.getElementById("splash");if(!s)return;function go(){setTimeout(function(){s.classList.add("hide");},650);setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},1400);}if(document.readyState==="complete")go();else window.addEventListener("load",go);})();</script>
