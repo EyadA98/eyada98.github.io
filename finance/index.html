@@ -1424,6 +1424,7 @@ html:not(.dark) #zakaCards .card::before{
     </div>
   </div>
 
+  <div class="insights" id="insights"></div>
 
   <div class="alloc-card">
     <h3>Wealth Allocation</h3>
@@ -1689,6 +1690,10 @@ function load(){
     // Signed-in users: load their OWN cached board first, so a refresh shows your
     // real numbers immediately instead of briefly flashing the sample/seed data.
     if(!localStorage.getItem("financeBoard.guest")){
+      /* Prefer the LAST signed-in account's cache (F7). Picking the newest-updatedAt cache across
+         every account that used this browser cold-flashes the wrong person's numbers when a shared
+         browser's other account was edited more recently, until pullCloud() corrects it. */
+      try{ var _lu=localStorage.getItem("financeBoard.lastUser"); if(_lu){ var _lc=localStorage.getItem(KEY+":"+_lu); if(_lc) return fill(migrate(JSON.parse(_lc))); } }catch(e){}
       let bestK=null, bestT="";
       for(let i=0;i<localStorage.length;i++){
         const k=localStorage.key(i);
@@ -1831,29 +1836,41 @@ async function refreshPrices(manual, quiet){
   const ok = [], fail = [];
   for(const h of holdings()){
     const m = data.meta[h.name] = data.meta[h.name] || {assetType:h.assetType, price:0};
+    const sym = m.symbol, priceCur = m.priceCur;
     try{
+      let raw = null;
       if(h.assetType==="Precious Metals" && /gold|silver|ذهب|فضة/i.test(h.name)){
-        const sym = /silver|فضة/i.test(h.name) ? "XAG" : "XAU";
-        const j = await fetchJSON("https://api.gold-api.com/price/"+sym);
+        const gsym = /silver|فضة/i.test(h.name) ? "XAG" : "XAU";
+        const j = await fetchJSON("https://api.gold-api.com/price/"+gsym);
         const usdOz = +(j && (j.price ?? j.Price));
         if(!isFinite(usdOz) || usdOz<=0) throw new Error("bad gold payload");
-        var _gp = usdOz * USD_SAR / OZ_GRAMS;     // USD/oz → SAR/gram (24k)
-        if(m.price>0 && (_gp>m.price*10 || _gp<m.price/10)) throw new Error("implausible gold move");
-        m.price = _gp; m.live = true; ok.push(h.name);
-      } else if(m.symbol){
-        const y = "https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(m.symbol)+"?interval=1d&range=1d";
+        raw = usdOz * USD_SAR / OZ_GRAMS;         // USD/oz → SAR/gram (24k)
+      } else if(sym){
+        const y = "https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(sym)+"?interval=1d&range=1d";
         const j = await fetchJSON(y);
         const meta = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
         let p = meta && (meta.regularMarketPrice ?? meta.previousClose);
         if(!isFinite(+p) || +p<=0) throw new Error("bad quote payload");
         p = +p;
-        if(!/\.SR$/i.test(m.symbol)) p *= (m.priceCur && FX_SAR[m.priceCur]!=null ? FX_SAR[m.priceCur] : USD_SAR); // FX→SAR (defaults USD)
-        if(m.price>0 && (p>m.price*10 || p<m.price/10)) throw new Error("implausible price move");
-        m.price = p; m.live = true; ok.push(h.name);
+        if(!/\.SR$/i.test(sym)) p *= (priceCur && FX_SAR[priceCur]!=null ? FX_SAR[priceCur] : USD_SAR); // FX→SAR (defaults USD)
+        raw = p;
+      }
+      if(raw!=null){
+        /* F3: a cloud pull can replace `data` (and thus data.meta) while we were awaiting the
+           fetch, orphaning the `m` captured above — re-read the live entry before writing. */
+        const mm = data.meta[h.name] = data.meta[h.name] || {assetType:h.assetType, price:0};
+        const base = +mm.price||0;
+        const implausible = base>0 && (raw>base*10 || raw<base/10);
+        /* F6: the 10× guard is meant to reject a single bad payload, not to lock a holding out of
+           live pricing forever. A genuine large move (or a stale manual placeholder) trips it every
+           time, so accept the fetched value once it has been rejected twice in a row. A holding with
+           no prior price (base===0, e.g. never live) is accepted immediately. */
+        if(implausible && (+mm._rej||0) < 2){ mm._rej=(+mm._rej||0)+1; throw new Error("implausible price move"); }
+        mm.price = raw; mm.live = true; mm._u = Date.now(); mm._rej = 0; ok.push(h.name);
       }
     }catch(e){
-      m.live = false;
-      if(liveable({...h, symbol:m.symbol})) fail.push(h.name);
+      const mm = data.meta[h.name]; if(mm) mm.live = false;
+      if(liveable({...h, symbol:sym})) fail.push(h.name);
     }
   }
   priceLoading = false;
@@ -2115,7 +2132,21 @@ function computeInsights(){
 }
 function renderInsights(){
   const el = document.getElementById("insights");
-  if(el) el.innerHTML = "";
+  if(!el) return;
+  /* F5: computeInsights() was fully built and styled but never rendered (this used to blank the
+     container). Wire it up — each card carries an icon, a message, an optional action, and a
+     dismiss button; the .insights:empty CSS rule collapses the row when there's nothing to show. */
+  let list = [];
+  try{ list = computeInsights() || []; }catch(e){ list = []; }
+  el.innerHTML = list.map(function(it){
+    var act = it.act ? '<div class="act"><button class="btn" onclick="'+it.act.fn+'">'+esc(it.act.label)+'</button></div>' : '';
+    return '<div class="insight tone-'+(it.tone||'info')+'">'
+      + '<div class="ico">'+(it.ico||'')+'</div>'
+      + '<div style="flex:1;min-width:0"><div>'+(it.html||'')+'</div>'+act+'</div>'
+      + '<button class="dismiss" aria-label="Dismiss insight" onclick="dismissInsight(\''+String(it.id).replace(/'/g,"\\'")+'\')">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;display:block"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+      + '</div>';
+  }).join("");
 }
 function dismissInsight(id){ (data.dismissed = data.dismissed||{})[id] = true; save(true); render(); }
 
@@ -2463,7 +2494,9 @@ function renderHoldings(){
 function updMeta(item,field,val){
   if(!data.meta[item]) data.meta[item]={assetType:"Stock",price:0};
   data.meta[item][field]=val;
-  if(field==="price") data.meta[item].live = false;
+  if(field==="price"){ data.meta[item].live = false; data.meta[item]._rej = 0; }
+  /* stamp a per-entry clock so a manual price/symbol edit merges by its own freshness (F2) */
+  data.meta[item]._u = Date.now();
   save(); render();
 }
 async function addWatch(){
@@ -2474,7 +2507,7 @@ function delWatch(i){ var v=data.watchlist[i]; if(v!=null){ data.deleted=data.de
 
 /* ---------- Purchases ---------- */
 function renderPurchases(){
-  document.querySelector("#purchTable tbody").innerHTML = data.purchases.map((p,i)=>`<tr>
+  document.querySelector("#purchTable tbody").innerHTML = data.purchases.map((p,i)=>`<tr${p.status==="Sold"?' data-nofoot="1"':''}>
     <td>${i+1}</td>
     <td><input value="${esc(p.item)}" onchange="upd('purchases',${i},'item',this.value)" aria-label="Item name"></td>
     <td class="num"><input type="number" step="any" value="${p.qty}" onchange="upd('purchases',${i},'qty',+this.value)" aria-label="Quantity"></td>
@@ -2843,7 +2876,10 @@ function mergeSnaps(primary, extra, tomb){ tomb=tomb||{};
     else if((s.ts&&(!ex.ts||s.ts>ex.ts)) || (!ex.ts&&Object.keys(s).length>Object.keys(ex).length)){ map[s.date]=s; } });
   return Object.keys(map).map(function(k){return map[k];}).sort(function(x,y){return String(x.date).localeCompare(String(y.date));});
 }
-function _mergeMap(a,b){ var o=Object.assign({}, a||{}); var src=b||{}; Object.keys(src).forEach(function(k){ o[k]=src[k]; }); return o; }
+/* Merge two meta maps PER ENTRY by each entry's own `_u` clock, not the whole-doc updatedAt — so a
+   fresh price fetched on one device isn't reverted by an unrelated newer save on the other (F2).
+   Called as _mergeMap(older.meta, newer.meta); legacy entries with no `_u` keep newer-wins. */
+function _mergeMap(older,newer){ older=older||{}; newer=newer||{}; var o={}, keys={}; Object.keys(older).forEach(function(k){keys[k]=1;}); Object.keys(newer).forEach(function(k){keys[k]=1;}); Object.keys(keys).forEach(function(k){ var a=older[k], b=newer[k]; if(a==null){o[k]=b;return;} if(b==null){o[k]=a;return;} var au=+(a&&a._u)||0, bu=+(b&&b._u)||0; o[k]=(bu>=au)?b:a; }); return o; }
 /* Item-level cross-device merge: each record is unioned by stable _id, deletions are
    tombstoned (data.deleted), edits win by _u timestamp. This fixes deletion resurrection
    and concurrent-edit loss. Watchlist (strings) and actuals (month keys) tombstone by value. */
@@ -3000,7 +3036,12 @@ function openAccount(){
       <button class="btn" onclick="closeModal()">Close</button>
     </div>`);
 }
-async function doSignOut(){ try{localStorage.removeItem("hub.authStart");}catch(e){} await supa.auth.signOut(); }
+async function doSignOut(){ try{localStorage.removeItem("hub.authStart");localStorage.removeItem("financeBoard.lastUser");}catch(e){} _finLastPulled=null; await supa.auth.signOut(); }
+/* F8: on load, onAuthStateChange's INITIAL_SESSION and getSession() can BOTH resolve for the same
+   restored session, firing two concurrent pullCloud()+refreshPrices() runs that race on data= and
+   double-write the cloud. Run the boot pull at most once per signed-in account id. */
+var _finLastPulled=null;
+function _finBootPull(uid){ if(!uid || _finLastPulled===uid) return; _finLastPulled=uid; try{ localStorage.setItem("financeBoard.lastUser",uid); }catch(e){} pullCloud().then(()=>refreshPrices(false)); }
 /* ---- Shared 4 h session timeout (coordinated with Hub via hub.authStart) ---- */
 var SESSION_MAX_MS=4*60*60*1000;
 function _touchAuth(){ try{ localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
@@ -3008,7 +3049,11 @@ function _sessionExpired(){ try{ var t=+localStorage.getItem("hub.authStart")||0
 async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await doSignOut(); } }
 setInterval(function(){ try{ _enforceSessionTimeout(); }catch(e){} },60000);
 var _authTouchT=0;
-["click","keydown","touchstart","mousedown"].forEach(function(ev){ try{ document.addEventListener(ev,function(){ if(!user) return; var n=Date.now(); if(n-_authTouchT>60000){ _authTouchT=n; _touchAuth(); } },{passive:true}); }catch(e){} });
+["click","keydown","touchstart","mousedown"].forEach(function(ev){ try{ document.addEventListener(ev,function(){ if(!user) return; /* enforce BEFORE refreshing the clock, or a returning interaction after a long idle resets the 4h timer and it never fires */ if(_sessionExpired()){ _enforceSessionTimeout(); return; } var n=Date.now(); if(n-_authTouchT>60000){ _authTouchT=n; _touchAuth(); } },{passive:true}); }catch(e){} });
+/* re-check on return: the 60s interval is throttled while hidden or during sleep */
+try{ document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"){ try{ _enforceSessionTimeout(); }catch(e){} } }); }catch(e){}
+try{ window.addEventListener("focus",function(){ try{ _enforceSessionTimeout(); }catch(e){} }); }catch(e){}
+try{ window.addEventListener("pageshow",function(){ try{ _enforceSessionTimeout(); }catch(e){} }); }catch(e){}
 
 async function initAuth(){
   updateAcctBtn();
@@ -3023,11 +3068,13 @@ async function initAuth(){
     if(signedIn){
       closeAuth();
       try{ const c = localStorage.getItem(KEY+":"+u.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
-      pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
+      _finBootPull(u.id);   // live prices last, so cloud data can't overwrite them (deduped — F8)
       toast("Welcome back");
     }
     if(signedOut){
       setSyncState("off");
+      _finLastPulled=null;
+      try{ localStorage.removeItem("financeBoard.lastUser"); }catch(e){}
       try{ const c = localStorage.getItem(KEY); data = c ? fill(migrate(JSON.parse(c))) : JSON.parse(JSON.stringify(DEFAULT_DATA)); }catch(e){}
       render();
       authUI("in");
@@ -3040,7 +3087,7 @@ async function initAuth(){
     _touchAuth();
     updateAcctBtn();
     try{ const c = localStorage.getItem(KEY+":"+user.id); if(c){ data = fill(migrate(JSON.parse(c))); render(); } }catch(e){}
-    pullCloud().then(()=>refreshPrices(false));   // live prices last, so cloud data can't overwrite them
+    _finBootPull(user.id);   // deduped against the onAuthStateChange path (F8)
   } else { authUI("in"); }   /* don't fetch prices behind the sign-in screen — goTab()->autoRefreshPrices already primed the cached board, and a fetch here only risked an error toast over the login card */
 }
 
@@ -3066,7 +3113,8 @@ function _yearOf(td){var m=_cellText(td).match(/(\d{4})/);return m?m[1]:"";}
 function _filtVal(f,td){return f.year?_yearOf(td):_cellText(td);}
 function recalcFooter(tbl,vis){
   var tf=tbl.tFoot;if(!tf)return;
-  function sumCol(ci){var s=0;vis.forEach(function(r){s+=_num(r.cells[ci]);});return s;}
+  /* Rows flagged data-nofoot (e.g. Sold purchase lots) stay visible/sortable but are left out of footer totals, so the generic sum matches the intended Owned-only total instead of double-sourcing against renderPurchases (F1). */
+  function sumCol(ci){var s=0;vis.forEach(function(r){if(r.getAttribute&&r.getAttribute("data-nofoot"))return;s+=_num(r.cells[ci]);});return s;}
   Array.prototype.forEach.call(tf.querySelectorAll("[data-foot]"),function(cell){
     var kind=cell.getAttribute("data-foot"),signed=cell.hasAttribute("data-signed"),val;
     if(kind==="ratio"){var nu=sumCol(+cell.getAttribute("data-num")),de=sumCol(+cell.getAttribute("data-den"));cell.textContent=de?pct(nu/de):"—";cell.classList.remove("pos","neg");cell.classList.add(nu>=0?"pos":"neg");return;}
@@ -3230,7 +3278,14 @@ function enhanceSelects(){
     _csRelabel(sel);
   });
 }
+/* True while the user is typing in / focused on a data-table field (cell input, select, or a
+   filter box). A full render() rebuilds those tbodies via innerHTML, which would destroy the
+   focused field and lose the in-progress edit — so background refreshes (cloud pull, price
+   fetch) must not re-render underneath the user. */
+function _finEditing(){ var a=document.activeElement; if(!a) return false; var tag=a.tagName; if(tag!=="INPUT"&&tag!=="SELECT"&&tag!=="TEXTAREA") return false; try{ return !!(a.closest && a.closest("main table")); }catch(e){ return false; } }
+var _finRerenderPending=false;
 function render(){
+  if(_finEditing()){ if(!_finRerenderPending){ _finRerenderPending=true; var _t=setInterval(function(){ if(!_finEditing()){ clearInterval(_t); _finRerenderPending=false; try{ render(); }catch(e){} } },400); } return; }   // F4: defer until the field is blurred, then render once
   try{ migrateActualsById(); }catch(e){}
   renderGreeting(); renderInsights(); renderKPIs(); renderAccounts(); renderHoldings(); renderPurchases();
   renderMonthSel(); renderBudget(); renderRoi(); renderAssetsInv();
