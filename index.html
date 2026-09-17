@@ -4284,12 +4284,19 @@ function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(J
 let data = (function(){
   try{
     if(!localStorage.getItem(GUEST_FLAG)){
+      /* Prefer the LAST signed-in account's cache so a browser used by more than one
+         account doesn't cold-boot into whichever per-user key localStorage happens to
+         enumerate first (H6). Falls back to the first match, then guest/default. */
+      var _lu=null; try{ _lu=localStorage.getItem("hub.lastUser"); }catch(e){}
+      if(_lu){ var _ld=loadLocal(KEY+":"+_lu); if(_ld) return _ld; }
       for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(KEY+":")===0){ const d=loadLocal(k); if(d) return d; } }
     }
     return loadLocal(KEY) || JSON.parse(JSON.stringify(DEFAULT));
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); }
 })();
-var _saveWarned=false; function save(){ try{ data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } } scheduleHubSync(); }
+var _lastSettingsJSON=""; function _syncSettingsBaseline(){ try{ _lastSettingsJSON=JSON.stringify((data&&data.settings)||{}); }catch(e){ _lastSettingsJSON=""; } }
+var _saveWarned=false; function save(){ try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } }catch(_s){} data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } } scheduleHubSync(); }
+_syncSettingsBaseline();
 let _hubTimer=null;
 function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
 async function pushHub(){ if(TEST_MODE) return; if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){
@@ -4306,7 +4313,7 @@ var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,k==="routines"); });
+function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,false); });
   /* Task ORDER is tracked separately from content freshness. `tasksOrderAt` is bumped
      ONLY by real reorders/adds, never by a plain content edit or a load-time save — so a
      reorder on one device survives an unrelated edit (or a stale newer-updatedAt blob) on
@@ -4316,8 +4323,8 @@ function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return c
   var _lto=+local.tasksOrderAt||0, _cto=+cloud.tasksOrderAt||0;
   var _tsrc=(_lto||_cto)?((_lto>=_cto)?local:cloud):_newer;
   base.tasks=_mergeArr(_tsrc.tasks,(_tsrc===local?cloud:local).tasks,tomb,false);
-  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ base.settings=Object.assign({}, _older.settings||{}, _newer.settings||{}); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_newer.settings&&_newer.settings.statuses)||[], (_older.settings&&_older.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
-async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
+  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ /* settings follow their OWN clock (settingsUpdatedAt), not the whole-doc updatedAt — otherwise an unrelated newer edit on one device silently reverts a preference toggled on the other. Legacy data (no settingsUpdatedAt) keeps the newer-blob behaviour. */ var _lsu=+local.settingsUpdatedAt||0, _csu=+cloud.settingsUpdatedAt||0; var _sNewer=(_lsu||_csu)?((_lsu>=_csu)?local:cloud):_newer; var _sOlder=(_sNewer===local)?cloud:local; base.settings=Object.assign({}, _sOlder.settings||{}, _sNewer.settings||{}); if(_lsu||_csu) base.settingsUpdatedAt=Math.max(_lsu,_csu); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_sNewer.settings&&_sNewer.settings.statuses)||[], (_sOlder.settings&&_sOlder.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
+async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
    tombstones (#parent/type::key), so concurrent edits to the SAME item don't lose data. */
@@ -6269,7 +6276,7 @@ function renderOvTasks(){
 }
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.push({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});_bumpTaskOrder();i.value="";save();render();toast("Task added");}
-function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
+function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));/* moved: #dailySummary is not in the markup, so nothing here ever rendered */if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
@@ -8158,7 +8165,7 @@ async function gmView(id){
     var html='<div class="gv-head"><div class="gv-av">'+esc(ini)+'</div><div style="flex:1;min-width:0"><div style="font-weight:700">'+esc(nm)+'</div><div class="muted" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(em)+'</div></div><div class="muted" style="font-size:.72rem;text-align:right;flex:none">'+esc(date?new Date(date).toLocaleString([], {dateStyle:"medium",timeStyle:"short"}):"")+'</div></div>'
       +'<div class="gv-subj">'+esc(subj)+'</div>'
       +bodyMarkup
-      +'<div class="row"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn soft" onclick="gmOpen(\''+id+'\')">Open in Gmail</button><button class="btn" onclick="closeModal();replyTo(\''+id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1"/></svg>Reply</button></div>';
+      +'<div class="row"><button class="btn soft" onclick="closeModal()">Close</button><button class="btn soft" onclick="gmOpen(\''+id+'\')">Open in Gmail</button><button class="btn" style="display:inline-flex;align-items:center;gap:7px" onclick="closeModal();replyTo(\''+id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1"/></svg>Reply</button></div>';
     showModal(html,"xwide");
     if(b.html){ var f=document.getElementById("gvFrame"); if(f) f.srcdoc=b.html; }
     var mm=gmailMsgs&&gmailMsgs.find(function(x){return x.id===id;}); if(mm&&mm.unread) gmMarkReadSilent(id);
@@ -8449,13 +8456,9 @@ function travelItems(){
         "Check out · "+nm+(city?" · "+city:""));
     });
 
-    /* activities, as written, only when they carry a date */
-    (t.spend||[]).forEach(function(s){
-      if(!s||!s.date) return; var city=nameOf(s.cityId);
-      push(s.date, tvClip(s.name||"Activity",20),
-        [s.name||"Activity", s.category, city, s.location].filter(Boolean).join(" · "),
-        s.time);
-    });
+    /* spend/budget lines are deliberately NOT surfaced on Hub timelines: the Travel app
+       auto-stamps every expense row with a date (city arrival / trip departure), so they are
+       not scheduled to-dos. The Hub shows only real milestones — departures, transports, hotels. */
   });
   return out;
 }
@@ -8765,7 +8768,7 @@ function confirmModal(title,msg,okLabel,danger){
 function delNoteConfirm(id){ closeModal(); delNote(id); }
 
 /* ============ Auth (Supabase SSO + minimal public landing) ============ */
-function accountInit(){ const b=document.getElementById("acctBtn"); if(b) b.textContent=user?(user.email||"Account").split("@")[0]:"Sign in"; var av=document.getElementById("avatarChip"); if(av) av.textContent=avatarText(); }
+function accountInit(){ const b=document.getElementById("acctBtn"); if(b) b.textContent=user?(user.email||"Account").split("@")[0]:"Sign in"; var av=document.getElementById("avatarChip"); if(av) av.textContent=avatarText(); try{ if(user&&user.id) localStorage.setItem("hub.lastUser",user.id); }catch(e){} }
 function openAccount(){
   if(!user){ authUI("in"); return; }
   showModal(`<h4>Account</h4><p class="muted" style="margin-bottom:14px">Signed in as <b style="color:var(--text)">${esc(user.email||"")}</b>. Your notes, tasks and links are saved on this device.</p>
@@ -8795,7 +8798,7 @@ function closeAuth(){ const r=document.getElementById("authRoot"); r.style.displ
   try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
        var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
 }
-function guestMode(){ try{localStorage.setItem(GUEST_FLAG,"1");}catch(e){} closeAuth(); }
+function guestMode(){ try{localStorage.setItem(GUEST_FLAG,"1");}catch(e){} _clearCloudGlobals(); closeAuth(); }
 async function doSignIn(){
   if(!supaReady) return guestMode();
   const email=document.getElementById("aEmail").value.trim(), pass=document.getElementById("aPass").value;
@@ -8819,7 +8822,18 @@ async function doForgot(){
   const {error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   authErr(error?error.message:"Reset link sent — check your inbox.",!error);
 }
-async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");}catch(e){} if(supa) await supa.auth.signOut(); }
+async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} if(supa) await supa.auth.signOut(); }
+/* Wipe every cloud-derived display global so a following account (or guest mode)
+   never sees the previous user's finance / travel / calendar / inbox data. */
+function _clearCloudGlobals(){
+  try{
+    financeStat=""; financeSeries=[]; financeUpdated="";
+    calEvents=null; zakatDue=null;
+    travelTrips=[]; travelAll=[]; travelUpdated=null;
+    gmailStats=null; gmailMsgs=null;
+    _nwLive=null; _nwLiveAt=0;
+  }catch(e){}
+}
 /* ---- Session timeout: auto sign-out 4 h after login ---- */
 var SESSION_MAX_MS=4*60*60*1000;
 function _touchAuth(){ try{ localStorage.setItem("hub.authStart",String(Date.now())); }catch(e){} }
@@ -8827,7 +8841,13 @@ function _sessionExpired(){ try{ var t=+localStorage.getItem("hub.authStart")||0
 async function _enforceSessionTimeout(){ if(!supa||!user) return; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await signOut(); } }
 setInterval(function(){ try{ _enforceSessionTimeout(); }catch(e){} },60000);
 var _authTouchT=0;
-["click","keydown","touchstart","mousedown"].forEach(function(ev){ try{ document.addEventListener(ev,function(){ if(!user) return; var n=Date.now(); if(n-_authTouchT>60000){ _authTouchT=n; _touchAuth(); } },{passive:true}); }catch(e){} });
+["click","keydown","touchstart","mousedown"].forEach(function(ev){ try{ document.addEventListener(ev,function(){ if(!user) return; /* An interaction after a long idle must NOT refresh the clock before the timeout is enforced — the user always touches something on returning, so touching first meant the 4h idle timer could never actually fire. Check expiry first; only refresh when still within the window. */ if(_sessionExpired()){ _enforceSessionTimeout(); return; } var n=Date.now(); if(n-_authTouchT>60000){ _authTouchT=n; _touchAuth(); } },{passive:true}); }catch(e){} });
+/* The 60s interval is throttled or frozen while the tab is hidden or the machine sleeps,
+   so an idle session past 4h could linger until the next tick — which a returning click
+   would already have reset. Re-check the moment the page becomes visible / regains focus. */
+try{ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ try{ _enforceSessionTimeout(); }catch(e){} } }); }catch(e){}
+try{ window.addEventListener("pageshow",function(){ try{ _enforceSessionTimeout(); }catch(e){} }); }catch(e){}
+try{ window.addEventListener("focus",function(){ try{ _enforceSessionTimeout(); }catch(e){} }); }catch(e){}
 /* Enter to trigger a modal's primary (Save/Add/Create) button */
 document.addEventListener("keydown",function(e){
   if(e.key!=="Enter"||e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||e.isComposing) return;
@@ -8850,8 +8870,8 @@ async function initAuth(){
        restores for us. Without this a restored session inherits whatever
        hub.authStart was left behind, so the 4h timer could already be spent
        the moment the page finished loading. */
-    if(signedIn){ _touchAuth(); closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
-    if(signedOut){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); render(); authUI("in"); }
+    if(signedIn){ _touchAuth(); closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
+    if(signedOut){ _clearCloudGlobals(); try{localStorage.removeItem("hub.lastUser");}catch(e){} data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _syncSettingsBaseline(); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
   /* Lower the gate here too. Closing it was left entirely to the signedIn branch
@@ -8863,7 +8883,7 @@ async function initAuth(){
      is an invisible sheet of glass over the whole workspace: every click lands
      on it and nothing in the app responds. closeAuth() is idempotent, so
      calling it on both paths costs nothing and removes the race. */
-  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
+  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
   else authUI("in");
 }
 
@@ -10263,6 +10283,7 @@ window.addEventListener("storage",function(e){
     var incoming=JSON.parse(e.newValue||"null"); if(!incoming) return;
     if(typeof mergeHubData==="function" && typeof fill==="function"){ data=fill(mergeHubData(data,incoming)); }
     else { data=incoming; }
+    _syncSettingsBaseline();
     render();
   }catch(err){}
 });
