@@ -41,9 +41,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   radial-gradient(640px 440px at 10% -8%, rgba(142,127,208,.22), transparent 65%),
   radial-gradient(560px 420px at 90% 10%, rgba(242,164,140,.18), transparent 65%),
   radial-gradient(720px 540px at 50% 112%, rgba(93,79,168,.16), transparent 70%),
-  linear-gradient(180deg,#F5F2FC,#EEEAF8);
-  animation:ambient 18s ease-in-out infinite alternate}
-@keyframes ambient{from{opacity:.82}to{opacity:1}}
+  linear-gradient(180deg,#F5F2FC,#EEEAF8)}
+/* (removed the always-on ambient opacity animation — a full-viewport fixed layer animating forever
+   kept the compositor busy even at rest, which added to the "heavy" feel for no real visual gain) */
 
 /* ================= Sidebar ================= */
 aside{background:linear-gradient(168deg,rgba(26,23,63,.93) 0%,rgba(38,34,92,.88) 55%,rgba(50,43,115,.86) 100%);
@@ -428,7 +428,7 @@ select.bare{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.
 }
 
 /* ================= Auth (accounts) ================= */
-.auth-wrap{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow:auto;
+.auth-wrap{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;overflow-x:hidden;overflow-y:auto;
   background:linear-gradient(112deg,var(--indigo-3) 0%,var(--indigo) 45%,var(--violet) 85%,var(--lavender) 115%)}
 .auth-wrap::before{content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)}
 .auth-wrap::after{display:none}
@@ -742,9 +742,27 @@ html:not(.dark) .bud-income td:first-child input{color:#0a7c6b}
 .bud-section.inc td{color:var(--green)}
 .bud-section td:first-child{padding-right:0}
 @media(max-width:640px){.bud-drag,.bud-dragh{display:none!important}}
-/* === Tablet/iPad: keep wide tables scrolling inside their card === */
-.card:has(table){overflow-x:auto;overflow-y:visible}
+/* === Wide tables scroll inside their OWN wrapper (.tbl-scroll), not the card ===
+   The card is padded and rounded, so scrolling the card put the horizontal bar down in the
+   bottom padding, detached from the table and overflowing its edge. enhanceTables() now wraps
+   each table in .tbl-scroll, which hugs the table and clips the bar to a rounded box. The
+   :has(> table) below only fires for an un-wrapped table (the brief window before enhance runs). */
+.tbl-scroll{overflow-x:auto;overflow-y:hidden;max-width:100%;border-radius:12px;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;-ms-overflow-style:none}                 /* still scrolls (trackpad / shift-wheel / drag) — the bar is just hidden */
+.tbl-scroll::-webkit-scrollbar{width:0;height:0;display:none}
+.tbl-scroll>table{margin:0}
+.card:has(> table){overflow-x:auto;overflow-y:visible}
 @media(max-width:1024px){ .card{overflow-x:auto} }
+/* Perf: while the page is actively scrolling, drop the frosted-glass blur down to a cheap radius
+   (not off — keeping a filter avoids tearing the compositing layer down and rebuilding it, which is
+   what caused a hitch at scroll start/stop), and freeze the hover-lift. Full blur returns the instant
+   scrolling settles (~160ms), so the look is unchanged at rest. */
+html.is-scrolling .card,
+html.is-scrolling .alloc-card,
+html.is-scrolling .insight,
+html.is-scrolling .topbar{backdrop-filter:blur(4px) saturate(1.15)!important;-webkit-backdrop-filter:blur(4px) saturate(1.15)!important}
+html.is-scrolling .card{transition:none!important}
+html.is-scrolling .card:hover{transform:none!important}
 @media(max-width:1100px){
   #holdingsTable{min-width:920px}
   #purchTable{min-width:760px}
@@ -3188,6 +3206,13 @@ function enhanceTables(){
         if(panel) panel.appendChild(tools);            /* after the primary — the action leads */
         else tbl.parentNode.insertBefore(tools,tbl);
       }
+      /* Wrap the table in its own horizontal-scroll box so the scrollbar hugs the table instead
+         of stranding in the card's bottom padding (done once, after the tools are placed so they
+         stay above the scroll region). */
+      if(tbl.parentNode && !tbl.parentNode.classList.contains("tbl-scroll")){
+        var _sc=document.createElement("div"); _sc.className="tbl-scroll";
+        tbl.parentNode.insertBefore(_sc,tbl); _sc.appendChild(tbl);
+      }
     }
     var defs2=FILTERS[tbl.id];
     if(defs2&&tblFilterSel[tbl.id]){
@@ -3303,6 +3328,14 @@ window.scrollTo(0,0);
 window.addEventListener("load", function(){ window.scrollTo(0,0); });
 requestAnimationFrame(function(){ window.scrollTo(0,0); });
 animateNumbers();                 // count-up entrance on first load
+/* Perf: mark the root while a scroll is in flight so CSS can suspend backdrop-blur and the
+   hover-lift for the duration, then restore them ~160ms after it stops. rAF-throttled, passive,
+   capture:true so inner scrollers (sidebar, table scroll boxes) count too. */
+(function(){ var root=document.documentElement, t=null, on=false, raf=0;
+  function stop(){ on=false; root.classList.remove("is-scrolling"); }
+  function mark(){ if(!on){ on=true; root.classList.add("is-scrolling"); } clearTimeout(t); t=setTimeout(stop,160); }
+  window.addEventListener("scroll",function(){ if(raf) return; raf=requestAnimationFrame(function(){ raf=0; mark(); }); },{passive:true,capture:true});
+})();
 initAuth();                       // restore session -> load cloud data -> THEN fetch live prices
 
 /* ---------- Top bar: quick actions sheet + native hide-on-scroll ---------- */
