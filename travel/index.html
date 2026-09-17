@@ -2669,8 +2669,11 @@ function itemCur(it,trip){ return (it&&it.currency)||trip.baseCurrency||'SAR'; }
 function usageDays(t){ if(t&&t.startDate&&t.endDate){ const d=daysBetween(t.startDate,t.endDate); return d>0?d:1; } return 1; }
 function transportNative(t,trip){ if(!t) return 0; if(t.type==='car'){ return num(t.perDay)*usageDays(t); } return num(t.cost)*pax(t.persons,trip); }
 function transportBase(t,trip){ return convertAmount(transportNative(t,trip),itemCur(t,trip),trip.baseCurrency||'SAR'); }
-function spendNative(s){ return num(s.perPerson)*Math.max(1,Math.round(num(s.persons))||1); }
-function spendBase(s,trip){ return convertAmount(spendNative(s),itemCur(s,trip),trip.baseCurrency||'SAR'); }
+/* T2: use the shared pax() rule so a spend item follows the trip's default party size when its own
+   persons field is blank, and honours an explicit 0 — matching hotels, transport and trip-wide costs.
+   (Was Math.max(1,…), which ignored the trip default and forced a minimum of one person.) */
+function spendNative(s,trip){ return num(s.perPerson)*pax(s&&s.persons,trip); }
+function spendBase(s,trip){ return convertAmount(spendNative(s,trip),itemCur(s,trip),trip.baseCurrency||'SAR'); }
 function hotelBase(h,trip){ return convertAmount(hotelCost(h),(h&&h.currency)||trip.baseCurrency||'SAR',trip.baseCurrency||'SAR'); }
 function cityWindows(trip){ const nodes=tripNodes(trip); const dep=trip.departDate,ret=trip.returnDate; const out={};
   const clamp=d=>{ if(!d) return ''; if(dep&&d<dep) return ''; if(ret&&d>ret) return ''; return d; };   /* trip dates are the source of truth: ignore any node date outside [dep,ret] and re-derive it */
@@ -2711,7 +2714,12 @@ const IDB={ db:null,
 };
 function usePersist(key,initial){
   const [v,setV]=useState(()=>{ try{const s=localStorage.getItem(key);return s?JSON.parse(s):initial;}catch{return initial;} });
+  const vref=useRef(v); vref.current=v;
   useEffect(()=>{ try{localStorage.setItem(key,JSON.stringify(v));}catch(e){} },[key,v]);
+  /* T7: when another tab (or the Hub) writes this key, rehydrate state IN PLACE instead of a full
+     location.reload() — the current view, scroll position and any open editor all survive the
+     cross-tab sync. Only apply a genuinely different value, to avoid a write/read ping-pong. */
+  useEffect(()=>{ function onStorage(e){ if(e.key!==key) return; try{ const nv=e.newValue?JSON.parse(e.newValue):initial; if(JSON.stringify(nv)!==JSON.stringify(vref.current)) setV(nv); }catch(_){} } window.addEventListener('storage',onStorage); return ()=>window.removeEventListener('storage',onStorage); },[key]);
   return [v,setV];
 }
 const Theme=createContext({dark:true});
@@ -2880,7 +2888,10 @@ function Bars({data,dark,horizontal,height=210}){ const ref=useChart(()=>({type:
 function Line({labels,values,dark,height=210}){ const ref=useChart(()=>({type:'line',data:{labels,datasets:[{data:values,fill:true,tension:.35,borderColor:'#9d90ff',backgroundColor:'rgba(160,129,214,.15)',pointRadius:0,borderWidth:2}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString()}`}}},scales:{x:{grid:{display:false},ticks:{color:dark?'#b3a9ff':'#4a38b5',font:{size:9},maxTicksLimit:8}},y:{grid:{color:dark?'rgba(255,255,255,.06)':'rgba(98,63,148,.12)'},ticks:{color:dark?'#9d90ff':'#6350e0',font:{size:9}}}},animation:{duration:600}}}),[JSON.stringify(labels),JSON.stringify(values),dark]); return <canvas ref={ref} height={height}></canvas>; }
 
 /* ============================ COMPUTE (node graph) ============================ */
-function hotelCost(h){ const n=daysBetween(h.checkIn,h.checkOut); const r=Math.max(1,num(h.rooms)||1); return (n>0?n:0)*num(h.perNight)*r+num(h.taxes); }
+/* T4: a hotel with a nightly rate but missing/invalid dates used to contribute 0 to the budget
+   (nights clamped to 0), silently understating the total — fall back to a single night so its cost
+   still counts until the dates are filled in. */
+function hotelCost(h){ const n=daysBetween(h.checkIn,h.checkOut); const r=Math.max(1,num(h.rooms)||1); return (n>0?n:1)*num(h.perNight)*r+num(h.taxes); }
 function useComputed(trip){
   return useMemo(()=>{
     const {departDate,returnDate,tripExpenses={}}=trip; const hotels=trip.hotels||[]; const transports=trip.transports||[]; const spend=trip.spend||[];
@@ -3479,7 +3490,7 @@ function buildTimeline(trip,cur){ const nodes=trip.nodes||[];
   const spOf=id=>(trip.spend||[]).filter(s=>s.cityId===id&&s.date).sort((a,b)=>((a.date||'')+(a.time||'')).localeCompare((b.date||'')+(b.time||'')));
   nodes.forEach(n=>{ trOf(n.id).forEach(t=>{ const tm=t.startTime?' · '+t.startTime:''; const rt=(t.from&&t.to)?(t.from+' → '+t.to):(n.name||''); push({date:t.startDate,I:((TRANSPORT_TYPES[t.type]||{}).I||Ic.compass),title:(TRANSPORT_TYPES[t.type]||{label:'Transport'}).label+(rt?' · '+rt:''),sub:(t.provider?t.provider+' · ':'')+(n.name||'')+tm+(num(t.cost)?' · '+fmt(transportBase(t,trip),cur):''),tag:'Travel'}); });
     hOf(n.id).forEach(h=>{ const nn=daysBetween(h.checkIn,h.checkOut); if(h.checkIn) push({date:h.checkIn,I:Ic.hotel,title:'Check in · '+(h.name||'Hotel'),sub:(n.name||'')+' · '+(nn>0?nn:0)+' nights · '+fmt(hotelBase(h,trip),cur),tag:'Stay'}); if(h.checkOut) push({date:h.checkOut,I:Ic.bag,title:'Check out · '+(h.name||'Hotel'),sub:n.name||'',tag:'Stay'}); });
-    spOf(n.id).forEach(s=>{ push({date:s.date,I:Ic.ticket,title:(s.name||'Activity'),sub:(s.category||'')+(s.time?' · '+s.time:'')+(spendNative(s)?' · '+fmt(spendBase(s,trip),cur):''),tag:'Plan'}); }); });
+    spOf(n.id).forEach(s=>{ push({date:s.date,I:Ic.ticket,title:(s.name||'Activity'),sub:(s.category||'')+(s.time?' · '+s.time:'')+(spendNative(s,trip)?' · '+fmt(spendBase(s,trip),cur):''),tag:'Plan'}); }); });
   push({date:trip.returnDate,I:Ic.landing,title:'Trip ends',sub:'Return'+(nodes.length&&nodes[nodes.length-1].name?' · '+nodes[nodes.length-1].name:''),tag:'End'});
   return ev; }
 
@@ -3548,8 +3559,13 @@ function BudgetView({trip,cur}){ const {dark}=useContext(Theme); const c=useComp
   const mostExp=[...c.cityInfo].sort((a,b)=>b.total-a.total)[0];
   const topCat=[...c.categoryBreakdown].sort((a,b)=>b.value-a.value)[0];
   const forecast=useMemo(()=>{ if(c.days<=0)return {labels:[],values:[]}; const start=trip.departDate; const arr=new Array(c.days).fill(0);
-    c.cityInfo.forEach(ci=>{ const s=ci.arrive||start; const idx=Math.max(0,daysBetween(start,s)); const span=Math.max(1,ci.nights||1); const per=ci.total/span; for(let k=0;k<span&&idx+k<c.days;k++){arr[idx+k]+=per;} });
+    /* T1: spread only accommodation + activities per night; transport gets its own per-day line below,
+       so using ci.total here (which already includes transport) double-counted every trip's transport. */
+    c.cityInfo.forEach(ci=>{ const s=ci.arrive||start; const idx=Math.max(0,daysBetween(start,s)); const span=Math.max(1,ci.nights||1); const per=(ci.accom+ci.spendSum)/span; for(let k=0;k<span&&idx+k<c.days;k++){arr[idx+k]+=per;} });
     (trip.transports||[]).forEach(t=>{ if(t.startDate){const idx=daysBetween(start,t.startDate); if(idx>=0&&idx<c.days)arr[idx]+=transportBase(t,trip);} });
+    /* T5: trip-wide expenses (visa, insurance, SIM, …) were left out of the forecast entirely — spread
+       them evenly across the trip so the daily curve reconciles with the grand total. */
+    if(c.miscTotal>0){ const mp=c.miscTotal/c.days; for(let i=0;i<c.days;i++)arr[i]+=mp; }
     return {labels:arr.map((_,i)=>prettyDate(addDays(start,i))),values:arr.map(v=>Math.round(v))}; },[trip&&trip.id, trip&&trip.updatedAt]);
 
   /* the five largest single costs, whatever kind of record they came from */
@@ -4646,7 +4662,7 @@ function useCloud(trips,setTrips){
     const remote={}; (rows||[]).forEach(r=>remote[r.id]=r); const local=tref.current; const updates={}; const toPush=[];
     Object.keys(remote).forEach(id=>{ const r=remote[id]; const l=local[id]; const ru=new Date(r.updated_at).getTime(); const rDel=!!(r.data&&r.data.__deleted), lDel=!!(l&&l.__deleted); if(rDel){ if(!lDel && (!l || ru>=(l.updatedAt||0))) updates[id]=r.data; } else if(lDel){ /* local delete is sticky: keep the tombstone, don't accept a live remote copy */ } else if(!l||(l.updatedAt||0)<ru){ updates[id]=r.data; } synced.current[id]=ru; });
     Object.values(local).forEach(l=>{ if(updates[l.id]&&updates[l.id].__deleted) return; /* we're accepting a delete for this id — don't push our stale live copy back */ const r=remote[l.id]; const ru=r?new Date(r.updated_at).getTime():0; const rDel=!!(r&&r.data&&r.data.__deleted); if(l.__deleted&&!rDel){ toPush.push(l); } else if(!r||(l.updatedAt||0)>ru){ toPush.push(l); } });
-    if(Object.keys(updates).length) setTrips(ts=>{ const next={...ts}; Object.keys(updates).forEach(id=>{ const inc=updates[id], cur=next[id]; if(inc&&inc.__deleted){ next[id]=inc; } else if(!cur||(cur.updatedAt||0)<=(inc&&inc.updatedAt||0)){ next[id]=inc; } /* else: a newer local edit landed during the fetch — keep it */ }); return next; });
+    if(Object.keys(updates).length) setTrips(ts=>{ const next={...ts}; Object.keys(updates).forEach(id=>{ const inc=updates[id], cur=next[id]; if(cur&&cur.__deleted&&inc&&!inc.__deleted) return; /* local delete is sticky vs a remote live edit (matches realtime) */ if(!cur||(cur.updatedAt||0)<(inc&&inc.updatedAt||0)){ next[id]=inc; } /* T3/T6: strictly-newer incoming wins — delete OR edit alike; a tie, or a newer local edit that landed during the fetch, keeps local (the delete branch was previously unconditional and could clobber a fresh local edit) */ }); return next; });
     for(const t of toPush){ await upsert(t); }
     if(!cancel){ setStatus('Synced'); setTimeout(()=>setStatus(s=>s==='Synced'?'':s),1800); }
   }catch(e){ if(!cancel) setStatus('Sync error: '+(e.message||e)); } })(); return ()=>{cancel=true;}; },[session]);
@@ -4662,7 +4678,7 @@ function useCloud(trips,setTrips){
   useEffect(()=>{ if(!session) return; if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); return; } _touchAuth(); const chk=()=>{ if(_sessionExpired()){ try{localStorage.removeItem('hub.authStart');}catch(e){} signOut(); } }; const iv=setInterval(chk,60000); var tt=0; const touch=()=>{ var n=Date.now(); if(n-tt>60000){ tt=n; _touchAuth(); } }; ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,touch,{passive:true})); return ()=>{ clearInterval(iv); ['click','keydown','touchstart'].forEach(e=>document.removeEventListener(e,touch)); }; },[session]);
   const resetPassword=async(email)=>{ if(!sb.current)return; if(!email){ setStatus('Enter your email first.'); return; } setStatus('Sending reset link…'); const {error}=await sb.current.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); setStatus(error?('Error: '+error.message):'Reset link sent — check your inbox.'); };
   /* realtime: reflect a peer's create/edit/delete without a reload (same last-write-wins guard as the pull) */
-  useEffect(()=>{ if(!sb.current||!session) return; let ch; try{ ch=sb.current.channel('trips-'+session.user.id).on('postgres_changes',{event:'*',schema:'public',table:'trips',filter:'user_id=eq.'+session.user.id},payload=>{ const row=payload.new||payload.old; const inc=row&&row.data; if(!inc||!inc.id) return; const ru=new Date((row&&row.updated_at)||Date.now()).getTime(); if(synced.current[inc.id]===(inc.updatedAt||ru)) return; setTrips(ts=>{ const cur=ts[inc.id]; if(cur&&cur.__deleted&&!inc.__deleted) return ts; if(!cur||(cur.updatedAt||0)<=(inc.updatedAt||0)) return {...ts,[inc.id]:inc}; return ts; }); synced.current[inc.id]=inc.updatedAt||ru; }).subscribe(); }catch(e){} return ()=>{ try{ if(ch) sb.current.removeChannel(ch); }catch(e){} }; },[session]);   /* realtime now matches the periodic pull: a remote delete obeys the newer-or-equal guard, AND a local delete stays sticky against a peer's live edit (so a deleted trip can't be silently revived over the live channel) */
+  useEffect(()=>{ if(!sb.current||!session) return; let ch; try{ ch=sb.current.channel('trips-'+session.user.id).on('postgres_changes',{event:'*',schema:'public',table:'trips',filter:'user_id=eq.'+session.user.id},payload=>{ const row=payload.new||payload.old; const inc=row&&row.data; if(!inc||!inc.id) return; const ru=new Date((row&&row.updated_at)||Date.now()).getTime(); if(synced.current[inc.id]===(inc.updatedAt||ru)) return; setTrips(ts=>{ const cur=ts[inc.id]; if(cur&&cur.__deleted&&!inc.__deleted) return ts; if(!cur||(cur.updatedAt||0)<(inc.updatedAt||0)) return {...ts,[inc.id]:inc}; return ts; }); synced.current[inc.id]=inc.updatedAt||ru; }).subscribe(); }catch(e){} return ()=>{ try{ if(ch) sb.current.removeChannel(ch); }catch(e){} }; },[session]);   /* realtime now matches the periodic pull: a remote delete obeys the newer-or-equal guard, AND a local delete stays sticky against a peer's live edit (so a deleted trip can't be silently revived over the live channel) */
   return {cfg,session,status,signInAt,checked,ready:!!sb.current,signUp,signIn,signOut,resetPassword};
 }
 /* Cloud sync, rebuilt in the Settings language: same card, same padding, same
@@ -5089,11 +5105,8 @@ function App(){
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 <script>
-/* another tab (same browser) wrote trips: reload them rather than let the last save win */
-window.addEventListener("storage",function(e){
-  if(e.key==="tp_trips_v1" || e.key==="tp_current_v1"){ try{ location.reload(); }catch(_){}
-  }
-});
+/* T7: cross-tab trip sync is now handled inside usePersist(), which rehydrates React state in
+   place — no full page reload, so the current view and any open editor are preserved. */
 </script>
 <script>
 /* Wide-monitor robustness: dragging the window to a screen with different OS scaling
