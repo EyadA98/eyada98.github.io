@@ -3947,6 +3947,20 @@ html:not(.dark) .app-card>.corner{opacity:.6}
   .app-card .tp-trip.tp-trip:nth-child(3){display:none}
   .app-card .tp-trip.tp-trip:nth-child(2){padding-right:0}
 }
+
+/* ===== Grids tab (embedded module) ===== */
+.grids-frame{--gbleed:10px;display:block;width:calc(100% + 2*var(--gbleed));margin:calc(-1*var(--gbleed)) calc(-1*var(--gbleed)) 0;height:calc(100dvh - 160px);min-height:420px;border:0;background:transparent}
+@media(max-width:640px){ .grids-frame{--gbleed:6px} }
+#tab-grids>.grids-frame{margin-top:calc(-1*var(--gbleed))!important}   /* beats the hub's .tab>:first-child reset */
+#tab-grids.active{animation:none}
+html.grids-on main{padding-bottom:0!important}   /* same top spacing as every other tab; the sheet uses the full height below */
+/* Grids full screen: the grid takes the whole window, hub chrome steps aside (Esc to leave) */
+html.grids-focus aside,html.grids-focus .topbar,html.grids-focus .bottombar{display:none!important}
+html.grids-focus body{grid-template-columns:minmax(0,1fr)!important}
+html.grids-focus main{padding:0!important}
+html.grids-focus,html.grids-focus body{overflow:hidden!important;scrollbar-width:none}
+html.grids-focus::-webkit-scrollbar{display:none}
+html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;z-index:85;--gbleed:0px}
 </style>
 </head>
 <body>
@@ -3964,6 +3978,7 @@ html:not(.dark) .app-card>.corner{opacity:.6}
   <button class="nav" data-tab="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
   <div class="nav-label">Workspace</div>
   <button class="nav" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Calendar</button>
+  <button class="nav" data-tab="grids"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="2.5"/><path d="M3 9h18M3 14.5h18M9 3.5v17"/></svg>Grids</button>
   <button class="nav" data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
   <button class="nav" data-tab="routines"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>Routines</button>
   <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
@@ -4155,6 +4170,11 @@ html:not(.dark) .app-card>.corner{opacity:.6}
   <div class="gcal-wrap" id="gcalWrap"></div>
 </div>
 
+<!-- GRIDS -->
+<div class="tab" id="tab-grids">
+  <iframe id="gridsFrame" class="grids-frame" title="Grids"></iframe>
+</div>
+
 <!-- TIMELINE -->
 <div class="tab" id="tab-timeline">
   <div class="pg-actions">
@@ -4192,6 +4212,7 @@ html:not(.dark) .app-card>.corner{opacity:.6}
   <div class="more-title">More</div>
   <div class="more-grid">
     <button data-tab="calendar" onclick="goMore('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Calendar</button>
+    <button data-tab="grids" onclick="goMore('grids')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="2.5"/><path d="M3 9h18M3 14.5h18M9 3.5v17"/></svg>Grids</button>
     <button data-tab="apps" onclick="goMore('apps')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Apps</button>
     <button data-tab="notifications" onclick="goMore('notifications')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Notifications</button>
     <button data-tab="timeline" onclick="goMore('timeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>Timeline</button>
@@ -4313,7 +4334,13 @@ var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function mergeHubData(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,false); });
+function _mergeGrids(a,b){ a=a||{}; b=b||{}; var del=Object.assign({},a.deleted||{}); Object.keys(b.deleted||{}).forEach(function(k){ if(!((+del[k]||0)>=(+b.deleted[k]||0))) del[k]=b.deleted[k]; });
+  function t(x){ return +(x&&(x.updated||x.created))||0; }
+  function pick(A,B){ A=A||{}; B=B||{}; var out={}, ids={}; Object.keys(A).forEach(function(k){ids[k]=1;}); Object.keys(B).forEach(function(k){ids[k]=1;});
+    Object.keys(ids).forEach(function(id){ var x=A[id], y=B[id]; var w=(x&&y)?(t(y)>t(x)?y:x):(x||y); var d=+del[id]||0; if(w&&d&&d>=t(w)) return; if(w) out[id]=w; }); return out; }
+  return {v:1,folders:pick(a.folders,b.folders),sheets:pick(a.sheets,b.sheets),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)}; }
+function mergeHubData(local,cloud){ var base=_mergeHubDataBase(local,cloud); try{ if(base&&local&&cloud&&(local.grids||cloud.grids)) base.grids=_mergeGrids(local.grids,cloud.grids); }catch(e){} return base; }
+function _mergeHubDataBase(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,false); });
   /* Task ORDER is tracked separately from content freshness. `tasksOrderAt` is bumped
      ONLY by real reorders/adds, never by a plain content edit or a load-time save — so a
      reorder on one device survives an unrelated edit (or a stale newer-updatedAt blob) on
@@ -4355,7 +4382,7 @@ function toggleTheme(){ const dark=!document.documentElement.classList.contains(
 updThemeIcon();
 
 /* ============ Navigation ============ */
-const PAGES={home:["Home","Dashboard"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],calendar:["Workspace","Calendar"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"],goals:["Workspace","Goals & Habits"]};
+const PAGES={home:["Home","Dashboard"],grids:["Workspace","Grids"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],calendar:["Workspace","Calendar"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"],goals:["Workspace","Goals & Habits"]};
 var BOTTOM_TABS=["home","tasks","routines","notes"];
 window.addEventListener("popstate",function(e){
   var name=(e.state&&e.state.tab) || (location.hash||"#home").slice(1) || "home";
@@ -4386,6 +4413,7 @@ function go(name,fromHistory){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.id==="tab-"+name));
   var mb=document.getElementById("moreBtn"); if(mb)mb.classList.toggle("active",BOTTOM_TABS.indexOf(name)<0);
   const p=PAGES[name]||["",""]; document.getElementById("crumb").textContent=p[0]; document.getElementById("pageTitle").textContent=p[1];
+  if(name==="grids"){ if(typeof gridsOpen==="function"){ try{ gridsOpen(); }catch(e){ console.error(e); } } } else { document.documentElement.classList.remove("grids-on"); if(document.documentElement.classList.contains("grids-focus")&&typeof gridsSetFocus==="function") gridsSetFocus(false); }
   if(name==="home"&&user&&supa){ try{ loadFinance(); loadTravel(); }catch(e){} }
   if(name==="calendar"&&user&&supa){ try{ loadTravel(); }catch(e){} }   /* trips feed the global calendar */
   if(name==="mindmap"){ try{ initMindMap(); }catch(e){ console.error(e); } }
@@ -4418,6 +4446,7 @@ function render(opts){
   Object.keys(_RENDERERS).forEach(function(k){ if(k!==active) _dirty[k]=true; });
   renderTab(active);
   if(active!=="home"){ try{ renderTasksOverview(); }catch(e){} }   /* the dashboard widgets stay truthful */
+  try{ gridsSyncFromHub(); }catch(e){}
   try{ updateNotifBadge(); }catch(e){}
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
@@ -4426,6 +4455,7 @@ function renderAll(){                                   /* boot / sign-in: every
   applyLang();
   try{ notifRepair(); }catch(e){}   /* heal dismissals the old notifComplete buried */
   Object.keys(_RENDERERS).forEach(function(k){ renderTab(k); });
+  try{ gridsSyncFromHub(); }catch(e){}
   try{ updateNotifBadge(); }catch(e){}
   var a=document.getElementById("avatarChip"); if(a) a.textContent=avatarText();
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
@@ -6043,6 +6073,8 @@ _watchDPR();
 /* also self-heal when the window regains visibility after being moved around */
 document.addEventListener("visibilitychange",function(){ if(!document.hidden) _relayoutSoon(); });
 window.addEventListener("pageshow",_relayoutSoon);
+/* "./finance/" etc. are relative to the site root; if this page is served from a sub-folder, climb out of it */
+function _siteRel(u){ try{ if(typeof u==="string"&&u.indexOf("./")===0&&/\/grids\/[^\/]*$/i.test(location.pathname)) return "../"+u.slice(2); }catch(e){} return u; }
 function appDef(){
   return [
     {key:"finance",nm:"Finance Board",tile:"tile-lav",url:data.settings.financeUrl,desc:"Net worth, budget, portfolio & zakat",
@@ -6057,7 +6089,7 @@ function tripCountdown(dep){ if(!dep) return ""; var today=new Date(isoLocal(new
    the app card and the notification item cannot disagree; travelUrl is a
    user-editable setting and may already carry a query of its own. */
 function travelHref(){
-  var u=(data.settings&&data.settings.travelUrl)||"./travel/";
+  var u=_siteRel((data.settings&&data.settings.travelUrl)||"./travel/");
   return u+(u.indexOf("?")>=0?"&":"?")+"view=trips";
 }
 /* ════════════════════════════════════════════════════════════════════════
@@ -6186,7 +6218,7 @@ function appCardHtml(a){
      misalignment this card was rebuilt to close. */
   if(a.key==="travel") foot='<div class="app-foot" aria-hidden="true">&nbsp;</div>';
 
-  var url=a.url||'#';
+  var url=_siteRel(a.url||'#');
   var href=a.key==="travel"?(url==='#'?url:travelHref()):url;
   return '<a class="card lift app-card app-'+a.key+'" href="'+esc(href)+'" '
     +(/^https?:/.test(url)?'target="_blank" rel="noopener"':'')+'>'
@@ -10293,6 +10325,58 @@ setTimeout(scheduleMasonry,300); setTimeout(scheduleMasonry,1200);
 (function waitG(n){ if(window.google&&google.accounts&&google.accounts.oauth2){ try{ gAutoConnect(); }catch(e){} } else if(n>0){ setTimeout(function(){ waitG(n-1); },400); } })(15);
 initAuth();
 (function(){ var s=document.getElementById("splash"); function go(){ setTimeout(()=>s.classList.add("hide"),600); setTimeout(()=>{ if(s.parentNode) s.parentNode.removeChild(s); },1400); } if(document.readyState==="complete") go(); else window.addEventListener("load",go); })();
+</script>
+<script>
+/* ════════════════ Grids — embedded module (Grids/index.html) ════════════════
+   The hub owns the data (data.grids → localStorage + Supabase like everything else).
+   Grids lives in its own frame so its shortcuts, styles and code never touch the hub. */
+var _gridsFrame=null, _gridsSent=undefined, _gridsTitle=null, _gridsLoaded=false;
+var GRIDS_VER="2026-09-24";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
+function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
+function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
+function gridsPost(msg){ try{ if(_gridsFrame&&_gridsFrame.contentWindow) _gridsFrame.contentWindow.postMessage(msg,_gridsOrigin()); }catch(e){} }
+function sizeGridsFrame(){ var f=document.getElementById("gridsFrame"); if(!f||_activeTab()!=="grids") return; if(document.documentElement.classList.contains("grids-focus")){ f.style.height=""; return; }
+  var bleed=parseFloat(getComputedStyle(f).getPropertyValue("--gbleed"))||0;
+  var top=f.getBoundingClientRect().top, bottomGap=Math.max(0,18-bleed);
+  var bb=document.querySelector(".bottombar"); if(bb&&getComputedStyle(bb).display!=="none"){ var r=bb.getBoundingClientRect(); if(r.height) bottomGap=Math.max(bottomGap,window.innerHeight-r.top+10-bleed); }
+  f.style.height=Math.max(380,Math.floor(window.innerHeight-top-bottomGap))+"px"; }
+function gridsOpen(){ var f=document.getElementById("gridsFrame"); if(!f) return; _gridsFrame=f;
+  document.documentElement.classList.add("grids-on");
+  if(!_gridsLoaded){ _gridsLoaded=true; f.src=gridsSrc(); }
+  sizeGridsFrame(); requestAnimationFrame(sizeGridsFrame); setTimeout(sizeGridsFrame,450);
+  gridsApplyTitle(); }
+function gridsApplyTitle(){ if(_activeTab()!=="grids"||!_gridsTitle) return; var c=document.getElementById("crumb"), t=document.getElementById("pageTitle");
+  if(c) c.textContent=_gridsTitle.crumb||"Workspace"; if(t) t.textContent=_gridsTitle.title||"Grids"; }
+/* Grids calls this directly (same-origin) so a save can't be lost when the page closes */
+function _gridsAcct(){ try{ return (user&&user.id)?String(user.id):"guest"; }catch(e){ return "guest"; } }
+var _gridsAcctSent=null;
+/* merge (not overwrite): anything that reached the hub from another device while Grids was busy survives; on a tie the frame's copy wins */
+window.__gridsSave=function(db,acct){ if(!db||typeof db!=="object") return; if(acct!==undefined&&acct!==_gridsAcct()) return;   /* a late save from the previous account */
+  var merged=_mergeGrids(db,data.grids); data.grids=merged; _gridsSent=data.grids; save();
+  var stale=Object.keys(merged.sheets||{}).some(function(k){ var a=merged.sheets[k], b=(db.sheets||{})[k]; return !b||(+a.updated||0)!==(+b.updated||0); })||Object.keys(db.sheets||{}).some(function(k){ return !(merged.sheets||{})[k]; });
+  if(stale) setTimeout(function(){ gridsPost({type:"grids:update",db:gridsDB(),acct:_gridsAcct()}); },0); };
+window.addEventListener("message",function(e){ var f=document.getElementById("gridsFrame"); if(!f||e.source!==f.contentWindow) return; if(location.protocol!=="file:"&&e.origin!==location.origin) return; var m=e.data||{};
+  if(m.type==="grids:ready"){ _gridsFrame=f; _gridsSent=data.grids; _gridsAcctSent=_gridsAcct(); gridsPost({type:"grids:init",db:gridsDB(),acct:_gridsAcctSent,dark:document.documentElement.classList.contains("dark")}); }
+  else if(m.type==="grids:save"){ window.__gridsSave(m.db,m.acct); }
+  else if(m.type==="grids:title"){ _gridsTitle={title:String(m.title||"Grids"),crumb:String(m.crumb||"Workspace")}; gridsApplyTitle(); }
+  else if(m.type==="grids:toast"){ try{ toast(String(m.msg||"")); }catch(_){} }
+  else if(m.type==="grids:toggleTheme"){ try{ toggleTheme(); }catch(_){} }
+  else if(m.type==="grids:focus"){ gridsSetFocus(!!m.on); }
+});
+function gridsSetFocus(on){ var h=document.documentElement; if(on&&_activeTab()!=="grids") on=false; if(h.classList.contains("grids-focus")===on&&!on){ gridsPost({type:"grids:focus",on:false}); return; }
+  h.classList.toggle("grids-focus",on); gridsPost({type:"grids:focus",on:on}); if(!on) setTimeout(sizeGridsFrame,30);
+  try{ if(on&&_gridsFrame) _gridsFrame.focus(); }catch(e){} }
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&document.documentElement.classList.contains("grids-focus")){ gridsSetFocus(false); } });
+function gridsSyncFromHub(){ if(!_gridsFrame||!_gridsLoaded) return; var a=_gridsAcct();
+  if(_gridsAcctSent!==null&&a!==_gridsAcctSent){ _gridsAcctSent=a; _gridsSent=data.grids; gridsPost({type:"grids:init",db:gridsDB(),acct:a,dark:document.documentElement.classList.contains("dark")}); return; }   /* signed in or out: replace, never merge */
+  if(data.grids===_gridsSent) return; _gridsSent=data.grids; gridsPost({type:"grids:update",db:gridsDB(),acct:a}); }
+/* theme: the hub's toggle drives Grids */
+try{ new MutationObserver(function(){ gridsPost({type:"grids:theme",dark:document.documentElement.classList.contains("dark")}); }).observe(document.documentElement,{attributes:true,attributeFilter:["class"]}); }catch(e){}
+window.addEventListener("resize",sizeGridsFrame);
+window.addEventListener("beforeunload",function(){ try{ var w=_gridsFrame&&_gridsFrame.contentWindow; if(w&&w.flushSave) w.flushSave(); }catch(e){} });
+/* opened straight onto #grids (bookmark / reload) */
+try{ if(_activeTab()==="grids") gridsOpen(); }catch(e){}
 </script>
 </body>
 </html>
