@@ -10331,7 +10331,7 @@ initAuth();
    The hub owns the data (data.grids → localStorage + Supabase like everything else).
    Grids lives in its own frame so its shortcuts, styles and code never touch the hub. */
 var _gridsFrame=null, _gridsSent=undefined, _gridsTitle=null, _gridsLoaded=false;
-var GRIDS_VER="2026-09-24";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-09-25";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
