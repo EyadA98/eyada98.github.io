@@ -908,6 +908,18 @@ table.gr tfoot td.sumcell .sv{font-weight:800;color:var(--text);font-variant-num
 table.gr tfoot td.sumempty .sk{opacity:0;transition:opacity .15s}
 table.gr tfoot tr:hover td.sumempty .sk{opacity:.8}
 table.gr tfoot td.frzcol{z-index:7}
+/* drag grids/folders into folders */
+body.bdrag,body.bdrag *{cursor:grabbing!important;user-select:none!important}
+.item.bdragging{opacity:.35;transform:scale(.97)}
+.bdrag-ghost{position:fixed;left:0;top:0;z-index:10000;pointer-events:none;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:14px;background:var(--card);border:1px solid rgba(129,126,255,.45);box-shadow:0 14px 34px rgba(21,16,58,.35);font-weight:700;font-size:.9rem;color:var(--text);max-width:260px}
+html.dark .bdrag-ghost{background:#231d58;box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.bdrag-ghost .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;margin:0}
+.bdrag-ghost .ic svg{width:17px;height:17px}
+.bdrag-ghost span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.folder.dropable{outline:1.5px dashed rgba(129,126,255,.55);outline-offset:3px}
+.item.folder.dropover{outline:2px solid var(--lavender);outline-offset:3px;transform:translateY(-2px) scale(1.02);box-shadow:0 0 0 6px rgba(129,126,255,.16),0 16px 34px rgba(21,16,58,.3)}
+.bcrumbs .bc.dropable{box-shadow:inset 0 0 0 1.5px rgba(129,126,255,.5)}
+.bcrumbs .bc.dropover{background:rgba(129,126,255,.22);color:var(--text)}
 </style>
 </head>
 <body>
@@ -1771,7 +1783,7 @@ function firstTab(d){ ensureTabs(d); return d.tabs[0]; }
 const _parentOf=x=>(x.parent&&DB.folders[x.parent]&&x.parent!==x.id)?x.parent:null;
 function childFolders(pid){ return Object.values(DB.folders).filter(f=>_parentOf(f)===(pid||null)).sort((a,b)=>a.name.localeCompare(b.name)); }
 function childSheets(pid){ return Object.values(DB.sheets).filter(s=>_parentOf(s)===(pid||null)).sort((a,b)=>a.name.localeCompare(b.name)); }
-function folderPath(fid){ const path=[]; let f=fid?DB.folders[fid]:null; while(f){ path.unshift(f); f=f.parent?DB.folders[f.parent]:null; } return path; }
+function folderPath(fid){ const path=[], seen=new Set(); let f=fid?DB.folders[fid]:null; while(f&&!seen.has(f.id)){ seen.add(f.id); path.unshift(f); f=f.parent?DB.folders[f.parent]:null; } return path; }
 
 function render(){ if(DB.ui.open&&DB.sheets[DB.ui.open]) renderEditor(); else renderBrowser(); renderCrumbs(); try{ vhOnRender(); }catch(e){} }
 
@@ -1788,8 +1800,8 @@ function renderCrumbs(){
   postTitle();
 }
 function browserCrumbs(){ const path=folderPath(DB.ui.cwd); if(!path.length) return `<nav class="bcrumbs"><span class="bc cur">All grids</span></nav>`;
-  return `<nav class="bcrumbs"><button class="bc bback" title="Back" onclick="openFolder(${path.length>1?`'${path[path.length-2].id}'`:"null"})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button><span class="bc" onclick="goHome()">All grids</span>`
-    +path.map((f,i)=>`<span class="bsep">/</span><span class="bc${i===path.length-1?' cur':''}" ${i===path.length-1?"":`onclick="openFolder('${f.id}')"`}>${esc(f.name)}</span>`).join("")+`</nav>`; }
+  return `<nav class="bcrumbs"><button class="bc bback" title="Back" data-drop="${path.length>1?path[path.length-2].id:""}" onclick="openFolder(${path.length>1?`'${path[path.length-2].id}'`:"null"})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button><span class="bc" data-drop="" onclick="goHome()">All grids</span>`
+    +path.map((f,i)=>`<span class="bsep">/</span><span class="bc${i===path.length-1?' cur':''}" ${i===path.length-1?"":`data-drop="${f.id}" onclick="openFolder('${f.id}')"`}>${esc(f.name)}</span>`).join("")+`</nav>`; }
 function goHome(){ DB.ui.open=null; DB.ui.cwd=null; save(); render(); }
 function openFolder(id){ DB.ui.open=null; DB.ui.cwd=id; save(); render(); }
 function openSheet(id){ DB.ui.open=id; save(); render(); }
@@ -1818,7 +1830,7 @@ function renderBrowser(){
   }else{
     if(fF.length){ html+=`<div class="section-label">Folders</div><div class="grid-items">`;
       fF.forEach(f=>{ const n=childFolders(f.id).length+childSheets(f.id).length;
-        html+=`<div class="item folder" onclick="openFolder('${f.id}')" oncontextmenu="itemMenu(event,'folder','${f.id}')">
+        html+=`<div class="item folder" data-kind="folder" data-id="${f.id}" data-drop="${f.id}" onclick="openFolder('${f.id}')" oncontextmenu="itemMenu(event,'folder','${f.id}')">
           <button class="kebab" onclick="event.stopPropagation();itemMenu(event,'folder','${f.id}')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
           <div class="nm">${esc(f.name)}</div><div class="meta">${n} item${n===1?"":"s"}</div></div>`;
@@ -1827,7 +1839,7 @@ function renderBrowser(){
     }
     if(sF.length){ html+=`<div class="section-label">Grids</div><div class="grid-items">`;
       sF.forEach(s=>{ const ft=firstTab(s); const rc=ft.rows.length, cc=ft.columns.length; const tn=(s.tabs||[]).length;
-        html+=`<div class="item sheet" onclick="openSheet('${s.id}')" oncontextmenu="itemMenu(event,'sheet','${s.id}')">
+        html+=`<div class="item sheet" data-kind="sheet" data-id="${s.id}" onclick="openSheet('${s.id}')" oncontextmenu="itemMenu(event,'sheet','${s.id}')">
           <button class="kebab" onclick="event.stopPropagation();itemMenu(event,'sheet','${s.id}')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></div>
           <div class="nm">${esc(s.name)}</div><div class="meta">${tn>1?tn+" tabs · ":""}${rc} row${rc===1?"":"s"} · ${cc} cols</div></div>`;
@@ -2453,7 +2465,8 @@ function startEdit(r,c){
   const isCol=(t==="formula"); const startVal=isCol?(col.formula||"="):cur;
   EDITING=true;
   let inp=document.createElement("input"); inp.className="cellinput"; inp.type="text";
-  if(t==="email")inp.type="email"; if(t==="phone")inp.type="tel"; if(t==="url")inp.type="url";
+  /* plain text boxes with a keyboard hint — type="email"/"tel" make Chrome pop up saved addresses over the grid */
+  if(t==="email")inp.inputMode="email"; if(t==="phone")inp.inputMode="tel"; if(t==="url")inp.inputMode="url";
   inp.value=startVal; td.appendChild(inp);
   _FE.cellInp=inp; _FE.isCol=isCol; _FE.r=r; _FE.c=c; _FE.scope=isCol?"col":"cell"; _FE.session=true; _FE.entry=false;
   inp.oninput=feOnInput; inp.onkeydown=e=>feOnKey(e,"cell"); inp.onfocus=()=>feFocus("cell"); inp.onblur=e=>feBlur(e,"cell");
@@ -2519,6 +2532,14 @@ function cselOpen(e,id){ e.preventDefault(); e.stopPropagation(); const reg=_cse
   const el=document.createElement("div"); el.className="ctx csel-pop"; el.style.left=b.left+"px"; el.style.top=(b.bottom+3)+"px"; el.style.minWidth=b.width+"px";
   el.innerHTML=reg.options.map(o=>`<button type="button" class="${String(o.value)===String(cur)?"on":""}" onclick="cselPick('${id}','${jsAttr(String(o.value))}')">${o.color?`<span class='dot' style='background:${o.color}'></span>`:""}${esc(o.label)}</button>`).join(""); openCtxEl(el); }
 function cselPick(id,val){ const reg=_cselReg[id]; const o=((reg&&reg.options)||[]).find(x=>String(x.value)===String(val))||{value:val,label:val}; const inp=$("#"+id); if(!inp){closeCtx();return;} inp.value=o.value; const l=$("#"+id+"__l"); if(l)l.textContent=o.label; closeCtx(); inp.dispatchEvent(new Event("change",{bubbles:true})); }
+/* ===================== No browser autofill ===================== */
+/* Chrome's saved names / addresses / emails popping up over cells is noise in a spreadsheet: every text box
+   Grids creates is marked as a non-form field ("off" plus a random name, which Chrome's address filler respects). */
+(function(){ let n=0; const tag=el=>{ if(!el||el._naf) return; el._naf=1; el.setAttribute("autocomplete","off"); el.setAttribute("autocorrect","off"); el.setAttribute("autocapitalize","off");
+    el.setAttribute("data-lpignore","true"); el.setAttribute("data-1p-ignore","true"); el.setAttribute("data-form-type","other"); if(!el.name) el.name="g"+(++n)+"_"+Math.random().toString(36).slice(2,7); };
+  const scan=root=>{ if(!root||!root.querySelectorAll) return; if(root.matches&&root.matches("input,textarea")) tag(root); root.querySelectorAll("input:not([type=file]):not([type=checkbox]):not([type=color]),textarea").forEach(tag); };
+  const start=()=>{ scan(document.body); new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(scan))).observe(document.body,{childList:true,subtree:true}); };
+  if(document.body) start(); else document.addEventListener("DOMContentLoaded",start); })();
 /* ===================== Brand tooltips ===================== */
 /* Every title="" in the module becomes data-tip on first hover, so the browser's grey bubble never shows;
    a branded pill appears instead, with any shortcut in brackets shown as a key cap. */
@@ -3329,7 +3350,7 @@ const I={edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
   fx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20c3 0 3-16 6-16M8 12h8"/></svg>',
   type:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>' };
 function itemMenu(e,kind,id){ ctxAt(e, kind==="folder"?
-  `<button onclick="closeCtx();openFolder('${id}')">${I.open}Open</button><button onclick="closeCtx();renameItem('folder','${id}')">${I.edit}Rename</button><div class="div"></div><button class="dan" onclick="closeCtx();deleteItem('folder','${id}')">${I.del}Delete</button>`
+  `<button onclick="closeCtx();openFolder('${id}')">${I.open}Open</button><button onclick="closeCtx();renameItem('folder','${id}')">${I.edit}Rename</button><button onclick="closeCtx();moveItemPrompt('${id}','folder')">${I.open}Move to…</button><div class="div"></div><button class="dan" onclick="closeCtx();deleteItem('folder','${id}')">${I.del}Delete</button>`
   : `<button onclick="closeCtx();openSheet('${id}')">${I.open}Open</button><button onclick="closeCtx();renameItem('sheet','${id}')">${I.edit}Rename</button><button onclick="closeCtx();dupSheet('${id}')">${I.copy}Duplicate</button><button onclick="closeCtx();moveItemPrompt('${id}')">${I.open}Move to…</button><div class="div"></div><button class="dan" onclick="closeCtx();deleteItem('sheet','${id}')">${I.del}Delete</button>`); }
 function bgMenu(e){ if(e.target.closest(".item")) return; ctxAt(e,`<div class="lbl">${esc(DB.ui.cwd?DB.folders[DB.ui.cwd].name:"Home")}</div><button onclick="closeCtx();newSheet()">${I.add}New grid</button><button onclick="closeCtx();newFolder()">${I.add}New folder</button>`); }
 function colMenu(e,cid){ if(_justDragged){ if(e){e.preventDefault();e.stopPropagation();} return; } const sh=curSheet(); const col=sh.columns.find(c=>c.id===cid);
@@ -3796,10 +3817,44 @@ function deleteItem(kind,id){
 }
 function deleteFolderDeep(id){ childFolders(id).forEach(f=>deleteFolderDeep(f.id)); childSheets(id).forEach(s=>{ delete DB.sheets[s.id]; tomb(s.id); }); delete DB.folders[id]; tomb(id); }
 function goBackFolder(){ const d=curDoc(); const p=d?d.parent:null; DB.ui.open=null; DB.ui.cwd=p; save(); render(); }
-function moveItemPrompt(id){
-  const opts=[{v:"",l:"Home"}].concat(Object.values(DB.folders).map(f=>({v:f.id,l:folderPath(f.id).map(x=>x.name).join(" / ")})));
-  selectModal("Move grid to…",opts,DB.sheets[id].parent||"",v=>{ DB.sheets[id].parent=v||null; save(); render(); toast("Moved"); });
+function moveItemPrompt(id,kind){ kind=kind||"sheet"; const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return;
+  const opts=[{v:"",l:"All grids"}].concat(Object.values(DB.folders).filter(f=>kind!=="folder"||!_isInside(f.id,id)).map(f=>({v:f.id,l:folderPath(f.id).map(x=>x.name).join(" / ")})));
+  selectModal(kind==="folder"?"Move folder to…":"Move grid to…",opts,it.parent||"",v=>moveItem(kind,id,v||null));
 }
+/* ---------- drag grids & folders into folders (or onto the breadcrumb to move them up) ---------- */
+function _isInside(fid,ancestor){ const seen=new Set(); let f=fid?DB.folders[fid]:null; while(f&&!seen.has(f.id)){ if(f.id===ancestor) return true; seen.add(f.id); f=f.parent?DB.folders[f.parent]:null; } return false; }
+function moveItem(kind,id,target){ const map=kind==="folder"?DB.folders:DB.sheets; const it=map[id]; if(!it) return false; target=target||null;
+  if(target&&!DB.folders[target]) return false;
+  if(kind==="folder"&&target&&_isInside(target,id)){ toast("A folder can't go inside itself"); return false; }
+  if((it.parent||null)===target) return false;
+  it.parent=target; save(); render(); toast(`Moved “${it.name}” to ${target?"“"+DB.folders[target].name+"”":"All grids"}`); return true; }
+let _bd=null, _bdJust=0;
+function _bdTargets(){ return [...document.querySelectorAll("#browserArea [data-drop]")]; }
+function _bdOk(el){ if(!_bd||!el) return false; const t=el.dataset.drop||null; if(_bd.kind==="folder"&&(t===_bd.id||(t&&_isInside(t,_bd.id)))) return false; const it=(_bd.kind==="folder"?DB.folders:DB.sheets)[_bd.id]; return !!it&&(it.parent||null)!==t; }
+function _bdBegin(x,y){ const card=_bd.card; card.classList.add("bdragging"); document.body.classList.add("bdrag");
+  const g=document.createElement("div"); g.className="bdrag-ghost"; g.innerHTML=card.querySelector(".ic").outerHTML+`<span>${esc(card.querySelector(".nm").textContent)}</span>`; document.body.appendChild(g); _bd.ghost=g; _bd.on=true;
+  _bdTargets().forEach(t=>{ if(_bdOk(t)) t.classList.add("dropable"); }); _bdMove(x,y); }
+function _bdMove(x,y){ if(!_bd||!_bd.on) return; _bd.ghost.style.transform=`translate(${x+14}px,${y+12}px)`;
+  const el=document.elementFromPoint(x,y); const t=el&&el.closest?el.closest("#browserArea [data-drop]"):null; const ok=t&&t!==_bd.card&&_bdOk(t)?t:null;
+  if(ok!==_bd.over){ if(_bd.over) _bd.over.classList.remove("dropover"); _bd.over=ok; if(ok) ok.classList.add("dropover"); } }
+function _bdEnd(drop){ const d=_bd; _bd=null; if(!d) return; clearTimeout(d.timer); document.removeEventListener("pointermove",_bdPM); document.removeEventListener("pointerup",_bdPU); document.removeEventListener("pointercancel",_bdPC);
+  document.removeEventListener("touchmove",_bdTM,{passive:false}); document.removeEventListener("touchend",_bdTE); document.removeEventListener("touchcancel",_bdTC);
+  if(!d.on) return; _bdJust=Date.now(); d.card.classList.remove("bdragging"); document.body.classList.remove("bdrag"); if(d.ghost) d.ghost.remove();
+  _bdTargets().forEach(t=>t.classList.remove("dropable","dropover"));
+  if(drop&&d.over) moveItem(d.kind,d.id,d.over.dataset.drop||null); }
+const _bdPM=e=>{ if(!_bd) return; if(!_bd.on){ if(Math.hypot(e.clientX-_bd.x0,e.clientY-_bd.y0)<6) return; _bdBegin(e.clientX,e.clientY); } _bdMove(e.clientX,e.clientY); };
+const _bdPU=()=>_bdEnd(true), _bdPC=()=>_bdEnd(false);
+/* touch: press and hold ~⅓ s to pick a card up (a normal swipe still scrolls) */
+const _bdTM=e=>{ if(!_bd) return; const t=e.touches[0]; if(!_bd.on){ if(Math.hypot(t.clientX-_bd.x0,t.clientY-_bd.y0)>8) _bdEnd(false); return; } e.preventDefault(); _bdMove(t.clientX,t.clientY); };
+const _bdTE=()=>_bdEnd(true), _bdTC=()=>_bdEnd(false);
+document.addEventListener("pointerdown",e=>{ const card=e.target.closest&&e.target.closest("#browserArea .item[data-kind]"); if(!card||e.target.closest(".kebab")||(e.button!==undefined&&e.button!==0)) return;
+  _bd={kind:card.dataset.kind,id:card.dataset.id,card,x0:e.clientX,y0:e.clientY,on:false,over:null};
+  if(e.pointerType==="touch"){ _bd.timer=setTimeout(()=>{ if(_bd&&!_bd.on){ try{ navigator.vibrate&&navigator.vibrate(12); }catch(_){} _bdBegin(_bd.x0,_bd.y0); } },350);
+    document.addEventListener("touchmove",_bdTM,{passive:false}); document.addEventListener("touchend",_bdTE); document.addEventListener("touchcancel",_bdTC); }
+  else { document.addEventListener("pointermove",_bdPM); document.addEventListener("pointerup",_bdPU); document.addEventListener("pointercancel",_bdPC); } });
+/* the click that ends a drag must not also open the card */
+document.addEventListener("click",e=>{ if(Date.now()-_bdJust<400&&e.target.closest&&e.target.closest("#browserArea")){ e.stopPropagation(); e.preventDefault(); } },true);
+document.addEventListener("contextmenu",e=>{ if(_bd&&_bd.on) e.preventDefault(); },true);
 
 /* ============================ COLUMN EDITOR ============================ */
 function editColumn(cid){ openColumnEditor(cid,false); }
