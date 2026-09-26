@@ -360,7 +360,7 @@ html:not(.dark) .insight{background:rgba(255,255,255,.56)}
 .insight .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(129,126,255,.22);color:#b3a9ff}
 
 /* ===== Modal / toast / auth ===== */
-.overlay{position:fixed;inset:0;background:rgba(13,9,38,.64);z-index:90;display:grid;place-items:center;padding:20px;animation:fadeIn .25s}
+.overlay{position:fixed;inset:0;background:rgba(13,9,38,.64);z-index:90;display:grid;place-items:center;padding:20px;animation:fadeIn .25s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 html.modal-open,body.modal-open{overflow:hidden!important;scrollbar-width:none}
 html.modal-open::-webkit-scrollbar,body.modal-open::-webkit-scrollbar{display:none}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -475,7 +475,7 @@ html:not(.dark) .kcard{background:#fff}
 .kcard:hover{box-shadow:0 6px 16px rgba(129,126,255,.18)}
 .kcard.dragging{opacity:.5}
 .kcard .ktitle{font-weight:700;font-size:.96rem;line-height:1.32;padding-right:22px;margin-bottom:10px}
-.ktitle,.tt-title,.to-title,.tcap{text-transform:capitalize}
+.tcap{text-transform:capitalize}
 .kfoot{display:flex;align-items:center;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border);font-size:.74rem;font-weight:600;color:var(--muted)}
 .kfoot svg{width:13px;height:13px;opacity:.75;flex:none}
 .kfoot.over{color:var(--red)}.kfoot.over svg{opacity:1}
@@ -1308,7 +1308,10 @@ html:not(.dark) .b-doing,html:not(.dark) .ev-event,html:not(.dark) .is-sync,html
 .b-arch{background:rgba(106,95,134,.2);color:var(--muted)}
 /* status board -> horizontal scroll for many columns */
 .kanban{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
-.kanban .kcol{min-width:330px;max-width:520px;flex:1 1 340px}   /* grow to fill the board width when there are few columns; still scroll horizontally when many */
+.kanban .kcol{min-width:330px;max-width:520px;flex:1 1 340px}
+/* iPad portrait and small laptops: three columns fit side by side instead of the third
+   hanging off the edge (it needed 1022px; an iPad in portrait has 782). */
+@media(min-width:561px){ .kanban .kcol{min-width:clamp(240px,calc((100% - 32px) / 3),330px)} }   /* grow to fill the board width when there are few columns; still scroll horizontally when many */
 .kcol-add{flex:0 0 auto;align-self:stretch;min-width:54px;min-height:120px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:18px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s var(--ease)}
 .kcol-add:hover{border-color:var(--lavender);color:var(--lavender);background:rgba(129,126,255,.07)}
 html:not(.dark) .kcol-add{background:rgba(255,255,255,.4)}
@@ -1813,6 +1816,8 @@ aside{position:sticky;top:0;height:100dvh!important;max-height:100dvh;overflow-y
 .up-t{font-weight:700;font-size:.7rem;opacity:.5;white-space:nowrap}
 /* full-width stacked composition */
 #dashStack{display:flex;flex-direction:column;gap:18px}
+.dash-cust{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 10px;font-size:.8rem}
+.dash-cust .btn.sm{padding:6px 14px;font-size:.78rem}
 #dashStack .dash-widget{width:auto;margin:0}
 #dashStack .dash-widget>.card{height:auto!important}
 .dash-row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
@@ -1912,6 +1917,7 @@ html:not(.dark) .nlabel{background:rgba(129,126,255,.14)}
 .lbl-filter:empty{display:none}
 .lbl-chip{font-size:.74rem;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 13px;cursor:pointer;transition:all .15s}
 html:not(.dark) .lbl-chip{background:#fff}
+html:not(.dark) .lbl-chip.on{background:var(--grad-iri);color:#fff}
 .lbl-chip:hover{border-color:var(--lavender);color:var(--lavender)}
 .lbl-chip.on{background:var(--grad-iri);color:#fff;border-color:#c9b0ff}
 .lbl-name{flex:1}
@@ -2290,6 +2296,16 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
   .hx-val .lnk{position:relative}
   .hx-val .lnk::after{content:"";position:absolute;inset:-14px -10px}
 }
+/* ===== iPad: hit areas, round three =====
+   Same rule as above: the ink stays where it is, only the reach grows. */
+@media(pointer:coarse){
+  #dashEditBtn,.wx-retry,.tc5-more,.lbl-chip{position:relative}
+  #dashEditBtn::after{content:"";position:absolute;inset:-6px -2px}
+  .wx-retry::after{content:"";position:absolute;inset:-10px -8px}
+  .tc5-more::after{content:"";position:absolute;inset:-5px 0}
+  .lbl-chip::after{content:"";position:absolute;inset:-6px -2px}
+  .rt-cki{min-height:32px}
+}
 /* counts read as numbers, not as display glyphs */
 .sc-n,.cnt,.to-cnt,.wsn,.rt-cnt,.tl2-cnt,.up2-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 /* summary counts are display numerals — Marcellus, with tabular figures so columns align */
@@ -2435,7 +2451,7 @@ html:not(.dark) :where(button,a,input,select,textarea,[tabindex]):focus-visible{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
 .rt-tile svg{width:19px;height:19px}
 .rt-hx{flex:1;min-width:0}
-.rt-card.v1 .rt-title{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.12rem;line-height:1.2;min-width:0;text-transform:capitalize;
+.rt-card.v1 .rt-title{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:1.12rem;line-height:1.2;min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rt-kind{font-size:.55rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:4px 8px;border-radius:6px;
   background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--muted);white-space:nowrap;flex:none;margin-top:1px}
@@ -2485,7 +2501,7 @@ html:not(.dark) .rt-card.v1 .rt-bar{background:rgba(20,14,45,.08)}
 .rt-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
 .rt-ic svg{width:21px;height:21px}
 .rt-h{flex:1;min-width:0}
-.rt-h .rt-title{font-weight:700;font-size:1rem;text-transform:capitalize;line-height:1.2}
+.rt-h .rt-title{font-weight:700;font-size:1rem;line-height:1.2}
 .rt-h .rt-cat-l{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:2px}
 .rt-due{font-size:.78rem;font-weight:700;border-radius:99px;padding:3px 11px;white-space:nowrap;flex:none}
 .rt-due.over{background:rgba(214,85,76,.16);color:var(--red)}.rt-due.today{background:rgba(255,179,171,.18);color:var(--peach-deep)}.rt-due.up{background:rgba(129,126,255,.16);color:var(--lavender)}.rt-due.none{background:rgba(106,95,134,.16);color:var(--muted)}
@@ -2703,7 +2719,7 @@ html:not(.dark) .tlg-bar{background:#fff;box-shadow:0 4px 12px -6px rgba(67,49,9
 html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#5a46d8,#817eff,#c66a2b)}
 .tlg-bar.grad .s{color:rgba(255,255,255,.88)}
 .tlg-bar.done{opacity:.5}
-.tlg-bar .t{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:capitalize;line-height:1.2;color:var(--text)}
+.tlg-bar .t{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;color:var(--text)}
 .tlg-bar.grad .t{color:#fff}
 .tlg-bar .s{font-size:.71rem;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tlg-bar .s svg{width:11px;height:11px;flex:none;opacity:.9}
@@ -2716,7 +2732,7 @@ html:not(.dark) .tlg-bar.grad{background:linear-gradient(120deg,#5a46d8,#817eff,
 .tlg-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
 .tl-hint{position:fixed;z-index:120;pointer-events:none;background:var(--card);border:1px solid var(--border);border-radius:13px;box-shadow:var(--sh-2);padding:12px 15px;max-width:280px;opacity:0;transform:translateY(5px);transition:opacity .15s,transform .15s}
 .tl-hint.show{opacity:1;transform:none}
-.tl-hint .h-t{font-family:'Marcellus',Georgia,serif;font-size:1.02rem;text-transform:capitalize;margin-bottom:8px;line-height:1.2}
+.tl-hint .h-t{font-family:'Marcellus',Georgia,serif;font-size:1.02rem;margin-bottom:8px;line-height:1.2}
 .tl-hint .h-r{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);font-weight:600}
 .tl-hint .h-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tl-hint .h-chip{display:inline-flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;padding:4px 9px;border-radius:99px;
@@ -3318,6 +3334,7 @@ html:not(.dark) .rt-card.v1.st-ok{
    after the logo button. */
 @media(min-width:1025px){
   /* fixed rail like Finance & Travel — sticky let the pattern scroll away near page end */
+  [dir=rtl] aside{left:auto!important;right:0;border-right:0;border-left:1px solid rgba(255,255,255,.08)}
   aside{position:fixed;left:0;top:0;width:clamp(214px,16.5vw,278px);height:100vh;height:100dvh;z-index:40;padding:18px 13px;gap:3px;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
   .content{grid-column:2}
   aside::-webkit-scrollbar{display:none;width:0;height:0}
@@ -3401,6 +3418,8 @@ html.dark #avatarChip{box-shadow:0 0 40px -10px rgba(129,126,255,.55)!important}
   content:"";position:absolute;top:-30%;right:-10%;width:560px;height:560px;border-radius:50%;
   background:radial-gradient(circle,rgba(242,164,140,.25),transparent 68%)
 }
+#authRoot .auth-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(187,164,228,.3);background:transparent;color:inherit;display:grid;place-items:center;cursor:pointer;z-index:2}
+#authRoot .auth-x svg{width:16px;height:16px}#authRoot .auth-x:hover{background:rgba(187,164,228,.14)}
 #authRoot .auth-card{
   position:relative;z-index:1;width:100%;max-width:420px;
   background:rgba(24,18,60,.92);backdrop-filter:blur(26px) saturate(1.5);
@@ -3664,6 +3683,23 @@ html.auth-open{overscroll-behavior:none}
    bold. That is deliberate and scoped to these three values only — the rest of
    the app keeps Marcellus at its true weight. */
 .hx-val,.hx-val .wx-t{font-weight:700}
+
+/* dashboard: reports pinned from Grids */
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.rep{border:1px solid var(--border);border-radius:16px;padding:12px 14px;background:var(--card);min-width:0}
+.rep-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.rep-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.rep-t b{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-t small{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-h .btn{padding:5px 12px;font-size:.78rem}
+.rep-tw{overflow:auto}
+.rep-tb{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums}
+.rep-tb th,.rep-tb td{padding:5px 6px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left}
+.rep-tb th{font-size:.7rem;color:var(--muted);font-weight:800}
+.rep-tb .n{text-align:right}
+.rep-tb tfoot td{font-weight:800;border-bottom:0}
+.rep-tb .riyal{margin-right:2px;font-size:.9em}
+.rep-more{font-size:.72rem;color:var(--muted);margin-top:6px}
 </style>
 <style id="sem-v2">/* semantic separation (brand guide): in-progress = sky info, due-soon = amber warning */.b-doing{background:rgba(90,162,234,.18);color:#7fb2f0}html:not(.dark) .b-doing{color:#1f5fc2}.rt-due.today,.ntf-when.soon{color:#f0c24b}html:not(.dark) .rt-due.today,html:not(.dark) .ntf-when.soon{color:#8a6100}</style>
 <style id="apps-v15">
@@ -3962,6 +3998,24 @@ html.grids-focus,html.grids-focus body{overflow:hidden!important;scrollbar-width
 html.grids-focus::-webkit-scrollbar{display:none}
 html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;z-index:85;--gbleed:0px}
 </style>
+<style id="polish-r2">
+/* ===== review round 2: legibility, focus and solid panels ===== */
+:root{--grad-iri:linear-gradient(120deg,#6152d6 0%,#7b6ce0 100%)}   /* white text on buttons reaches 4.5:1 */
+.modal.side{background:#17123a!important}
+html:not(.dark) .modal.side{background:#fff!important}   /* the task / routine panel is solid — no board text showing through */
+.modal{background-color:rgba(24,18,60,.985)} html:not(.dark) .modal{background-color:rgba(255,255,255,.985)}
+html:not(.dark) .fld:focus,html:not(.dark) .fld:focus-visible{border-color:var(--lavender)!important;box-shadow:0 0 0 3px rgba(129,126,255,.28)!important;outline:none}
+input[type=checkbox]{accent-color:var(--lavender)}
+.kc-title,.to-title,.tl2-title,.rt-title,.ntitle,.tlg-bar .t,.ntf-title,.tc5-t,.h-t,.rep-t b{unicode-bidi:plaintext}   /* English titles keep their emoji and "…" on the right in Arabic mode */
+.sum-card .sc-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif!important;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}   /* Marcellus' zero read like the letter O */
+.wx-err{display:inline-flex;align-items:center;gap:7px;font-size:.95rem;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;color:rgba(255,255,255,.82)!important;-webkit-text-fill-color:rgba(255,255,255,.82)!important;background:none!important}.wx-err svg{width:20px;height:20px}
+.wx-retry{-webkit-text-fill-color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:99px;padding:3px 11px;font:inherit;font-size:.7rem;font-weight:700;cursor:pointer}
+.wx-retry:hover{background:rgba(255,255,255,.2)}
+.more-sheet[inert]{visibility:hidden}.more-sheet.show{visibility:visible}
+@media (max-width:1024px){ .bottombar{background:linear-gradient(180deg,rgba(40,32,88,.9),rgba(18,12,48,.94))!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)} html:not(.dark) .bottombar{background:rgba(255,255,255,.94)!important} }
+html.dark .kc-chip.p-high,html.dark .tl2-prio-pill.p-high,html.dark .pflag.p-high{color:#ff8fa0}
+html:not(.dark) .kc-chip.p-med,html:not(.dark) .tl2-prio-pill.p-med{color:#8f4a14}
+</style>
 </head>
 <body>
 <div id="splash"><div style="display:flex;flex-direction:column;align-items:center;gap:12px">
@@ -3979,7 +4033,7 @@ html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!impo
   <div class="nav-label">Workspace</div>
   <button class="nav" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Calendar</button>
   <button class="nav" data-tab="grids"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="2.5"/><path d="M3 9h18M3 14.5h18M9 3.5v17"/></svg>Grids</button>
-  <button class="nav" data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
+  <button class="nav" data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.2l2.7 2.7L16.2 9.4"/></svg>Tasks</button>
   <button class="nav" data-tab="routines"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>Routines</button>
   <button class="nav" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button class="nav" data-tab="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>Timeline</button>
@@ -3994,7 +4048,7 @@ html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!impo
         <button class="btn soft round" id="notifBtn" onclick="go('notifications')" title="Notifications" aria-label="Notifications" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="tb-badge" id="notifBadge"></span></button>
         <button class="btn soft round" onclick="toggleTheme()" title="Theme" aria-label="Toggle theme"><span id="themeIcon"></span></button>
     <div class="av-wrap">
-      <div id="avatarChip" title="Account" style="width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:.92rem;font-weight:800;color:#fff;background:var(--grad-iri);box-shadow:var(--glow-lav);cursor:pointer" onclick="toggleAvMenu(event)"></div>
+      <button type="button" id="avatarChip" title="Account" aria-label="Account menu" style="border:0;padding:0;font-family:inherit;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:.92rem;font-weight:800;color:#fff;background:var(--grad-iri);box-shadow:var(--glow-lav);cursor:pointer" onclick="toggleAvMenu(event)"></button>
       <div class="av-menu" id="avMenu"></div>
     </div>
   </div>
@@ -4015,12 +4069,13 @@ html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!impo
         <div class="hx-box hx-date"><div class="hx-lbl">Date</div><div class="hx-val" id="dateLine">&mdash;</div><div class="hx-sub" id="hijriLine"></div></div>
         <div class="hx-box hx-weather"><div class="hx-lbl">Weather</div><div class="hx-val" id="ambient">&mdash;</div><div class="hx-sub" id="weatherSub"></div></div>
       </div>
-      <div class="hx-up-h">Upcoming this week</div>
+      <div class="hx-up-h">Next 7 days</div>
       <div id="upcomingList" class="up2"></div>
     </div>
   </div>
 
 
+  <!-- the dashboard's "Customize" button was removed on request; cards keep whatever show/hide layout was already saved -->
   <div id="dashStack">
     <!-- PRAYER (full width) -->
     <div class="dash-widget" data-w="prayer">
@@ -4028,6 +4083,9 @@ html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!impo
         <div id="prayerNext"></div>
       </div>
     </div>
+
+    <!-- REPORTS pinned from Grids summaries (hidden until something is pinned) -->
+    <div class="dash-widget" data-w="reports" id="dashReports" style="display:none"></div>
 
     <!-- TASKS OVERVIEW + RECENT NOTES (side by side, equal height) -->
     <div class="dash-row2">
@@ -4201,13 +4259,13 @@ html.grids-focus #tab-grids>.grids-frame{position:fixed;inset:0;width:100vw!impo
 
 <nav class="bottombar">
   <button data-tab="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
-  <button data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M4 12v7a1 1 0 0 0 1 1h14"/></svg>Tasks</button>
+  <button data-tab="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.2l2.7 2.7L16.2 9.4"/></svg>Tasks</button>
   <button data-tab="routines"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>Routines</button>
   <button data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h6"/></svg>Notes</button>
   <button id="moreBtn" type="button" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</button>
 </nav>
 <div id="moreOverlay" class="more-overlay" onclick="closeMoreSheet()"></div>
-<div id="moreSheet" class="more-sheet" role="dialog" aria-label="More">
+<div id="moreSheet" class="more-sheet" role="dialog" aria-label="More" inert aria-hidden="true">
   <div class="more-grip"></div>
   <div class="more-title">More</div>
   <div class="more-grid">
@@ -4250,7 +4308,8 @@ const DEFAULT = {
 
 /* ============ State ============ */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function storeKey(){ return user ? KEY+":"+user.id : KEY; }
+var _offline=false;   /* sign-in service unreachable: keep working on the last account's copy on this device (no cloud) */
+function storeKey(){ return user ? KEY+":"+user.id : ((_offline&&_dataOwner) ? KEY+":"+_dataOwner : KEY); }
 function fill(d){
   for(const k of Object.keys(DEFAULT)) if(d[k]===undefined) d[k]=JSON.parse(JSON.stringify(DEFAULT[k]));
   if(!d.settings) d.settings={};
@@ -4293,7 +4352,7 @@ function fill(d){
     if(!t.status||ids.indexOf(t.status)<0) t.status=(t.done?doneId:ids[0]);
     t.done=(t.status===doneId);
   });
-  if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["briefing","weather","prayer","calendar","tasks","gmail","notes","apps"]; var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
+  if((d.settings.dashV||0)<4){ d.settings.dashLayout=JSON.parse(JSON.stringify(DEFAULT.settings.dashLayout)); d.settings.dashV=4; } var KN=["tasks","reports","calendar","gmail","notes","prayer","links","apps"];   /* same cards as DASH_KEYS — a key missing here lost its "hidden" choice on every reload */ var dl=d.settings.dashLayout; if(!Array.isArray(dl))dl=[]; var seen={}; dl=dl.filter(function(w){ if(!w||!w.k||KN.indexOf(w.k)<0||seen[w.k])return false; seen[w.k]=1; return true; }); KN.forEach(function(k){ if(!seen[k]) dl.push({k:k,h:false}); }); d.settings.dashLayout=dl;
   (d.notes||[]).forEach(function(n){ if(!Array.isArray(n.labels)) n.labels=[]; });
   /* A deleted routine stays deleted. This is the last gate before data is
      rendered or pushed back up, so a stale copy arriving from an old device
@@ -4302,6 +4361,7 @@ function fill(d){
   return d;
 }
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
+var _dataOwner=null;   /* whose data is in memory: a user id, or null for the guest copy — save() never writes one account's data under another's key */
 let data = (function(){
   try{
     if(!localStorage.getItem(GUEST_FLAG)){
@@ -4309,18 +4369,29 @@ let data = (function(){
          account doesn't cold-boot into whichever per-user key localStorage happens to
          enumerate first (H6). Falls back to the first match, then guest/default. */
       var _lu=null; try{ _lu=localStorage.getItem("hub.lastUser"); }catch(e){}
-      if(_lu){ var _ld=loadLocal(KEY+":"+_lu); if(_ld) return _ld; }
-      for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(KEY+":")===0){ const d=loadLocal(k); if(d) return d; } }
+      if(_lu){ var _ld=loadLocal(KEY+":"+_lu); if(_ld){ _dataOwner=_lu; return _ld; } }
+      /* no remembered account: start from the guest copy, never from some other account's cache */
     }
     return loadLocal(KEY) || JSON.parse(JSON.stringify(DEFAULT));
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); }
 })();
-var _lastSettingsJSON=""; function _syncSettingsBaseline(){ try{ _lastSettingsJSON=JSON.stringify((data&&data.settings)||{}); }catch(e){ _lastSettingsJSON=""; } }
-var _saveWarned=false; function save(){ try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } }catch(_s){} data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } } scheduleHubSync(); }
+var _lastSettingsJSON="", _lastProfileJSON=""; function _syncSettingsBaseline(){ try{ _lastSettingsJSON=JSON.stringify((data&&data.settings)||{}); _lastProfileJSON=JSON.stringify((data&&data.profile)||{}); }catch(e){ _lastSettingsJSON=""; _lastProfileJSON=""; } }
+var _saveWarned=false; function save(){ if((user?user.id:(_offline?_dataOwner:null))!==_dataOwner){ return; } try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } var _pj=JSON.stringify(data.profile||{}); if(_pj!==_lastProfileJSON){ data.profileUpdatedAt=Date.now(); _lastProfileJSON=_pj; } }catch(_s){} data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } scheduleHubSync(); return false; } scheduleHubSync(); return true; }
 _syncSettingsBaseline();
 let _hubTimer=null;
 function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
-async function pushHub(){ if(TEST_MODE) return; if(!user||!supa) return; try{ const {error}=await supa.from("hub").upsert({user_id:user.id,data:data,updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) throw error; }catch(e){
+var _hubCloudAt=null;   /* updated_at of the cloud copy we last read or wrote */
+function _modalOpen(){ return !!document.querySelector("#modalRoot .overlay"); }
+/* close the pop-ups through their own close functions, so their "open" state is reset and they open on the next click */
+function _closePops(){ try{ tdSchedClose(); }catch(_){} try{ tdAsgClose(); }catch(_){} try{ _dpClose(); }catch(_){} try{ _tmpClose(); }catch(_){} try{ document.querySelectorAll(".dp-pop,.tmp-pop,.asg-pop").forEach(function(p){ p.remove(); }); }catch(_){} }
+/* work held back while a dialog was open: changes from another tab, and a pending pull */
+function _afterModalClose(){ setTimeout(function(){ if(_modalOpen()) return; try{ if(_pendingIncoming){ var inc=_pendingIncoming; _pendingIncoming=null; data=fill(mergeHubData(data,inc)); _syncSettingsBaseline(); render(); } if(_pullPending){ _pullPending=false; pullHub(); } }catch(_){} },0); }
+async function pushHub(){ if(TEST_MODE){ try{ gridsNoteSync(true); }catch(_){} return; } if(!user||!supa) return; var uid0=user.id; try{
+    /* read → merge → write: if another device saved since we last looked, fold its changes in first instead of overwriting them */
+    const chk=await supa.from("hub").select("updated_at").eq("user_id",uid0).limit(1); if(chk.error) throw chk.error; if(!user||user.id!==uid0) return;
+    var cAt=chk.data&&chk.data[0]&&chk.data[0].updated_at; if(cAt&&(!_hubCloudAt||Date.parse(cAt)!==Date.parse(_hubCloudAt))){ if(_modalOpen()){ _pullPending=true; return; } const full=await supa.from("hub").select("data,updated_at").eq("user_id",uid0).limit(1); if(full.error) throw full.error; if(!user||user.id!==uid0) return;
+      if(_modalOpen()){ _pullPending=true; return; } var rec=full.data&&full.data[0]&&full.data[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var ch=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(_){} if(ch) render(); } }
+    var at=new Date().toISOString(); const {error}=await supa.from("hub").upsert({user_id:uid0,data:data,updated_at:at},{onConflict:"user_id"}); if(error) throw error; _hubCloudAt=at; try{ gridsNoteSync(true); }catch(_){} }catch(e){ try{ gridsNoteSync(false); }catch(_){}
   /* A failed cloud save used to reach console.error and nowhere else: you kept
      working, the change never left the device, and another device showed stale
      data with no hint anything had gone wrong. Finance and Travel both surface
@@ -4333,7 +4404,7 @@ async function pushHub(){ if(TEST_MODE) return; if(!user||!supa) return; try{ co
 var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
-function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>=cu) map[id]=x; } } a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
+function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>cu) map[id]=x; } }   /* a tie keeps this device's copy */ a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
 function _mergeGrids(a,b){ a=a||{}; b=b||{}; var del=Object.assign({},a.deleted||{}); Object.keys(b.deleted||{}).forEach(function(k){ if(!((+del[k]||0)>=(+b.deleted[k]||0))) del[k]=b.deleted[k]; });
   function t(x){ return +(x&&(x.updated||x.created))||0; }
   function pick(A,B){ A=A||{}; B=B||{}; var out={}, ids={}; Object.keys(A).forEach(function(k){ids[k]=1;}); Object.keys(B).forEach(function(k){ids[k]=1;});
@@ -4350,18 +4421,27 @@ function _mergeHubDataBase(local,cloud){ if(!cloud) return local; if(!local) ret
   var _lto=+local.tasksOrderAt||0, _cto=+cloud.tasksOrderAt||0;
   var _tsrc=(_lto||_cto)?((_lto>=_cto)?local:cloud):_newer;
   base.tasks=_mergeArr(_tsrc.tasks,(_tsrc===local?cloud:local).tasks,tomb,false);
-  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.settings||cloud.settings){ /* settings follow their OWN clock (settingsUpdatedAt), not the whole-doc updatedAt — otherwise an unrelated newer edit on one device silently reverts a preference toggled on the other. Legacy data (no settingsUpdatedAt) keeps the newer-blob behaviour. */ var _lsu=+local.settingsUpdatedAt||0, _csu=+cloud.settingsUpdatedAt||0; var _sNewer=(_lsu||_csu)?((_lsu>=_csu)?local:cloud):_newer; var _sOlder=(_sNewer===local)?cloud:local; base.settings=Object.assign({}, _sOlder.settings||{}, _sNewer.settings||{}); if(_lsu||_csu) base.settingsUpdatedAt=Math.max(_lsu,_csu); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_sNewer.settings&&_sNewer.settings.statuses)||[], (_sOlder.settings&&_sOlder.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
-async function pullHub(){ if(!user||!supa) return; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1); if(error) throw error; const rec=rows&&rows[0]&&rows[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
+  if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.profile||cloud.profile){ /* your name/photo follow their own clock too — a brand-new device (still on the default profile) must never overwrite the real one */ var _lpu=+local.profileUpdatedAt||0, _cpu=+cloud.profileUpdatedAt||0; var _isDef=function(x){ try{ return JSON.stringify(x.profile||{})===JSON.stringify(DEFAULT.profile||{}); }catch(e){ return false; } }; var _pN; if(_lpu||_cpu) _pN=(_lpu>=_cpu)?local:cloud; else if(_isDef(local)&&!_isDef(cloud)) _pN=cloud; else if(_isDef(cloud)&&!_isDef(local)) _pN=local; else _pN=_newer; if(_pN===local&&_isDef(local)&&!_isDef(cloud)&&!_lpu) _pN=cloud; var _pO=(_pN===local)?cloud:local; base.profile=Object.assign({},_pO.profile||{},_pN.profile||{}); if(_lpu||_cpu) base.profileUpdatedAt=Math.max(_lpu,_cpu); } if(local.settings||cloud.settings){ /* settings follow their OWN clock (settingsUpdatedAt), not the whole-doc updatedAt — otherwise an unrelated newer edit on one device silently reverts a preference toggled on the other. Legacy data (no settingsUpdatedAt) keeps the newer-blob behaviour. */ var _lsu=+local.settingsUpdatedAt||0, _csu=+cloud.settingsUpdatedAt||0; var _sNewer=(_lsu||_csu)?((_lsu>=_csu)?local:cloud):_newer; var _sOlder=(_sNewer===local)?cloud:local; base.settings=Object.assign({}, _sOlder.settings||{}, _sNewer.settings||{}); if(_lsu||_csu) base.settingsUpdatedAt=Math.max(_lsu,_csu); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_sNewer.settings&&_sNewer.settings.statuses)||[], (_sOlder.settings&&_sOlder.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
+var _pullPending=false, _pendingIncoming=null;
+async function pullHub(){ if(!user||!supa) return; if(_modalOpen()){ _pullPending=true; return; }   /* never swap the data out from under an open editor — pull when it closes */
+  var uid0=user.id; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",uid0).order("updated_at",{ascending:false}).limit(1); if(error) throw error; if(!user||user.id!==uid0) return; if(_modalOpen()){ _pullPending=true; return; } const rec=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]) _hubCloudAt=rows[0].updated_at; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
    tombstones (#parent/type::key), so concurrent edits to the SAME item don't lose data. */
 function _nHashT(s){ s=String(s==null?"":s); var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return (h>>>0).toString(36); }
-function _subKey(x){ return "$"+_nHashT(x&&x.t); }
+/* subtasks have ids: key by id, so renaming one on a device doesn't leave the old wording behind after a merge (checklist items without an id still key by text) */
+function _subKey(x){ return (x&&x.id!=null&&x.id!=="")?"#"+x.id:"$"+_nHashT(x&&x.t); }
+var _SUBKEY_MIGR=Date.parse("2026-09-27T00:00:00Z");   /* deletions made before this were recorded by text */
 function _cmtKey(x){ return "#"+(x&&x.id); }
 function _byIdN(arr){ var m={}; (Array.isArray(arr)?arr:[]).forEach(function(x){ if(x&&x.id!=null) m["#"+x.id]=x; }); return m; }
-function _mergeNestedList(win,oth,tomb,pfx,keyFn){ win=Array.isArray(win)?win:[]; oth=Array.isArray(oth)?oth:[]; tomb=tomb||{}; var seen={},out=[]; function ins(x){ if(x==null)return; var k=pfx+"::"+keyFn(x); if((+tomb[k]||0)>0)return; if(!seen[k]){ seen[k]=1; out.push(x); } } win.forEach(ins); oth.forEach(ins); return out; }
+/* keys for a list: two subtasks with the same text get "$h" and "$h~2", so they no longer collapse into one when devices merge */
+function _nKeys(arr,keyFn){ var cnt={}; return arr.map(function(x){ var k=keyFn(x); cnt[k]=(cnt[k]||0)+1; return cnt[k]>1?k+"~"+cnt[k]:k; }); }
+function _mergeNestedList(win,oth,tomb,pfx,keyFn){ win=Array.isArray(win)?win:[]; oth=Array.isArray(oth)?oth:[]; tomb=tomb||{}; var seen={},out=[]; function add(arr){ var ks=_nKeys(arr.filter(function(x){ return x!=null; }),keyFn); arr.filter(function(x){ return x!=null; }).forEach(function(x,i){ var k=pfx+"::"+ks[i]; if((+tomb[k]||0)>0)return;
+      if(keyFn===_subKey&&x.id!=null&&x.id!==""){ var lt=+tomb[pfx+"::$"+_nHashT(x.t)]||0; if(lt>0) return; }   /* honour deletions recorded the old way */ if(!seen[k]){ seen[k]=1; out.push(x); } }); } add(win); add(oth); return out; }
 function _unionHist(a,b){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; var seen={},out=[]; function ins(x){ if(x==null)return; var k=String(x.ts)+"|"+String(x.note==null?"":x.note); if(!seen[k]){ seen[k]=1; out.push(x); } } a.forEach(ins); b.forEach(ins); out.sort(function(x,y){ return (+y.ts||0)-(+x.ts||0); }); return out; }
-function _nestedDiff(pfx, oldArr, newArr, keyFn){ oldArr=Array.isArray(oldArr)?oldArr:[]; newArr=Array.isArray(newArr)?newArr:[]; data.deleted=data.deleted||{}; var nk={}; newArr.forEach(function(x){ nk[keyFn(x)]=1; }); oldArr.forEach(function(x){ var k=keyFn(x); if(!nk[k]) data.deleted[pfx+"::"+k]=Date.now(); }); newArr.forEach(function(x){ var kk=pfx+"::"+keyFn(x); if(data.deleted[kk]!=null&&data.deleted[kk]>0) data.deleted[kk]=-Date.now(); }); }
+function _nestedDiff(pfx, oldArr, newArr, keyFn){ oldArr=(Array.isArray(oldArr)?oldArr:[]).filter(function(x){ return x!=null; }); newArr=(Array.isArray(newArr)?newArr:[]).filter(function(x){ return x!=null; }); data.deleted=data.deleted||{}; var nKs=_nKeys(newArr,keyFn), oKs=_nKeys(oldArr,keyFn); var nk={}; nKs.forEach(function(k){ nk[k]=1; }); oKs.forEach(function(k){ if(!nk[k]) data.deleted[pfx+"::"+k]=Date.now(); }); nKs.forEach(function(k){ var kk=pfx+"::"+k; if(data.deleted[kk]!=null&&data.deleted[kk]>0) data.deleted[kk]=-Date.now(); });
+  /* an item added back with the same text as one deleted the old (text-keyed) way: clear that old record too, or the next merge would drop it */
+  if(keyFn===_subKey) newArr.forEach(function(x){ if(x&&x.id!=null&&x.id!==""){ var lk=pfx+"::$"+_nHashT(x.t); if((+data.deleted[lk]||0)>0) data.deleted[lk]=-Date.now(); } }); }
 function _reconcileNested(base, local, cloud, tomb){ try{
   function recon(field, nested){ var L=_byIdN(local&&local[field]), C=_byIdN(cloud&&cloud[field]); ((base&&base[field])||[]).forEach(function(it){ if(!it||it.id==null)return; var lv=L["#"+it.id], cv=C["#"+it.id]; if(!lv||!cv)return; var other=(it===lv)?cv:lv; nested.forEach(function(nf){ it[nf[0]]=_mergeNestedList(it[nf[0]], other[nf[0]], tomb, "#"+it.id+nf[1], nf[2]); }); }); }
   recon("tasks",[["subs","/s",_subKey],["comments","/c",_cmtKey]]);
@@ -4382,7 +4462,7 @@ function toggleTheme(){ const dark=!document.documentElement.classList.contains(
 updThemeIcon();
 
 /* ============ Navigation ============ */
-const PAGES={home:["Home","Dashboard"],grids:["Workspace","Grids"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],calendar:["Workspace","Calendar"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"],goals:["Workspace","Goals & Habits"]};
+const PAGES={home:["Home","Dashboard"],grids:["Workspace","Grids"],notifications:["Home","Notifications"],apps:["Apps","Your Apps"],calendar:["Workspace","Calendar"],notes:["Workspace","Notes"],timeline:["Workspace","Timeline"],mindmap:["Workspace","Mind Map"],tasks:["Workspace","Tasks"],routines:["Workspace","Routines"],library:["Workspace","Library"]};   /* "goals" had no page to show (a blank screen from #goals) — removed until it's built */
 var BOTTOM_TABS=["home","tasks","routines","notes"];
 window.addEventListener("popstate",function(e){
   var name=(e.state&&e.state.tab) || (location.hash||"#home").slice(1) || "home";
@@ -4394,6 +4474,7 @@ function _navInit(){
 }
 var _navSilent=false;
 function go(name,fromHistory){
+  var _gridsAgain=(name==="grids"&&!fromHistory&&typeof _activeTab==="function"&&_activeTab()==="grids");   /* Grids clicked while already in Grids */
   /* a panel or modal must never survive a page change — it would float over the new page,
      and its pending autosave would fire against a DOM that no longer exists */
   if(document.querySelector(".overlay")){ try{ closeModal(); }catch(e){} }
@@ -4413,7 +4494,13 @@ function go(name,fromHistory){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.id==="tab-"+name));
   var mb=document.getElementById("moreBtn"); if(mb)mb.classList.toggle("active",BOTTOM_TABS.indexOf(name)<0);
   const p=PAGES[name]||["",""]; document.getElementById("crumb").textContent=p[0]; document.getElementById("pageTitle").textContent=p[1];
-  if(name==="grids"){ if(typeof gridsOpen==="function"){ try{ gridsOpen(); }catch(e){ console.error(e); } } } else { document.documentElement.classList.remove("grids-on"); if(document.documentElement.classList.contains("grids-focus")&&typeof gridsSetFocus==="function") gridsSetFocus(false); }
+  if(name==="grids"){ if(typeof gridsOpen==="function"){ try{ gridsOpen();
+      /* Grids in the sidebar / bottom bar always lands on All grids — not on whatever grid
+         was open last. Back/forward (fromHistory) and a reload keep where you were. If the
+         frame hasn't loaded yet the request waits, unless something already asked to open a
+         specific grid (a notification, a report link). */
+      if(!fromHistory){ if(_gridsFrame&&_gridsAcctSent!==null) gridsPost({type:"grids:home"}); else if(!_gridsPendingOpen) _gridsPendingOpen={type:"grids:home"}; }
+    }catch(e){ console.error(e); } } } else { document.documentElement.classList.remove("grids-on"); if(document.documentElement.classList.contains("grids-focus")&&typeof gridsSetFocus==="function") gridsSetFocus(false); }
   if(name==="home"&&user&&supa){ try{ loadFinance(); loadTravel(); }catch(e){} }
   if(name==="calendar"&&user&&supa){ try{ loadTravel(); }catch(e){} }   /* trips feed the global calendar */
   if(name==="mindmap"){ try{ initMindMap(); }catch(e){ console.error(e); } }
@@ -4422,8 +4509,8 @@ function go(name,fromHistory){
   if(_dirty[name]!==false) renderTab(name);          /* it changed while we were on another tab */
   try{ enhanceDatePickers(); enhanceTimePickers(); enhanceSelects(); }catch(e){}
 }
-function openMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s)s.classList.add("show"); }
-function closeMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.remove("show"); if(s)s.classList.remove("show"); }
+function openMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.add("show"); if(s){ s.classList.add("show"); s.removeAttribute("inert"); s.setAttribute("aria-hidden","false"); } }
+function closeMoreSheet(){ var o=document.getElementById("moreOverlay"),s=document.getElementById("moreSheet"); if(o)o.classList.remove("show"); if(s){ s.classList.remove("show"); s.setAttribute("inert",""); s.setAttribute("aria-hidden","true"); } }
 function goMore(name){ closeMoreSheet(); go(name); }
 document.querySelectorAll("aside button.nav,.bottombar button[data-tab]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 
@@ -4550,6 +4637,11 @@ function _modalPrimary(m){
 document.addEventListener("keydown", function(e){
   if(e.key==="Escape"){
     if(document.querySelector(".cp")||document.querySelector(".rtm-pop")||document.querySelector(".cs-pop")) return; /* those close themselves */
+    /* the top-most thing closes first: a date / time / assignee pop-up, then an open menu, and only then the dialog */
+    var pops=document.querySelectorAll(".dp-pop,.tmp-pop,.asg-pop"); if(pops.length){ e.preventDefault(); var top=pops[pops.length-1];
+      try{ if(_tsch&&_tsch.pop===top) tdSchedClose(); else if(_asg&&_asg.pop===top) tdAsgClose(); else if(_dp&&_dp.pop===top) _dpClose(); else if(_tmp&&_tmp.pop===top) _tmpClose(); else top.remove(); }catch(_){ top.remove(); } return; }
+    var menuOpen=document.querySelector("#avMenu.show,#wsGearMenu.show,#rtMenu,#taskMenu,#noteMenu,#moreSheet.show");
+    if(menuOpen){ e.preventDefault(); try{ closeAvMenu(); }catch(_){} try{ closeWsMenu(); }catch(_){} try{ cardMenusClose(); }catch(_){} try{ closeMoreSheet(); }catch(_){} return; }
     var mo=document.querySelector(".overlay"); if(!mo) return;
     /* The panel used to be excluded from Escape, presumably to protect unsaved edits —
        but it autosaves, and closeModal() flushes the pending write, so nothing is lost.
@@ -4562,6 +4654,9 @@ document.addEventListener("keydown", function(e){
   if(e.key!=="Enter" || e.isComposing) return;
   var t=e.target;
   if(_inFloating(t)) return;                                   /* pickers own their Enter */
+  if(t.isContentEditable) return;                              /* rich text: Enter is a new line */
+  if(t.classList&&(t.classList.contains("sub-in")||t.classList.contains("tdp-chip-in"))) return;   /* checklist / tag fields */
+  if(t.getAttribute&&/Enter/.test(t.getAttribute("onkeydown")||"")) return;   /* the field handles Enter itself (prompt, comment, quick add) */
   if(t.closest && (t.closest(".td-panel")||t.closest(".sd-panel"))) return;   /* task panels autosave */
   var m=(t.closest && t.closest(".modal")) || document.querySelector(".overlay .modal");   /* focus may sit on <body> */
   if(!m) return;
@@ -4665,13 +4760,13 @@ function cpOpen(anchor, color, onPick){
 var PRI={ high:{c:"#f2596f",bg:"rgba(255,155,146,.18)",n:"High",s:"High"},
           med :{c:"#ffb3ab",bg:"rgba(255,179,171,.18)",n:"Medium",s:"Med"},
           low :{c:"#74c4b6",bg:"rgba(116,196,182,.18)",n:"Low",s:"Low"},
-          none:{c:"#8b829f",bg:"rgba(139,130,159,.16)",n:"NA",s:"NA"} };
+          none:{c:"#8b829f",bg:"rgba(139,130,159,.16)",n:"No priority",s:""} };
 function priKey(p){ return PRI[p]?p:"none"; }
 function priColor(p){ return PRI[priKey(p)].c; }
 function priHue(p){ return PRI[priKey(p)].c; }
 function priName(p){ return PRI[priKey(p)].n; }
 /* the card shows priority as one chip in the meta row */
-function priChip(p){ var k=priKey(p); return '<span class="kc-chip kc-pri p-'+k+'">'+PRI[k].s+'</span>'; }
+function priChip(p){ var k=priKey(p); if(k==="none") return ""; return '<span class="kc-chip kc-pri p-'+k+'">'+PRI[k].s+'</span>'; }   /* no priority → no chip (an "NA" chip was noise on every card) */
 
 function tlParse(s){ if(!s) return null; var p=String(s).slice(0,10).split("-"); if(p.length<3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d)?null:d; }
 function tlDayIdx(d,start){ return Math.round((d-start)/86400000); }
@@ -4752,6 +4847,8 @@ function renderTimeline(){
   var start=new Date(Math.min(minD.getTime(),today.getTime())); start.setHours(0,0,0,0); start.setDate(start.getDate()-2);
   var end=new Date(Math.max(maxD.getTime(),today.getTime())); end.setHours(0,0,0,0); end.setDate(end.getDate()+3);
   var totalDays=tlDayIdx(end,start)+1; if(totalDays>900){ totalDays=900; }
+  /* fill the card: when the items end early, keep drawing days to the right edge instead of leaving an empty band */
+  var _hw=(host.clientWidth||0)-2; if(_hw>0&&totalDays*dw<_hw){ totalDays=Math.floor(_hw/dw); end=new Date(start); end.setDate(start.getDate()+totalDays-1); }
   var chartW=totalDays*dw;
   var months={}, daysHtml="", DLT=["S","M","T","W","T","F","S"];
   var every=dw<14?7:(dw<22?2:1);
@@ -4841,12 +4938,12 @@ function rtCatsInit(){ if(!Array.isArray(data.routineCats)||!data.routineCats.le
 function rtCats(){ rtCatsInit(); return data.routineCats; }
 function rtCat(id){ return rtCats().find(function(c){return c.id===id;})||{id:"custom",name:"Custom",color:"#9aa0b5",icon:"custom"}; }
 function rtColor(r){ return r.color||rtCat(r.catId).color; }
-function rtIcon(r){ if(r.iconSvg)return r.iconSvg; if(r.icon&&RICON[r.icon])return RICON[r.icon]; var c=rtCat(r.catId); if(c.iconSvg)return c.iconSvg; return RICON[c.icon]||RICON[c.id]||RICON.custom; }
+function rtIcon(r){ if(r.iconSvg)return _svgSafe(r.iconSvg); if(r.icon&&RICON[r.icon])return RICON[r.icon]; var c=rtCat(r.catId); if(c.iconSvg)return _svgSafe(c.iconSvg); return RICON[c.icon]||RICON[c.id]||RICON.custom; }
 function openRtCats(){ rtCatsInit(); showModal('<h4>Manage categories</h4><div class="tm"><p class="muted" style="font-size:.8rem;margin:-4px 0 12px">Add, rename, recolor or remove categories. Pick an icon for each.</p><div id="rtCatRows">'+data.routineCats.map(rtCatRow).join("")+'</div><button type="button" class="btn soft sm" style="margin-top:8px" onclick="rtCatAdd()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg> Add category</button></div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveRtCats()">Save</button></div>'); }
 var RT_COLORS=["#817eff","#c9b0ff","#b3a9ff","#4a38b5","#5aa2ea","#7fd1c4","#0a7c6b","#74c4b6","#ffb3ab","#c66a2b","#e0746b","#c22940","#9aa0b5","#6a5f86"];
 function rtCatRow(c){
   var col=c.color||"#817eff";
-  var prev=c.iconSvg?c.iconSvg:(RICON[c.icon]||RICON[c.id]||RICON.custom);
+  var prev=c.iconSvg?_svgSafe(c.iconSvg):(RICON[c.icon]||RICON[c.id]||RICON.custom);
   var rid="rc"+(c.id||Math.random().toString(36).slice(2,7));
   return '<div class="rtcat-row" data-id="'+(c.id||"")+'" data-iconkey="'+(c.icon||"custom")+'">'
     +'<div class="rc-cwrap">'
@@ -4895,7 +4992,7 @@ document.addEventListener("mousedown",function(e){
   if(!e.target.closest(".wsm-cwrap")) document.querySelectorAll(".wsm-pal.show").forEach(function(p){ p.classList.remove("show"); });
 },true);
 
-function rtCatIcon(input){ var f=input.files&&input.files[0]; if(!f)return; if(f.size>60000){ toast("SVG too large (max 60 KB)"); input.value=""; return; } var rd=new FileReader(); rd.onload=function(){ var m=String(rd.result).match(/<svg[\s\S]*?<\/svg>/i); if(!m){ toast("Not a valid SVG file"); return; } var svg=m[0].replace(/<script[\s\S]*?<\/script>/gi,""); var row=input.closest(".rtcat-row"); row.dataset.iconsvg=svg; var pv=row.querySelector(".rc-iconprev"); if(pv)pv.innerHTML=svg; toast("Icon set"); }; rd.readAsText(f); input.value=""; }
+function rtCatIcon(input){ var f=input.files&&input.files[0]; if(!f)return; if(f.size>60000){ toast("SVG too large (max 60 KB)"); input.value=""; return; } var rd=new FileReader(); rd.onload=function(){ var m=String(rd.result).match(/<svg[\s\S]*?<\/svg>/i); if(!m){ toast("Not a valid SVG file"); return; } var svg=_svgSafe(m[0]); if(!svg){ toast("Not a valid SVG file"); return; } var row=input.closest(".rtcat-row"); row.dataset.iconsvg=svg; var pv=row.querySelector(".rc-iconprev"); if(pv)pv.innerHTML=svg; toast("Icon set"); }; rd.readAsText(f); input.value=""; }
 function rtCatAdd(){ var host=document.getElementById("rtCatRows"); if(!host)return; var tmp=document.createElement("div"); tmp.innerHTML=rtCatRow({id:"",name:"",color:"#817eff",icon:"custom"}); host.appendChild(tmp.firstChild); var inp=host.lastChild.querySelector(".rc-name"); if(inp)inp.focus(); }
 function saveRtCats(){ var out=[]; document.querySelectorAll("#rtCatRows .rtcat-row").forEach(function(rw){ var nm=(rw.querySelector(".rc-name").value||"").trim(); if(!nm)return; var id=rw.getAttribute("data-id")||("cat_"+uid()); var o={id:id,name:nm,color:rw.querySelector(".rc-color").value,icon:rw.getAttribute("data-iconkey")||"custom",updated:Date.now()}; if(rw.dataset.iconsvg)o.iconSvg=rw.dataset.iconsvg; out.push(o); }); if(!out.length){ toast("Keep at least one category"); return; } var _keep={}; out.forEach(function(c){_keep[c.id]=1;}); (data.routineCats||[]).forEach(function(c){ if(c&&c.id!=null&&!_keep[c.id]) tombstone({id:c.id}); }); data.routineCats=out; if(rtCatFilter&&!out.some(function(c){return c.id===rtCatFilter;}))rtCatFilter=""; save(); closeModal(); render(); toast("Categories saved"); }
 function routinesInit(){
@@ -4924,25 +5021,29 @@ function normRecur(rc){ rc=rc||{}; var t=rc.type;
   if(t==="manual") return {type:"once"};
   return {type:"once"}; }
 function rtNext(r){
+  /* the schedule moves on from the occurrence that was last handled (done or skipped), not from the day you happened to tick it */
+  var _lc=(r.anchor&&(r.anchorFor||"")===(r.lastCompleted||""))?r.anchor:r.lastCompleted;   /* an anchor only counts while "last completed" is still the value it was set with */
   var rc=normRecur(r.recur||{}); var ty=rc.type;
   if(ty==="once"||ty==="usage"||ty==="distance"||ty==="customUnit") return r.due||null;
   var today=new Date(); today.setHours(0,0,0,0);
-  var baseStr=r.lastCompleted||r.due||isoLocal(today);
+  var baseStr=_lc||r.due||isoLocal(today);
   var base=new Date(baseStr+"T00:00:00"); if(isNaN(base)) base=new Date(today); base.setHours(0,0,0,0);
-  if(!r.lastCompleted&&r.due) return r.due;
+  if(!_lc&&r.due) return r.due;
   if(ty==="daily"){ base.setDate(base.getDate()+1); return isoLocal(base); }
   if(ty==="interval"){ var n=+rc.n||1, u=rc.unit||"days"; if(u==="days")base.setDate(base.getDate()+n); else if(u==="weeks")base.setDate(base.getDate()+7*n); else if(u==="months"){ var _bd=base.getDate(); base.setDate(1); base.setMonth(base.getMonth()+n); base.setDate(Math.min(_bd,daysInMonth(base.getFullYear(),base.getMonth()))); } else if(u==="years"){ var _by=base.getDate(); base.setDate(1); base.setFullYear(base.getFullYear()+n); base.setDate(Math.min(_by,daysInMonth(base.getFullYear(),base.getMonth()))); } else base.setDate(base.getDate()+n); return isoLocal(base); }   /* clamp month/year steps so a day-29-31 base doesn't overflow into the next month and skip a period */
-  if(ty==="weekly"){ var days=(rc.days&&rc.days.length)?rc.days.slice():[base.getDay()]; var ref=r.lastCompleted?base:today; var startI=r.lastCompleted?1:0; for(var i=startI;i<=7;i++){ var nd=new Date(ref); nd.setDate(ref.getDate()+i); if(days.indexOf(nd.getDay())>=0) return isoLocal(nd); } var x=new Date(ref); x.setDate(x.getDate()+7); return isoLocal(x); }
-  if(ty==="monthly"){ var md=+rc.monthDay||1; var ref2=r.lastCompleted?base:today; var cand; if(r.lastCompleted){ cand=new Date(ref2.getFullYear(),ref2.getMonth()+1,1); } else { cand=new Date(ref2.getFullYear(),ref2.getMonth(),1); } cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); if(!r.lastCompleted&&cand<today){ cand=new Date(today.getFullYear(),today.getMonth()+1,1); cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); } return isoLocal(cand); }
-  if(ty==="yearly"){ var ym=(rc.yearMonth!=null?rc.yearMonth:0), yd=+rc.yearDay||1; var ref3=r.lastCompleted?base:today; var c; if(r.lastCompleted){ c=new Date(ref3.getFullYear()+1,ym,1); } else { c=new Date(today.getFullYear(),ym,1); } c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); if(!r.lastCompleted&&c<today){ c=new Date(today.getFullYear()+1,ym,1); c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); } return isoLocal(c); }
+  if(ty==="weekly"){ var days=(rc.days&&rc.days.length)?rc.days.slice():[base.getDay()]; var ref=_lc?base:today; var startI=_lc?1:0; for(var i=startI;i<=7;i++){ var nd=new Date(ref); nd.setDate(ref.getDate()+i); if(days.indexOf(nd.getDay())>=0) return isoLocal(nd); } var x=new Date(ref); x.setDate(x.getDate()+7); return isoLocal(x); }
+  if(ty==="monthly"){ var md=+rc.monthDay||1; var ref2=_lc?base:today; var cand; if(_lc){ cand=new Date(ref2.getFullYear(),ref2.getMonth()+1,1); } else { cand=new Date(ref2.getFullYear(),ref2.getMonth(),1); } cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); if(!_lc&&cand<today){ cand=new Date(today.getFullYear(),today.getMonth()+1,1); cand.setDate(Math.min(md,daysInMonth(cand.getFullYear(),cand.getMonth()))); } return isoLocal(cand); }
+  if(ty==="yearly"){ var ym=(rc.yearMonth!=null?rc.yearMonth:0), yd=+rc.yearDay||1; var ref3=_lc?base:today; var c; if(_lc){ c=new Date(ref3.getFullYear()+1,ym,1); } else { c=new Date(today.getFullYear(),ym,1); } c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); if(!_lc&&c<today){ c=new Date(today.getFullYear()+1,ym,1); c.setDate(Math.min(yd,daysInMonth(c.getFullYear(),c.getMonth()))); } return isoLocal(c); }
   return null;
 }
+/* "Every day", "Every 3 days", "Every 2 weeks" — never "Every 3 day" or "Every 1 days" */
+function _everyN(n,unit){ n=+n||1; var u=String(unit||"days").replace(/s$/,""); return n===1?"Every "+u:"Every "+n+" "+u+"s"; }
 function rtRecurLabel(r){ var rc=normRecur(r.recur||{}); switch(rc.type){
   case"once":return"One-time"; case"daily":return"Every day";
   case"weekly":{ var ds=(rc.days||[]).slice().sort(function(a,b){return a-b;}); if(!ds.length)return"Weekly"; if(ds.join()==="0,1,2,3,4")return"Every weekday"; if(ds.join()==="5,6")return"Every weekend"; if(ds.length===7)return"Every day"; return "Every "+ds.map(function(x){return RDNAME[x];}).join(", "); }
   case"monthly":return"Monthly · day "+(rc.monthDay||1);
   case"yearly":return"Yearly · "+RMON[rc.yearMonth||0]+" "+(rc.yearDay||1);
-  case"interval":return"Every "+(rc.n||1)+" "+(rc.unit||"days");
+  case"interval":return _everyN(rc.n,rc.unit||"days");
   case"usage":return"Every "+(rc.n||1)+" uses";
   case"distance":return"Every "+(+(rc.n||rc.kmInterval)||0).toLocaleString()+" "+(rc.unit||"km");
   case"customUnit":return"Every "+(rc.n||1)+" "+(rc.customUnit||"units");
@@ -5016,7 +5117,7 @@ function renderRoutines(){
   var overdue=all.filter(function(r){return rtStatus(r)==="overdue";}).length;
   var upcoming=all.filter(function(r){var nx=rtNext(r); if(!nx)return false; var n=Math.round((new Date(nx)-new Date(t))/86400000); return n>0&&n<=7;}).length;
   var recent=all.filter(function(r){return r.lastCompleted&&(Date.now()-new Date(r.lastCompleted).getTime())<7*86400000;}).length;
-  var mStart=new Date(); mStart.setDate(1); var month=all.reduce(function(s,r){ return s+((r.history||[]).filter(function(h){return new Date(h.ts)>=mStart;}).length); },0);
+  var mStart=new Date(); mStart.setDate(1); var month=all.reduce(function(s,r){ return s+((r.history||[]).filter(function(h){return !h.skipped&&new Date(h.ts)>=mStart;}).length); },0);
   var sm=document.getElementById("rtSummary");
   if(sm) sm.innerHTML=[["Due today",dueToday,"acc-peach"],["Upcoming",upcoming,"acc-lav"],["Overdue",overdue,"acc-red"],["Done this week",recent,"acc-green"],["Completed this month",month,""]].map(function(c){return '<div class="sum-card '+c[2]+'"><div class="sc-n">'+c[1]+'</div><div class="sc-l">'+c[0]+'</div></div>';}).join("");
   var cc=document.getElementById("rtCats");
@@ -5038,7 +5139,7 @@ function rtMeter(r){
   var last=+((r.recur&&(r.recur.lastKm!=null?r.recur.lastKm:r.recur.lastVal))||0);
   var cur =+((r.recur&&r.recur.curKm!=null)?r.recur.curKm:last);
   var due =+((r.recur&&r.recur.nextKm)||0) || (last+n);
-  if(rc.type==="usage"){ cur=+((r.recur&&r.recur.curKm)||r.uses||0); last=0; due=n||1; }
+  if(rc.type==="usage"){ cur=(r.uses!=null)?+r.uses:+((r.recur&&r.recur.curKm)||0); last=0; due=n||1; }   /* r.uses is the counter; curKm only seeds it */
   return {n:n,last:last,cur:cur,due:due};
 }
 /* the whole card state in one object */
@@ -5084,7 +5185,7 @@ function rtKindLabel(r){
   if(t==="distance") return (+rc.n||+rc.kmInterval||0).toLocaleString()+" "+((r.recur&&r.recur.unit)||"km");
   if(t==="usage") return (+rc.n||0)+" uses";
   if(t==="customUnit") return (+rc.n||0)+" "+((r.recur&&r.recur.unit)||"units");
-  if(t==="interval") return "Every "+(rc.n||1)+" "+(rc.unit||"days");
+  if(t==="interval") return _everyN(rc.n,rc.unit||"days");
   return {once:"One-time",daily:"Daily",weekly:"Weekly",monthly:"Monthly",yearly:"Yearly"}[t]||"Routine";
 }
 /* the kind badge already states the type, and the endpoints already state "last done" \u2014
@@ -5171,13 +5272,13 @@ function rtSkip(id){
   var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r) return;
   var nx=rtNext(r); if(!nx){ toast("Nothing to skip"); return; }
   r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:"Skipped",skipped:true});
-  r.lastCompleted=nx; r.updated=Date.now(); save(); render(); toast("Skipped \u2014 moved to the next one");
+  r.anchor=nx; r.anchorFor=r.lastCompleted||""; r.updated=Date.now();   /* a skip moves the schedule on but isn't a completion */ save(); render(); toast("Skipped \u2014 moved to the next one");
 }
 /* log a meter reading (km / uses / hours) without completing */
 function rtLogMeter(id){
   var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r) return;
   var m=rtMeter(r), unit=rtUnit(r), isUse=(normRecur(r.recur||{}).type==="usage");
-  if(isUse){ r.uses=(+r.uses||0)+1; r.updated=Date.now(); save(); renderRoutines(); toast("Logged 1 use"); return; }
+  if(isUse){ r.uses=((r.uses!=null)?+r.uses:+((r.recur&&r.recur.curKm)||0))+1; r.updated=Date.now(); save(); renderRoutines(); toast("Logged 1 use"); return; }
   showModal('<h4>Log reading &middot; '+esc(r.title)+'</h4><div class="tm">'
     +'<label class="setlbl">Current '+esc(unit)+'</label>'
     +'<input class="fld" id="rtLogVal" type="number" inputmode="numeric" value="'+(m.cur||"")+'">'
@@ -5202,12 +5303,26 @@ function rtComplete(id){ var r=(data.routines||[]).find(function(x){return x.id=
   showModal('<h4>Complete &middot; '+esc(r.title)+'</h4><div class="tm"><label class="setlbl">Note (optional)</label><textarea class="fld" id="rtcNote" rows="3" placeholder="Add a note for the history log…"></textarea>'+kmField+dueField+'</div><div class="row"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" onclick="rtDoComplete(\''+id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:15px;height:15px"><path d="M5 12l5 5L20 7"/></svg>Mark complete</button></div>');
   try{ enhanceDatePickers(); }catch(e){}
 }
+/* one "done" for every entry point (routine card, notification): history, schedule, checklist and counters */
+function _rtMarkDone(r,note){ r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:String(note||"").trim()});
+  var _ty=(normRecur(r.recur||{})).type, _today=isoLocal(new Date());
+  /* calendar-style routines (weekly / monthly / yearly) keep their schedule when done late: a Monday routine ticked on Wednesday is next due Monday.
+     Daily and "every N" routines count from the day you did it. Doing it twice the same day doesn't move it again. */
+  var _sched=(_ty==="weekly"||_ty==="monthly"||_ty==="yearly");
+  var _occ=_sched&&r.lastCompleted!==_today?rtNext(r):null;
+  var _wasToday=r.lastCompleted===_today;
+  if(!_wasToday){ r.lastCompleted=_today; delete r.anchor; r.anchorFor=_today;
+    if(_occ&&_occ<_today){ r.anchor=_occ; for(var _g=0;_g<400;_g++){ var _nx=rtNext(r); if(!_nx||_nx>_today) break; r.anchor=_nx; } } } (r.checklist||[]).forEach(function(c){c.done=false;});
+  var _t2=(normRecur(r.recur||{})).type;
+  if(_t2==="usage"){ r.uses=0; if(r.recur) delete r.recur.curKm; }   /* the use counter starts again */
+  if(_t2==="once"||_t2==="usage"||_t2==="distance"||_t2==="customUnit") r.due="";
+  r.updated=Date.now(); }
 function rtDoComplete(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return;
-  var note=(document.getElementById("rtcNote")||{}).value||""; r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:note.trim()});
-  r.lastCompleted=isoLocal(new Date()); (r.checklist||[]).forEach(function(c){c.done=false;});
-  var km=document.getElementById("rtcKm"); if(km&&r.recur){ r.recur.lastKm=+km.value||r.recur.lastKm; }
-  var nk=document.getElementById("rtcNextKm"); if(nk&&r.recur&&nk.value!==""){ r.recur.nextKm=+nk.value||r.recur.nextKm; }
-  var dd=document.getElementById("rtcDue"); var rty2=(normRecur(r.recur||{})).type; if(dd&&dd.value){ r.due=dd.value; } else if(rty2==="once"||rty2==="usage"||rty2==="distance"||rty2==="customUnit"){ r.due=""; }
+  var _dueIn=(document.getElementById("rtcDue")||{}).value||"";
+  _rtMarkDone(r,(document.getElementById("rtcNote")||{}).value||"");
+  var km=document.getElementById("rtcKm"); if(km&&r.recur&&km.value!==""){ r.recur.lastKm=+km.value||r.recur.lastKm; r.recur.curKm=r.recur.lastKm; }   /* the reading you just gave is the current reading */
+  var nk=document.getElementById("rtcNextKm"); if(r.recur&&km){ var _oldNext=r.recur.nextKm; if(nk&&nk.value!==""&&+nk.value!==+_oldNext&&+nk.value>(+r.recur.lastKm||0)) r.recur.nextKm=+nk.value; else { var _n=rtMeter(r).n; if(_n) r.recur.nextKm=(+r.recur.lastKm||0)+_n; } }   /* left as it was → next change = this reading + the interval */
+  if(_dueIn) r.due=_dueIn;
   r.updated=Date.now(); save(); closeModal(); render(); toast("Routine completed");
 }
 function rtHistory(id){ var r=(data.routines||[]).find(function(x){return x.id===id;}); if(!r)return; var h=r.history||[];
@@ -5277,7 +5392,7 @@ function rtCommit(){
   var rec=rReadRecur();
   if(r.recur&&r.recur.lastKm!=null&&rec.lastKm==null) rec.lastKm=r.recur.lastKm;
   r.title=te.value.trim(); r.desc=gv("rDesc").trim(); r.catId=gv("rCat"); r.priority=gv("rPrio")||"med";
-  r.recur=rec; r.due=gv("rDue"); r.lastCompleted=gv("rLast"); r.time=gv("rTime");
+  r.recur=rec; r.due=gv("rDue"); if(gv("rLast")!==(r.lastCompleted||"")) delete r.anchor; r.lastCompleted=gv("rLast"); r.time=gv("rTime");
   r.tags=gv("rTags").split(",").map(function(x){return x.trim();}).filter(Boolean);
   r.links=gv("rLinks").split(",").map(function(x){return x.trim();}).filter(Boolean);
   r.checklist=checks; r.updated=Date.now();
@@ -5314,7 +5429,7 @@ function rReadRecur(){ var type=(document.getElementById("rType")||{}).value||"w
   else if(type==="distance"){ rec.n=+gv("rN")||0; rec.unit=gv("rUnit")||"km"; rec.curKm=+gv("rCur")||0; rec.nextKm=+gv("rNextKm")||0; }
   else if(type==="customUnit"){ rec.n=+gv("rN")||1; rec.customUnit=gv("rCustomUnit")||"units"; rec.curKm=+gv("rCur")||0; rec.nextKm=+gv("rNextKm")||0; }
   return rec; }
-function rNextPreview(){ var el=document.getElementById("rNextHint"); if(!el)return; var temp={recur:rReadRecur(),lastCompleted:(document.getElementById("rLast")||{}).value||"",due:(document.getElementById("rDue")||{}).value||"",created:Date.now()}; var nx=rtNext(temp); var lab=esc(rtRecurLabel(temp)); el.innerHTML=nx?('<span class="rt-next-l">'+lab+'</span> · Next due <b>'+esc(fmtFull(nx))+'</b>'):('<span class="rt-next-l">'+lab+'</span> · set a “Next due” date to schedule it'); }
+function rNextPreview(){ var el=document.getElementById("rNextHint"); if(!el)return; var temp={recur:rReadRecur(),lastCompleted:(document.getElementById("rLast")||{}).value||"",due:(document.getElementById("rDue")||{}).value||"",created:Date.now()}; var _orig=_rId&&(data.routines||[]).find(function(x){return x.id===_rId;}); if(_orig&&_orig.anchor){ temp.anchor=_orig.anchor; temp.anchorFor=_orig.anchorFor; } var nx=rtNext(temp); var lab=esc(rtRecurLabel(temp)); el.innerHTML=nx?('<span class="rt-next-l">'+lab+'</span> · Next due <b>'+esc(fmtFull(nx))+'</b>'):('<span class="rt-next-l">'+lab+'</span> · set a “Next due” date to schedule it'); }
 function rAddCheck(text,done){ var host=document.getElementById("rChecks"); if(!host)return; var row=document.createElement("div"); row.className="sub-row note-check-row"; row.innerHTML=subGripHtml("checklist item")+'<span class="chk sub-chk'+(done?" done":"")+'" onclick="this.classList.toggle(\'done\');var i=this.parentNode.querySelector(\'.sub-in\');if(i)i.classList.toggle(\'done\',this.classList.contains(\'done\'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span><input class="fld sub-in'+(done?" done":"")+'" placeholder="Checklist item&hellip;" value="'+esc(text||"")+'"><button type="button" class="sub-del" onclick="this.parentNode.remove()" aria-label="Remove item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'; host.appendChild(row); if(!text){var i=row.querySelector(".sub-in"); if(i)i.focus();} }
 function saveRoutine(id){
   var title=(((document.getElementById("rTitle")||{}).value||"")||"").trim(); if(!title){ toast("Title is required"); return; }
@@ -5356,7 +5471,7 @@ function buildNotifs(){
   (data.tasks||[]).forEach(function(t){ if((t.done||t.status===completedStatusId(t.ws))||!t.due) return; if(t.due>horIso) return; out.push({id:"task:"+t.id,source:"task",title:t.t,desc:rteText(t.desc||""),due:t.due,time:prettyTime(t.time),priority:t.priority||"med",open:"openTask(\'"+t.id+"\')"}); });
   (data.tasks||[]).forEach(function(pt){ (pt.subs||[]).forEach(function(sb){ if(sb.done||!sb.due) return; if(sb.due>horIso) return; out.push({id:"sub:"+pt.id+"::"+sb.id,source:"task",title:sb.t||"Subtask",desc:(pt.t?("Subtask · "+pt.t):""),due:sb.due,time:prettyTime(sb.time),priority:sb.priority||pt.priority||"med",open:"openSubFromLib(\'"+pt.id+"\',\'"+sb.id+"\')"}); }); });
   (data.routines||[]).forEach(function(r){ var nx=rtNext(r); if(!nx||nx>horIso) return; out.push({time:(r.time||""),id:"routine:"+r.id,source:"routine",title:r.title,desc:rtRecurLabel(r)+(r.desc?(" · "+r.desc):""),due:nx,priority:r.priority||"med",open:"notifOpenRoutine(\'"+r.id+"\')"}); });
-  if(Array.isArray(calEvents)) calEvents.forEach(function(e){ var w=(e.start&&(e.start.dateTime||e.start.date))||""; var dd=w.slice(0,10); if(!dd||dd<today||dd>horIso) return; out.push({id:"event:"+e.id,source:"event",title:e.summary||"(event)",desc:e.location||"",due:dd,time:evTime(e),priority:"med",open:"go(\'home\')"}); });
+  if(Array.isArray(calEvents)) calEvents.forEach(function(e){ var w=(e.start&&(e.start.dateTime||e.start.date))||""; var dd=evDay(w); if(!dd||dd<today||dd>horIso) return; out.push({id:"event:"+e.id,source:"event",title:e.summary||"(event)",desc:e.location||"",due:dd,time:evTime(e),priority:"med",open:"go(\'home\')"}); });
   if(zakatDue!=null&&zakatDue>=0&&zakatDue<=Math.max(lead,60)){ var z=new Date(); z.setDate(z.getDate()+zakatDue); out.push({id:"finance:zakat",source:"finance",title:"Zakat due",desc:"Annual zakat is approaching",due:isoLocal(z),priority:"high",open:"window.open(data.settings.financeUrl,'_blank')"}); }
   (travelTrips||[]).forEach(function(tr){ if(!tr.departDate||tr.departDate<today||tr.departDate>horIso) return; out.push({id:"travel:"+(tr.id||tr.departDate),source:"travel",title:"Trip: "+(tr.name||"Travel"),desc:"Departure "+fmtShort(tr.departDate),due:tr.departDate,priority:"med",open:"window.open(travelHref(),'_blank')"}); });
   return out;
@@ -5365,14 +5480,16 @@ function notifActive(){ var ns=notifStore(); var now=Date.now(); return buildNot
 function notifUnreadCount(){ var ns=notifStore(); return notifActive().filter(function(n){return !ns.read[n.id];}).length; }
 function updateNotifBadge(){ var c=notifUnreadCount(); var b=document.getElementById("notifBadge"); if(b){ b.textContent=c>99?"99+":c; b.classList.toggle("show",c>0); } var nb=document.getElementById("navNotifBadge"); if(nb){ nb.textContent=c>99?"99+":c; nb.classList.toggle("show",c>0); } }
 function notifWhen(due,time){ if(!due) return {txt:"",cls:""}; var today=new Date(isoLocal(new Date())+"T00:00:00"); var d=new Date(due+"T00:00:00"); var n=Math.round((d-today)/86400000); var tm=time?(" · "+time):""; if(n<0) return {txt:(-n)+(n===-1?" day":" days")+" overdue",cls:"over"}; if(n===0) return {txt:"Today"+tm,cls:"soon"}; if(n===1) return {txt:"Tomorrow"+tm,cls:"soon"}; return {txt:"In "+n+" days"+tm,cls:""}; }
+function _ntfSummary(all,active){ var ns=notifStore(), now=Date.now(), today=isoLocal(new Date()); if(!all){ all=buildNotifs(); active=all.filter(function(n){ return !notifDismissed(n)&&!(ns.snooze[n.id]&&ns.snooze[n.id]>now); }); }
+  var sm=document.getElementById("ntfSummary");
+  if(sm){ var unread=active.filter(function(n){return !ns.read[n.id];}).length; var over=active.filter(function(n){return n.due&&n.due<today;}).length; var dt=active.filter(function(n){return n.due===today;}).length; var snz=all.filter(function(n){return ns.snooze[n.id]&&ns.snooze[n.id]>now;}).length;
+    sm.innerHTML=[["Unread",unread,"acc-lav"],["Due today",dt,"acc-peach"],["Overdue",over,"acc-red"],["Snoozed",snz,""]].map(function(c){return '<div class="sum-card '+c[2]+'"><div class="sc-n">'+c[1]+'</div><div class="sc-l">'+c[0]+'</div></div>';}).join(""); } }
 function renderNotifs(){
   var host=document.getElementById("ntfList"); if(!host) return;
   var ns=notifStore(); var now=Date.now(); var all=buildNotifs(); var today=isoLocal(new Date());
   syncTools("notifications", all.length, ["ntfSearch","ntfSource","ntfStatus","ntfPrio"]);
   var active=all.filter(function(n){ return !notifDismissed(n)&&!(ns.snooze[n.id]&&ns.snooze[n.id]>now); });
-  var sm=document.getElementById("ntfSummary");
-  if(sm){ var unread=active.filter(function(n){return !ns.read[n.id];}).length; var over=active.filter(function(n){return n.due&&n.due<today;}).length; var dt=active.filter(function(n){return n.due===today;}).length; var snz=all.filter(function(n){return ns.snooze[n.id]&&ns.snooze[n.id]>now;}).length;
-    sm.innerHTML=[["Unread",unread,"acc-lav"],["Due today",dt,"acc-peach"],["Overdue",over,"acc-red"],["Snoozed",snz,""]].map(function(c){return '<div class="sum-card '+c[2]+'"><div class="sc-n">'+c[1]+'</div><div class="sc-l">'+c[0]+'</div></div>';}).join(""); }
+  _ntfSummary(all,active);
   var q=((document.getElementById("ntfSearch")||{}).value||"").toLowerCase();
   var src=(document.getElementById("ntfSource")||{}).value||"";
   var stat=(document.getElementById("ntfStatus")||{}).value||"active";
@@ -5426,7 +5543,7 @@ function notifItem(n,ns,today){
       +'<button class="icon-btn danger" title="Dismiss" onclick="notifDismiss(\''+n.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
     +'</div></div>';
 }
-function notifMarkRead(id,el){ var ns=notifStore(); if(!ns.read[id]){ ns.read[id]=Date.now(); save(); updateNotifBadge(); if(el){ el.classList.remove("unread"); var d=el.querySelector(".ntf-unreaddot"); if(d)d.remove(); } } }
+function notifMarkRead(id,el){ var ns=notifStore(); if(!ns.read[id]){ ns.read[id]=Date.now(); save(); updateNotifBadge(); if(el){ el.classList.remove("unread"); var d=el.querySelector(".ntf-unreaddot"); if(d)d.remove(); } try{ _ntfSummary(); }catch(_){} } }
 function notifMarkAllRead(){ var ns=notifStore(); notifActive().forEach(function(n){ ns.read[n.id]=Date.now(); }); save(); renderNotifs(); updateNotifBadge(); toast("All marked read"); }
 function notifPin(id){ var ns=notifStore(); if(ns.pinned[id])delete ns.pinned[id]; else ns.pinned[id]=1; save(); renderNotifs(); }
 /* A dismissal must not outlive the thing it dismissed. Reopen a task and its reminder
@@ -5461,7 +5578,7 @@ function notifDismissed(n){
 function notifDismiss(id){ var ns=notifStore(); var it=buildNotifs().find(function(x){return x.id===id;});
   ns.dismissed[id]={ts:Date.now(),due:(it&&it.due)||""}; save(); renderNotifs(); updateNotifBadge(); }
 function notifSnzMenu(btn){ var pop=btn.parentNode.querySelector(".ntf-snz-pop"); var open=pop.classList.contains("show"); document.querySelectorAll(".ntf-snz-pop.show").forEach(function(p){p.classList.remove("show");}); if(!open)pop.classList.add("show"); }
-function notifSnooze(id,amt){ var ns=notifStore(); var until; if(amt==="tomorrow"){ var t=new Date(); t.setDate(t.getDate()+1); t.setHours(9,0,0,0); until=t.getTime(); } else if(amt==="week"){ var w=new Date(); w.setDate(w.getDate()+7); w.setHours(9,0,0,0); until=w.getTime(); } else if(amt==="custom"){ uiPrompt("Format: YYYY-MM-DD HH:MM", new Date(Date.now()+86400000).toISOString().slice(0,16).replace("T"," "), function(v){ if(!v)return; var dt=new Date(v.replace(" ","T")); if(isNaN(dt)){toast("Invalid date");return;} ns.snooze[id]=dt.getTime(); save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }, {title:"Custom snooze", ok:"Snooze"}); return; } else { until=Date.now()+amt; } ns.snooze[id]=until; save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }
+function notifSnooze(id,amt){ var ns=notifStore(); var until; if(amt==="tomorrow"){ var t=new Date(); t.setDate(t.getDate()+1); t.setHours(9,0,0,0); until=t.getTime(); } else if(amt==="week"){ var w=new Date(); w.setDate(w.getDate()+7); w.setHours(9,0,0,0); until=w.getTime(); } else if(amt==="custom"){ uiPrompt("Format: YYYY-MM-DD HH:MM", (function(){ var d=new Date(Date.now()+86400000), p=function(n){ return (n<10?"0":"")+n; }; return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()); })(), function(v){ if(!v)return; var dt=new Date(v.replace(" ","T")); if(isNaN(dt)){toast("Invalid date");return;} ns.snooze[id]=dt.getTime(); save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }, {title:"Custom snooze", ok:"Snooze"}); return; } else { until=Date.now()+amt; } ns.snooze[id]=until; save(); renderNotifs(); updateNotifBadge(); toast("Snoozed"); }
 function notifComplete(id){ var p=id.split(":");
   if(p[0]==="sub"){
     /* buildNotifs() emits "sub:<taskId>::<subId>" — notifComplete only ever knew "task"
@@ -5471,7 +5588,7 @@ function notifComplete(id){ var p=id.split(":");
     var _sb=_pt&&(_pt.subs||[]).find(function(x){return x&&x.id===_q[1];});
     if(_sb){ _sb.done=true; _pt.updated=Date.now(); }
   }
-  else if(p[0]==="task"){ var t=(data.tasks||[]).find(function(x){return x.id===p[1];}); if(t){ var _wd=(t.done||t.status===completedStatusId(t.ws)); t.status=completedStatusId(t.ws); t.done=true; t.updated=Date.now(); if(!_wd){ _moveTaskFront(t.id); _taskLog(t,"Completed","done"); } } } else if(p[0]==="routine"){ var r=(data.routines||[]).find(function(x){return x.id===p[1];}); if(r){ r.history=r.history||[]; r.history.unshift({ts:Date.now(),note:""}); r.lastCompleted=isoLocal(new Date()); (r.checklist||[]).forEach(function(c){c.done=false;}); r.updated=Date.now(); } }
+  else if(p[0]==="task"){ var t=(data.tasks||[]).find(function(x){return x.id===p[1];}); if(t){ var _wd=(t.done||t.status===completedStatusId(t.ws)); t.status=completedStatusId(t.ws); t.done=true; t.updated=Date.now(); if(!_wd){ _moveTaskFront(t.id); _taskLog(t,"Completed","done"); } } } else if(p[0]==="routine"){ var r=(data.routines||[]).find(function(x){return x.id===p[1];}); if(r){ _rtMarkDone(r,""); } }
   /* No dismissal here. buildNotifs() already hides a done task, and a routine's next
      occurrence reuses the same notification id — so dismissing it buried every future
      reminder for that routine, and stopped a re-opened task from ever coming back. */
@@ -5516,7 +5633,7 @@ function digestData(){
   (Array.isArray(calEvents)?calEvents:[]).forEach(function(e){
     var w=(e.start&&(e.start.dateTime||e.start.date))||""; if(!w) return;
     var wend=(e.end&&(e.end.dateTime||e.end.date))||w;
-    var dt=e.start&&e.start.dateTime, sISO=w.slice(0,10), eISO=wend.slice(0,10);
+    var dt=e.start&&e.start.dateTime, sISO=evDay(w), eISO=evDay(wend);
     if(e.end&&e.end.date&&eISO>sISO){ var _d=new Date(eISO+"T00:00:00"); _d.setDate(_d.getDate()-1); eISO=isoLocal(_d); } /* all-day end is exclusive */
     if(eISO<t) return; /* fully past — it already happened */
     var it={kind:"event",title:e.summary||"(event)",time:dt?w.slice(11,16):""};
@@ -5993,7 +6110,11 @@ function mmExportSvg(d){ if(!d.nodes.length)return '<svg xmlns="http://www.w3.or
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'"><rect width="'+W+'" height="'+H+'" fill="'+bg+'"/>'+body+'</svg>';
 }
 function mmDownload(name,content,type){ var b=new Blob([content],{type:type}); var u=URL.createObjectURL(b); var a=document.createElement("a"); a.href=u; a.download=name; a.click(); setTimeout(function(){URL.revokeObjectURL(u);},1000); }
-function mmImport(ev){ var f=ev.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ var j=JSON.parse(r.result); if(!Array.isArray(j.nodes))throw 0; mmPush(); var d=mmData(); d.nodes=j.nodes; d.edges=j.edges||[]; mmSave(); mmFit(); toast("Mind map imported"); }catch(x){ toast("Invalid file"); } }; r.readAsText(f); ev.target.value=""; }
+function mmImport(ev){ var f=ev.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ var j=JSON.parse(r.result); if(!Array.isArray(j.nodes))throw 0; var col=function(v,d){ v=String(v==null?"":v); return /^(#[0-9a-f]{3,8}|[a-z]{3,20}|rgba?\([\d\s.,%]+\))$/i.test(v)?v:d; }, num=function(v,d){ v=+v; return isFinite(v)?v:d; }, sid=function(v){ return String(v==null?"":v).replace(/[^\w-]/g,"").slice(0,40)||("n"+Math.random().toString(36).slice(2,9)); };
+      var nodes=j.nodes.filter(function(n){ return n&&typeof n==="object"; }).slice(0,2000).map(function(n){ var o={}; Object.keys(n).forEach(function(k){ var v=n[k]; if(typeof v==="number"||typeof v==="boolean") o[k]=v; else if(typeof v==="string") o[k]=v.slice(0,20000); });
+        o.id=sid(n.id); o.text=rteSanitize(n.text||""); o.x=num(n.x,0); o.y=num(n.y,0); o.w=num(n.w,160); o.h=num(n.h,60); if(n.fontSize!=null) o.fontSize=Math.max(6,Math.min(96,num(n.fontSize,14))); ["stroke","fill","textColor"].forEach(function(k){ if(n[k]!=null) o[k]=col(n[k],undefined); if(o[k]===undefined) delete o[k]; }); return o; });
+      var edges=(Array.isArray(j.edges)?j.edges:[]).filter(function(e){ return e&&typeof e==="object"; }).slice(0,5000).map(function(e){ var o={}; Object.keys(e).forEach(function(k){ var v=e[k]; if(typeof v==="number"||typeof v==="boolean") o[k]=v; else if(typeof v==="string") o[k]=v.slice(0,2000); }); ["id","from","to"].forEach(function(k){ if(e[k]!=null) o[k]=sid(e[k]); }); if(o.label!=null) o.label=String(o.label); ["stroke","color"].forEach(function(k){ if(e[k]!=null){ o[k]=col(e[k],undefined); if(o[k]===undefined) delete o[k]; } }); return o; });
+      mmPush(); var d=mmData(); d.nodes=nodes; d.edges=edges; mmSave(); mmFit(); toast("Mind map imported"); }catch(x){ toast("Invalid file"); } }; r.readAsText(f); ev.target.value=""; }
 
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function hijri(d){ try{ var x=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"}).format(d); return /AH/i.test(x)?x:(x+" AH"); }catch(e){ return ""; } }
@@ -6250,6 +6371,8 @@ function renderInsights(){
 function insight(ic,html){ return `<div class="insight"><div class="ico">${ic}</div><div>${html}</div></div>`; }
 
 /* ---- Today command view ---- */
+/* the day a Google date/time falls on HERE (a timed event carries its calendar's offset, which may not be yours) */
+function evDay(v){ v=String(v||""); if(v.length>10&&v.indexOf("T")===10){ var d=new Date(v); if(!isNaN(d)) return isoLocal(d); } return v.slice(0,10); }
 function isoLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 /* A date you have to decode is a date you skim past. "Aug 3" only means
    anything after you work out what today is; "Today" is the one due date on a
@@ -6289,7 +6412,7 @@ function kindBadge(k){ var x=kindKey(k); return '<span class="badge k-'+x+'">'+K
 function sumRow(ic,html){return '<div class="sum-row"><span class="si">'+ic+'</span><div>'+html+'</div></div>';}
 function emptyTasks(){return '<div class="empty"><div class="glyph">'+IC.task+'</div><p>No tasks here yet.</p><div style="margin-top:12px"><button class="btn" onclick="openTask()">+ New task</button></div></div>';}
 function tickClock(){var el=document.getElementById("clockTime");if(!el)return;var n=new Date();function p(x){return String(x).padStart(2,"0");}var h=n.getHours();var mer=h<12?"AM":"PM";var h12=(h%12)||12;el.innerHTML=h12+":"+p(n.getMinutes())+'<span class="sec">'+p(n.getSeconds())+'</span><span class="mer">'+mer+'</span>';}
-function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return ((e.start&&(e.start.dateTime||e.start.date))||"").slice(0,10)===t;});}
+function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new Date());return calEvents.filter(function(e){return evDay((e.start&&(e.start.dateTime||e.start.date))||"")===t;});}
 var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
 function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var nowS=_prayNowSecs(); for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
 function hpill(ic,html,cls){ return '<span class="hpill'+(cls?" "+cls:"")+'">'+ic+'<span>'+html+'</span></span>'; }
@@ -6308,7 +6431,7 @@ function renderOvTasks(){
 }
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.unshift({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});_bumpTaskOrder();/* newest task goes to the TOP of its column, not the bottom */i.value="";save();render();toast("Task added");}
-function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(w.slice(0,10)>=t)items.push({date:w.slice(0,10),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
+function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(evDay(w)>=t)items.push({date:evDay(w),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));/* moved: #dailySummary is not in the markup, so nothing here ever rendered */if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
@@ -6329,7 +6452,7 @@ function addSpan(sISO,eISO,label,kind,time,sk,id,link,full,anchor){if(!sISO)retu
 /* Tasks/subtasks with a start..due range span every day too, but the DUE day is the solid anchor
    (that's the deadline, and where the time belongs); the lead-up days show a faded "due later" chip. */
 (data.tasks||[]).forEach(function(x){if(x.due){var st=(x.start&&x.start<x.due)?x.start:x.due;addSpan(st,x.due,x.t,"task",prettyTime(x.time),x.time||"","","","",x.due);}});
-(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due){var st=(sb.start&&sb.start<sb.due)?sb.start:sb.due;addSpan(st,sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"","","","",sb.due);}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var we=(e.end&&(e.end.dateTime||e.end.date))||w;var dt=e.start&&e.start.dateTime;var sISO=w.slice(0,10),eISO=we.slice(0,10);/* all-day events store an EXCLUSIVE end date, so the real last day is one earlier */if(e.end&&e.end.date&&eISO>sISO){var _ed=new Date(eISO+"T00:00:00");_ed.setDate(_ed.getDate()-1);eISO=isoLocal(_ed);}addSpan(sISO,eISO,e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _rlo, _rhi).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
+(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(sb.due){var st=(sb.start&&sb.start<sb.due)?sb.start:sb.due;addSpan(st,sb.due,sb.t||"Subtask","subtask",prettyTime(sb.time),sb.time||"","","","",sb.due);}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var we=(e.end&&(e.end.dateTime||e.end.date))||w;var dt=e.start&&e.start.dateTime;var sISO=evDay(w),eISO=evDay(we);/* all-day events store an EXCLUSIVE end date, so the real last day is one earlier */if(e.end&&e.end.date&&eISO>sISO){var _ed=new Date(eISO+"T00:00:00");_ed.setDate(_ed.getDate()-1);eISO=isoLocal(_ed);}addSpan(sISO,eISO,e.summary||"(event)","event",evTime(e),dt?w.slice(11,16):"",e.id,meetLink(e));});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);add(isoLocal(z),"Zakat due","zakat");}(data.routines||[]).forEach(function(r){ if(r.archived||r.deleted) return; rtOccurrences(r, _rlo, _rhi).forEach(function(iso){ add(iso, r.title||"Routine", "routine", prettyTime(r.time), r.time||"zz", r.id); }); });/* travel. id stays empty: a non-empty id makes the row call openEventEdit(), which only knows Google events. */try{travelItems().forEach(function(it){add(it.date,it.label,"trip",it.time,it.sk,"","",it.full);});}catch(e){}Object.keys(map).forEach(function(k){map[k].sort(function(a,b){return (a.sk||"zz").localeCompare(b.sk||"zz");});});return map;}
 function evClass(k){ return "ev-"+kindKey(k==="sub"?"subtask":k); }
 function calCell(d,map,today,out){var iso=isoLocal(d);var items=map[iso]||[];var sel=(calSel||today);var cls="cal-cell"+(out?" out":"")+(iso===today?" today":"")+(iso===sel?" sel":"");var chips=items.slice(0,2).map(function(it){var tp=it.time?'<b style="font-weight:800;opacity:.85">'+esc(it.time)+'</b> ':'';return '<span class="cal-ev '+evClass(it.kind)+(it.cont?' cont':'')+'" title="'+(it.time?esc(it.time)+' — ':'')+esc(it.full||it.label)+(it.cont?' ('+_contTxt(it.cont)+')':'')+'">'+tp+esc(it.label)+'</span>';}).join("");var more=items.length>2?'<span class="cal-more">+'+(items.length-2)+' more</span>':'';var dots=items.slice(0,3).map(function(){return "<i></i>";}).join("");return '<div class="'+cls+'" onclick="calPick(\''+iso+'\')"><div class="dn">'+d.getDate()+'</div><div class="cal-evs">'+chips+more+'</div>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';}
 function calPick(iso){calSel=iso;renderCalendar();}
@@ -6350,7 +6473,7 @@ function renderAgenda(){
   if(data.settings.showCalendar===false){ el.innerHTML='<span class="muted" style="font-size:.84rem">Calendar off (enable in Settings).</span>'; return; }
   if(calEvents===null){ el.innerHTML = data.settings.gcalId ? '<button class="btn soft" onclick="connectCal()">Connect Google Calendar</button>' : '<span class="muted" style="font-size:.84rem">Add a Google Client ID in Settings to see your agenda.</span>'; return; }
   var today=isoLocal(new Date());
-  var todays=calEvents.filter(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";return w.slice(0,10)===today;});
+  var todays=calEvents.filter(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";return evDay(w)===today;});
   el.innerHTML = todays.length ? todays.map(function(e){var dt=e.start&&e.start.dateTime; var tm=dt?new Date(e.start.dateTime).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"All day"; return '<div class="agenda-item"><div class="agenda-time">'+esc(tm)+'</div><div style="flex:1">'+esc(e.summary||"(no title)")+'</div></div>';}).join("") : '<div class="muted" style="padding:8px 0;font-size:.86rem">No events today.</div>';
 }
 function renderMomentum(){
@@ -6449,7 +6572,7 @@ function renderFullCalendar(){
     var chips=items.slice(0,3).map(chip).join("");
     var more=items.length>3?'<button type="button" class="tc5-more" onclick="event.stopPropagation();gcalDay(\''+iso+'\')">+'+(items.length-3)+' more</button>':'';
     var dots=items.length?'<div class="tc5-dots">'+items.slice(0,4).map(function(it){ return '<span class="tc5-dot2" style="background:'+kindColor(it.kind)+'"></span>'; }).join("")+(items.length>4?'<span class="tc5-dotmore">+'+(items.length-4)+'</span>':'')+'</div>':'';
-    return '<div class="tc5-cell'+(out?' out':'')+(isToday?' today':'')+((dow===0||dow===6)?' wknd':'')+(items.length?' has-ev':'')+'" onclick="gcalDay(\''+iso+'\')" title="View this day"><span class="tc5-num">'+dt.getDate()+'</span><div class="tc5-evs">'+chips+more+'</div>'+dots+'</div>';
+    return '<div class="tc5-cell'+(out?' out':'')+(isToday?' today':'')+((dow===5||dow===6)?' wknd':'')+(items.length?' has-ev':'')+'" onclick="gcalDay(\''+iso+'\')" title="View this day"><span class="tc5-num">'+dt.getDate()+'</span><div class="tc5-evs">'+chips+more+'</div>'+dots+'</div>';
   }
   var monthLbl=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
   var IC_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
@@ -6499,7 +6622,7 @@ function renderTaskCalendar(host){
     var chips=items.slice(0,3).map(evChip).join("");
     var more=items.length>3?'<button type="button" class="tc5-more" onclick="event.stopPropagation();taskCalDay(\''+iso+'\')">+'+(items.length-3)+' more</button>':'';
     var dots=items.length?'<div class="tc5-dots">'+items.slice(0,4).map(function(e){ var t=e.t, k=priKey(t.priority); return '<span class="tc5-dot2'+(_taskDone(t)?' done':'')+'" style="background:'+PRI[k].c+'"></span>'; }).join("")+(items.length>4?'<span class="tc5-dotmore">+'+(items.length-4)+'</span>':'')+'</div>':'';
-    return '<div class="tc5-cell'+(out?' out':'')+(isToday?' today':'')+((dow===0||dow===6)?' wknd':'')+(items.length?' has-ev':'')+'" onclick="taskCalCell(\''+iso+'\','+items.length+')" title="'+(items.length?'View this day':'Add a task on this day')+'"><span class="tc5-num">'+dt.getDate()+'</span><div class="tc5-evs">'+chips+more+'</div>'+dots+'</div>';
+    return '<div class="tc5-cell'+(out?' out':'')+(isToday?' today':'')+((dow===5||dow===6)?' wknd':'')+(items.length?' has-ev':'')+'" onclick="taskCalCell(\''+iso+'\','+items.length+')" title="'+(items.length?'View this day':'Add a task on this day')+'"><span class="tc5-num">'+dt.getDate()+'</span><div class="tc5-evs">'+chips+more+'</div>'+dots+'</div>';
   }
   var monthLbl=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
   var IC_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
@@ -6559,10 +6682,10 @@ async function colRename(id){
   col.name=v; col.updated=Date.now(); w.updated=Date.now();
   save(); render(); toast("Column renamed");
 }
-function addStatusInline(){ promptModal("Add status","Name this status","New status").then(function(nm){ if(nm===null) return; nm=String(nm).trim(); if(!nm) return; var _w=wsActive(); if(!_w){ toast("Pick a workspace to add a column"); return; } var ss=statuses(); ss.push({id:"s"+uid(),name:nm,updated:Date.now()}); _w.statuses=ss; _w.updated=Date.now(); data.settings.statusesV=2; save(); render(); toast("Status added"); }); }
+function addStatusInline(){ promptModal("Add status","Name this status","New status").then(function(nm){ if(nm===null) return; nm=String(nm).trim(); if(!nm) return; var _w=wsActive(); if(!_w){ toast("Pick a workspace to add a column"); return; } var ss=statuses(); var _d=stDoneOf(ss); ss.forEach(function(c){ if(c.id===_d) c.done=true; }); ss.push({id:"s"+uid(),name:nm,updated:Date.now()});   /* pin "finished" before adding, so the new last column doesn't become it */ _w.statuses=ss; _w.updated=Date.now(); data.settings.statusesV=2; save(); render(); toast("Status added"); }); }
 function dueLabel(t){ if(!t.due&&!t.start) return ""; var d=t.due||t.start; var s=(t.start&&t.due&&t.start!==t.due)?t.start:""; var base=s?(esc(fmtDueShort(s))+'<span class="dl-arr">&rarr;</span>'+esc(fmtDueShort(d))):esc(fmtDueShort(d)); var tm=t.time?'<span class="dl-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'+esc(prettyTime(t.time))+'</span>':''; return '<span class="dl">'+base+tm+'</span>'; }
 function subBadge(t){ var s=t.subs||[]; if(!s.length) return ""; var done=s.filter(function(x){return x.done;}).length; return '<span class="ksub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+done+'/'+s.length+'</span>'; }
-function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!t.done;
+function kcard(t){ var today=isoLocal(new Date()); var over=t.due&&t.due<today&&!(t.done||taskStatus(t)===completedStatusId(t.ws));
   var asg=((t.assignee||"")+"").trim();
   var av=asg?'<span class="kc-av" title="'+esc(asg)+'">'+esc(_initials(asg))+'</span>':'';
   var dd=t.due||t.start;
@@ -6597,7 +6720,7 @@ function taskListRow(t,today,alt){
     +(wsActive()?'':'<div class="tl2-ws">'+wsChip(t)+'</div>')
     +'<div class="tl2-asg">'+av+'</div>'
     +'<div class="tl2-due">'+due+'</div>'
-    +'<div class="tl2-pri"><span class="tl2-prio-pill p-'+p+'">'+pl+'</span></div>'
+    +'<div class="tl2-pri">'+(p==="none"?'':'<span class="tl2-prio-pill p-'+p+'">'+pl+'</span>')+'</div>'
     +'</div>';
 }
 var TL_PAL=[["#817eff","#b3a9ff"],["#ffb3ab","#ffb3ab"],["#74c4b6","#7fd1c4"],["#f2596f","#f2596f"],["#c9b0ff","#b3a9ff"],["#c66a2b","#e0a06a"]];
@@ -6675,8 +6798,26 @@ var _tdId=null,_tdNew=null,_tdReady=false,_tdT=null,_tdPresetDue=null;
    Inline actions appear on selection (bubble); block actions live in a
    compact toolbar that reveals on focus. Markdown shortcuts + paste-linkify. */
 var RTE_OK={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,DEL:1,A:1,UL:1,OL:1,LI:1,H1:1,H2:1,H3:1,BLOCKQUOTE:1,CODE:1,PRE:1,BR:1,P:1,DIV:1,SPAN:1};
+/* parse untrusted HTML in an inert document: nothing in it runs or loads (no <img onerror>, no scripts) while we clean it */
+function _inertDiv(html){ var doc=document.implementation.createHTMLDocument(""); var d=doc.createElement("div"); d.innerHTML=(html==null?"":String(html)); return d; }
+/* SVG icons from files or the cloud: only drawing elements — no scripts, event handlers, external links or embedded HTML */
+var _svgSafeC={};
+function _svgSafe(svg){ svg=String(svg||""); if(_svgSafeC[svg]!=null) return _svgSafeC[svg]; var out="";
+  var badUrl=/url\s*\(\s*['"]?(?!#)|expression\s*\(|javascript:/i;
+  function clean(root){ (function walk(n){ [].slice.call(n.children).forEach(function(ch){ var t=ch.nodeName.toLowerCase().replace(/^svg:/,"");
+        if(/^(script|foreignobject|iframe|object|embed|image|a|animate|animatetransform|animatemotion|set|handler)$/.test(t)){ ch.parentNode.removeChild(ch); return; }
+        if(t==="style"&&(/@import/i.test(ch.textContent)||badUrl.test(ch.textContent))){ ch.parentNode.removeChild(ch); return; }   /* class fills (Illustrator) are fine; imports and outside links aren't */
+        walk(ch); });
+      [].slice.call(n.attributes).forEach(function(a){ var nm=a.name.toLowerCase(), v=String(a.value||"");
+        if(/^on/.test(nm)) n.removeAttribute(a.name); else if(/href$/.test(nm)&&v.trim()[0]!=="#") n.removeAttribute(a.name);   /* only links inside the icon (#gradient, <use href="#…">) */
+        else if(badUrl.test(v)) n.removeAttribute(a.name); }); })(root); return root; }
+  try{ var doc=new DOMParser().parseFromString(svg,"image/svg+xml"); var root=doc.documentElement;
+    if(root&&root.nodeName.toLowerCase()==="svg"&&!doc.querySelector("parsererror")) out=new XMLSerializer().serializeToString(clean(root));
+    else { var d=_inertDiv(svg); var el=d.querySelector("svg"); if(el) out=clean(el).outerHTML; }   /* not strict XML (&nbsp;, unclosed tags): read it as HTML instead of blanking the icon */
+  }catch(e){ out=""; }
+  _svgSafeC[svg]=out; return out; }
 function rteSanitize(html){
-  var d=document.createElement("div"); d.innerHTML=(html==null?"":String(html));
+  var d=_inertDiv(html);
   (function walk(node){
     [].slice.call(node.childNodes).forEach(function(ch){
       if(ch.nodeType===1){
@@ -6704,7 +6845,7 @@ function rteHTML(el){
 function rteText(v){
   if(!v) return ""; v=String(v);
   if(v.indexOf("<")<0) return v;
-  var d=document.createElement("div"); d.innerHTML=v;
+  var d=_inertDiv(v);
   d.querySelectorAll("li").forEach(function(li){ li.textContent="• "+li.textContent+" "; });
   d.querySelectorAll("h1,h2,h3,p,div,blockquote,br,pre").forEach(function(b){ b.insertAdjacentText&&b.insertAdjacentText("afterend"," "); });
   return (d.textContent||"").replace(/\s+/g," ").trim();
@@ -6713,7 +6854,7 @@ function rteText(v){
 function rtePreview(v){
   if(!v) return ""; v=String(v);
   if(v.indexOf("<")<0) return v.replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim();
-  var d=document.createElement("div"); d.innerHTML=v;
+  var d=_inertDiv(v);
   d.querySelectorAll("li").forEach(function(li){ li.textContent="• "+(li.textContent||""); });
   d.querySelectorAll("br").forEach(function(br){ if(br.parentNode) br.parentNode.replaceChild(document.createTextNode("\n"),br); });
   d.querySelectorAll("p,div,li,h1,h2,h3,blockquote,pre").forEach(function(b){ b.appendChild(document.createTextNode("\n")); });
@@ -6997,9 +7138,10 @@ function tdWsChange(){
   var wsSel=document.getElementById("tdWs"), stSel=document.getElementById("tdStatus");
   if(!wsSel||!stSel) return;
   var prevName=(statuses().find(function(c){return c.id===stSel.value;})||{}).name||"";
+  var _prevDone=wsAll().some(function(w){ return completedStatusId(w.id)===stSel.value; });
   var cols=statuses(wsSel.value);
   stSel.innerHTML=cols.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join("");
-  var match=cols.find(function(c){ return (c.name||"").toLowerCase()===prevName.toLowerCase(); });
+  var match=(_prevDone&&cols.find(function(c){ return c.id===completedStatusId(wsSel.value); }))||cols.find(function(c){ return (c.name||"").toLowerCase()===prevName.toLowerCase(); });
   stSel.value = match ? match.id : (cols[0]?cols[0].id:"");
   try{ enhanceSelects(); }catch(e){}
   try{ tdPills(); }catch(e){}
@@ -7366,9 +7508,9 @@ function taskAct(a){
     copy.id=uid(); copy.t=(t.t||"")+" (copy)";
     copy.done=false; copy.status=reopenStatusId(t.ws);
     copy.created=Date.now(); copy.updated=Date.now();
-    copy.subs=(t.subs||[]).map(function(sb){ var c=JSON.parse(JSON.stringify(sb)); c.id=uid(); c.done=false; return c; });
+    copy.subs=(t.subs||[]).map(function(sb){ var c=JSON.parse(JSON.stringify(sb)); c.id=uid(); c.done=false; delete c.attachments; return c; });
     copy.comments=[];   /* a copy shouldn't inherit the conversation or the files */
-    copy.atts=[];
+    copy.atts=[]; delete copy.attachments;   /* files live in `attachments` — sharing them meant deleting the copy's file removed the original's */
     var i=(data.tasks||[]).indexOf(t);
     data.tasks.splice(i<0?data.tasks.length:i+1, 0, copy); _bumpTaskOrder();
     save(); render(); toast("Task duplicated");
@@ -7459,7 +7601,7 @@ function subMarkComplete(){ if(!_tdSub) return; var o=_subOf(_tdSub.p,_tdSub.s);
   o.s.done=true; o.t.updated=Date.now(); celebrateHere(); save(true); try{render();}catch(e){} toast("Subtask completed"); subBack(); }
 function sdAutoSave(){ if(_sdT) clearTimeout(_sdT); _sdT=setTimeout(function(){ _sdT=null; sdCommit(); },400); }
 function subBack(){ var pid=_sdParent; try{ sdCommit(); }catch(e){} _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
-function subPanelDelete(){ var pid=_sdParent, o=_subOf(_sdParent,_sdId); if(o){ o.t.subs=(o.t.subs||[]).filter(function(x){return x.id!==_sdId;}); o.t.updated=Date.now(); save(); } _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
+function subPanelDelete(){ var pid=_sdParent, o=_subOf(_sdParent,_sdId); if(o){ try{ var _old=(o.t.subs||[]).slice(); _nestedDiff("#"+pid+"/s",_old,_old.filter(function(x){return x.id!==_sdId;}),_subKey); }catch(_){} o.t.subs=(o.t.subs||[]).filter(function(x){return x.id!==_sdId;}); o.t.updated=Date.now(); save(); } _tdSub=null; _sdReady=false; _tdReady=false; closeModal(); if(pid) openTask(pid); }
 function sdAddComment(){ var inp=document.getElementById("sdCmtIn"); if(!inp) return; var v=inp.value.trim(); if(!v) return; var o=_subOf(_sdParent,_sdId); if(!o) return; o.s.comments=o.s.comments||[]; o.s.comments.push({id:uid(),text:v,ts:Date.now(),author:(data.profile&&data.profile.name)||"You"}); o.t.updated=Date.now(); inp.value=""; save(true); sdRenderComments(); }
 function sdRenderComments(){ var host=document.getElementById("sdComments"); if(!host) return; var o=_subOf(_sdParent,_sdId); var cs=(o&&o.s.comments)||[];
   host.innerHTML=cs.length?cs.map(function(c){ return '<div style="padding:9px 11px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted);margin-bottom:3px"><b style="color:var(--text);font-size:.8rem">'+esc(c.author||"You")+'</b><span>'+esc(new Date(c.ts).toLocaleDateString())+'</span></div><div style="font-size:.88rem;line-height:1.45;white-space:pre-wrap;word-break:break-word">'+esc(c.text)+'</div></div>'; }).join(""):'<div class="muted" style="font-size:.82rem">No comments yet.</div>'; }
@@ -7674,7 +7816,8 @@ async function _attUploadOne(f,kind,id,arr,host){
     host.insertBefore(row,host.firstChild); }
   try{
     await _attXhrUpload(f,path,function(pct){ if(!row) return; var fi=row.querySelector(".att-up-bar i"); if(fi) fi.style.width=pct+"%"; var pc=row.querySelector(".att-up-pct"); if(pc) pc.textContent=pct+"%"; });
-    arr.push({id:aid,name:f.name||"file",size:f.size||0,type:f.type||"",path:path,uploadedAt:Date.now()});
+    /* a sync may have swapped the data while the file was uploading — add it to the item as it is NOW, not the old copy */
+    var _cur=_attListOf(kind,id)||arr; _cur.push({id:aid,name:f.name||"file",size:f.size||0,type:f.type||"",path:path,uploadedAt:Date.now()}); arr=_cur;
     var it=_attOwner(kind,id); if(it) it.updated=Date.now(); if(kind==="sub"){ var _pp=(data.tasks||[]).find(function(x){return x.id===(id||"").split("::")[0];}); if(_pp) _pp.updated=Date.now(); }
     save();
     if(kind==="task") tdRenderAttach(id); else if(kind==="sub") sdRenderAttach(); else noteRenderAttach(id);
@@ -7883,7 +8026,7 @@ function noteCard(n){
         return '<div class="nchk-row'+(c.done?' done':'')+'"><span class="nchk-b">'+(c.done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M5 12l5 5L20 7"/></svg>':'')+'</span><span>'+esc(c.t||c.text||"")+'</span></div>';
       }).join("")+(cl.length>4?'<div class="nchk-more">+'+(cl.length-4)+' more</div>':'')+'</div>':'')
     +((n.labels&&n.labels.length)?'<div class="note-labels">'+n.labels.map(function(l){return '<span class="nlabel">'+esc(l)+'</span>';}).join("")+'</div>':'')
-    +'<div class="ndate"><span>'+new Date(n.ts).toLocaleDateString()+(cl.length?(' \u00b7 '+dn+'/'+cl.length):'')+(n.updated&&n.updated>(n.ts||0)+2000?' \u00b7 edited':'')+'</span>'
+    +'<div class="ndate"><span>'+esc(fmtDueShort(isoLocal(new Date(n.ts||n.created||n.updated||Date.now()))))+(cl.length?(' \u00b7 '+dn+'/'+cl.length):'')+(n.updated&&n.updated>(n.ts||0)+2000?' \u00b7 edited':'')+'</span>'
     +'<div class="nact">'
       +'<button class="nib'+(n.pinned?' on':'')+'" title="Pin" onclick="event.stopPropagation();pinNote(\''+n.id+'\')">'+IC.pin+'</button>'
       +'<button class="nib" title="Colour" onclick="event.stopPropagation();noteColorMenu(event,\''+n.id+'\')">'
@@ -7925,7 +8068,7 @@ function renderNotes(){
   const list=(data.notes||[]).filter(function(n){return (!!n.archived===notesShowArchived)&&(!q||((n.title||"")+" "+rteText(n.desc||"")+" "+(Array.isArray(n.checklist)?n.checklist.map(function(c){return c.t;}).join(" "):"")).toLowerCase().indexOf(q)>=0)&&(!notesFilterLabel||((n.labels||[]).indexOf(notesFilterLabel)>=0));});
   list.sort(function(a,b){return ((b.pinned?1:0)-(a.pinned?1:0))||((b.ts||0)-(a.ts||0));});
   var lf=document.getElementById("lblFilter");
-  if(lf){ var ls=noteLabels(); lf.innerHTML=ls.length?('<span class="lbl-chip'+(!notesFilterLabel?" on":"")+'" onclick="setNoteFilter(\'\')">All</span>'+ls.map(function(l){return '<span class="lbl-chip'+(notesFilterLabel===l?" on":"")+'" onclick="setNoteFilter(\''+esc(l).replace(/\x27/g,"")+'\')">'+esc(l)+'</span>';}).join("")):''; }
+  if(lf){ var ls=noteLabels(); lf.innerHTML=ls.length?('<span class="lbl-chip'+(!notesFilterLabel?" on":"")+'" onclick="setNoteFilter(\'\')">All</span>'+ls.map(function(l){return '<span class="lbl-chip'+(notesFilterLabel===l?" on":"")+'" role="button" tabindex="0" data-label="'+esc(l)+'" onclick="setNoteFilter(this.dataset.label)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'+esc(l)+'</span>';}).join("")):''; }
   const host=document.getElementById("notesList"); if(!host) return;
   host.innerHTML = list.length? list.map(noteCard).join("") : '<div class="empty" style="grid-column:1/-1"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h6"/></svg></div><p>'+(notesShowArchived?'No archived notes.':(notesFilterLabel?'No notes with this label.':(q?'No notes match your search.':'No notes yet.')))+'</p></div>';
 }
@@ -8256,11 +8399,12 @@ async function loadWeather(){
   }catch(e){
     /* inline `color` cannot be overridden by any stylesheet rule, so the hero ink
        has to be set here too, not just in .hx-val .lnk above */
-    box.innerHTML='<button class="lnk" onclick="retryWeather()" style="font-size:.7rem;-webkit-text-fill-color:initial;color:#fff">Retry</button>'; if(sub) sub.textContent='';
+    box.innerHTML='<span class="wx-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7 18z"/><path d="M4 4l16 16"/></svg><span>Unavailable</span></span>'; if(sub) sub.innerHTML='<button type="button" class="wx-retry" onclick="retryWeather()">Try again</button>';
   }
 }
 function retryWeather(){ delete _wxCache[_wxKey()]; loadWeather(); }
-function wxDesc(c){ if(c==0)return"Clear"; if(c<3)return"Sunny"; if(c<50)return"Cloudy"; if(c<70)return"Rain"; if(c<80)return"Showers"; return"Storm"; }
+/* WMO weather codes (Open-Meteo) */
+function wxDesc(c){ c=+c; if(c===0)return"Clear"; if(c===1)return"Mostly clear"; if(c===2)return"Partly cloudy"; if(c===3)return"Overcast"; if(c===45||c===48)return"Fog"; if(c>=51&&c<=57)return"Drizzle"; if(c>=61&&c<=67)return"Rain"; if(c>=71&&c<=77)return"Snow"; if(c>=80&&c<=82)return"Showers"; if(c===85||c===86)return"Snow showers"; if(c>=95)return"Thunderstorm"; return"Cloudy"; }
 var _prayList=null, _prayTz="";
 /* seconds-of-day in the PRAYER LOCATION's own timezone (from the API meta), so the countdown stays
    correct even when a hand-picked city sits in a different timezone than the device. Falls back to
@@ -8299,7 +8443,7 @@ function renderPrayerNext(){
     +'<div class="pw-strip">'+strip+'</div></div>'
     +'</div>';
 }
-var _prayDay="";
+var _prayDay="", _prayErr=false, _prayRetryT=null, _prayTried="", _prayBusy=false;
 /* Detect the device's current location once, then let prayer + weather follow it as you travel.
    Coordinates are the source of truth; a reverse-geocode only supplies a friendly label.
    Requires a secure context (https/localhost) — on a bare file:// page the browser blocks
@@ -8350,7 +8494,7 @@ async function loadPrayers(){
   const method=data.settings.prayerMethod||4;
   const host=document.getElementById("prayerNext"); if(!host) return;
   var geo=_getGeo();
-  var today=isoLocal(new Date()); var dstr=today.split("-").reverse().join("-"); _prayDay=today;
+  var today=isoLocal(new Date()); var dstr=today.split("-").reverse().join("-"); _prayTried=today; _prayBusy=true;   /* the minute timer checks _prayTried; failures retry every 5 min */
   var url,ckey,label;
   if(geo&&geo.lat!=null){                                      /* GPS coords win, so prayer times follow you as you travel */
     url="https://api.aladhan.com/v1/timings/"+dstr+"?latitude="+geo.lat+"&longitude="+geo.lng+"&method="+method;
@@ -8369,8 +8513,8 @@ async function loadPrayers(){
     try{ _prayTz=(j.data&&j.data.meta&&j.data.meta.timezone)||""; }catch(e){ _prayTz=""; }
     const t=j.data.timings; const order=[["Fajr",t.Fajr],["Dhuhr",t.Dhuhr],["Asr",t.Asr],["Maghrib",t.Maghrib],["Isha",t.Isha]];
     _prayList=order.map(function(o){ var pp=String(o[1]).split(":"); return {name:o[0],h:+pp[0],m:+pp[1]}; });
-    renderPrayerNext();
-  }catch(e){ host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(label)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
+    _prayDay=today; _prayErr=false; _prayBusy=false; renderPrayerNext();
+  }catch(e){ _prayErr=true; _prayBusy=false; clearTimeout(_prayRetryT); _prayRetryT=setTimeout(function(){ if(_prayErr) loadPrayers(); },5*60*1000); host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(label)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
 }
 function prayerCityPicker(){
   var cur=data.settings.city||"Makkah", cc=data.settings.prayerCountry||"Saudi Arabia", mcur=data.settings.prayerMethod||4;
@@ -8506,7 +8650,7 @@ var IC_PLANE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
    copied, the digest and Upcoming could silently disagree about what "this
    week" means. Note it collapses to today on a Saturday; that is the existing
    behaviour of Upcoming, deliberately matched rather than corrected here. */
-function hubWeekEnd(){ var d=new Date(); var s=new Date(); s.setDate(s.getDate()+(6-d.getDay())); return isoLocal(s); }
+function hubWeekEnd(){ var s=new Date(); s.setDate(s.getDate()+6); return isoLocal(s); }   /* a rolling 7 days — a calendar week left almost nothing to show by Friday */
 /* the hero strip takes pills, not rows — same rule, different wrapper */
 function travelDigestPill(){
   var r=travelDigestRow(true);
@@ -8542,10 +8686,10 @@ function travelDigestRow(asText){
   var h2="<b>"+esc(dest(next))+"</b> in <b>"+days+"</b> day"+(days>1?"s":"");return asText?h2:sumRow(IC_PLANE,h2);
 }
 async function loadTravel(){
-  if(!user||!supa) return;
+  if(!user||!supa) return; var _uid=user.id;
   try{
-    const {data:rows}=await supa.from("trips").select("data,updated_at").eq("user_id",user.id);
-    if(!rows) return;
+    const {data:rows}=await supa.from("trips").select("data,updated_at").eq("user_id",_uid);
+    if(!rows||!user||user.id!==_uid) return;   /* signed out / switched account while this was loading */
     var today=isoLocal(new Date());
     /* Travel deletes a trip by writing a tombstone ({__deleted:true}) rather than
        removing the row, so the record stays in the table for last-write-wins sync.
@@ -8570,9 +8714,10 @@ async function loadTravel(){
   }catch(e){}
 }
 async function loadFinance(){
-  if(!user||!supa) return;
+  if(!user||!supa) return; var _uid=user.id;
   try{
-    const {data:rows}=await supa.from("boards").select("data,updated_at").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1);
+    const {data:rows}=await supa.from("boards").select("data,updated_at").eq("user_id",_uid).order("updated_at",{ascending:false}).limit(1);
+    if(!user||user.id!==_uid) return;
     const d=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]&&rows[0].updated_at) financeUpdated=rows[0].updated_at; if(!d) return;
     let net=null;
     if(typeof d.netWorth==="number" && isFinite(d.netWorth)) net=d.netWorth;
@@ -8585,7 +8730,7 @@ async function loadFinance(){
        time pointing at that live recompute instead of the last cloud save, or the footer
        would say "3 days ago" next to a live figure */
     if(_nwLive!=null && (Date.now()-_nwLiveAt)<600000){ financeStat=Number(_nwLive).toLocaleString("en-US",{maximumFractionDigits:0}); financeUpdated=new Date(_nwLiveAt).toISOString(); }
-    if(Array.isArray(d.zaka)&&d.zaka.length){ var last=d.zaka.map(function(z){return z.dateG;}).filter(Boolean).sort().pop(); if(last){ var nx=new Date(last); nx.setDate(nx.getDate()+354); zakatDue=Math.ceil((nx-new Date())/86400000); } }
+    if(Array.isArray(d.zaka)&&d.zaka.length){ var last=d.zaka.map(function(z){return z.dateG;}).filter(Boolean).sort().pop(); if(last){ var nx=new Date(last); var _now=new Date(); var _g=0; while(nx<=_now&&_g++<400) nx=new Date(nx.getTime()+354.37*864e5); zakatDue=Math.ceil((nx-_now)/86400000); } }   /* same rule as Finance: step lunar years until the next date is ahead */
     renderAppCards("appCards"); renderAppCards("appCardsFull"); try{ renderToday(); renderWelcomeSummary(); renderCalendar(); }catch(e){}
     try{ refreshNetWorthLive(d); }catch(e){}   /* fetch live gold/stock prices and recompute net worth right here in the hub */
   }catch(e){}
@@ -8743,7 +8888,7 @@ function showModal(html,cls){
 }
 var _mdlPrevFocus=null;
 /* styled replacements for native confirm()/prompt() — keep the app's modal look & focus handling */
-function uiConfirm(msg,onOk,opts){ opts=opts||{}; showModal('<h4>'+esc(opts.title||"Please confirm")+'</h4><p class="muted" style="margin:6px 0 16px;line-height:1.5">'+esc(msg)+'</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn soft" onclick="closeModal()">'+esc(opts.cancel||"Cancel")+'</button><button class="btn'+(opts.danger?" danger":"")+'" id="__uiOk">'+esc(opts.ok||"Confirm")+'</button></div>'); var b=document.getElementById("__uiOk"); if(b) b.onclick=function(){ closeModal(); try{ onOk&&onOk(); }catch(e){} }; }
+function uiConfirm(msg,onOk,opts){ opts=opts||{}; showModal('<h4>'+esc(opts.title||"Please confirm")+'</h4><p class="muted" style="margin:6px 0 16px;line-height:1.5">'+esc(msg)+'</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn soft" id="__uiNo" onclick="closeModal()">'+esc(opts.cancel||"Cancel")+'</button><button class="btn'+(opts.danger?" danger":"")+'" id="__uiOk">'+esc(opts.ok||"Confirm")+'</button></div>'); setTimeout(function(){ var c=document.getElementById("__uiNo"); if(c) c.focus(); },30); var b=document.getElementById("__uiOk"); if(b) b.onclick=function(){ closeModal(); try{ onOk&&onOk(); }catch(e){} }; }
 function uiPrompt(msg,def,onOk,opts){ opts=opts||{}; showModal('<h4>'+esc(opts.title||"")+'</h4>'+(msg?'<p class="muted" style="margin:6px 0 10px;line-height:1.5">'+esc(msg)+'</p>':"")+'<input class="fld" id="__uiIn" value="'+esc(def==null?"":def)+'"><div class="row" style="justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn" id="__uiOk">'+esc(opts.ok||"Save")+'</button></div>'); var i=document.getElementById("__uiIn"); var b=document.getElementById("__uiOk"); if(b) b.onclick=function(){ var v=i?i.value:""; closeModal(); try{ onOk&&onOk(v); }catch(e){} }; if(i){ setTimeout(function(){ try{ i.focus(); i.select(); }catch(_){} },40); } }
 function _mdlTrap(e){
   if(e.key!=="Tab") return;
@@ -8770,6 +8915,8 @@ function closeModal(){ try{ cpClose(); }catch(_){}
   if(window._tdCleanup){ try{window._tdCleanup();}catch(e){} window._tdCleanup=null; }
   document.getElementById("modalRoot").innerHTML="";
   document.documentElement.classList.remove("modal-open"); document.body.classList.remove("modal-open");
+  _closePops();   /* date/time/assignee pop-ups belong to the closed editor */
+  _afterModalClose();
   if(_promptResolve){_promptResolve(null);_promptResolve=null;}
   if(_wasPanel){ try{ render(); }catch(e){ console.error("render after panel close",e); } }   /* every widget sees the edit */
 }
@@ -8784,14 +8931,16 @@ function promptModal(title,label,def){
     setTimeout(()=>{ const el=document.getElementById("pmIn"); if(el){el.focus();el.select();} },30);
   });
 }
-function pmOk(){ const v=document.getElementById("pmIn").value; const r=_promptResolve; _promptResolve=null; document.getElementById("modalRoot").innerHTML=""; if(r) r(v); }
-function pmCancel(){ const r=_promptResolve; _promptResolve=null; document.getElementById("modalRoot").innerHTML=""; if(r) r(null); }
+function pmOk(){ const v=document.getElementById("pmIn").value; const r=_promptResolve; _promptResolve=null; document.getElementById("modalRoot").innerHTML=""; _afterModalClose(); if(r) r(v); }
+function pmCancel(){ const r=_promptResolve; _promptResolve=null; document.getElementById("modalRoot").innerHTML=""; _afterModalClose(); if(r) r(null); }
 function confirmModal(title,msg,okLabel,danger){
   return new Promise(function(res){
     var wrap=document.createElement("div"); wrap.className="overlay"; wrap.style.zIndex="200";
     wrap.innerHTML='<div class="modal" style="max-width:380px"><h4>'+esc(title)+'</h4>'+(msg?'<p class="muted" style="font-size:.86rem;margin:-4px 0 14px;line-height:1.5">'+esc(msg)+'</p>':'')+'<div class="row"><button class="btn soft" data-x="0">Cancel</button><button class="btn" data-x="1"'+(danger?' style="background:var(--red);background-image:none"':'')+'>'+esc(okLabel||"Confirm")+'</button></div></div>';
     document.body.appendChild(wrap);
-    function done(v){ wrap.remove(); res(v); }
+    function onKey(e){ if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); done(false); } }
+    function done(v){ document.removeEventListener("keydown",onKey,true); wrap.remove(); res(v); }
+    document.addEventListener("keydown",onKey,true); setTimeout(function(){ var c=wrap.querySelector('[data-x="0"]'); if(c) c.focus(); },30);   /* Esc = Cancel, and the safe choice has focus */
     wrap.querySelector('[data-x="0"]').onclick=function(){done(false);};
     wrap.querySelector('[data-x="1"]').onclick=function(){done(true);};
     wrap.addEventListener("click",function(e){ if(e.target===wrap) done(false); });
@@ -8813,7 +8962,8 @@ function authUI(mode){
   mode=mode||"in";
   const root=document.getElementById("authRoot"); root.style.display="grid"; document.documentElement.classList.add("dark"); document.documentElement.classList.add("auth-open");
   const tabs=`<div class="auth-tabs"><button class="${mode==='in'?'active':''}" onclick="authUI('in')">Sign in</button><button class="${mode==='up'?'active':''}" onclick="authUI('up')">Create account</button></div>`;
-  root.innerHTML=`<div class="auth-card">
+  var canClose=false; try{ canClose=!!localStorage.getItem(GUEST_FLAG); }catch(e){}
+  root.innerHTML=`<div class="auth-card">${canClose?'<button type="button" class="auth-x" onclick="closeAuth()" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>':''}
     <div class="auth-logo"><svg viewBox="375 170 200 200" fill="currentColor"><path d="M381.64 217.79l10.23-40.91h171.15l-10.23 40.91z"/><path d="M381.64 322.21l10.23 40.91h171.15l-10.23-40.91z"/><path d="M381.64 290.46l10.23-40.91h186.5l-10.23 40.91z"/></svg></div>
     <h2 class="marc">Workspace</h2><div class="tag"></div>
     ${tabs}
@@ -8821,7 +8971,7 @@ function authUI(mode){
     <div class="pwf"><input class="fld" id="aPass" type="password" placeholder="Password" autocomplete="${mode==='up'?'new-password':'current-password'}" onkeydown="if(event.key==='Enter')document.getElementById('aBtn').click()"><button type="button" class="pwf-eye" id="aEye" onclick="togglePw('aPass','aEye')" aria-label="Show password" title="Show password">${I_EYE}</button></div>
     <div class="auth-err" id="aErr"></div>
     <button class="btn full" id="aBtn" onclick="${mode==='up'?'doSignUp()':'doSignIn()'}">${mode==='up'?'Create account':'Sign in'}</button>
-    <div class="auth-links">${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}</div>
+    <div class="auth-links">${mode==='in'?'<button onclick="doForgot()">Forgot password?</button>':''}${!supaReady?(_dataOwner?'<button onclick="workOffline()">Work offline on this device</button>':'<button onclick="guestMode()">Continue without an account</button>'):''}</div>
   </div>`;
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
@@ -8830,30 +8980,40 @@ function closeAuth(){ const r=document.getElementById("authRoot"); r.style.displ
   try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
        var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
 }
-function guestMode(){ try{localStorage.setItem(GUEST_FLAG,"1");}catch(e){} _clearCloudGlobals(); closeAuth(); }
+var _freshLogin=false;
+function workOffline(){ _offline=true; closeAuth(); try{ render(); }catch(e){} toast("Working offline — changes stay on this device until you're back online"); }
+function guestMode(){ try{localStorage.setItem(GUEST_FLAG,"1");}catch(e){} _clearCloudGlobals(); _offline=false;
+  if(_dataOwner!==null){ data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); try{ render(); }catch(e){} }   /* guest works on the guest copy, never on an account's data */
+  closeAuth(); }
 async function doSignIn(){
-  if(!supaReady) return guestMode();
+  if(!supaReady) return authErr("Can't reach the sign-in service right now — check your connection and reload.");
   const email=document.getElementById("aEmail").value.trim(), pass=document.getElementById("aPass").value;
   if(!email||!pass) return authErr("Enter your email and password.");
   authErr("Signing in…");
-  const {error}=await supa.auth.signInWithPassword({email,password:pass});
-  if(error) authErr(error.message); else _touchAuth();
+  _freshLogin=true; const {error}=await supa.auth.signInWithPassword({email,password:pass});
+  if(error){ _freshLogin=false; authErr(error.message); } else _touchAuth();
 }
 async function doSignUp(){
-  if(!supaReady) return guestMode();
+  if(!supaReady) return authErr("Can't reach the sign-in service right now — check your connection and reload.");
   const email=document.getElementById("aEmail").value.trim(), pass=document.getElementById("aPass").value;
   if(!email||!pass) return authErr("Enter an email and password.");
   if(pass.length<8) return authErr("Use at least 8 characters.");
   authErr("Creating…");
-  const {data:res,error}=await supa.auth.signUp({email,password:pass});
+  _freshLogin=true; const {data:res,error}=await supa.auth.signUp({email,password:pass}); if(error||!(res&&res.session)) _freshLogin=false;
   if(error) return authErr(error.message);
-  if(res&&res.session){ _touchAuth(); return; } authErr("Check your email to confirm your account.",true);
+  if(res&&res.session){ _freshLogin=true; _touchAuth(); return; } authErr("Check your email to confirm your account.",true);
 }
 async function doForgot(){
   const email=document.getElementById("aEmail").value.trim(); if(!email) return authErr("Enter your email first.");
   const {error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   authErr(error?error.message:"Reset link sent — check your inbox.",!error);
 }
+function _adoptUser(u){ var _st=loadLocal(KEY+":"+u.id), _gu=_dataOwner===u.id?null:loadLocal(KEY);
+  /* keep what's on screen only if it already belongs to this account (or is guest work being brought in) — never another account's data */
+  var base=(_dataOwner===u.id||_dataOwner===null)?data:JSON.parse(JSON.stringify(DEFAULT));
+  var m=base; if(_st) m=mergeHubData(m,_st); if(_gu) m=mergeHubData(m,_gu); data=fill(m); _dataOwner=u.id;
+  try{ localStorage.removeItem(GUEST_FLAG); localStorage.setItem("hub.lastUser",u.id); }catch(e){}
+  _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} }
 async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} if(supa) await supa.auth.signOut(); }
 /* Wipe every cloud-derived display global so a following account (or guest mode)
    never sees the previous user's finance / travel / calendar / inbox data. */
@@ -8865,6 +9025,7 @@ function _clearCloudGlobals(){
     gmailStats=null; gmailMsgs=null;
     _nwLive=null; _nwLiveAt=0;
   }catch(e){}
+  try{ _gTok={}; calToken=null; gmailToken=null; calState="idle"; gmailState="idle"; }catch(e){}   /* the next account must connect its own Google */
 }
 /* ---- Session timeout: auto sign-out 4 h after login ---- */
 var SESSION_MAX_MS=4*60*60*1000;
@@ -8883,12 +9044,13 @@ try{ window.addEventListener("focus",function(){ try{ _enforceSessionTimeout(); 
 /* Enter to trigger a modal's primary (Save/Add/Create) button */
 document.addEventListener("keydown",function(e){
   if(e.key!=="Enter"||e.shiftKey||e.ctrlKey||e.metaKey||e.altKey||e.isComposing) return;
-  var t=e.target; if(!t) return;
+  var t=e.target; if(!t||e.defaultPrevented||!t.isConnected) return;   /* already handled, or the field's own handler just closed the dialog — don't press a second button */
   if(t.tagName==="TEXTAREA"||t.isContentEditable||t.tagName==="BUTTON"||t.tagName==="SELECT") return;
-  var modal=t.closest?t.closest(".modal"):null; if(!modal||modal.classList.contains("side")) return;
+  if(t.classList&&(t.classList.contains("sub-in")||t.classList.contains("tdp-chip-in"))) return;   /* checklist / tag fields: Enter isn't "save and close" */
+  var modal=t.closest?t.closest(".modal"):null; if(!modal||modal.classList.contains("side")||!modal.isConnected) return;
   var btns=modal.querySelectorAll("button.btn"), primary=null;
   for(var i=btns.length-1;i>=0;i--){ var b=btns[i]; if(!b.disabled&&!b.classList.contains("soft")&&!b.classList.contains("danger")){ primary=b; break; } }
-  if(primary){ e.preventDefault(); primary.click(); }
+  if(primary){ e.preventDefault(); e.stopPropagation(); primary.click(); }
 });
 
 async function initAuth(){
@@ -8902,8 +9064,8 @@ async function initAuth(){
        restores for us. Without this a restored session inherits whatever
        hub.authStart was left behind, so the 4h timer could already be spent
        the moment the page finished loading. */
-    if(signedIn){ _touchAuth(); closeAuth(); var _st=loadLocal(KEY+":"+u.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
-    if(signedOut){ _clearCloudGlobals(); try{localStorage.removeItem("hub.lastUser");}catch(e){} data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _syncSettingsBaseline(); render(); authUI("in"); }
+    if(signedIn){ if(_sessionExpired()&&!_freshLogin){ try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} user=null; accountInit(); _clearCloudGlobals(); data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); try{ render(); }catch(e){} authUI("in"); toast("Signed out after 4h of inactivity — please sign in again"); supa.auth.signOut(); return; } _freshLogin=false; _touchAuth(); closeAuth(); _adoptUser(u); render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
+    if(signedOut){ _clearCloudGlobals(); try{localStorage.removeItem("hub.lastUser");}catch(e){} data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); render(); authUI("in"); }
   });
   const {data:{session}}=await supa.auth.getSession();
   /* Lower the gate here too. Closing it was left entirely to the signedIn branch
@@ -8915,7 +9077,7 @@ async function initAuth(){
      is an invisible sheet of glass over the whole workspace: every click lands
      on it and nothing in the app responds. closeAuth() is idempotent, so
      calling it on both paths costs nothing and removes the race. */
-  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); var _st=loadLocal(KEY+":"+user.id), _gu=loadLocal(KEY); data=fill(mergeHubData(mergeHubData(data,_st),_gu)); _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
+  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); _adoptUser(user); render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
   else authUI("in");
 }
 
@@ -8935,12 +9097,12 @@ function openEventEdit(id){ var ev=(calEvents||[]).find(function(e){return e.id=
 function openEventModal(ev){
   var isNew=!ev;
   var allDay = ev ? !!(ev.start&&ev.start.date&&!ev.start.dateTime) : false;
-  var dateV, startT="", endT="", title="", loc="", desc="", guests="";
+  var dateV, endDV="", startT="", endT="", title="", loc="", desc="", guests="";
   if(ev){
     title=ev.summary||""; loc=ev.location||""; desc=ev.description||"";
     guests=((ev.attendees||[]).map(function(a){return a.email;}).filter(Boolean)).join(", ");
-    if(allDay){ dateV=(ev.start.date||"").slice(0,10); }
-    else { var sd=ev.start&&ev.start.dateTime?new Date(ev.start.dateTime):null; var ed=ev.end&&ev.end.dateTime?new Date(ev.end.dateTime):null; dateV=sd?isoLocal(sd):isoLocal(new Date()); startT=sd?(_pad2(sd.getHours())+":"+_pad2(sd.getMinutes())):""; endT=ed?(_pad2(ed.getHours())+":"+_pad2(ed.getMinutes())):""; }
+    if(allDay){ dateV=(ev.start.date||"").slice(0,10); var _xe=(ev.end&&ev.end.date)?new Date(ev.end.date+"T00:00:00"):null; if(_xe&&!isNaN(_xe)){ _xe.setDate(_xe.getDate()-1); endDV=isoLocal(_xe); } }   /* Google's all-day end is exclusive: show the real last day */
+    else { var sd=ev.start&&ev.start.dateTime?new Date(ev.start.dateTime):null; var ed=ev.end&&ev.end.dateTime?new Date(ev.end.dateTime):null; dateV=sd?isoLocal(sd):isoLocal(new Date()); startT=sd?(_pad2(sd.getHours())+":"+_pad2(sd.getMinutes())):""; endT=ed?(_pad2(ed.getHours())+":"+_pad2(ed.getMinutes())):""; endDV=ed?isoLocal(ed):""; }
   } else {
     dateV=calSel||isoLocal(new Date()); var h=new Date().getHours()+1; startT=_pad2(Math.min(h,22))+":00"; endT=_pad2(Math.min(h+1,23))+":00";
   }
@@ -8950,7 +9112,7 @@ function openEventModal(ev){
    +'<input class="fld tm-title" id="evTitle" value="'+esc(title)+'" placeholder="Event title">'
    +'<div class="tm-sec"><div class="tm-h">'+ICsch+'Schedule</div>'
    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.86rem;font-weight:600;margin-bottom:13px"><input type="checkbox" id="evAllDay" '+(allDay?"checked":"")+' onchange="evToggleAllDay()" style="accent-color:var(--lavender);width:16px;height:16px"> All-day event</label>'
-   +'<div><label class="setlbl">Date</label><input class="fld" id="evDate" type="date" value="'+esc(dateV)+'"></div>'
+   +'<div class="f2"><div><label class="setlbl">Starts</label><input class="fld" id="evDate" type="date" value="'+esc(dateV)+'"></div><div><label class="setlbl">Ends</label><input class="fld" id="evEndDate" type="date" value="'+esc(endDV||dateV)+'"></div></div>'
    +'<div class="f2" id="evTimesWrap" style="margin-top:12px'+(allDay?";display:none":"")+'"><div><label class="setlbl">Start time</label><input class="fld" id="evStart" type="time" value="'+esc(startT)+'"></div><div><label class="setlbl">End time</label><input class="fld" id="evEnd" type="time" value="'+esc(endT)+'"></div></div>'
    +'</div>'
    +'<div class="tm-sec"><div class="tm-h">'+ICdet+'Details</div>'
@@ -8972,15 +9134,16 @@ async function saveEvent(id){
   var desc=(document.getElementById("evDesc").value||"").trim();
   var guests=(document.getElementById("evGuests").value||"").split(",").map(function(x){return x.trim();}).filter(function(x){return /.+@.+\..+/.test(x);});
   var body={summary:title,location:loc,description:desc};
-  if(guests.length) body.attendees=guests.map(function(e){return {email:e};});
+  if(guests.length||id) body.attendees=guests.map(function(e){return {email:e};});   /* editing: an emptied list really removes the guests */
+  var endDate=(document.getElementById("evEndDate")||{}).value||date; if(endDate<date) endDate=date;
   if(allDay){
-    var nd=new Date(date+"T00:00:00"); nd.setDate(nd.getDate()+1);
+    var nd=new Date(endDate+"T00:00:00"); nd.setDate(nd.getDate()+1);   /* exclusive end, so a 28 Sep – 1 Oct event stays four days */
     body.start={date:date}; body.end={date:isoLocal(nd)};
   } else {
     var st=document.getElementById("evStart").value||"09:00";
     var et=document.getElementById("evEnd").value||st;
-    var endDate=date;
-    if(et<=st){ var pp=st.split(":"); var mm=(+pp[0])*60+(+pp[1])+60; et=_pad2(Math.floor(mm/60)%24)+":"+_pad2(mm%60); if(mm>=1440){ var _ed=new Date(date+"T00:00:00"); _ed.setDate(_ed.getDate()+1); endDate=isoLocal(_ed); } /* fix: end time wrapped past midnight -> roll the end date to the next day so end is after start */ }
+    if(endDate===date&&et<st){ var _ed=new Date(date+"T00:00:00"); _ed.setDate(_ed.getDate()+1); endDate=isoLocal(_ed); }   /* 22:00 → 02:00 is an overnight event, not a mistake */
+    else if(endDate===date&&et===st){ var pp=st.split(":"); var mm=(+pp[0])*60+(+pp[1])+60; et=_pad2(Math.floor(mm/60)%24)+":"+_pad2(mm%60); if(mm>=1440){ var _ed2=new Date(date+"T00:00:00"); _ed2.setDate(_ed2.getDate()+1); endDate=isoLocal(_ed2); } }
     var tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||"UTC";
     body.start={dateTime:date+"T"+st+":00",timeZone:tz};
     body.end={dateTime:endDate+"T"+et+":00",timeZone:tz};
@@ -9038,7 +9201,7 @@ function _dpPlace(pop,btn){var r=btn.getBoundingClientRect();var W=252;var ph=po
 function _dpOpen(inp,btn,relabel){
   _dpClose();
   var pop=document.createElement("div");pop.className="dp-pop";
-  var base=inp.value?new Date(inp.value):new Date();var cur={y:base.getFullYear(),m:base.getMonth()};
+  var base=inp.value?new Date(String(inp.value).slice(0,10)+"T00:00:00"):new Date(); if(isNaN(base)) base=new Date(); var cur={y:base.getFullYear(),m:base.getMonth()};
   function draw(){
     var first=new Date(cur.y,cur.m,1),start=first.getDay(),days=new Date(cur.y,cur.m+1,0).getDate();
     var td=new Date();var todayISO=td.getFullYear()+"-"+_pad2(td.getMonth()+1)+"-"+_pad2(td.getDate());
@@ -9158,6 +9321,7 @@ function enhanceSelects(){
 /* ===================== Workspaces ===================== */
 var WS_DEFAULT_STATUSES=[{id:"todo",name:"To Do"},{id:"doing",name:"In Progress"},{id:"done",name:"Completed",done:true}];
 var WS_COLORS=["#817eff","#c9b0ff","#b3a9ff","#4a38b5","#5aa2ea","#7fd1c4","#0a7c6b","#74c4b6","#ffb3ab","#c66a2b","#e0746b","#c22940","#9aa0b5","#6a5f86"];
+var _wsChk={};
 function wsAll(){
   if(!Array.isArray(data.workspaces)) data.workspaces=[];
   /* first run: everything you already have becomes one workspace, so nothing moves */
@@ -9170,7 +9334,9 @@ function wsAll(){
   /* Adopt orphans. A task can arrive with no workspace (synced from a device that
      hasn't migrated) or pointing at a deleted one. Scoping would make it invisible
      everywhere except "All" — i.e. a deadline could silently vanish. Never allow that. */
-  if(live.length){
+  var _sig=live.map(function(w){ return w.id; }).join(",")+"|"+((data.tasks||[]).length);
+  if(live.length&&(_wsChk.d!==data||_wsChk.t!==data.tasks||_wsChk.s!==_sig)){   /* called many times per screen — only re-scan when the data or the task list changed */
+    _wsChk={d:data,t:data.tasks,s:_sig};
     var ids={}; live.forEach(function(w){ ids[w.id]=1; });
     var home=live[0].id, moved=0;
     (data.tasks||[]).forEach(function(t){
@@ -9250,7 +9416,7 @@ function renderWsBar(){
       +'<span class="wsd" style="background:'+w.color+'"></span>'+esc(w.name)
       +'<span class="wsn">'+wsCount(w.id)+'</span></button>';
   });
-  h+='<button class="ws-p ghost" onclick="wsAdd()">+ New</button>';
+  h+='<button class="ws-p ghost" onclick="wsAdd()" title="New workspace">+ Workspace</button>';
   h+='<div class="wsgear-wrap">'
     +'<button class="ws-p gear" onclick="toggleWsMenu(event)" title="Settings" aria-label="Board settings">'
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.6 13.9a7.9 7.9 0 0 0 0-3.8l2-1.5-2-3.4-2.4 1a7.9 7.9 0 0 0-3.3-1.9L13.5 2h-3l-.4 2.3a7.9 7.9 0 0 0-3.3 1.9l-2.4-1-2 3.4 2 1.5a7.9 7.9 0 0 0 0 3.8l-2 1.5 2 3.4 2.4-1a7.9 7.9 0 0 0 3.3 1.9l.4 2.3h3l.4-2.3a7.9 7.9 0 0 0 3.3-1.9l2.4 1 2-3.4z"/></svg></button>'
@@ -9392,7 +9558,12 @@ async function wsDelete(id){
     n ? (n+" task"+(n>1?"s":"")+" will move to “"+others[0].name+"”. Nothing is deleted.") : "This workspace is empty.",
     "Delete");
   if(!ok) return;
-  (data.tasks||[]).forEach(function(t){ if(t.ws===id) { t.ws=others[0].id; t.updated=Date.now(); } });
+  var to=others[0], toSt=(to.statuses&&to.statuses.length)?to.statuses:statuses(to.id), fromSt=w.statuses||[];
+  (data.tasks||[]).forEach(function(t){ if(t.ws!==id) return; t.ws=to.id;
+    /* columns belong to a workspace: carry the task to the column with the same name, else the done / first column */
+    var old=fromSt.find(function(s){ return s.id===t.status; }); var same=old&&toSt.find(function(s){ return String(s.name||"").toLowerCase()===String(old.name||"").toLowerCase(); });
+    if(!toSt.some(function(s){ return s.id===t.status; })){ try{ t.status=same?same.id:(t.done?completedStatusId(to.id):(toSt[0]&&toSt[0].id)||t.status); }catch(_){ } }
+    t.updated=Date.now(); });
   w.deleted=true; w.updated=Date.now();          /* tombstone, so it can't resurrect from another device */
   if(data.settings.activeWs===id) data.settings.activeWs="all";
   save(); render(); wsmRefresh(); toast("Workspace deleted");
@@ -9535,8 +9706,8 @@ function saveStatuses(){
   if(!list.some(function(c){return c.done===true;}) && _kp[_prevDone]){ list.forEach(function(c){ if(c.id===_prevDone) c.done=true; }); }
   _prev.forEach(function(c){ if(c&&c.id!=null&&!_kp[c.id]) tombstone({id:c.id}); });
   list.forEach(function(c){ c.updated=Date.now(); });
-  var _doneId=stDoneOf(list);
-  (data.tasks||[]).forEach(function(t){ if(t.ws!==_w.id) return; if(ids.indexOf(t.status)<0) t.status=ids[0]; t.done=(t.status===_doneId); });
+  var _doneId=stDoneOf(list); list.forEach(function(c){ if(c.id===_doneId) c.done=true; });   /* the finished column is always marked, so a later "+" column can't take over */
+  (data.tasks||[]).forEach(function(t){ if(t.ws!==_w.id) return; var _wasDone=!!t.done; if(ids.indexOf(t.status)<0) t.status=_wasDone?_doneId:ids[0]; t.done=(t.status===_doneId); });   /* tasks in a deleted "Done" column stay done */
   _w.statuses=list; _w.updated=Date.now();
   data.settings.defaultStatus=(def&&ids.indexOf(def)>=0)?def:ids[0]; data.settings.statusesV=2;
   save(); closeModal(); render(); toast("Statuses updated"); }
@@ -9569,11 +9740,11 @@ function gAvatar(){ var p=data.settings.googlePhoto; if(p) return '<img class="g
 function googleChip(extra,sub){ var email=data.settings.googleEmail||"Google account"; return '<div class="gchip">'+gAvatar()+'<div class="gchip-main"><div class="gchip-email">'+esc(email)+'</div><div class="gchip-sub">'+istBadge("on")+'<span class="muted" style="font-size:.74rem">'+(sub?esc(sub):"Calendar &amp; Gmail")+'</span></div></div><div class="gchip-actions">'+(extra||"")+'<button class="btn soft" onclick="googleDisconnect()">Disconnect</button></div></div>'; }
 function googleDisconnect(){ clearGToken("google"); clearGToken("gcal"); clearGToken("gmail"); calToken=null; gmailToken=null; calState="idle"; gmailState="idle"; calEvents=null; gmailStats=null; gmailMsgs=null; data.settings.calConnected=false; data.settings.gmailConnected=false; data.settings.googleEmail=""; data.settings.googlePhoto=""; data.settings.googleName=""; save(); try{ renderCalConn(); renderGmail(); renderCalendar(); renderToday(); renderWelcomeSummary(); }catch(e){} toast("Google disconnected"); }
 /* Dashboard customization */
-var DASH_KEYS=["tasks","calendar","gmail","notes","prayer","links","apps"];
-var DASH_COL={tasks:"main",gmail:"main",prayer:"main",calendar:"rail",notes:"rail",links:"rail",apps:"rail"};
+var DASH_KEYS=["tasks","reports","calendar","gmail","notes","prayer","links","apps"];
+var DASH_COL={tasks:"main",reports:"main",gmail:"main",prayer:"main",calendar:"rail",notes:"rail",links:"rail",apps:"rail"};
 var dashDragK=null;
 function dashLayout(){ var l=data.settings.dashLayout; if(!Array.isArray(l)) l=[]; var seen={}; l=l.filter(function(w){ if(!w||!w.k||DASH_KEYS.indexOf(w.k)<0||seen[w.k]) return false; seen[w.k]=1; return true; }); DASH_KEYS.forEach(function(k){ if(!seen[k]) l.push({k:k,h:false}); }); data.settings.dashLayout=l; return l; }
-function renderDashboard(){ var stack=document.getElementById("dashStack"); if(!stack) return; var hide={}; dashLayout().forEach(function(w){ hide[w.k]=!!w.h; }); stack.querySelectorAll(".dash-widget").forEach(function(el){ el.classList.toggle("w-hidden",!!hide[el.dataset.w]); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
+function renderDashboard(){ var stack=document.getElementById("dashStack"); if(!stack) return; try{ renderGridReports(); }catch(e){} var hide={}; dashLayout().forEach(function(w){ hide[w.k]=!!w.h; }); stack.querySelectorAll(".dash-widget").forEach(function(el){ el.classList.toggle("w-hidden",!!hide[el.dataset.w]); }); if(document.body.classList.contains("dash-edit")) renderDashTools(); }
 function toggleDashEdit(){ var on=!document.body.classList.contains("dash-edit"); document.body.classList.toggle("dash-edit",on); var b=document.getElementById("dashEditBtn"); if(b) b.textContent=on?"Done":"Customize"; var h=document.getElementById("dashHint"); if(h) h.style.display=on?"":"none"; var host=document.getElementById("dashStack"); if(on){ renderDashTools(); scheduleMasonry(); } else if(host){ host.querySelectorAll(".dash-tools").forEach(function(x){x.remove();}); host.querySelectorAll(".dash-widget").forEach(function(el){ el.removeAttribute("draggable"); el.ondragstart=el.ondragend=el.ondragover=el.ondragleave=el.ondrop=null; }); renderDashboard(); } }
 function renderDashTools(){ var stack=document.getElementById("dashStack"); if(!stack) return; stack.querySelectorAll(".dash-widget").forEach(function(el){ var w=el.dataset.w; var t=el.querySelector(":scope > .dash-tools"); if(!t){ t=document.createElement("div"); t.className="dash-tools"; el.appendChild(t); } var hidden=el.classList.contains("w-hidden"); t.innerHTML='<button title="'+(hidden?"Show":"Hide")+'" onclick="dashHide(\''+w+'\')">'+(hidden?EYE_OFF:EYE)+'</button>'; }); }
 function dashMove(k,dir){ var l=dashLayout(); var i=l.findIndex(function(w){return w.k===k;}); if(i<0) return; var j=i+dir; if(j<0||j>=l.length) return; var tmp=l[i]; l[i]=l[j]; l[j]=tmp; data.settings.dashLayout=l; save(); renderDashboard(); }
@@ -10120,7 +10291,9 @@ function moveTaskToWs(taskId,wsId){
   if(t.ws===wsId){ toast("Already in "+w.name); return; }
   var curName=((statusesOf(t).find(function(c){return c.id===taskStatus(t);})||{}).name||"").toLowerCase();
   var to=statuses(wsId);
-  var match=to.find(function(c){ return (c.name||"").toLowerCase()===curName; })
+  var _wasDone=!!(t.done||taskStatus(t)===completedStatusId(t.ws));
+  var match=(_wasDone&&to.find(function(c){ return c.id===completedStatusId(wsId); }))   /* a finished task stays finished in the new workspace */
+         || to.find(function(c){ return (c.name||"").toLowerCase()===curName; })
          || to.find(function(c){ return c.id===t.status; })
          || to[0];
   t.ws=wsId; t.status=match?match.id:t.status; t.done=(t.status===completedStatusId(wsId));
@@ -10228,18 +10401,20 @@ var notesFilterLabel="";
 function parseLabels(str){ return (str||"").split(",").map(function(x){return x.trim();}).filter(Boolean).filter(function(x,i,a){return a.indexOf(x)===i;}); }
 function noteLabels(){ var set={}; (data.notes||[]).forEach(function(n){ (n.labels||[]).forEach(function(l){ if(l) set[l]=1; }); }); return Object.keys(set).sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());}); }
 function setNoteFilter(l){ notesFilterLabel=(notesFilterLabel===l?"":l); renderNotes(); }
-function labelSuggest(inputId){ var ls=noteLabels(); if(!ls.length) return ""; return '<div class="lbl-filter" style="margin-top:8px">'+ls.map(function(l){return '<span class="lbl-chip" onclick="addLabelTo(\''+inputId+'\',\''+esc(l).replace(/'/g,"")+'\')">+ '+esc(l)+'</span>';}).join("")+'</div>'; }
+function labelSuggest(inputId){ var ls=noteLabels(); if(!ls.length) return ""; return '<div class="lbl-filter" style="margin-top:8px">'+ls.map(function(l){return '<span class="lbl-chip" role="button" tabindex="0" data-label="'+esc(l)+'" onclick="addLabelTo(\''+esc(inputId)+'\',this.dataset.label)">+ '+esc(l)+'</span>';}).join("")+'</div>'; }
 function addLabelTo(inputId,l){ var i=document.getElementById(inputId); if(!i) return; var cur=parseLabels(i.value); if(cur.indexOf(l)<0) cur.push(l); i.value=cur.join(", "); }
 function openLabels(){ var ls=noteLabels(); var html='<h4>Manage labels</h4><p class="muted" style="font-size:.8rem;margin:-6px 0 12px">Rename or delete labels across all notes.</p>'+(ls.length?'<div id="lblMgr">'+ls.map(lblRow).join("")+'</div>':'<p class="muted" style="font-size:.86rem">No labels yet. Add labels when writing or editing a note.</p>')+'<div class="row"><button class="btn soft" onclick="closeModal()">Close</button></div>'; showModal(html); }
 function lblRow(l){ return '<div class="st-row" data-l="'+esc(l)+'"><input class="fld lbl-name" value="'+esc(l)+'"><button type="button" class="st-mini" title="Rename" onclick="renameLabel(this)">'+IC.edit+'</button><button type="button" class="st-mini" title="Delete" onclick="deleteLabel(this)">'+IC.trash+'</button></div>'; }
-function renameLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var oldL=row.dataset.l; var newL=row.querySelector(".lbl-name").value.trim(); if(!newL||newL===oldL) return; (data.notes||[]).forEach(function(n){ if(n.labels&&n.labels.length){ n.labels=n.labels.map(function(x){return x===oldL?newL:x;}).filter(function(x,i,a){return a.indexOf(x)===i;}); } }); if(notesFilterLabel===oldL) notesFilterLabel=newL; save(); renderNotes(); toast("Label renamed"); openLabels(); }
-function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var l=row.dataset.l; (data.notes||[]).forEach(function(n){ if(n.labels) n.labels=n.labels.filter(function(x){return x!==l;}); }); if(notesFilterLabel===l) notesFilterLabel=""; save(); renderNotes(); toast("Label deleted"); openLabels(); }
+function renameLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var oldL=row.dataset.l; var newL=row.querySelector(".lbl-name").value.trim(); if(!newL||newL===oldL) return; (data.notes||[]).forEach(function(n){ if(n.labels&&n.labels.length){ if(n.labels.indexOf(oldL)>=0){ n.labels=n.labels.map(function(x){return x===oldL?newL:x;}).filter(function(x,i,a){return a.indexOf(x)===i;}); n.updated=Date.now(); } } }); if(notesFilterLabel===oldL) notesFilterLabel=newL; save(); renderNotes(); toast("Label renamed"); openLabels(); }
+function deleteLabel(btn){ var row=btn.closest(".st-row"); if(!row) return; var l=row.dataset.l; (data.notes||[]).forEach(function(n){ if(n.labels&&n.labels.indexOf(l)>=0){ n.labels=n.labels.filter(function(x){return x!==l;}); n.updated=Date.now(); } }); if(notesFilterLabel===l) notesFilterLabel=""; save(); renderNotes(); toast("Label deleted"); openLabels(); }
 
-function priFlag(p){ var k=priKey(p); return '<span class="pflag p-'+k+'">'+PRI[k].s+'</span>'; }
+function priFlag(p){ var k=priKey(p); if(k==="none") return ""; return '<span class="pflag p-'+k+'">'+PRI[k].s+'</span>'; }
 /* a hard tab-close must not lose a keystroke that is still inside the 400ms autosave window */
 window.addEventListener("beforeunload",function(){
   try{ if(typeof _tdT!=="undefined" && _tdT){ clearTimeout(_tdT); _tdT=null; if(_tdSub){ if(_sdReady) sdCommit(); } else if(_tdReady) tdCommit(); } }catch(e){}
   try{ if(typeof _sdT!=="undefined" && _sdT){ clearTimeout(_sdT); _sdT=null; if(_sdReady) sdCommit(); } }catch(e){}
+  /* a "New task" panel still open and empty: drop the blank draft instead of saving an untitled card */
+  try{ if(_tdNew){ var _bt=(data.tasks||[]).find(function(x){return x.id===_tdNew;}); if(_bt&&!String(_bt.t||"").trim()&&!(_bt.subs&&_bt.subs.length)&&!String(_bt.desc||"").replace(/<[^>]*>/g,"").trim()) data.tasks=data.tasks.filter(function(x){return x!==_bt;}); } }catch(e){}
   try{ save(true); }catch(e){}
 });
 /* ============ Boot ============ */
@@ -10283,7 +10458,7 @@ function _hasStoredSupaSession(){
 renderAll();
 if(location.hash && PAGES[location.hash.slice(1)]) { _navInit(); }
 else try{ var _lv=localStorage.getItem("hubView"); if(_lv&&_lv!=="home"&&PAGES[_lv]&&document.getElementById("tab-"+_lv)) go(_lv); }catch(e){}
-setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayDay && _prayDay!==isoLocal(new Date())) loadPrayers(); }catch(e){} } },1000);
+setInterval(function(){ var hub=document.getElementById("tab-home"); if(hub&&hub.classList.contains("active")){ if(document.getElementById("clockTime")) tickClock(); try{ renderPrayerNext(); }catch(e){} try{ if(data.settings.showPrayer!==false && _prayTried && _prayTried!==isoLocal(new Date()) && !_prayBusy) loadPrayers(); }catch(e){} } },1000);
 setInterval(function(){ if(user&&supa&&document.visibilityState==="visible"){ loadFinance(); loadTravel(); if(!document.querySelector(".overlay")){ try{ pullHub(); }catch(e){} } } },30000);   /* the Hub now polls too (tasks/notes/routines), skipped while a modal is open so a periodic pull can't disrupt an active edit */
 setInterval(function(){ try{ updateNotifBadge(); }catch(e){} },60000);
 /* Mobile browsers usually restore the app from the back-forward cache when you return to it,
@@ -10310,9 +10485,10 @@ window.addEventListener("storage",function(e){
      also contain "hub". And actually MERGE the incoming data in: mergeHubData is pure and returns a
      new object, so the result must be assigned (the old code discarded it, making cross-tab sync a
      silent no-op and risking last-write-wins data loss between tabs). */
-  if(!e.key || e.key.indexOf(KEY)!==0) return;
+  if(!e.key || e.key!==storeKey() || (user?user.id:null)!==_dataOwner) return;   /* only this account's own data — another account's tab never merges in */
   try{
     var incoming=JSON.parse(e.newValue||"null"); if(!incoming) return;
+    if(_modalOpen()){ _pendingIncoming=incoming; return; }   /* merged when the open editor closes */
     if(typeof mergeHubData==="function" && typeof fill==="function"){ data=fill(mergeHubData(data,incoming)); }
     else { data=incoming; }
     _syncSettingsBaseline();
@@ -10331,7 +10507,24 @@ initAuth();
    The hub owns the data (data.grids → localStorage + Supabase like everything else).
    Grids lives in its own frame so its shortcuts, styles and code never touch the hub. */
 var _gridsFrame=null, _gridsSent=undefined, _gridsTitle=null, _gridsLoaded=false;
-var GRIDS_VER="2026-09-25";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+/* ===== Reports: Grids summaries pinned to the dashboard (Grids stores a small ready-made snapshot on each pinned summary) ===== */
+function gridReports(){ var out=[]; var g=data.grids||{}; var del=g.deleted||{}; Object.keys(g.sheets||{}).forEach(function(id){ var d=g.sheets[id]; if(!d||d.trashed||del[id]||!Array.isArray(d.tabs)) return;
+  var p=d.parent, seen={}; while(p&&g.folders&&g.folders[p]&&!seen[p]){ seen[p]=1; if(g.folders[p].trashed) return; p=g.folders[p].parent; }
+  d.tabs.forEach(function(t){ if(t&&t.pivot&&t.pivot.pin&&t.pivot.snap) out.push({gid:id,tid:t.id,g:d.name,t:t.name,s:t.pivot.snap}); }); });
+  return out.sort(function(a,b){ return (a.g+a.t).localeCompare(b.g+b.t); }); }
+function renderGridReports(){ var host=document.getElementById("dashReports"); if(!host) return; var L=gridReports(); if(!L.length){ host.style.display="none"; host.innerHTML=""; return; } host.style.display="";
+  var R='<span class="riyal">&#xe900;</span>'; var num=function(v){ return v!==""&&v!=="—"&&/^[-\d.,]+%?$/.test(String(v)); };
+  var cards=L.map(function(r){ var s=r.s||{}; var head=s.head||[], rows=s.rows||[], tot=s.tot||[];
+    var cell=function(v,i){ v=v==null?"":String(v); var mon=Array.isArray(s.mc)?!!s.mc[i]:!!s.money; return '<td class="'+(i?"n":"")+'">'+(i&&mon&&num(v)&&!/%$/.test(v)?R:"")+esc(v)+'</td>'; };
+    return '<div class="rep"><div class="rep-h"><div class="rep-t"><b>'+esc(String(r.t||"Summary").replace(/^Summary · /,""))+'</b><small>'+esc(String(r.g||""))+(s.sub?' · '+esc(String(s.sub)):'')+'</small></div><button class="btn soft" data-g="'+esc(String(r.gid))+'" data-t="'+esc(String(r.tid))+'" onclick="openGridReport(this.dataset.g,this.dataset.t)">Open</button></div>'
+      +'<div class="rep-tw"><table class="rep-tb"><thead><tr>'+head.map(function(h,i){ return '<th class="'+(i?"n":"")+'">'+esc(String(h))+'</th>'; }).join("")+'</tr></thead><tbody>'
+      +rows.map(function(row){ return '<tr>'+row.map(cell).join("")+'</tr>'; }).join("")+'</tbody><tfoot><tr>'+tot.map(cell).join("")+'</tr></tfoot></table></div>'
+      +(s.more?'<div class="rep-more">+ '+s.more+' more in Grids</div>':'')+'</div>'; }).join("");
+  host.innerHTML='<div class="card"><div class="section-head" style="margin:0 0 12px"><h2 style="font-size:.95rem">Reports</h2><button class="btn soft" onclick="go(\'grids\')">Open Grids</button></div><div class="rep-grid">'+cards+'</div></div>'; }
+var _gridsPendingOpen=null;
+function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
+
+var GRIDS_VER="2026-10-10";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
@@ -10349,15 +10542,19 @@ function gridsOpen(){ var f=document.getElementById("gridsFrame"); if(!f) return
 function gridsApplyTitle(){ if(_activeTab()!=="grids"||!_gridsTitle) return; var c=document.getElementById("crumb"), t=document.getElementById("pageTitle");
   if(c) c.textContent=_gridsTitle.crumb||"Workspace"; if(t) t.textContent=_gridsTitle.title||"Grids"; }
 /* Grids calls this directly (same-origin) so a save can't be lost when the page closes */
+function _gridsWho(){ try{ if(data&&data.profile&&data.profile.name) return String(data.profile.name); }catch(e){} try{ if(user){ var m=user.user_metadata||{}; return String(m.full_name||m.name||(user.email||"").split("@")[0]||"You"); } }catch(e){} return "You"; }   /* shown in Grids' cell history */
+var _gridsLastSync=0;
+function _gridsCloud(){ try{ return !!(user&&supa&&!TEST_MODE); }catch(e){ return false; } }
+function gridsNoteSync(ok){ if(ok) _gridsLastSync=Date.now(); try{ gridsPost({type:"grids:sync",ok:!!ok,cloud:_gridsCloud(),t:_gridsLastSync||Date.now()}); }catch(e){} }
 function _gridsAcct(){ try{ return (user&&user.id)?String(user.id):"guest"; }catch(e){ return "guest"; } }
 var _gridsAcctSent=null;
 /* merge (not overwrite): anything that reached the hub from another device while Grids was busy survives; on a tie the frame's copy wins */
 window.__gridsSave=function(db,acct){ if(!db||typeof db!=="object") return; if(acct!==undefined&&acct!==_gridsAcct()) return;   /* a late save from the previous account */
-  var merged=_mergeGrids(db,data.grids); data.grids=merged; _gridsSent=data.grids; save();
+  var merged=_mergeGrids(db,data.grids); data.grids=merged; _gridsSent=data.grids; var _ok=save(); if(_ok===false) gridsNoteSync(false); else if(!_gridsCloud()) gridsNoteSync(true);   /* storage full: Grids must not say "Saved" */ try{ renderGridReports(); }catch(e){}   /* guest: saved on this device is the whole story */
   var stale=Object.keys(merged.sheets||{}).some(function(k){ var a=merged.sheets[k], b=(db.sheets||{})[k]; return !b||(+a.updated||0)!==(+b.updated||0); })||Object.keys(db.sheets||{}).some(function(k){ return !(merged.sheets||{})[k]; });
   if(stale) setTimeout(function(){ gridsPost({type:"grids:update",db:gridsDB(),acct:_gridsAcct()}); },0); };
 window.addEventListener("message",function(e){ var f=document.getElementById("gridsFrame"); if(!f||e.source!==f.contentWindow) return; if(location.protocol!=="file:"&&e.origin!==location.origin) return; var m=e.data||{};
-  if(m.type==="grids:ready"){ _gridsFrame=f; _gridsSent=data.grids; _gridsAcctSent=_gridsAcct(); gridsPost({type:"grids:init",db:gridsDB(),acct:_gridsAcctSent,dark:document.documentElement.classList.contains("dark")}); }
+  if(m.type==="grids:ready"){ _gridsFrame=f; _gridsSent=data.grids; _gridsAcctSent=_gridsAcct(); gridsPost({type:"grids:init",db:gridsDB(),acct:_gridsAcctSent,who:_gridsWho(),cloud:_gridsCloud(),syncAt:_gridsLastSync,dark:document.documentElement.classList.contains("dark")}); if(_gridsPendingOpen){ var po=_gridsPendingOpen; _gridsPendingOpen=null; setTimeout(function(){ gridsPost(po); },80); } }
   else if(m.type==="grids:save"){ window.__gridsSave(m.db,m.acct); }
   else if(m.type==="grids:title"){ _gridsTitle={title:String(m.title||"Grids"),crumb:String(m.crumb||"Workspace")}; gridsApplyTitle(); }
   else if(m.type==="grids:toast"){ try{ toast(String(m.msg||"")); }catch(_){} }
@@ -10369,14 +10566,16 @@ function gridsSetFocus(on){ var h=document.documentElement; if(on&&_activeTab()!
   try{ if(on&&_gridsFrame) _gridsFrame.focus(); }catch(e){} }
 document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&document.documentElement.classList.contains("grids-focus")){ gridsSetFocus(false); } });
 function gridsSyncFromHub(){ if(!_gridsFrame||!_gridsLoaded) return; var a=_gridsAcct();
-  if(_gridsAcctSent!==null&&a!==_gridsAcctSent){ _gridsAcctSent=a; _gridsSent=data.grids; gridsPost({type:"grids:init",db:gridsDB(),acct:a,dark:document.documentElement.classList.contains("dark")}); return; }   /* signed in or out: replace, never merge */
-  if(data.grids===_gridsSent) return; _gridsSent=data.grids; gridsPost({type:"grids:update",db:gridsDB(),acct:a}); }
+  if(_gridsAcctSent!==null&&a!==_gridsAcctSent){ _gridsAcctSent=a; _gridsSent=data.grids; gridsPost({type:"grids:init",db:gridsDB(),acct:a,who:_gridsWho(),cloud:_gridsCloud(),syncAt:_gridsLastSync,dark:document.documentElement.classList.contains("dark")}); return; }   /* signed in or out: replace, never merge */
+  if(data.grids===_gridsSent) return; _gridsSent=data.grids; gridsPost({type:"grids:update",db:gridsDB(),acct:a,who:_gridsWho()}); }
 /* theme: the hub's toggle drives Grids */
 try{ new MutationObserver(function(){ gridsPost({type:"grids:theme",dark:document.documentElement.classList.contains("dark")}); }).observe(document.documentElement,{attributes:true,attributeFilter:["class"]}); }catch(e){}
 window.addEventListener("resize",sizeGridsFrame);
 window.addEventListener("beforeunload",function(){ try{ var w=_gridsFrame&&_gridsFrame.contentWindow; if(w&&w.flushSave) w.flushSave(); }catch(e){} });
 /* opened straight onto #grids (bookmark / reload) */
 try{ if(_activeTab()==="grids") gridsOpen(); }catch(e){}
+/* the dashboard drew before this script existed — draw the pinned Grids reports now so they show after a reload */
+try{ renderGridReports(); }catch(e){}
 </script>
 </body>
 </html>
