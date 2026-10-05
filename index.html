@@ -462,11 +462,7 @@ html:not(.dark) .more-sheet{border-top-color:#d9cdf2}
 .kcol{position:relative;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;padding:12px;min-height:120px;display:flex;flex-direction:column;max-height:calc(100dvh - 208px)}
 html:not(.dark) .kcol{background:rgba(255,255,255,.5)}
 .kcol-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;overscroll-behavior-x:auto;/* y:contain keeps vertical scroll from leaking to the page. x:auto lets a sideways swipe chain out to .kanban -- the old shorthand contained BOTH axes, so swiping a card could never scroll the board. */margin:0;padding:3px 0 10px;scrollbar-width:none}
-.kcol-body::-webkit-scrollbar{width:0;height:0}
-.kcol-body::-webkit-scrollbar{width:8px}
-.kcol-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:8px}
-.kcol-body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.22)}
-html:not(.dark) .kcol-body::-webkit-scrollbar-thumb{background:rgba(90,70,150,.22)}
+.kcol-body::-webkit-scrollbar{width:0;height:0} /* Overflow never consumes card width in one column only. */
 .kcol-head{display:flex;align-items:center;justify-content:space-between;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:2px 6px 10px}
 .kcol-head .cnt{background:rgba(129,126,255,.2);color:var(--lavender);border-radius:99px;padding:1px 8px;font-size:.7rem}
 .kcol.over{border-color:var(--lavender);background:rgba(129,126,255,.08)}
@@ -655,7 +651,10 @@ html:not(.dark) .note-card.pinned{background:linear-gradient(150deg,rgba(255,179
 .tv-switch button{border:none;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:.78rem;padding:6px 12px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .tv-switch button.on{background:var(--grad-iri);color:#fff;border-color:#c9b0ff}
 .tv-switch button svg{width:14px;height:14px}
-.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:14px}
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,244px),1fr));gap:14px;min-width:0}
+.tcards>.tcard{min-width:0;width:100%;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
+.tcard .tc-top,.tcard .kmeta{min-width:0;gap:8px;flex-wrap:wrap}
+.tcard .tag-chip,.tcard .kdue,.tcard .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .tcard{position:relative;cursor:pointer}
 .tcard .tc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
 .tc-prog{height:5px;border-radius:99px;background:rgba(129,126,255,.16);margin-top:13px;overflow:hidden}
@@ -1307,15 +1306,19 @@ html:not(.dark) .b-doing,html:not(.dark) .ev-event,html:not(.dark) .is-sync,html
 .b-block{background:rgba(214,85,76,.16);color:var(--red)}
 .b-arch{background:rgba(106,95,134,.2);color:var(--muted)}
 /* status board -> horizontal scroll for many columns */
-.kanban{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
-.kanban .kcol{min-width:330px;max-width:520px;flex:1 1 340px}
-/* iPad portrait and small laptops: three columns fit side by side instead of the third
-   hanging off the edge (it needed 1022px; an iPad in portrait has 782). */
-@media(min-width:561px){ .kanban .kcol{min-width:clamp(240px,calc((100% - 32px) / 3),330px)} }   /* grow to fill the board width when there are few columns; still scroll horizontally when many */
+/* Status columns share a viewport-based width across every workspace.
+   Neither status count, collapsed columns nor task content redistributes their width.
+   The 102px reservation is three 16px gaps plus the 54px add-column control. */
+.kanban{--task-column-width:clamp(240px,calc((100% - 102px) / 3),340px);display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;min-width:0;width:100%;box-sizing:border-box}
+.kanban .kcol{flex:0 0 var(--task-column-width);width:var(--task-column-width);min-width:0;max-width:none;box-sizing:border-box}
+.kanban .kcol-body{min-width:0;width:100%;box-sizing:border-box}
+.kanban .kcard{min-width:0;width:100%;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
+.kanban .kc-top,.kanban .kc-chips{min-width:0;max-width:100%}
+.kanban .kc-chip{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .kcol-add{flex:0 0 auto;align-self:stretch;min-width:54px;min-height:120px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:18px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s var(--ease)}
 .kcol-add:hover{border-color:var(--lavender);color:var(--lavender);background:rgba(129,126,255,.07)}
 html:not(.dark) .kcol-add{background:rgba(255,255,255,.4)}
-@media(max-width:560px){.kanban .kcol{min-width:82vw}}
+@media(max-width:560px){.kanban{--task-column-width:82vw}}
 .kcard[draggable]{touch-action:pan-x pan-y}   /* was none, which forbade the board from scrolling under your finger */
 /* manage statuses rows */
 .st-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;position:relative}
@@ -4016,6 +4019,9 @@ input[type=checkbox]{accent-color:var(--lavender)}
 html.dark .kc-chip.p-high,html.dark .tl2-prio-pill.p-high,html.dark .pflag.p-high{color:#ff8fa0}
 html:not(.dark) .kc-chip.p-med,html:not(.dark) .tl2-prio-pill.p-med{color:#8f4a14}
 </style>
+<style>
+#rtSummary .sc-n,#ntfSummary .sc-n{font-family:'Marcellus',Georgia,serif!important;font-weight:400;letter-spacing:.01em}
+</style>
 </head>
 <body>
 <div id="splash"><div style="display:flex;flex-direction:column;align-items:center;gap:12px">
@@ -4069,7 +4075,7 @@ html:not(.dark) .kc-chip.p-med,html:not(.dark) .tl2-prio-pill.p-med{color:#8f4a1
         <div class="hx-box hx-date"><div class="hx-lbl">Date</div><div class="hx-val" id="dateLine">&mdash;</div><div class="hx-sub" id="hijriLine"></div></div>
         <div class="hx-box hx-weather"><div class="hx-lbl">Weather</div><div class="hx-val" id="ambient">&mdash;</div><div class="hx-sub" id="weatherSub"></div></div>
       </div>
-      <div class="hx-up-h">Next 7 days</div>
+      <div class="hx-up-h">UPCOMING THIS WEEK</div>
       <div id="upcomingList" class="up2"></div>
     </div>
   </div>
@@ -4405,11 +4411,18 @@ var _hubSyncWarned=false;
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>cu) map[id]=x; } }   /* a tie keeps this device's copy */ a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
-function _mergeGrids(a,b){ a=a||{}; b=b||{}; var del=Object.assign({},a.deleted||{}); Object.keys(b.deleted||{}).forEach(function(k){ if(!((+del[k]||0)>=(+b.deleted[k]||0))) del[k]=b.deleted[k]; });
-  function t(x){ return +(x&&(x.updated||x.created))||0; }
-  function pick(A,B){ A=A||{}; B=B||{}; var out={}, ids={}; Object.keys(A).forEach(function(k){ids[k]=1;}); Object.keys(B).forEach(function(k){ids[k]=1;});
-    Object.keys(ids).forEach(function(id){ var x=A[id], y=B[id]; var w=(x&&y)?(t(y)>t(x)?y:x):(x||y); var d=+del[id]||0; if(w&&d&&d>=t(w)) return; if(w) out[id]=w; }); return out; }
-  return {v:1,folders:pick(a.folders,b.folders),sheets:pick(a.sheets,b.sheets),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)}; }
+function _mergeGrids(a,b){
+  a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
+  const time=x=>+(x&&(x.updated||x.created))||0;
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
+  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
+      /* A descendant already includes the other revision. Divergent revisions retain the loser. */
+      if(recover&&sx!==sy&&!winner.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!(del[key]&&del[key]>=time(loser))){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;}}
+    }if(winner&&!(del[id]&&del[id]>=time(winner)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k])out[k]=copies[k];});return out;}
+  return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)};
+}
+
 function mergeHubData(local,cloud){ var base=_mergeHubDataBase(local,cloud); try{ if(base&&local&&cloud&&(local.grids||cloud.grids)) base.grids=_mergeGrids(local.grids,cloud.grids); }catch(e){} return base; }
 function _mergeHubDataBase(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,false); });
   /* Task ORDER is tracked separately from content freshness. `tasksOrderAt` is bumped
@@ -6143,7 +6156,7 @@ function renderHome(){
      and something actually consumes it (prayer or weather) — otherwise a user who turned both widgets
      off, or who isn't signed in yet, would get a pointless location-permission prompt */
   try{ var _aw=document.getElementById("authRoot"); var _wallUp=!!(_aw&&_aw.style.display&&_aw.style.display!=="none");
-    if(!_wallUp && (data.settings.showPrayer!==false||data.settings.showWeather!==false) && data.settings.geoAuto!==false && !_geoDenied && (Date.now()-_geoLastAttempt>60000) && (!_getGeo() || (Date.now()-((_getGeo()&&_getGeo().at)||0))>1800000)) hubUseMyLocation(true); }catch(e){}
+    if(!_wallUp && (data.settings.showPrayer!==false||data.settings.showWeather!==false)) hubAutoLocation(); }catch(e){}
   /* the Settings "Weather" toggle now actually hides + stops the weather box (it was previously read nowhere) */
   var _wb=document.querySelector(".hx-weather"); if(_wb) _wb.style.display=(data.settings.showWeather!==false)?"":"none";
   if(data.settings.showWeather!==false){ try{ loadWeather(); }catch(e){} }
@@ -6416,7 +6429,7 @@ function todayEvents(){if(!Array.isArray(calEvents))return[];var t=isoLocal(new 
 var MAIL_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
 function nextPrayerShort(){ if(!_prayList) return ""; function p2(x){return (x<10?"0":"")+x;} var nowS=_prayNowSecs(); for(var i=0;i<_prayList.length;i++){ var pr=_prayList[i]; if(pr.h*3600+pr.m*60>nowS) return pr.name+" "+p2(pr.h)+":"+p2(pr.m); } var f=_prayList[0]; return f.name+" "+p2(f.h)+":"+p2(f.m); }
 function hpill(ic,html,cls){ return '<span class="hpill'+(cls?" "+cls:"")+'">'+ic+'<span>'+html+'</span></span>'; }
-function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var over=op.filter(function(x){return x.due&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));/* travel: renderDailySummary() looks for #dailySummary, which no longer exists in the markup — it returns on the first line, so a row added there is invisible. This hero strip is the summary that actually renders. */try{var _tv=travelDigestPill();if(_tv)parts.push(_tv);}catch(e){}el.innerHTML=parts.join("");}
+function renderWelcomeSummary(){var el=document.getElementById("welcomeSummary");if(!el)return;var t=isoLocal(new Date());var op=(data.tasks||[]).filter(function(x){return x.status!=="done"&&!x.done;});var dueT=op.filter(function(x){return x.due&&x.due===t;}).length;var _ws=hubWeekStart();var over=op.filter(function(x){return x.due&&x.due>=_ws&&x.due<t;}).length;var parts=[];if(over)parts.push(hpill(IC.warn,"<b>"+over+"</b> overdue","alert"));parts.push(hpill(IC.task,"<b>"+dueT+"</b> due today"));if(financeStat)parts.push(hpill(IC.money,esc(financeStat)));/* travel: renderDailySummary() looks for #dailySummary, which no longer exists in the markup — it returns on the first line, so a row added there is invisible. This hero strip is the summary that actually renders. */try{var _tv=travelDigestPill();if(_tv)parts.push(_tv);}catch(e){}el.innerHTML=parts.join("");}
 
 /* ---- Today's overview ---- */
 function renderToday(){renderOvTasks();renderAgenda();renderUpcoming();renderDailySummary();}
@@ -6431,7 +6444,7 @@ function renderOvTasks(){
 }
 function ovToggleSub(pid,sid){ var o=_subOf(pid,sid); if(!o) return; o.s.done=!o.s.done; if(o.s.done) celebrateHere(); o.t.updated=Date.now(); save(); render(); }
 function quickAddTask(){var i=document.getElementById("ovQuickTask");if(!i)return;var v=i.value.trim();if(!v)return;var t=isoLocal(new Date());data.tasks.unshift({ws:wsDefault(),id:uid(),t:v,desc:"",status:defaultStatusId(),priority:"",start:"",due:"",tags:[],assignee:"",project:"",done:false,created:Date.now(),updated:Date.now()});_bumpTaskOrder();/* newest task goes to the TOP of its column, not the bottom */i.value="";save();render();toast("Task added");}
-function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(evDay(w)>=t)items.push({date:evDay(w),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _we=hubWeekEnd();items=items.filter(function(it){return it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
+function renderUpcoming(){var el=document.getElementById("upcomingList");if(!el)return;var t=isoLocal(new Date());var items=[];(data.tasks||[]).filter(function(x){return !x.done&&x.status!=="done"&&x.due&&x.due>=t;}).forEach(function(x){items.push({date:x.due,label:x.t,kind:"task",time:prettyTime(x.time),sk:x.time||"zz"});});(data.tasks||[]).forEach(function(pt){(pt.subs||[]).forEach(function(sb){if(!sb.done&&sb.due&&sb.due>=t){items.push({date:sb.due,label:sb.t||"Subtask",kind:"subtask",time:prettyTime(sb.time),sk:sb.time||"zz"});}});});if(Array.isArray(calEvents))calEvents.forEach(function(e){var w=(e.start&&(e.start.dateTime||e.start.date))||"";var dt=e.start&&e.start.dateTime;if(evDay(w)>=t)items.push({date:evDay(w),label:e.summary||"(event)",kind:"event",time:evTime(e),sk:dt?w.slice(11,16):"zz"});});if(zakatDue!=null&&zakatDue>=0){var z=new Date();z.setDate(z.getDate()+zakatDue);items.push({date:isoLocal(z),label:"Zakat due",kind:"zakat",time:"",sk:"zz"});}(data.routines||[]).forEach(function(r){var nx=rtNext(r);if(nx&&nx>=t){items.push({date:nx,label:r.title,kind:"routine",time:prettyTime(r.time),sk:r.time||"zz"});}});/* travel: the week filter below clips these like every other source */try{travelItems().forEach(function(it){if(it.date>=t)items.push(it);});}catch(e){}var _ws=hubWeekStart(), _we=hubWeekEnd();items=items.filter(function(it){return it.date>=_ws&&it.date<=_we;});items.sort(function(a,b){return a.date.localeCompare(b.date)||(a.sk||"zz").localeCompare(b.sk||"zz");});if(!items.length){el.innerHTML='<div class="muted" style="padding:6px 0;font-size:.84rem">Nothing upcoming.</div>';return;}var groups=[],gi={};items.forEach(function(it){if(gi[it.date]==null){gi[it.date]=groups.length;groups.push({date:it.date,items:[]});}groups[gi[it.date]].items.push(it);});el.innerHTML=groups.map(function(g){var dd=new Date(g.date+"T00:00:00");var isToday=(g.date===t);var wk=dd.toLocaleDateString(undefined,{weekday:"short"});var mon=dd.toLocaleDateString(undefined,{month:"short"});var sub=isToday?(wk+" · Today"):(wk+" · "+mon);var _sh=g.items;var _mo=0;var rows=_sh.map(function(it){return '<div class="up2-row" title="'+esc(it.full||it.label)+'"><span class="up2-title">'+esc(it.label)+'</span>'+kindBadge(it.kind)+'<span class="up2-time'+(it.time?'':' none')+'">'+(it.time?esc(it.time):'—')+'</span></div>';}).join("")+(_mo>0?'<div class="up2-more">+'+_mo+' more</div>':'');return '<div class="up2-day'+(isToday?' today':'')+'"><div class="up2-date"><div class="up2-num">'+dd.getDate()+'</div><div class="up2-wk">'+esc(sub)+'</div></div><div class="up2-items">'+rows+'</div></div>';}).join("");}
 function renderDailySummary(){var el=document.getElementById("dailySummary");if(!el)return;var t=isoLocal(new Date());var rows=[];var overdue=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due<t;}).length;var dueT=(data.tasks||[]).filter(function(x){return !x.done&&x.due&&x.due===t;}).length;var open=(data.tasks||[]).filter(function(x){return !x.done;}).length;if(financeStat)rows.push(sumRow(IC.money,"Net worth <b>"+esc(financeStat)+"</b>"));rows.push(sumRow(IC.task,"<b>"+open+"</b> open task"+(open!==1?"s":"")+(dueT?(" &middot; <b>"+dueT+"</b> due today"):"")));if(overdue)rows.push(sumRow(IC.warn,'<b style="color:var(--red)">'+overdue+'</b> overdue task'+(overdue>1?"s":"")));/* moved: #dailySummary is not in the markup, so nothing here ever rendered */if(zakatDue!=null&&zakatDue>=0&&zakatDue<=60)rows.push(sumRow(IC.moon,"Zakat due in <b>"+zakatDue+"</b> days"));if(!rows.length)rows.push('<div class="muted" style="font-size:.86rem;padding:6px 0">All quiet. Add a task or open an app.</div>');el.innerHTML=rows.join("");}
 
 /* ---- Calendar (month + agenda; Google-ready) ---- */
@@ -8416,6 +8429,7 @@ function _prayNowSecs(){
 function pr12(t){ var s=String(t).slice(0,5).split(":"); var h=+s[0]; var h12=h%12||12; return h12+":"+(s[1]||"00"); }
 function renderPrayerNext(){
   var el=document.getElementById("prayerNext"); if(!el) return;
+  if(_prayErr&&!_prayBusy)return;
   if(!_prayList||!_prayList.length){ el.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Loading prayer times&hellip;</div></div>'; return; }
   var nowS=_prayNowSecs();
   var secs=_prayList.map(function(p){return p.h*3600+p.m*60;});
@@ -8443,12 +8457,30 @@ function renderPrayerNext(){
     +'<div class="pw-strip">'+strip+'</div></div>'
     +'</div>';
 }
-var _prayDay="", _prayErr=false, _prayRetryT=null, _prayTried="", _prayBusy=false;
+var _prayDay="", _prayErr=false, _prayRetryT=null, _prayTried="", _prayBusy=false, _prayRequest=0;
 /* Detect the device's current location once, then let prayer + weather follow it as you travel.
    Coordinates are the source of truth; a reverse-geocode only supplies a friendly label.
    Requires a secure context (https/localhost) — on a bare file:// page the browser blocks
    geolocation, so this falls back silently to the manually-set city. */
-var _geoBusy=false, _geoDenied=false, _geoLastAttempt=0;
+var _geoBusy=false, _geoDenied=false, _geoLastAttempt=0, _geoChecking=false;
+async function hubFetchJSON(url,timeout){
+  var controller=new AbortController(), timer=setTimeout(function(){controller.abort();},timeout||12000);
+  try{ var r=await fetch(url,{signal:controller.signal}); if(!r.ok)throw new Error("HTTP "+r.status);return await r.json(); }
+  finally{clearTimeout(timer);}
+}
+async function hubAutoLocation(){
+  if(_geoChecking||_geoBusy||_geoDenied||data.settings.geoAuto===false)return;
+  if(!navigator.geolocation||!window.isSecureContext)return;
+  if(Date.now()-_geoLastAttempt<60000)return;
+  if(_getGeo()&&Date.now()-_getGeo().at<1800000)return;
+  _geoChecking=true;
+  try{ if(navigator.permissions&&navigator.permissions.query){
+    var p=await navigator.permissions.query({name:"geolocation"});
+    if(p.state!=="granted")return; // An explicit location button handles first-time permission.
+  }else{return;}
+  hubUseMyLocation(true);
+  }catch(e){}finally{_geoChecking=false;}
+}
 /* geo is DEVICE-LOCAL: each device only ever trusts its OWN GPS, so a location detected on one
    device can never leak onto another through cloud sync. It lives in its own localStorage key,
    OUTSIDE the synced `data`. Only the follow-me preference (geoAuto) and the manual city sync —
@@ -8464,7 +8496,7 @@ function hubUseMyLocation(silent){
   if(!silent){ try{toast("Detecting your location…");}catch(e){} }
   navigator.geolocation.getCurrentPosition(function(pos){
     var la=pos.coords.latitude, lo=pos.coords.longitude;
-    _setGeo({lat:la,lng:lo,city:(_localGeo&&_localGeo.city)||"",at:Date.now()});
+    _setGeo({lat:la,lng:lo,city:(_localGeo&&Math.abs(_localGeo.lat-la)<.01&&Math.abs(_localGeo.lng-lo)<.01&&_localGeo.city)||"",at:Date.now()});
     data.settings.geoAuto=true;               /* the follow-me PREFERENCE syncs; the coordinates do NOT */
     var finish=function(){ _geoBusy=false;
       try{ delete _wxCache[_wxKey()]; }catch(e){}
@@ -8473,24 +8505,26 @@ function hubUseMyLocation(silent){
       if(data.settings.showWeather!==false){ try{loadWeather();}catch(e){} }
       try{if(typeof closeModal==="function"&&document.querySelector(".overlay .modal")&&!silent)closeModal();}catch(e){}
     };
-    /* best-effort friendly label; the data works even if this fails */
-    fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la+"&longitude="+lo+"&localityLanguage=en").then(function(r){return r.json();}).then(function(g){
+    // Coordinates update prayer times immediately; the friendly label is optional.
+    finish();
+    hubFetchJSON("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la+"&longitude="+lo+"&localityLanguage=en",5000).then(function(g){
       var nm=(g&&(g.city||g.locality||g.principalSubdivision))||"";
-      if(nm&&_localGeo){ _localGeo.city=nm; _setGeo(_localGeo); }
+      if(nm&&_localGeo&&_localGeo.lat===la&&_localGeo.lng===lo){ _localGeo.city=nm; _setGeo(_localGeo); if(!_prayErr)renderPrayerNext(); }
       if(!silent) toast("Location set to "+(nm||"your area"));
-      finish();
-    }).catch(function(){ if(!silent) toast("Using your current location."); finish(); });
+    }).catch(function(){ if(!silent) toast("Using your current location."); });
   }, function(err){
     _geoBusy=false;
     /* Only a hard permission-denial (code 1) stops auto-follow for the session. A transient
        timeout/position-unavailable must NOT latch — otherwise one slow GPS fix kills location-follow
        for the rest of the session; those just rely on the 60s attempt throttle + 30-min freshness. */
     if(err&&err.code===1){ _geoDenied=true; }
-    if(_localGeo){ _localGeo.at=Date.now(); _setGeo(_localGeo); }   /* back off ~30 min before the next refresh */
+    // Failed GPS must not make stale coordinates appear newly detected.
+    if(data.settings.showPrayer!==false)loadPrayers();
     if(!silent){ toast(err&&err.code===1?"Location permission denied — set a city manually.":"Couldn't get your location — set a city manually."); }
   }, {enableHighAccuracy:false,timeout:9000,maximumAge:600000});
 }
 async function loadPrayers(){
+  const request=++_prayRequest;
   const method=data.settings.prayerMethod||4;
   const host=document.getElementById("prayerNext"); if(!host) return;
   var geo=_getGeo();
@@ -8507,14 +8541,15 @@ async function loadPrayers(){
     label=city;
   }
   try{
-    const j= _prayCache[ckey] || await fetch(url).then(r=>r.json());
+    const j= _prayCache[ckey] || await hubFetchJSON(url,12000);
+    if(request!==_prayRequest)return;
     if(!j||!j.data||!j.data.timings) throw new Error("bad");
     _prayCache[ckey]=j;
     try{ _prayTz=(j.data&&j.data.meta&&j.data.meta.timezone)||""; }catch(e){ _prayTz=""; }
     const t=j.data.timings; const order=[["Fajr",t.Fajr],["Dhuhr",t.Dhuhr],["Asr",t.Asr],["Maghrib",t.Maghrib],["Isha",t.Isha]];
     _prayList=order.map(function(o){ var pp=String(o[1]).split(":"); return {name:o[0],h:+pp[0],m:+pp[1]}; });
     _prayDay=today; _prayErr=false; _prayBusy=false; renderPrayerNext();
-  }catch(e){ _prayErr=true; _prayBusy=false; clearTimeout(_prayRetryT); _prayRetryT=setTimeout(function(){ if(_prayErr) loadPrayers(); },5*60*1000); host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(label)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
+  }catch(e){ if(request!==_prayRequest)return; _prayList=null; _prayErr=true; _prayBusy=false; clearTimeout(_prayRetryT); _prayRetryT=setTimeout(function(){ if(_prayErr) loadPrayers(); },5*60*1000); host.innerHTML='<div class="pw-wrap"><div class="muted" style="font-size:.85rem">Couldn’t load prayer times for '+esc(label)+'. <button type="button" class="pw-city" onclick="prayerCityPicker()">Change location</button></div></div>'; }
 }
 function prayerCityPicker(){
   var cur=data.settings.city||"Makkah", cc=data.settings.prayerCountry||"Saudi Arabia", mcur=data.settings.prayerMethod||4;
@@ -8650,7 +8685,8 @@ var IC_PLANE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
    copied, the digest and Upcoming could silently disagree about what "this
    week" means. Note it collapses to today on a Saturday; that is the existing
    behaviour of Upcoming, deliberately matched rather than corrected here. */
-function hubWeekEnd(){ var s=new Date(); s.setDate(s.getDate()+6); return isoLocal(s); }   /* a rolling 7 days — a calendar week left almost nothing to show by Friday */
+function hubWeekStart(){ var s=new Date(); s.setDate(s.getDate()-s.getDay()); return isoLocal(s); }
+function hubWeekEnd(){ var s=new Date(); s.setDate(s.getDate()+(6-s.getDay())); return isoLocal(s); }   /* Sunday–Saturday, matching the app calendar and digest */
 /* the hero strip takes pills, not rows — same rule, different wrapper */
 function travelDigestPill(){
   var r=travelDigestRow(true);
@@ -8976,6 +9012,7 @@ function authUI(mode){
 }
 function authErr(m,ok){ const e=document.getElementById("aErr"); if(e){ e.textContent=m; e.classList.toggle("ok",!!ok);} }
 function closeAuth(){ const r=document.getElementById("authRoot"); r.style.display="none"; r.innerHTML=""; document.documentElement.classList.remove("auth-open"); try{var _t=localStorage.getItem("hub.theme")||"dark";document.documentElement.classList.toggle("dark",_t!=="light");}catch(e){} try{updThemeIcon();}catch(e){}
+  if(data.settings.showPrayer!==false||data.settings.showWeather!==false)hubAutoLocation();
   try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(e){}
   try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0;
        var m=document.querySelector("main"); if(m) m.scrollTop=0; }catch(e){}
@@ -10524,7 +10561,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-10";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-05-tools-2";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
@@ -10556,6 +10593,9 @@ window.__gridsSave=function(db,acct){ if(!db||typeof db!=="object") return; if(a
 window.addEventListener("message",function(e){ var f=document.getElementById("gridsFrame"); if(!f||e.source!==f.contentWindow) return; if(location.protocol!=="file:"&&e.origin!==location.origin) return; var m=e.data||{};
   if(m.type==="grids:ready"){ _gridsFrame=f; _gridsSent=data.grids; _gridsAcctSent=_gridsAcct(); gridsPost({type:"grids:init",db:gridsDB(),acct:_gridsAcctSent,who:_gridsWho(),cloud:_gridsCloud(),syncAt:_gridsLastSync,dark:document.documentElement.classList.contains("dark")}); if(_gridsPendingOpen){ var po=_gridsPendingOpen; _gridsPendingOpen=null; setTimeout(function(){ gridsPost(po); },80); } }
   else if(m.type==="grids:save"){ window.__gridsSave(m.db,m.acct); }
+  else if(m.type==="grids:links:request"&&m.acct===_gridsAcct()){ gridsPost({type:"grids:links:list",acct:m.acct,token:m.token,items:(data.tasks||[]).map(function(x){return {kind:"task",id:x.id,title:x.t||x.title||x.name||"Untitled task"};}).concat((data.notes||[]).map(function(x){return {kind:"note",id:x.id,title:x.title||x.name||"Untitled note"};}))}); }
+  else if(m.type==="grids:link:open"&&m.acct===_gridsAcct()){ if(m.kind==="task"&&(data.tasks||[]).some(function(x){return x.id===m.id;})){go("tasks");openTask(m.id);}else if(m.kind==="note"&&(data.notes||[]).some(function(x){return x.id===m.id;})){go("notes");editNote(m.id);}else toast("Linked item is no longer available"); }
+
   else if(m.type==="grids:title"){ _gridsTitle={title:String(m.title||"Grids"),crumb:String(m.crumb||"Workspace")}; gridsApplyTitle(); }
   else if(m.type==="grids:toast"){ try{ toast(String(m.msg||"")); }catch(_){} }
   else if(m.type==="grids:toggleTheme"){ try{ toggleTheme(); }catch(_){} }
