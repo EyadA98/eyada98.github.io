@@ -2450,6 +2450,33 @@ html:not(.dark) .tp-bottombar button.is-active{
 @media(max-width:1024px){#authRoot .auth-card .fld{font-size:16px!important}}
 @media(max-width:420px){#authRoot .auth-card{padding:64px 26px 28px}}
 </style>
+<style>
+/* Date checks use theme tokens rather than pale dark-mode utility colors. */
+.date-check-error,.date-check-warn{color:var(--peach)}
+.date-check-info{color:var(--muted)}
+html:not(.dark) .date-check-error,html:not(.dark) .date-check-warn{color:#a1531f}
+html:not(.dark) .tv-checks-ico{color:#a1531f}
+html:not(.dark) .tv-checks.good .tv-checks-ico{color:#0a7c6b}
+html:not(.dark) .tv-checks .tv-cap2{color:var(--text)}
+/* Trip-wide controls inherit the light surface and readable brand ink. */
+html:not(.dark) .tw-chip{background:var(--card);border-color:var(--border)}
+html:not(.dark) .tw-cap{color:var(--muted)}
+html:not(.dark) .tw-fig{background:none;color:var(--violet,#4a38b5);-webkit-text-fill-color:currentColor}
+html:not(.dark) .tw-fig.is-zero{color:var(--muted);-webkit-text-fill-color:currentColor}
+html:not(.dark) .tw-att button.w-14{color:#4a38b5!important}
+html:not(.dark) .tw-att button.w-14:hover{background:var(--tile-hi)!important}
+.tw-foot{flex-wrap:wrap;row-gap:8px}
+.tw-chip{max-width:100%;min-width:0}
+.tw-in{width:8ch!important;max-width:100%}
+.tw-chip:focus-within{border-color:var(--lav);box-shadow:0 0 0 2px var(--tile-bd)}
+/* Bottom metrics: common baseline and wrapping totals, without truncating values. */
+.tv-trip-stats{grid-template-columns:minmax(0,2.2fr) repeat(2,minmax(0,1fr));align-items:start;gap:10px;text-align:left}
+.tv-trip-stats>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.tv-trip-stats .tv-big{font-size:clamp(.95rem,1.3vw,1.2rem);line-height:1.35;min-height:1.35em;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-variant-numeric:tabular-nums lining-nums}
+.tv-trip-stats .tv-cap{order:-1;margin:0;font-size:.58rem;line-height:1.3;letter-spacing:.08em}
+@media(max-width:430px){.tv-trip-stats{gap:8px}.tv-trip-stats .tv-big{font-size:1rem}}
+
+</style>
 </head>
 <body>
 <div id="splash"><div id="splash-logo" style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%238E7FD0%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2326225C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2222%22%20fill%3D%22url%28%23g%29%22/%3E%3Cg%20transform%3D%22translate%2820%2C21.6%29%20scale%280.3053%29%20translate%28-381.64%2C-176.88%29%22%20fill%3D%22%23ffffff%22%3E%3Cpath%20d%3D%22M381.64%20217.79l10.23-40.91h171.15l-10.23%2040.91z%22/%3E%3Cpath%20d%3D%22M381.64%20322.21l10.23%2040.91h171.15l-10.23-40.91z%22/%3E%3Cpath%20d%3D%22M381.64%20290.46l10.23-40.91h186.5l-10.23%2040.91z%22/%3E%3C/g%3E%3C/svg%3E" width="112" height="112" alt="Travel Planner" style="display:block"/><div style="font-family:Marcellus,serif;font-size:26px;letter-spacing:1px;background:linear-gradient(110deg,#b3a9ff,#ffb3ab);-webkit-background-clip:text;background-clip:text;color:transparent">Travel Planner</div></div><div class="splash-bar"></div></div>
@@ -3323,7 +3350,7 @@ function PlanView({trip,setTrip,cur,onSave}){
       {(checks.length>0)?(<Card className={`tv-checks slide-up ${errs?'err':'warn'}`}>
         <span className="tv-checks-ico">{errs?<Ic.stop className="w-4 h-4"/>:<Ic.warn className="w-4 h-4"/>}</span>
         <div><span className="tv-cap2">Date checks · {errs?`${errs} issue${errs>1?'s':''}`:`${warns} to review`}</span>
-        <ul>{checks.map((w,i)=>(<li key={i}><span className={w.level==='error'?'text-peach-400':w.level==='warn'?'text-peach-300':'text-lavender-200/80'}>{w.msg}</span></li>))}</ul></div>
+        <ul>{checks.map((w,i)=>(<li key={i}><span className={w.level==='error'?'date-check-error':w.level==='warn'?'date-check-warn':'date-check-info'}>{w.msg}</span></li>))}</ul></div>
       </Card>):((trip.departDate&&trip.returnDate&&(trip.hotels||[]).length>0)?(
         <Card className="tv-checks good slide-up"><span className="tv-checks-ico"><Ic.check className="w-4 h-4"/></span>
         <div><span className="tv-cap2">Date checks</span><ul><li>Dates line up across every leg and stay.</li></ul></div></Card>):null)}
