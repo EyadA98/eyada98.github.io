@@ -193,7 +193,7 @@ table.gr.nogrid td.cell{border-bottom-color:transparent}
 .tablewrap.rtl table.gr td.cell .cv .riyal{direction:ltr}
 td.cell.num .cv{justify-content:flex-end;font-variant-numeric:tabular-nums}
 td.cell.center .cv{justify-content:center}
-td.cell.sel{outline:2px solid var(--sel);outline-offset:-2px;z-index:3}
+td.cell.sel{outline:none;z-index:3} /* Selection is painted inside the cell without changing its fill. */
 td.cell.formulaC .cv{color:var(--violet)}
 html.dark td.cell.formulaC .cv{color:var(--lilac)}
 td.cell .cellinput{position:absolute;inset:0;border:2px solid var(--sel);background:var(--card);color:var(--text);font:inherit;padding:6px 8px;outline:none;z-index:10;width:100%}
@@ -450,8 +450,19 @@ th .col-resize{cursor:col-resize;touch-action:none}
 .drag-ind.v{width:3px}
 .ghost-label{position:fixed;z-index:260;pointer-events:none;background:var(--card);border:1px solid var(--lilac);color:var(--text);
   border-radius:9px;padding:5px 12px;font-size:.8rem;font-weight:700;box-shadow:0 10px 26px rgba(20,14,50,.25)}
-td.cell.inrange{background:rgba(129,126,255,.12)!important}
-html.dark td.cell.inrange{background:rgba(129,126,255,.22)!important}
+/* A separate, pointer-transparent selection layer keeps manual/rule fills intact.
+   Two contrasting strokes stay visible even on a fill matching the selection ink.
+   The active cell has a heavier frame than the other cells in the range. */
+:root{--grid-selection-ink:#4a38b5;--grid-selection-keyline:rgba(255,255,255,.95);--grid-selection-tint:rgba(129,126,255,.08)}
+html.dark{--grid-selection-ink:#b3a9ff;--grid-selection-keyline:rgba(19,10,48,.95);--grid-selection-tint:rgba(179,169,255,.10)}
+table.gr td.cell.inrange::after,table.gr td.cell.sel::after{
+  content:"";position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:4;
+  border:1px solid var(--grid-selection-ink);
+  box-shadow:inset 0 0 0 2px var(--grid-selection-keyline);
+  background:var(--grid-selection-tint)
+}
+table.gr td.cell.sel::after{border-width:3px;background:transparent}
+/* Existing editors (z-index 10) and the fill handle remain above the frame. */
 /* banded (alternating) rows */
 tr.band td.cell{background:var(--surface-raised)}
 /* freeze panes */
@@ -1680,6 +1691,9 @@ table.gr td.rowhdr,table.gr th.rowhdr{position:sticky;left:0}
   .pv-panel::before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--border);margin:8px auto 0}
   .pvw.withp::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:59}
   .pv-scroll{max-height:none;flex:1 1 auto} .pv-chartw{padding:10px 8px 6px} .pv-chart{max-height:220px} .pv-warn{flex-wrap:wrap} }
+
+/* Shared panels for imports, row forms and print controls. */
+.grid-review{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:10px}.grid-review p{overflow-wrap:anywhere}.grid-row-details textarea{resize:vertical;white-space:pre-wrap}.grid-row-details{max-height:65vh;overflow:auto;padding-right:4px}
 </style>
 </head>
 <body>
@@ -1697,9 +1711,9 @@ table.gr td.rowhdr,table.gr th.rowhdr{position:sticky;left:0}
 
 <script>
 /* ============================================================================
-   Grids — a standalone Smartsheet-style workspace (Phase 1)
+   Grids — Workspace spreadsheet module
    Folders/sheets browser + typed-column grid + formula engine + rules/automations.
-   Self-contained: persists to localStorage. Designed to drop into the Hub as a tab.
+   Single HTML module. The Workspace owns persistence and account synchronization.
    ============================================================================ */
 "use strict";
 /* Grids runs INSIDE the Workspace hub (a tab). The hub owns the data: it hands Grids a copy,
@@ -1733,14 +1747,14 @@ function save(){ try{ localStorage.setItem(UI_KEY,JSON.stringify(DB.ui||{})); }c
 /* stamp `updated` on every folder/grid whose content changed, so the hub can merge per grid across devices */
 /* content signature — view state (active tab, sort, filters) is left out, so merely LOOKING at a grid a
    different way never makes this device's older copy "newer" than an edit made elsewhere */
-function _itemSig(x){ const c=Object.assign({},x); delete c.updated; delete c.activeTab; delete c.fav;
+function _itemSig(x){ const c=Object.assign({},x); delete c.updated; delete c.ancestors; delete c.activeTab; delete c.fav;
   if(Array.isArray(c.tabs)) c.tabs=c.tabs.map(t=>{ if(!t||(t.sort===undefined&&t.filters===undefined&&t.activeView===undefined&&!(t.pivot&&t.pivot.snap))) return t; const u=Object.assign({},t); delete u.sort; delete u.filters; delete u.activeView; if(u.pivot&&u.pivot.snap){ u.pivot=Object.assign({},u.pivot); delete u.pivot.snap; } return u; });   /* the dashboard snapshot is derived — refreshing it isn't an edit */
   return JSON.stringify(c); }
 function _viewSig(x){ return JSON.stringify([x.activeTab||"",(x.tabs||[]).map(t=>[t.sort||null,t.filters||null,t.activeView||null]),!!x.fav]); }
 let _vhashes={};
 function stampChanged(){ const now=Date.now(); let changed=false; const seen={};
   [["s",DB.sheets],["f",DB.folders]].forEach(([p,map])=>{ Object.values(map||{}).forEach(x=>{ const k=p+x.id; seen[k]=1; const h=_itemSig(x);
-    if(_hashes[k]!==h){ if(_hashes[k]!==undefined||!x.updated) x.updated=now; _hashes[k]=h; changed=true; }
+    if(_hashes[k]!==h){ if(_hashes[k]!==undefined||!x.updated){ if(x.updated) x.ancestors=Array.from(new Set((x.ancestors||[]).concat([x.updated]))).slice(-128); x.updated=Math.max(now,(+x.updated||0)+1); } _hashes[k]=h; changed=true; }
     { const v=_viewSig(x); if(_vhashes[k]!==v){ _vhashes[k]=v; changed=true; } } }); });   /* view-only changes are saved, but don't bump `updated` */
   Object.keys(_hashes).forEach(k=>{ if(!seen[k]){ delete _hashes[k]; changed=true; } });
   return changed; }
@@ -1756,10 +1770,18 @@ function flushSave(){ clearTimeout(_saveT); _saveT=null; if(!EMBED||!_gridsReady
     if(!_saveWarned){ _saveWarned=true; try{ toast("Couldn't save — reload the Workspace to keep your changes."); }catch(_){} } } }
 function tomb(id){ DB.deleted=DB.deleted||{}; DB.deleted[id]=Date.now(); }
 /* same rule the hub uses: per folder/grid, the newer edit wins; deletions win over older copies */
-function mergeGridsDB(a,b){ a=a||{}; b=b||{}; const del=Object.assign({},a.deleted||{}); Object.keys(b.deleted||{}).forEach(k=>{ if(!((+del[k]||0)>=(+b.deleted[k]||0))) del[k]=b.deleted[k]; });
-  const t=x=>+(x&&(x.updated||x.created))||0;
-  const pick=(A,B)=>{ A=A||{}; B=B||{}; const out={}; new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{ const x=A[id], y=B[id]; const w=(x&&y)?(t(y)>t(x)?y:x):(x||y); const d=+del[id]||0; if(w&&d&&d>=t(w)) return; if(w) out[id]=w; }); return out; };
-  return {v:1,folders:pick(a.folders,b.folders),sheets:pick(a.sheets,b.sheets),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)}; }
+function mergeGridsDB(a,b){
+  a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
+  const time=x=>+(x&&(x.updated||x.created))||0;
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
+  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
+      /* A descendant already includes the other revision. Divergent revisions retain the loser. */
+      if(recover&&sx!==sy&&!winner.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!(del[key]&&del[key]>=time(loser))){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;}}
+    }if(winner&&!(del[id]&&del[id]>=time(winner)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k])out[k]=copies[k];});return out;}
+  return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)};
+}
+
 function applyIncoming(db,first){ db=db||{};
   if(first){ DB.folders=db.folders||{}; DB.sheets=db.sheets||{}; DB.deleted=db.deleted||{};
     let ui=null; try{ ui=JSON.parse(localStorage.getItem(UI_KEY)||"null"); }catch(e){} DB.ui=Object.assign({cwd:null,open:null},ui||{}); }
@@ -2671,6 +2693,8 @@ function _groupBy(f,A,arrArg,val,has,sc,N,sheet,ctx){ const piv=f==="PIVOTBY";
   return new Arr(out); }
 /* computed value of a cell (handles formula columns & cell-level =formulas, memoized w/ cycle guard) */
 function _rowById(sheet,rowId,ctx){ let m=ctx.rix&&ctx.rix.get(sheet); if(!m||m.n!==sheet.rows.length){ m=new Map(); sheet.rows.forEach(r=>m.set(r.id,r)); m.n=sheet.rows.length; if(!ctx.rix) ctx.rix=new Map(); ctx.rix.set(sheet,m); } return m.get(rowId); }
+/* One row-position index per calculation context avoids rescanning the column for every formula. */
+function formulaRowPositions(sheet,ctx){ctx.positions=ctx.positions||new Map();let p=ctx.positions.get(sheet);if(!p||p.size!==sheet.rows.length){p=new Map(sheet.rows.map((r,i)=>[r.id,i]));ctx.positions.set(sheet,p);}return p;}
 function cellComputed(sheet,rowId,col,ctx){
   ctx=ctx||newCtx(); if(!ctx.memo) ctx.memo={}; if(!ctx.stack) ctx.stack={};
   const key=rowId+":"+col.id;
@@ -2678,7 +2702,7 @@ function cellComputed(sheet,rowId,col,ctx){
   if(ctx.stack[key]) return "#CIRC!";
   const row=_rowById(sheet,rowId,ctx); if(!row) return "";
   let raw;
-  if(col.type==="formula"){ raw=col.formula||""; }
+  if(col.type==="formula"){ raw=col.formula||""; if(col.formulaAnchor){ const positions=formulaRowPositions(sheet,ctx),ai=positions.get(col.formulaAnchor); raw=shiftA1(raw,positions.get(rowId)-(ai==null?(col.formulaAnchorIndex||0):ai),0); } }
   else if(col.type==="created"||col.type==="modified"||col.type==="createdby"||col.type==="modifiedby"||col.type==="autonumber"){ raw=rawCellVal(sheet,row,col,ctx); if(raw==null) raw=""; return ctx.memo[key]=raw; }
   else { raw=row.cells[col.id]; if(raw==null) raw="";
     if(raw===""&&!NOSPILL_T.has(col.type)){ const sv=spillAt(sheet,rowId,col.id,ctx); if(sv!==undefined){ ctx.memo[key]=sv; return sv; } } }   /* part of a spilled result */
@@ -3158,7 +3182,7 @@ function visibleRows(sh){ let rows=sh.rows.slice(); const _ch=collapsedHidden(sh
 }
 /* Undo/redo: one history per grid tab (switching tabs or grids never replays another sheet's history).
    A step stores the tab's data + formatting, plus other tabs' formulas when this tab's structure can rewrite them. */
-const _UNDO_KEYS=["columns","rows","rules","fmt","notes","charts","freeze","name","density","wrapText","noGrid","bands","rtl","sumRow","views","pivot"];
+const _UNDO_KEYS=["columns","rows","rules","fmt","notes","charts","freeze","name","density","wrapText","noGrid","bands","rtl","sumRow","views","pivot","links"];
 let _undoKey=null, _undoMap={}, _undoBytes=new WeakMap();
 function _undoSync(){ const sh=curSheet(); const key=(DB.ui&&DB.ui.open||"")+":"+(sh?sh.id:""); if(key===_undoKey) return;
   if(_undoKey) _undoMap[_undoKey]={u:undoStack,r:redoStack}; const e=_undoMap[key]||{u:[],r:[]}; undoStack=e.u; redoStack=e.r; _undoKey=key; }
@@ -3277,12 +3301,12 @@ function renderEditor(){ _cellTick++;
   let html=`<div class="editor${sh.locked?" sheetlocked":""}${DB.ui.tbHide?" notb":""}">
     <div class="etool titlerow">
       <button class="btn sm" onclick="goBackFolder()" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <span class="sname" contenteditable="true" spellcheck="false" title="Click to rename" onkeydown="snameKey(event,this)" onblur="commitName(this)">${esc(doc.name)}</span>
+      <span class="sname" contenteditable="true" spellcheck="false" title="Click to rename" onkeydown="snameKey(event,this)" onblur="commitName(this)">${esc(doc.name)}</span>${doc.isTemplate?'<span class="hint">Template</span>':""}
       <span class="tbreak"></span>
       <nav class="menurow">
         <button class="menb" onclick="menuInsert(event)">Insert</button>
         <button class="menb" onclick="menuFormat(event)">Format</button>
-        <button class="menb" onclick="menuData(event)">Data</button>
+        <button class="menb" onclick="menuData(event)">Data</button><button class="menb" onclick="gridTools(event)">Tools</button>
         <button class="menb" onclick="menuView(event)">View</button>
         ${viewPillHTML(sh)}
       </nav>
@@ -3357,7 +3381,7 @@ function renderEditor(){ _cellTick++;
     const fullIdx=sh.columns.findIndex(c=>c.id===col.id); let hiddenBefore=0; for(let k=fullIdx-1;k>=0&&sh.columns[k].hidden;k--)hiddenBefore++;
     const hb=hiddenBefore?`<span class="hidmark" title="${hiddenBefore} hidden column${hiddenBefore>1?"s":""} — click to show" onmousedown="event.stopPropagation()" onclick="event.stopPropagation();revealBefore('${col.id}')"><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4'><path d='M9 6l6 6-6 6'/></svg></span>`:"";
     html+=`<th style="width:${_colW(col)}px;min-width:${_colW(col)}px" oncontextmenu="colMenu(event,'${col.id}')" onpointerdown="colDragStart(event,'${col.id}')">${hb}
-      <div class="hc"><span class="hname" data-hname="${col.id}" onclick="selectColumn('${col.id}',event)" ondblclick="renameColumn(event,'${col.id}')" title="${esc(col.name)} — click to select, Shift-click to extend, double-click to rename, drag to reorder">${esc(col.name)}</span>${col.locked?`<span class="hlock" title="Locked — can't be edited. Unlock from the column menu.">${LOCK_IC}</span>`:""}${colRules(col)?`<span class="rhdr-rule" title="Has column rules — click to edit" onclick="event.stopPropagation();openColumnRules('${col.id}')">${RULE_ICON}</span>`:""}
+      <div class="hc"><span class="hname" data-hname="${col.id}" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectColumn('${col.id}',event)}" onclick="selectColumn('${col.id}',event)" ondblclick="renameColumn(event,'${col.id}')" title="${esc(col.name)} — click to select, Shift-click to extend, double-click to rename, drag to reorder">${esc(col.name)}</span>${col.locked?`<span class="hlock" title="Locked — can't be edited. Unlock from the column menu.">${LOCK_IC}</span>`:""}${colRules(col)?`<span class="rhdr-rule" title="Has column rules — click to edit" onclick="event.stopPropagation();openColumnRules('${col.id}')">${RULE_ICON}</span>`:""}
       <span class="htype">${_hdrRoom(col)?typeBadge(col):""}${sortInd?`<span class="hsort">${sortInd}</span>`:""}</span>
       <span class="hacts${isFilt?" filtered":""}"><button class="hins" title="Column insights" onclick="event.stopPropagation();colInsights('${col.id}')">${INS_IC}</button><button class="hfilter ${isFilt?"on":""}" title="Sort & filter" onclick="filterMenu(event,'${col.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></button>
       <button class="hcaret" onclick="colMenu(event,'${col.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></span></div>
@@ -3739,7 +3763,7 @@ function _cellDragMove(e){ if(!_cellDrag) return; const el=document.elementFromP
   if(FR===r&&FC===c) return; FR=r; FC=c; updateSelDOM(); }
 function _cellDragEnd(){ document.removeEventListener("pointermove",_cellDragMove); document.removeEventListener("pointerup",_cellDragEnd); document.body.classList.remove("selecting");
   if(_cellDrag&&_cellDrag.moved){ _justCellDrag=true; setTimeout(()=>{_justCellDrag=false;},0); } _cellDrag=null; }
-function selectColumn(cid,e){ if(_justDragged){ return; } _hdrSel="col"; const sh=curSheet(); const vr=_viewRows&&_viewRows.length?_viewRows:sh.rows; const vc=_viewCols&&_viewCols.length?_viewCols:sh.columns;
+function selectColumn(cid,e){ if(!EDITING&&document.activeElement&&document.activeElement.blur)document.activeElement.blur(); if(_justDragged){ return; } _hdrSel="col"; const sh=curSheet(); const vr=_viewRows&&_viewRows.length?_viewRows:sh.rows; const vc=_viewCols&&_viewCols.length?_viewCols:sh.columns;
   if(!vr.length){ SELC=cid;FC=cid; SELR=null; return; }
   if(e&&e.shiftKey&&SELC){ FC=cid; SELR=vr[0].id; FR=vr[vr.length-1].id; }
   else if(e&&(e.metaKey||e.ctrlKey)){ rectCells().forEach(({r,c})=>_selCells.add(r+"|"+c)); vr.forEach(r=>_selCells.add(r.id+"|"+cid)); SELC=cid; FC=cid; SELR=vr[0].id; FR=vr[vr.length-1].id; }
@@ -3910,7 +3934,7 @@ function vhOpenDb(){ if(_vhDbP) return _vhDbP; _vhDbP=new Promise(res=>{ try{ co
   rq.onupgradeneeded=()=>{ const st=rq.result.createObjectStore("snaps",{keyPath:"id"}); st.createIndex("gid","gid"); };
   rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); rq.onblocked=()=>res(null); }catch(e){ res(null); } }); return _vhDbP; }
 function _vhHash(str){ let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0; return (h>>>0).toString(36)+":"+str.length; }
-function _vhJson(doc){ const c=Object.assign({},doc); delete c.updated; delete c.activeTab; return JSON.stringify(c); }
+function _vhJson(doc){ const c=Object.assign({},doc); delete c.updated; delete c.ancestors; delete c.activeTab; return JSON.stringify(c); }
 async function vhList(gid){ const db=await vhOpenDb(); if(!db) return _vhMem.filter(x=>x.gid===gid).sort((a,b)=>b.ts-a.ts);
   return new Promise(res=>{ try{ const out=[]; const rq=db.transaction("snaps").objectStore("snaps").index("gid").openCursor(IDBKeyRange.only(gid));
     rq.onsuccess=()=>{ const c=rq.result; if(c){ out.push(c.value); c.continue(); } else res(out.sort((a,b)=>b.ts-a.ts)); }; rq.onerror=()=>res([]); }catch(e){ res([]); } }); }
@@ -3947,7 +3971,7 @@ async function openVersionHistory(){ const gid=DB.ui.open; if(!gid||!DB.sheets[g
   if(EDITING){ try{ feCommit((_FE.el&&_FE.el.id==="fxInput")?"fx":"cell"); }catch(e){} }
   await vhSnap(gid,_vhDirty[gid]?"auto":"open");   /* make sure the newest state is in the list */
   const body=document.createElement("div"); body.className="vh"; body.innerHTML=`<div class="vh-list" id="vhList"></div><div class="vh-pv" id="vhPv"></div>`;
-  modal("Version history",body,null,"Close",true); const m=document.querySelector(".modal"); if(m) m.classList.add("vhmodal");
+  modal("Version history · this device",body,null,"Close",true); const m=document.querySelector(".modal"); if(m) m.classList.add("vhmodal");
   _vh={gid,list:await vhList(gid),sel:null,tab:null}; _vh.sel=_vh.list[0]&&_vh.list[0].id; vhDraw();
   body.addEventListener("click",vhClick); }
 function vhDraw(){ const L=document.getElementById("vhList"), P=document.getElementById("vhPv"); if(!L||!P||!_vh) return;
@@ -4034,12 +4058,12 @@ function setSummary(cid,k){ const sh=curSheet(); const col=sh.columns.find(c=>c.
 /* ===================== Saved views (named filter + sort combinations, per sheet tab) ===================== */
 const VIEW_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg>';
 function _cleanFilters(f){ const o={}; Object.keys(f||{}).sort().forEach(k=>{ const x=f[k]; if(x&&((x.text&&x.text.length)||(x.excl&&x.excl.length))){ const y={}; if(x.text) y.text=x.text; if(x.excl&&x.excl.length) y.excl=x.excl.slice().sort(); o[k]=y; } }); return o; }
-function _viewState(sh){ return {sort:sh.sort&&sh.sort.col?{col:sh.sort.col,dir:sh.sort.dir||1}:null,filters:_cleanFilters(sh.filters)}; }
+function _viewState(sh){ return {sort:sh.sort&&sh.sort.col?{col:sh.sort.col,dir:sh.sort.dir||1}:null,filters:_cleanFilters(sh.filters),columns:sh.columns.map(c=>({id:c.id,hidden:!!c.hidden,width:c.width,wManual:!!c.wManual})),density:sh.density||null,freeze:clone(sh.freeze||{}),wrapText:!!sh.wrapText}; }
 function _sameState(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 function _curView(sh){ return (sh.views||[]).find(v=>v.id===sh.activeView)||null; }
 function viewPillHTML(sh){ const v=_curView(sh), cur=_viewState(sh); const any=!!cur.sort||Object.keys(cur.filters).length>0;
   const mod=!!v&&!_sameState(v.state,cur); const label=v?v.name:(any?"Unsaved view":"All rows");
-  return `<button class="menb viewpill${v?" on":""}${any&&!v?" loose":""}" onclick="viewsMenu(event)" title="Saved views: switch filter & sort in one click">${VIEW_IC}<span class="vpl">${esc(label)}</span>${mod?`<i class="vmod" title="Changed since it was saved"></i>`:""}<svg class="vch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>`; }
+  return `<button class="menb viewpill${v?" on":""}${any&&!v?" loose":""}" onclick="viewsMenu(event)" title="Saved views: filters, sort, columns, widths, density and freeze">${VIEW_IC}<span class="vpl">${esc(label)}</span>${mod?`<i class="vmod" title="Changed since it was saved"></i>`:""}<svg class="vch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>`; }
 function _viewDesc(sh,st){ const parts=[]; if(st.sort){ const c=sh.columns.find(x=>x.id===st.sort.col); if(c) parts.push("sorted by "+c.name+(st.sort.dir<0?" ↓":" ↑")); }
   const fk=Object.keys(st.filters||{}); if(fk.length){ const names=fk.map(k=>(sh.columns.find(c=>c.id===k)||{}).name).filter(Boolean); parts.push("filtered on "+names.slice(0,3).join(", ")+(names.length>3?"…":"")); }
   return parts.join(" · ")||"no filters"; }
@@ -4049,12 +4073,12 @@ function viewsMenu(e){ const sh=curSheet(); const views=sh.views||[]; const v=_c
   views.forEach(x=>{ h+=`<div class="vrowi"><button onclick="closeCtx();applyView('${x.id}')">${VIEW_IC}<span class="mtx">${esc(x.name)}<small class="vdesc">${esc(_viewDesc(sh,x.state))}</small></span>${x.id===sh.activeView?rck:""}</button>
       <button class="vmini" title="Rename" onclick="closeCtx();renameView('${x.id}')">${I.edit}</button><button class="vmini dan" title="Delete view" onclick="closeCtx();deleteView('${x.id}')">${I.del}</button></div>`; });
   h+=`<div class="div"></div>`;
-  if(v&&mod) h+=`<button onclick="closeCtx();updateView('${v.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span class="mtx">Update “${esc(v.name)}” with current filters</span></button>`;
+  if(v&&mod) h+=`<button onclick="closeCtx();updateView('${v.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span class="mtx">Update “${esc(v.name)}” with current layout</span></button>`;
   h+=`<button onclick="closeCtx();saveViewAs()">${I.add}<span class="mtx">Save as view</span></button>`;
   if(!any&&!views.length) h+=`<div class="hint" style="padding:6px 10px 4px;margin:0;max-width:260px">Filter or sort using a column's funnel icon, then save it here to switch back in one click.</div>`;
   const b=e.currentTarget.getBoundingClientRect(); const el=document.createElement("div"); el.className="ctx viewsmenu"; el.style.left=b.left+"px"; el.style.top=(b.bottom+4)+"px"; el.innerHTML=h; openCtxEl(el); e.stopPropagation(); }
 function applyView(id){ const sh=curSheet(); if(!id){ delete sh.sort; delete sh.filters; delete sh.activeView; }
-  else { const v=(sh.views||[]).find(x=>x.id===id); if(!v) return; if(v.state.sort) sh.sort=clone(v.state.sort); else delete sh.sort; sh.filters=clone(v.state.filters||{}); sh.activeView=id; }
+  else { const v=(sh.views||[]).find(x=>x.id===id); if(!v) return; if(v.state.sort) sh.sort=clone(v.state.sort); else delete sh.sort; sh.filters=clone(v.state.filters||{}); sh.activeView=id; if(v.state.columns){ const oldOrder=sh.columns.map(c=>c.id); const cm=new Map(sh.columns.map(c=>[c.id,c])); const ordered=[]; v.state.columns.forEach(a=>{ const c=cm.get(a.id); if(c){ c.hidden=!!a.hidden; if(a.width!=null)c.width=a.width; c.wManual=!!a.wManual; ordered.push(c); cm.delete(a.id); } }); sh.columns=ordered.concat([...cm.values()]); const colMap=oldOrder.map(id=>sh.columns.findIndex(c=>c.id===id)); if(colMap.some((v,i)=>v!==i))remapRefs(sh,null,colMap); sh.density=v.state.density; sh.freeze=clone(v.state.freeze||{}); sh.wrapText=!!v.state.wrapText; } }
   save(); renderEditor(); const v=_curView(sh); toast(v?"View: "+v.name:"Showing all rows"); }
 function _suggestViewName(sh){ const st=_viewState(sh); const bits=[]; Object.keys(st.filters).slice(0,2).forEach(k=>{ const c=sh.columns.find(x=>x.id===k); if(c) bits.push(c.name); }); if(st.sort){ const c=sh.columns.find(x=>x.id===st.sort.col); if(c) bits.push("by "+c.name); }
   return bits.length?bits.join(" · "):"View "+((sh.views||[]).length+1); }
@@ -4878,7 +4902,8 @@ document.addEventListener("keydown",e=>{
   if(mod&&!e.altKey&&SELR&&SELC&&(e.key==="ArrowUp"||e.key==="ArrowDown"||e.key==="ArrowLeft"||e.key==="ArrowRight")){ e.preventDefault(); jumpEdge(e.key==="ArrowUp"?-1:e.key==="ArrowDown"?1:0,e.key==="ArrowLeft"?-1:e.key==="ArrowRight"?1:0,e.shiftKey); return; }
   if(mod&&e.altKey&&!e.shiftKey&&e.code==="KeyV"){ e.preventDefault(); pasteSpecial(); return; }   /* Paste special */
   if(mod&&e.shiftKey&&!e.altKey&&e.code==="KeyV"){ _pasteMode="values"; setTimeout(()=>{ _pasteMode=null; },400); return; }   /* the paste event that follows pastes values only */
-  if(mod&&!e.shiftKey&&!e.altKey&&e.code==="KeyE"){ e.preventDefault(); flashFill(); return; }
+  if(mod&&!e.shiftKey&&!e.altKey&&["e","l","r"].includes(e.key.toLowerCase())){ e.preventDefault(); applyToRange(f=>{f.a={e:"center",l:"left",r:"right"}[e.key.toLowerCase()];}); return; }
+  if(mod&&e.altKey&&e.code==="KeyE"){ e.preventDefault(); flashFill(); return; }
   if(mod&&e.shiftKey&&!e.altKey&&e.code==="KeyL"){ e.preventDefault(); toggleFilters(); return; }
   if(mod&&e.shiftKey&&!e.altKey&&(e.code==="Digit1"||e.code==="Digit4"||e.code==="Digit5")){ e.preventDefault(); setNumFmt(e.code==="Digit4"?"currency":e.code==="Digit5"?"percent":""); return; }
   if(mod&&!e.altKey&&(e.code==="Backslash"||e.key==="\\")){ e.preventDefault(); clearFmt(); return; }
@@ -4892,7 +4917,7 @@ document.addEventListener("keydown",e=>{
   if(mod&&e.key.toLowerCase()==="u"){ e.preventDefault(); toggleFmt("u"); return; }
   if(mod&&e.key==="Enter"){ e.preventDefault(); if(SELR) addRowAt(SELR,true); return; }
   if(mod&&e.key.toLowerCase()==="d"){ e.preventDefault(); fillDown(); return; }
-  if(mod&&e.key.toLowerCase()==="r"){ e.preventDefault(); fillRight(); return; }
+  if(mod&&e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="r"){ e.preventDefault(); fillRight(); return; }
   if(mod&&e.key===";"){ e.preventDefault(); insertToday(); return; }
   if(mod&&e.key.toLowerCase()==="k"){ e.preventDefault(); insertHyperlink(); return; }
   if(mod&&e.key===" "){ e.preventDefault(); if(SELC)selectColumn(SELC,{}); return; }   /* Ctrl+Space → select column */
@@ -4937,8 +4962,8 @@ function openShortcuts(){
   const b=document.createElement("div");
   const groups=[
     ["Navigate & select",[["Move between cells","↑ ↓ ← →"],["Extend selection","Shift + arrows"],["Row start / end","Home / End"],["First / last cell","Ctrl/⌘ + Home / End"],["Jump 10 rows","PageUp / PageDown"],["Jump to edge of data","Ctrl/⌘ + arrows"],["Select whole column","Ctrl/⌘ + Space"],["Select whole row","Shift + Space"],["Select all cells","Ctrl/⌘ + A"],["Next / previous sheet tab","Ctrl + PageDown / PageUp"],["…in Chrome","Ctrl + Shift + PageDown / PageUp"],["New sheet tab","Shift + F11"],["Open dropdown or column filter","Alt + ↓"]]],
-    ["Edit",[["Edit cell","Enter / F2 / double-click"],["Type to replace","Just start typing"],["Confirm & move down","Enter"],["Next / previous cell","Tab / Shift+Tab"],["Clear cell(s)","Delete / Backspace"],["Delete selected row(s)","Select row ▸ Delete"],["Insert row below","Ctrl/⌘ + Enter"],["Fill down / right","Ctrl/⌘ + D / R"],["Insert today's date","Ctrl/⌘ + ;"],["Flash fill (learn from examples)","Ctrl/⌘ + E"],["Lock a reference ($A$1)","F4 while typing a formula"],["Indent / outdent row","Ctrl/⌘ + ] / ["],["Start a formula","="]]],
-    ["Format & tools",[["Bold / Italic / Underline","Ctrl/⌘ + B / I / U"],["Copy / cut / paste","Ctrl/⌘ + C / X / V"],["Paste values only","Ctrl/⌘ + Shift + V"],["Paste special","Ctrl/⌘ + Alt + V"],["Number / currency / percent","Ctrl/⌘ + Shift + 1 / 4 / 5"],["Clear formatting","Ctrl/⌘ + \\"],["Filters on / off","Ctrl/⌘ + Shift + L"],["Undo / redo","Ctrl/⌘ + Z / Shift+Z"],["Repeat last action","F4 / Ctrl/⌘ + Y"],["Find & replace","Ctrl/⌘ + F"],["Full screen","Ctrl/⌘ + Shift + F"],["This help","Ctrl/⌘ + /"]]]
+    ["Edit",[["Edit cell","Enter / F2 / double-click"],["Type to replace","Just start typing"],["Confirm & move down","Enter"],["Next / previous cell","Tab / Shift+Tab"],["Clear cell(s)","Delete / Backspace"],["Delete selected row(s)","Select row ▸ Delete"],["Insert row below","Ctrl/⌘ + Enter"],["Fill down / right","Ctrl/⌘ + D / Shift+R"],["Insert today's date","Ctrl/⌘ + ;"],["Flash fill (learn from examples)","Ctrl/⌘ + Alt+E"],["Lock a reference ($A$1)","F4 while typing a formula"],["Indent / outdent row","Ctrl/⌘ + ] / ["],["Start a formula","="]]],
+    ["Format & tools",[["Align center / left / right","Ctrl/⌘ + E / L / R"],["Bold / Italic / Underline","Ctrl/⌘ + B / I / U"],["Copy / cut / paste","Ctrl/⌘ + C / X / V"],["Paste values only","Ctrl/⌘ + Shift + V"],["Paste special","Ctrl/⌘ + Alt + V"],["Number / currency / percent","Ctrl/⌘ + Shift + 1 / 4 / 5"],["Clear formatting","Ctrl/⌘ + \\"],["Filters on / off","Ctrl/⌘ + Shift + L"],["Undo / redo","Ctrl/⌘ + Z / Shift+Z"],["Repeat last action","F4 / Ctrl/⌘ + Y"],["Find & replace","Ctrl/⌘ + F"],["Full screen","Ctrl/⌘ + Shift + F"],["This help","Ctrl/⌘ + /"]]]
   ];
   b.innerHTML=groups.map(g=>`<div class="lb" style="margin:14px 0 8px;font-size:.72rem">${esc(g[0])}</div><div style="display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:center">`+g[1].map(r=>`<div style="color:var(--muted)">${esc(r[0])}</div><div><kbd style="background:var(--surface-hover);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;white-space:nowrap">${esc(r[1])}</kbd></div>`).join("")+`</div>`).join("").replace(/^<div class="lb" style="margin:14px/,'<div class="lb" style="margin:2px');
   modal("Keyboard shortcuts",b,null,"Got it",true);
@@ -5263,7 +5288,7 @@ function changeIndent(delta){ const sh=curSheet(); if(!sh)return; const ids=selR
   afterEdit(); }
 function toggleCollapse(rid){ const sh=curSheet(); const row=sh.rows.find(r=>r.id===rid); if(!row)return; const i=sh.rows.indexOf(row); if(!rowHasChildren(sh,i))return; row.collapsed=!row.collapsed; save(); renderEditor(); }
 function collapseAllGroups(v){ const sh=curSheet(); let any=false; sh.rows.forEach((r,i)=>{ if(rowHasChildren(sh,i)){ r.collapsed=v; any=true; } }); if(!any){ toast("No groups yet — indent rows to create one"); return; } save(); renderEditor(); toast(v?"All groups collapsed":"All groups expanded"); }
-function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
+function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details & Workspace links…</button><button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
     <button onclick="closeCtx();addRowAt('${rid}',true)">${I.add}Insert below</button>
     <button onclick="closeCtx();dupRow('${rid}')">${I.copy}Duplicate row</button>
     <div class="div"></div>
@@ -5277,7 +5302,7 @@ function cellMenu(e,rid,cid){ const sh=curSheet();
   const inSel=rangeCells().some(x=>x.r===rid&&x.c===cid);
   if(!inSel){ SELR=rid; SELC=cid; FR=rid; FC=cid; _selCells.clear(); updateSelDOM(); }
   const hasNote=sh.notes&&sh.notes[rid+":"+cid];
-  ctxAt(e,`<button onclick="closeCtx();startEdit('${rid}','${cid}')">${I.edit}Edit</button>
+  ctxAt(e,`${formulaColumnMenu(sh,rid,cid)}<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details & Workspace links…</button><button onclick="closeCtx();startEdit('${rid}','${cid}')">${I.edit}Edit</button>
     <button onclick="closeCtx();copySel()">${I.copy}<span class="mtx">Copy</span><span class="kbd">Ctrl+C</span></button>
     <button onclick="closeCtx();pasteSpecial()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="mtx">Paste special</span><span class="kbd">Ctrl+Alt+V</span></button>
     <button onclick="closeCtx();clearSelection()">${I.del}Clear${rangeCells().length>1?" "+rangeCells().length+" cells":""}</button>
@@ -5851,7 +5876,7 @@ function ruleBuilder(sh,existing,done){
 }
 
 /* ============================ IMPORT / EXPORT (CSV + Excel) ============================ */
-function cellExportVal(sh,r,c,ctx){ if(["created","modified","createdby","modifiedby"].includes(c.type)) return rawCellVal(sh,r,c,ctx); let v=(c.type==="formula"||String(r.cells[c.id]||"")[0]==="=")?cellComputed(sh,r.id,c,ctx):r.cells[c.id]; if((v==null||v==="")&&!NOSPILL_T.has(c.type)){ const sv=spillAt(sh,r.id,c.id,ctx); if(sv!==undefined) v=sv; } if(Array.isArray(v))v=v.join(", "); if(isFErr(v))v=""; return fmtScalar(v); }
+function cellExportVal(sh,r,c,ctx){ if(["created","modified","createdby","modifiedby"].includes(c.type)) return rawCellVal(sh,r,c,ctx); let v=(c.type==="formula"||String(r.cells[c.id]||"")[0]==="=")?cellComputed(sh,r.id,c,ctx):r.cells[c.id]; if((v==null||v==="")&&!NOSPILL_T.has(c.type)){ const sv=spillAt(sh,r.id,c.id,ctx); if(sv!==undefined) v=sv; } if(Array.isArray(v))v=v.join(", "); return fmtScalar(v); }
 /* the riyal mark comes from a web font; if it can't load, fall back to the standard ﷼ sign so money never shows a blank box */
 let _noRiyal=false;
 function riyalHTML(st){ return _noRiyal?`<span class="riyal nr"${st?` style="${st}"`:""}>&#xFDFC;</span>`:`<span class="riyal"${st?` style="${st}"`:""}>&#xe900;</span>`; }
@@ -6244,7 +6269,7 @@ function renderPivotInto(host,html,sh,doc){ try{ _hsBtns.forEach(x=>{ try{x.remo
 function fileMenu(e){ ctxAt(e,`<div class="lbl">Download</div>
   <button onclick="closeCtx();exportXlsx()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8l6 8M15 8l-6 8"/></svg>Excel (.xlsx)</button>
   <button onclick="closeCtx();exportCsv()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 9h16M9 4v16"/></svg>CSV (.csv)</button>
-  <div class="div"></div><div class="lbl">Bring data in</div>
+  <button onclick="closeCtx();printGridDialog()">${I.copy}Print / Save as PDF…</button><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><div class="div"></div><div class="lbl">Bring data in</div>
   <button onclick="closeCtx();importFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Import Excel or CSV</button>`);
   const m=_ctxEl; if(m&&e.currentTarget){ const r=e.currentTarget.getBoundingClientRect(); m.style.top=(r.bottom+6)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8,r.right-m.offsetWidth))+"px"; } }
 function exportMenu(e){ ctxAt(e,`<div class="lbl">Export as</div>
@@ -6273,18 +6298,19 @@ function exportXlsx(){
   if(curSheet()&&curSheet().pivot){ const M=pvMatrix(curSheet(),curDoc(),{expand:true}); const ws=XLSX.utils.aoa_to_sheet([M.head].concat(M.rows,[M.tot])); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,(curSheet().name||"Summary").replace(/[\\\/?*\[\]:]/g,"").slice(0,31)||"Summary"); XLSX.writeFile(wb,(curSheet().name||"summary")+".xlsx"); toast("Exported Excel"); return; }
   const sh=curSheet(); const ctx=newCtx();
   const aoa=[sh.columns.map(c=>c.name)];
-  sh.rows.forEach(r=>aoa.push(sh.columns.map(c=>{ let v=cellExportVal(sh,r,c,ctx);
+  sh.rows.forEach(r=>aoa.push(sh.columns.map(c=>{ const formula=c.type==="formula"||typeof r.cells[c.id]==="string"&&r.cells[c.id][0]==="="; let v=formula?cellComputed(sh,r.id,c,ctx):cellExportVal(sh,r,c,ctx); if(Array.isArray(v))v=v.join(", ");
     if(c.type==="checkbox") return (v==="1"||v===true)?true:false;
-    if(["number","currency","percent","formula"].includes(c.type)&&v!==""&&v!=null&&!isNaN(parseFloat(v))) return parseFloat(v);
+    if(["number","currency","percent"].includes(c.type)&&v!==""&&v!=null&&!isNaN(numOrNaN(v))) return numOrNaN(v);
     return v==null?"":v; })));
   const ws=XLSX.utils.aoa_to_sheet(aoa);
+  aoa.forEach((row,ri)=>row.forEach((v,ci)=>{ if(ri&&isFErr(v)&&(sh.columns[ci].type==="formula"||String(sh.rows[ri-1].cells[sh.columns[ci].id]||"")[0]==="=")){ const ec={"#NULL!":0,"#DIV/0!":7,"#VALUE!":15,"#REF!":23,"#NAME?":29,"#NUM!":36,"#N/A":42}; const addr=XLSX.utils.encode_cell({r:ri,c:ci}); if(ec[v]!==undefined) ws[addr]={t:"e",v:ec[v],w:v}; } }));
   ws["!cols"]=sh.columns.map(c=>({wpx:Math.max(60,(c.width||140)-6)}));
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,(sh.name||"Sheet").replace(/[\\\/?*\[\]:]/g,"").slice(0,31)||"Sheet");
   XLSX.writeFile(wb,(sh.name||"grid")+".xlsx"); toast("Exported Excel");
 }
 $("#csvFile").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const ext=(f.name.split(".").pop()||"").toLowerCase(); const rd=new FileReader();
   if(ext==="xlsx"||ext==="xls"){ if(!window.XLSX){ toast("Excel support is still loading — try again"); e.target.value=""; return; }
-    rd.onload=()=>{ try{ const wb=XLSX.read(new Uint8Array(rd.result),{type:"array"}); const ws=wb.Sheets[wb.SheetNames[0]]; const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:""}); importRows(aoa,"Excel"); }catch(err){ toast("Couldn't read that file"); } e.target.value=""; };
+    rd.onload=()=>{ try{ const wb=XLSX.read(new Uint8Array(rd.result),{type:"array"}); chooseWorkbookSheets(wb); }catch(err){ toast("Couldn't read that file"); } e.target.value=""; };
     rd.readAsArrayBuffer(f);
   } else { rd.onload=()=>{ importRows(csvParse(rd.result),"CSV"); e.target.value=""; }; rd.readAsText(f); }
 });
@@ -6313,7 +6339,7 @@ function importRows(rows,label){
   body.addEventListener("click",e=>{ const m=e.target.closest("#impMode button"); if(m){ st.mode=m.dataset.m; draw(); return; } if(e.target.closest("#impHdr")){ st.hdr=!st.hdr; draw(); } });
   modal("Import "+label,body,()=>applyImport(rows,st,label),"Import");
   const md=document.querySelector(".modal"); if(md) md.classList.add("wide"); }
-function applyImport(rows,st,label){ const doc=curDoc(); let sh=curSheet(); if(st.mode!=="tab"&&sh&&sheetLocked(sh)&&!_lockBypass){ lockToast(); return; } try{ vhSnap(DB.ui.open,"import"); }catch(e){}
+function applyImport(rows,st,label){ if(st.mode==="append"&&!st.reviewed){const problems=importRejects(curSheet(),rows,st); if(problems.length){ reviewImportRejects(rows,st,label,problems); return; }} const doc=curDoc(); let sh=curSheet(); if(st.mode!=="tab"&&sh&&sheetLocked(sh)&&!_lockBypass){ lockToast(); return; } try{ vhSnap(DB.ui.open,"import"); }catch(e){}
   const W=Math.max(...rows.map(r=>r.length)); const hdr=st.hdr?rows[0].map(h=>String(h==null?"":h).replace(/[\[\]!]/g,"").trim()):null; const data=st.hdr?rows.slice(1):rows;
   const names=[]; const uniq=n=>{ let b=n, k=2; while(names.some(x=>x.toLowerCase()===b.toLowerCase())) b=n+" "+(k++); names.push(b); return b; };
   const mkCols=()=>Array.from({length:W},(_,i)=>({id:uid(),name:uniq((hdr&&hdr[i])||colLetter(i)),type:"text",width:Math.min(260,Math.max(100,Math.round(((hdr&&hdr[i])||"").length*8+40)))}));
@@ -6321,12 +6347,11 @@ function applyImport(rows,st,label){ const doc=curDoc(); let sh=curSheet(); if(s
   let n=data.length;
   if(st.mode==="tab"){ ensureTabs(doc); const cols=mkCols(); const t={id:uid(),name:_uniqTabName(doc,"Import "+(doc.tabs.length+1)),columns:cols,rows:data.map(r=>toRow(r,cols)),rules:[],fmt:{}}; while(t.rows.length<BLANK_ROWS) t.rows.push(emptyRow()); doc.tabs.push(t); doc.activeTab=t.id; _selReset(); save(); render(); }
   else if(st.mode==="replace"){ pushUndo(); const cols=mkCols(); if(cols.length<BLANK_COLS&&!hdr) while(cols.length<BLANK_COLS) cols.push({id:uid(),name:uniq(colLetter(cols.length)),type:"text",width:120});
-    sh.columns=cols; sh.rows=data.map(r=>toRow(r,cols)); while(sh.rows.length<BLANK_ROWS) sh.rows.push(emptyRow()); sh.fmt={}; sh.notes={}; delete sh.sort; delete sh.filters; delete sh.freeze; if(hdr) sh.freeze={rows:0,cols:0}; _selReset(); afterEdit(); }
+    sh.columns=cols; sh.rows=data.map(r=>toRow(r,cols)); while(sh.rows.length<BLANK_ROWS) sh.rows.push(emptyRow()); sh.fmt={}; sh.notes={}; sh.links={}; sh.rules=[]; sh.views=[]; delete sh.activeView; delete sh.sort; delete sh.filters; delete sh.freeze; if(hdr) sh.freeze={rows:0,cols:0}; _selReset(); afterEdit(); }
   else { pushUndo(); sh.columns.forEach(c=>names.push(c.name));
-    const usedCols=new Set();
-    const map=Array.from({length:W},(_,i)=>{ const h=hdr?hdr[i]:null; let col=h?sh.columns.find(c=>!usedCols.has(c.id)&&(c.name.trim().toLowerCase()===h.toLowerCase()||new RegExp("^"+h.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+" \\d+$","i").test(c.name.trim()))):sh.columns.filter(c=>!c.hidden)[i];
-      if(col) usedCols.add(col.id); if(!col||_ro(col)||colLocked(col,sh)){   /* locked columns aren't written to — the values go in a new column */ col={id:uid(),name:uniq(h||colLetter(sh.columns.length)),type:"text",width:140}; sh.columns.push(col); usedCols.add(col.id); } return col; });
-    let at=_lastUsedRow(sh)+1; data.forEach(cells=>{ let row=sh.rows[at]; if(!row){ row=emptyRow(); sh.rows.push(row); } map.forEach((c,i)=>{ const v=cells[i]; if(v!=null&&String(v)!==""){ let x=_pasteVal(c,v); if(typeof x==="string") x=normTyped(c,x); if(x!==""&&x!=null) row.cells[c.id]=x; } });   /* same conversion as paste: TRUE → ticked, 3/4/2026 → a real date */ touchRow(row); at++; });
+    const initialMap=importColumnMap(sh,rows,st);
+    const map=initialMap.map((c,i)=>{if(c)return c;const col={id:uid(),name:uniq((hdr&&hdr[i])||colLetter(sh.columns.length)),type:"text",width:140};sh.columns.push(col);return col;});
+    const plan=planAppendImport(sh,rows,st,map);let at=_lastUsedRow(sh)+1;plan.candidates.forEach((candidate,ri)=>{let row=sh.rows[at];if(!row){row=emptyRow();sh.rows.push(row);}map.forEach(c=>{if(!plan.rejected.has(ri+':'+c.id)){const x=candidate.cells[c.id];if(x!==""&&x!=null)row.cells[c.id]=x;}});touchRow(row);at++;});
     afterEdit(); }
   let big=0; try{ big=JSON.stringify(curDoc()).length; }catch(e){}
   toast(`Imported ${n.toLocaleString()} row${n===1?"":"s"} from ${label}`+(big>4e6?" — this grid is very large, saving may be slow":"")); }
@@ -6346,14 +6371,14 @@ function closeModal(){ closeCtx(); const ov=$(".ov"); if(ov)ov.remove(); }
 function modal(title,bodyEl,onSave,saveLabel,noSave){
   closeModal();
   const ov=document.createElement("div"); ov.className="ov"; ov.addEventListener("mousedown",e=>{ if(e.target===ov)closeModal(); });
-  const m=document.createElement("div"); m.className="modal"+(title.includes("Rules")?" wide":"");
+  const m=document.createElement("div"); m.className="modal"+(title.includes("Rules")?" wide":""); m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true"); m.setAttribute("aria-label",title);
   m.innerHTML=`<div class="mhead"><h3>${esc(title)}</h3><div class="sp"></div><button class="icon-btn" onclick="closeModal()" style="width:32px;height:32px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
   const b=document.createElement("div"); b.className="mbody"; b.appendChild(bodyEl); m.appendChild(b);
   const f=document.createElement("div"); f.className="mfoot";
   if(noSave){ f.innerHTML=`<button class="btn pri" onclick="closeModal()">${esc(saveLabel||"Done")}</button>`; }
   else { f.innerHTML=`<button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" id="mSave">${esc(saveLabel||"Save")}</button>`; }
   m.appendChild(f); ov.appendChild(m); document.body.appendChild(ov);
-  if(!noSave){ $("#mSave").addEventListener("click",()=>{ try{ onSave&&onSave(); }catch(e){ console.error(e); } closeModal(); }); }
+  if(!noSave){ $("#mSave").addEventListener("click",async()=>{ const button=$("#mSave"); button.disabled=true; try{ const result=onSave?await onSave():undefined; if(result!==false&&ov.isConnected) ov.remove(); }catch(e){ console.error(e); toast(e.message||"Couldn't save these changes"); } finally{button.disabled=false;} }); }
 }
 function promptModal(title,label,val,cb){
   const b=document.createElement("div"); b.innerHTML=`<label class="fld"><span class="lb">${esc(label)}</span><input class="inp" id="pmInp" value="${esc(val)}"></label>`;
@@ -6371,6 +6396,485 @@ function selectModal(title,opts,cur,cb){
   const b=document.createElement("div"); b.innerHTML=`<label class="fld"><span class="lb">Destination</span>${selHTML("smSel",opts.map(o=>({value:o.v,label:o.l})),cur)}</label>`;
   modal(title,b,()=>{ cb($("#smSel").value); },"Move");
 }
+
+"use strict";
+
+/* ==================== Formula columns: reversible, relative references ==================== */
+function formulaColumnMenu(sh, rid, cid) {
+  const c = sh.columns.find(c => c.id === cid),
+    r = sh.rows.find(r => r.id === rid);
+  if (!c || !r || colLocked(c, sh) || sheetLocked(sh)) return '';
+  if (c.type === 'formula') return `<button onclick="closeCtx();unapplyColumnFormula('${cid}')">${I.edit}Un-apply column formula…</button>`;
+  return typeof r.cells[cid] === 'string' && r.cells[cid].startsWith('=') ? `<button onclick="closeCtx();applyColumnFormula('${rid}','${cid}')">${I.edit}Apply formula to column</button>` : '';
+}
+function applyColumnFormula(rid, cid) {
+  const sh = curSheet(),
+    c = sh.columns.find(c => c.id === cid),
+    r = sh.rows.find(r => r.id === rid);
+  if (!c || !r || sheetLocked(sh) || colLocked(c, sh)) return;
+  const f = r.cells[cid];
+  if (typeof f !== 'string' || f[0] !== '=') return;
+  pushUndo();
+  c.formulaRestore = clone(c);
+  c.type = 'formula';
+  c.formula = f;
+  c.formulaAnchor = rid;
+  c.formulaAnchorIndex = sh.rows.indexOf(r);
+  afterEdit();
+  toast('Formula applied to the column, including new rows. Previous contents kept for un-apply.');
+}
+function unapplyColumnFormula(cid) {
+  const sh = curSheet(),
+    c = sh.columns.find(c => c.id === cid);
+  if (!c || c.type !== 'formula' || sheetLocked(sh) || colLocked(c, sh)) return;
+  const b = document.createElement('div');
+  b.innerHTML = `<p>${c.formulaRestore ? 'Restore the column’s previous type and contents?' : 'This formula column has no previous contents to restore. Convert its current results to editable values?'}</p>`;
+  modal('Un-apply column formula', b, () => {
+    pushUndo();
+    if (c.formulaRestore) {
+      const old = clone(c.formulaRestore),
+        layout = {
+          width: c.width,
+          wManual: c.wManual,
+          hidden: c.hidden
+        };
+      Object.keys(c).forEach(k => delete c[k]);
+      Object.assign(c, old, layout);
+    } else {
+      const ctx = newCtx();
+      sh.rows.forEach(r => {
+        r.cells[cid] = cellComputed(sh, r.id, c, ctx);
+        touchRow(r);
+      });
+      c.type = 'text';
+      delete c.formula;
+      delete c.formulaAnchor;
+      delete c.formulaAnchorIndex;
+    }
+    afterEdit();
+  }, 'Un-apply');
+}
+/* ==================== Import planning & workbook sheet selection ==================== */
+function importColumnMap(sh, rows, st) {
+  const hdr = st.hdr ? rows[0].map(v => String(v == null ? '' : v).replace(/[\[\]!]/g, '').trim()) : null,
+    used = new Set();
+  return Array.from({
+    length: Math.max(...rows.map(r => r.length))
+  }, (_, i) => {
+    const h = hdr && hdr[i];
+    const c = h ? sh.columns.find(c => !used.has(c.id) && (c.name.trim().toLowerCase() === h.toLowerCase() || c.name.trim().toLowerCase().startsWith(h.toLowerCase() + ' ') && /^\d+$/.test(c.name.trim().slice(h.length + 1)))) : sh.columns.filter(c => !c.hidden)[i];
+    if (c) used.add(c.id);
+    return c && !_ro(c) && !colLocked(c, sh) ? c : null;
+  });
+}
+function planAppendImport(sh, rows, st, map) {
+  map = map || importColumnMap(sh, rows, st);
+  const data = st.hdr ? rows.slice(1) : rows,
+    at = _lastUsedRow(sh) + 1;
+  const candidates = data.map((cells, ri) => {
+    const r = sh.rows[at + ri] ? clone(sh.rows[at + ri]) : emptyRow();
+    map.forEach((c, i) => {
+      if (!c) return;
+      let v = _pasteVal(c, cells[i] ?? '');
+      if (typeof v === 'string') v = normTyped(c, v);
+      r.cells[c.id] = v;
+    });
+    return r;
+  });
+  const validationSheet = Object.assign({}, sh, {
+      rows: sh.rows.slice(0, at).concat(candidates)
+    }),
+    cache = {};
+  const rejected = new Map(),
+    problems = [];
+  candidates.forEach((r, ri) => map.forEach((c, i) => {
+    if (!c) return;
+    const vr = colRules(c),
+      reason = vr && vr.mode === 'reject' && validateVal(validationSheet, c, r, r.cells[c.id], cache);
+    if (reason) {
+      rejected.set(ri + ':' + c.id, true);
+      problems.push({
+        row: ri + 1,
+        column: c.name,
+        value: String(data[ri][i] ?? ''),
+        reason: String(reason)
+      });
+    }
+  }));
+  return {
+    candidates,
+    rejected,
+    problems
+  };
+}
+function importRejects(sh, rows, st) {
+  return planAppendImport(sh, rows, st).problems;
+}
+function reviewImportRejects(rows, st, label, problems) {
+  setTimeout(() => {
+    const b = document.createElement('div');
+    b.innerHTML = `<p><b>${problems.length}</b> values fail the destination column’s validation. Import will leave these cells blank.</p><div class="grid-review">${problems.slice(0, 100).map(p => `<p>Row ${p.row} · <b>${esc(p.column)}</b>: ${esc(p.value)} — ${esc(p.reason)}</p>`).join('')}</div>${problems.length > 100 ? '<p>Showing the first 100 rejected values.</p>' : ''}`;
+    modal('Review rejected import values', b, () => applyImport(rows, Object.assign({}, st, {
+      reviewed: true
+    }), label), 'Import valid values');
+  }, 0);
+}
+function chooseWorkbookSheets(wb) {
+  if (wb.SheetNames.length === 1) {
+    importRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+      header: 1,
+      raw: false,
+      defval: ''
+    }), wb.SheetNames[0]);
+    return;
+  }
+  const b = document.createElement('div');
+  b.innerHTML = '<p>Choose a sheet to preview, or import several as separate tabs. For multiple sheets, choose whether the first row contains headers.</p>' + wb.SheetNames.map((n, i) => `<label class="fld"><span><input type="checkbox" data-wb-index="${i}" ${i === 0 ? 'checked' : ''}> ${esc(n)} <small>(${esc(wb.Sheets[n]['!ref'] || 'empty')})</small></span></label>`).join('') + '<label class="fld"><span><input type="checkbox" id="wbHeaders" checked> First row contains column headers (multiple sheets)</span></label>';
+  modal('Choose workbook sheets', b, () => {
+    const ids = [...b.querySelectorAll('[data-wb-index]:checked')].map(x => +x.dataset.wbIndex);
+    if (!ids.length) {
+      toast('Choose at least one sheet');
+      return false;
+    }
+    const hdr = b.querySelector('#wbHeaders').checked;
+    if (ids.length === 1) {
+      setTimeout(() => importRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[ids[0]]], {
+        header: 1,
+        raw: false,
+        defval: ''
+      }), wb.SheetNames[ids[0]]), 0);
+    } else {
+      ids.forEach(i => {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]], {
+          header: 1,
+          raw: false,
+          defval: ''
+        });
+        if (rows.length) {
+          applyImport(rows, {
+            mode: 'tab',
+            hdr,
+            reviewed: true
+          }, wb.SheetNames[i]);
+          curSheet().name = _uniqTabName(curDoc(), wb.SheetNames[i]);
+        }
+      });
+      save();
+      render();
+    }
+  }, 'Continue');
+}
+/* ==================== Grid tools: backups, templates & print ==================== */
+function gridTools(e) {
+  ctxAt(e, `<div class="lbl">Grid tools</div><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><button onclick="closeCtx();restoreGridsFile()">${I.add}Restore backup…</button><div class="div"></div><button onclick="closeCtx();saveGridTemplate()">${I.add}Save reusable template…</button><button onclick="closeCtx();chooseGridTemplate()">${I.copy}Create from template…</button><button onclick="closeCtx();printGridDialog()">${I.copy}Print / Save as PDF…</button>`);
+}
+function gridDownload(name, value) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], {
+      type: 'application/json'
+    })),
+    a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+async function backupGrids() {
+  flushSave();
+  const acct = _acct,
+    snapshot = clone(gridsPayload()),
+    history = [];
+  for (const id of Object.keys(snapshot.sheets)) {
+    history.push(...(await vhList(id)));
+    if (acct !== _acct) {
+      toast('Account changed — start the backup again');
+      return;
+    }
+  }
+  gridDownload('grids-backup-' + new Date().toISOString().slice(0, 10) + '.json', {
+    format: 'workspace-grids-backup',
+    version: 1,
+    created: new Date().toISOString(),
+    db: snapshot,
+    history
+  });
+  toast('Full backup downloaded, including local version history');
+}
+function validateGridBackup(obj) {
+  if (!obj || obj.format !== 'workspace-grids-backup' || obj.version !== 1 || !obj.db || !obj.db.sheets || !obj.db.folders) throw Error('Choose a supported Grids backup.');
+  const db = obj.db;
+  for (const [id, d] of Object.entries(db.sheets)) {
+    if (!d || d.id !== id || !Array.isArray(d.tabs) || !d.tabs.length) throw Error('Backup contains an invalid grid.');
+    for (const t of d.tabs) {
+      if (!t || typeof t.id !== 'string' || !Array.isArray(t.columns) || !Array.isArray(t.rows) || t.columns.some(c => !c || typeof c.id !== 'string') || t.rows.some(r => !r || typeof r.id !== 'string' || !r.cells || typeof r.cells !== 'object')) throw Error('Backup contains an invalid tab.');
+    }
+  }
+  return obj;
+}
+function restoreGridsFile() {
+  const f = document.createElement('input');
+  f.type = 'file';
+  f.accept = '.json,application/json';
+  f.onchange = async () => {
+    try {
+      const value = validateGridBackup(JSON.parse(await f.files[0].text()));
+      const b = document.createElement('div');
+      b.innerHTML = `<p>Restore ${Object.keys(value.db.sheets).length} grids, including formulas, formatting, rules, notes, views and templates. Existing grids will be kept. Restored grids get new IDs.</p>`;
+      modal('Restore full backup', b, async () => {
+        const acct = _acct;
+        await backupBeforeRestore();
+        if (acct !== _acct) return false;
+        await restoreGridCopies(value);
+      }, 'Restore copies');
+    } catch (e) {
+      toast(e.message || 'Could not read backup');
+    }
+  };
+  f.click();
+}
+async function backupBeforeRestore() {
+  for (const id of Object.keys(DB.sheets)) await vhSnap(id, 'import');
+}
+async function restoreGridCopies(value) {
+  const acct = _acct;
+  const db = value.db,
+    ids = new Map(),
+    now = Date.now();
+  Object.keys(db.folders).concat(Object.keys(db.sheets)).forEach(id => ids.set(id, uid()));
+  Object.entries(db.folders).forEach(([id, x]) => {
+    const d = clone(x);
+    d.id = ids.get(id);
+    d.parent = ids.get(d.parent) || null;
+    d.created = d.updated = now;
+    delete d.ancestors;
+    DB.folders[d.id] = d;
+  });
+  Object.entries(db.sheets).forEach(([id, x]) => {
+    const d = clone(x);
+    d.id = ids.get(id);
+    d.parent = ids.get(d.parent) || null;
+    d.created = d.updated = now;
+    delete d.ancestors;
+    delete d.recoveredFrom;
+    d.tabs.forEach(t => {
+      if (t.pivot && t.pivot.src && t.pivot.src.grid) t.pivot.src.grid = ids.get(t.pivot.src.grid) || t.pivot.src.grid;
+    });
+    DB.sheets[d.id] = d;
+  });
+  save();
+  for (const v of value.history || []) {
+    if (acct !== _acct) return;
+    if (!v || !ids.has(v.gid) || typeof v.json !== 'string') continue;
+    let snap;
+    try {
+      snap = JSON.parse(v.json);
+    } catch (e) {
+      continue;
+    }
+    snap.id = ids.get(v.gid);
+    snap.parent = ids.get(snap.parent) || null;
+    snap.tabs?.forEach(t => {
+      if (t.pivot?.src?.grid) t.pivot.src.grid = ids.get(t.pivot.src.grid) || t.pivot.src.grid;
+    });
+    const json = JSON.stringify(snap);
+    await vhPut(Object.assign({}, v, {
+      id: uid(),
+      gid: snap.id,
+      json,
+      sig: _vhHash(json)
+    }));
+  }
+  save();
+  render();
+  toast('Backup restored as new grids');
+}
+function saveGridTemplate() {
+  const d = curDoc(),
+    b = document.createElement('div');
+  b.innerHTML = `<label class="fld"><span class="lb">Template name</span><input class="inp" id="templateName" value="${esc(d.name)}"></label><label class="fld"><span><input type="checkbox" id="templateData"> Include existing values and Workspace links</span></label><p class="hint">Column types, formulas, validation, formatting, rules, notes, views and tabs are preserved.</p>`;
+  modal('Save reusable template', b, () => {
+    const name = b.querySelector('#templateName').value.trim();
+    if (!name) return false;
+    const x = clone(d);
+    x.id = uid();
+    x.tabs.forEach(t=>{if(t.pivot?.src?.grid===d.id)t.pivot.src.grid=x.id;});
+    x.name = name;
+    x.isTemplate = true;
+    x.created = x.updated = Date.now();
+    x.parent = null;
+    delete x.ancestors;
+    delete x.recoveredFrom;
+    delete x.trashed;
+    if (!b.querySelector('#templateData').checked) x.tabs.forEach(t => {
+      t.rows.forEach(r => {
+        delete r.createdBy;
+        delete r.modifiedBy;
+        delete r.created;
+        delete r.modified;
+        Object.keys(r.cells).forEach(cid => {
+          if (!(typeof r.cells[cid] === 'string' && r.cells[cid][0] === '=')) delete r.cells[cid];
+        });
+      });
+      delete t.links;
+      delete t.hist;
+    });
+    DB.sheets[x.id] = x;
+    save();
+    toast('Reusable template saved');
+  });
+}
+function chooseGridTemplate() {
+  const templates = Object.values(DB.sheets).filter(d => d.isTemplate && !isTrashed('sheet', d.id));
+  if (!templates.length) {
+    toast('Save a template from a grid first');
+    return;
+  }
+  const b = document.createElement('div');
+  b.innerHTML = `<label class="fld"><span class="lb">Template</span><select class="inp" id="templatePick">${templates.map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('')}</select></label><label class="fld"><span class="lb">New grid name</span><input class="inp" id="templateNewName" placeholder="My new grid"></label>`;
+  modal('Create from template', b, () => {
+    const x = clone(DB.sheets[b.querySelector('#templatePick').value]);
+    const templateId=x.id;
+    x.id = uid();
+    x.tabs.forEach(t=>{if(t.pivot?.src?.grid===templateId)t.pivot.src.grid=x.id;});
+    x.name = b.querySelector('#templateNewName').value.trim() || x.name + ' copy';
+    x.created = x.updated = Date.now();
+    delete x.isTemplate;
+    delete x.ancestors;
+    DB.sheets[x.id] = x;
+    DB.ui.open = x.id;
+    DB.ui.cwd = x.parent;
+    _selReset();
+    save();
+    render();
+  }, 'Create grid');
+}
+function printGridDialog() {
+  const sh = curSheet(),
+    b = document.createElement('div');
+  if (sh.pivot) {
+    const M = pvMatrix(sh, curDoc(), {
+      expand: true
+    });
+    const cols = M.head.map((name, i) => ({
+        id: 'p' + i,
+        name
+      })),
+      rows = M.rows.concat([M.tot]).map((cells, i) => ({
+        id: 'r' + i,
+        cells: Object.fromEntries(cells.map((v, j) => ['p' + j, v]))
+      }));
+    b.innerHTML = '<label class="fld"><span class="lb">Orientation</span><select class="inp" id="printOrientation"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></label><p>Print the complete expanded summary, including totals.</p>';
+    modal('Print summary / Save as PDF', b, () => printGrid({
+      name: sh.name,
+      columns: cols,
+      rows
+    }, cols, rows, b.querySelector('#printOrientation').value), 'Open print preview');
+    return;
+  }
+  b.innerHTML = `<label class="fld"><span class="lb">Rows</span><select class="inp" id="printRows"><option value="filtered">Current filtered rows</option><option value="all">All rows</option></select></label><label class="fld"><span class="lb">Orientation</span><select class="inp" id="printOrientation"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></label><span class="lb">Columns</span><div class="grid-review">${sh.columns.map((c, i) => `<label class="fld"><span><input type="checkbox" data-print-index="${i}" ${c.hidden ? '' : 'checked'}> ${esc(c.name)}</span></label>`).join('')}</div><p class="hint">Headers repeat on each printed page. Choose Save as PDF in the print dialog.</p>`;
+  modal('Print / Save as PDF', b, () => {
+    const cols = [...b.querySelectorAll('[data-print-index]:checked')].map(x => sh.columns[+x.dataset.printIndex]);
+    if (!cols.length) {
+      toast('Choose at least one column');
+      return false;
+    }
+    const rows = b.querySelector('#printRows').value === 'all' ? sh.rows : visibleRows(sh),
+      orientation = b.querySelector('#printOrientation').value;
+    return printGrid(sh, cols, rows, orientation);
+  }, 'Open print preview');
+}
+function printGrid(sh, cols, rows, orientation) {
+  const w = window.open('', '_blank');
+  if (!w) {
+    toast('Allow pop-ups to open the print preview');
+    return false;
+  }
+  const ctx = newCtx();
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(curDoc().name)}</title><style>@page{size:${orientation === 'portrait' ? 'portrait' : 'landscape'};margin:12mm}body{font-family:Arial,sans-serif;color:#25183f}h1{font-size:22px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #ccc;padding:6px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px}th{background:#eee7fa;text-align:left}thead{display:table-header-group}tr{break-inside:avoid}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h1>${esc(curDoc().name)} · ${esc(sh.name)}</h1><table><thead><tr>${cols.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(cellExportVal(sh, r, c, ctx) ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`);
+  w.document.close();
+  return true;
+}
+/* ==================== Row details & explicit Workspace links ==================== */
+let _linkRequest = 0;
+function rowDetails(rid) {
+  const sh = curSheet(),
+    r = sh.rows.find(r => r.id === rid);
+  if (!r) return;
+  const b = document.createElement('div');
+  b.className = 'grid-row-details';
+  const ctx = newCtx();
+  b.innerHTML = sh.columns.map((c, i) => `<label class="fld"><span class="lb">${esc(c.name)}${_ro(c) ? ' · computed' : ''}</span><textarea class="inp" rows="${c.type === 'text' ? 3 : 1}" data-detail-index="${i}" ${_ro(c) || colLocked(c, sh) || sheetLocked(sh) ? 'disabled' : ''}>${esc(_ro(c) ? cellExportVal(sh, r, c, ctx) : Array.isArray(r.cells[c.id]) ? r.cells[c.id].join(', ') : r.cells[c.id] ?? '')}</textarea></label>`).join('') + `<div class="lb">Workspace links</div><div id="rowLinks">Loading tasks and notes…</div><div class="hint" id="rowDetailError" role="alert"></div>`;
+  modal('Row details', b, () => {
+    if (sheetLocked(sh)) return;
+    const changes = [];
+    for (const el of b.querySelectorAll('[data-detail-index]:not(:disabled)')) {
+      const c = sh.columns[+el.dataset.detailIndex];
+      let v = _pasteVal(c, el.value);
+      if (typeof v === 'string') v = normTyped(c, v);
+      changes.push([c, v]);
+    }
+    const proposed = clone(r);
+    changes.forEach(([c, v]) => proposed.cells[c.id] = v);
+    for (const [c, v] of changes) {
+      const vr = colRules(c),
+        err = vr && vr.mode === 'reject' && validateVal(Object.assign({},sh,{rows:sh.rows.map(row=>row.id===rid?proposed:row)}), c, proposed, v, {});
+      if (err) {
+        b.querySelector('#rowDetailError').textContent = c.name + ': ' + err;
+        return false;
+      }
+    }
+    pushUndo();
+    changes.forEach(([c, v]) => r.cells[c.id] = v);
+    const picker = b.querySelector('#rowLinkPick');
+    if (picker && !picker.disabled) {
+      sh.links = sh.links || {};
+      if (picker.value) {
+        const [kind, id] = JSON.parse(picker.value);
+        sh.links[rid] = {
+          kind,
+          id
+        };
+      } else delete sh.links[rid];
+    }
+    touchRow(r);
+    afterEdit();
+  });
+  const token = ++_linkRequest;
+  window.parent.postMessage({
+    type: 'grids:links:request',
+    acct: _acct,
+    token
+  }, _hubOrigin());
+  b.dataset.linkToken = token;
+  b.dataset.rowId = rid;
+}
+window.addEventListener('message', e => {
+  if (e.source !== window.parent || location.protocol !== 'file:' && e.origin !== _hubOrigin()) return;
+  const m = e.data || {};
+  if (m.type !== 'grids:links:list' || m.acct !== _acct) return;
+  const b = document.querySelector('.grid-row-details');
+  if (!b || +b.dataset.linkToken !== m.token) return;
+  const sh = curSheet(),
+    link = (sh.links || {})[b.dataset.rowId],
+    items = m.items || [],
+    has = link && items.some(x => x.kind === link.kind && x.id === link.id);
+  const host = b.querySelector('#rowLinks');
+  host.innerHTML = `<select class="inp" id="rowLinkPick" ${sheetLocked(sh) ? 'disabled' : ''}><option value="">No linked item</option>${link && !has ? `<option selected value="${esc(JSON.stringify([link.kind, link.id]))}">Linked item unavailable</option>` : ''}${items.map(x => `<option value="${esc(JSON.stringify([x.kind, x.id]))}" ${link && link.kind === x.kind && link.id === x.id ? 'selected' : ''}>${esc(x.kind === 'task' ? 'Task' : 'Note')}: ${esc(x.title)}</option>`).join('')}</select><button type="button" class="btn" id="rowLinkOpen">Open linked item</button>`;
+  host.querySelector('#rowLinkOpen').onclick = () => {
+    const value = host.querySelector('select').value;
+    if (!value) {
+      toast('Choose a linked item first');
+      return;
+    }
+    const [kind, id] = JSON.parse(value);
+    window.parent.postMessage({
+      type: 'grids:link:open',
+      acct: _acct,
+      kind,
+      id
+    }, _hubOrigin());
+  };
+});
 
 /* ============================ BOOT ============================ */
 if(EMBED){ $("#main").innerHTML=`<div class="gload"><span class="gspin"></span>Loading your grids…</div>`; try{ window.parent.postMessage({type:"grids:ready"},_hubOrigin()); }catch(e){} }
