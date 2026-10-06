@@ -1850,6 +1850,13 @@ html.dark .paste-index{color:var(--lilac)}
 .modal .grid-review:has([data-print-index]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;max-height:none;overflow:visible}
 .modal .grid-review:has([data-print-index]) .fld{margin:0;font-size:12px;overflow-wrap:anywhere}
 @media(max-width:600px){.modal .grid-review:has([data-print-index]){grid-template-columns:1fr}}
+
+/* Mobile browser cards: bounded action targets and vertically centered names. */
+.item .cacts .kebab,.item .cacts .favstar,.item .lact .kebab,.item .lact .favstar{position:relative;inset:auto;transform:none}
+.item .kebab::after,.item .favstar::after{content:none}
+@media(pointer:coarse){.item .cacts,.item .lact{gap:4px}.item .cacts .kebab,.item .cacts .favstar,.item .lact .kebab,.item .lact .favstar{width:36px;height:40px;min-width:36px;opacity:1;touch-action:manipulation}}
+@media(max-width:600px){.grid-items:not(.mini):not(.list) .item:not(:has(.desc)) .nm{grid-row:1/span 3;align-self:center}.grid-items:not(.mini):not(.list) .item:has(.desc) .nm{grid-row:1/3;align-self:end}.grid-items:not(.mini):not(.list) .item .desc{grid-row:3;align-self:start}.grid-items:not(.mini):not(.list) .item .cacts{align-self:center;justify-self:end}.grid-items:not(.mini):not(.list) .item{column-gap:10px}.grid-items:not(.mini):not(.list) .item .nm{white-space:normal;overflow-wrap:anywhere}}
+
 </style>
 </head>
 <body>
@@ -1929,12 +1936,19 @@ function tomb(id){ DB.deleted=DB.deleted||{}; DB.deleted[id]=Date.now(); }
 function mergeGridsDB(a,b){
   a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
   const time=x=>+(x&&(x.updated||x.created))||0;
-  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav','restoredAt','recoveredFrom','recoveredAt','recoveredSignature'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
-  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
+  Object.keys(del).forEach(k=>{const at=k.indexOf('-recovered-');if(at>0&&!k.startsWith('__')){const root='__recoveryDismissed__:'+k.slice(0,at);del[root]=Math.max(+del[root]||0,+del[k]||0);}});
+  // A content revision is recovered once, regardless of changing sync timestamps.
+  const recoveryKey=(id,sig)=>'__recovery__:'+id+':'+sig;
+  function recoveredSignature(copy){if(copy.recoveredSignature)return copy.recoveredSignature;const original=JSON.parse(JSON.stringify(copy));original.id=copy.recoveredFrom;original.name=(copy.name||'Grid').replace(/ · recovered conflict$/,'');delete original.trashed;return hash(content(original));}
+  [a.sheets,b.sheets].forEach(map=>Object.values(map||{}).forEach(copy=>{if(copy.recoveredFrom){if(copy.trashed){const dismissed='__recoveryDismissed__:'+copy.recoveredFrom;del[dismissed]=Math.max(+del[dismissed]||0,+copy.trashed||0);}const k=recoveryKey(copy.recoveredFrom,recoveredSignature(copy));del[k]=Math.max(+del[k]||0,time(copy),+copy.recoveredAt||0,1);}}));
+  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);// A trashed recovery stays deleted unless explicitly restored after that deletion.
+      if(recover&&(x.recoveredFrom||y.recoveredFrom)&&(x.trashed||y.trashed)){const trash=+(x.trashed||0)>=+(y.trashed||0)?x:y;const other=trash===x?y:x;if((+other.restoredAt||0)<=(+trash.trashed||0))winner=trash;}
+      const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
       /* A descendant already includes the other revision. Divergent revisions retain the loser. */
-      if(recover&&sx!==sy&&!winner.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!(del[key]&&del[key]>=time(loser))){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;}}
-    }if(winner&&!(del[id]&&del[id]>=time(winner)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k])out[k]=copies[k];});return out;}
+      if(recover&&sx!==sy&&!x.trashed&&!y.trashed&&!winner.recoveredFrom&&!loser.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const sig=hash(content(loser)),seen=recoveryKey(id,sig),copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+sig,legacy=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!del[seen]&&!del[key]&&!del[legacy]&&time(loser)>(+del['__recoveryDismissed__:'+id]||0)){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredSignature=sig;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;del[seen]=Math.max(time(x),time(y),1);}}
+    }if(winner&&!(del[id]&&(del[id]>=time(winner)||winner.recoveredFrom)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k]&&!del[k])out[k]=copies[k];});return out;}
   return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)};
 }
 
@@ -1943,11 +1957,11 @@ function applyIncoming(db,first){ db=db||{};
     let ui=null; try{ ui=JSON.parse(localStorage.getItem(UI_KEY)||"null"); }catch(e){} DB.ui=Object.assign({cwd:null,open:null},ui||{}); }
   else {
     const mine={folders:DB.folders,sheets:DB.sheets,deleted:DB.deleted};
-    if(JSON.stringify({f:db.folders||{},s:db.sheets||{}})===JSON.stringify({f:DB.folders,s:DB.sheets})) return;
+    if(JSON.stringify({f:db.folders||{},s:db.sheets||{},d:db.deleted||{}})===JSON.stringify({f:DB.folders,s:DB.sheets,d:DB.deleted||{}})) return;
     stampChanged();                                     /* keep any local edit made since the hub's copy */
     const m=mergeGridsDB(mine,db); DB.folders=m.folders; DB.sheets=m.sheets; DB.deleted=m.deleted;
     /* we still hold edits the hub's copy doesn't have — send the merged result back */
-    if(JSON.stringify({f:m.folders,s:m.sheets})!==JSON.stringify({f:db.folders||{},s:db.sheets||{}})){ _forcePush=true; setTimeout(flushSave,0); } }
+    if(JSON.stringify({f:m.folders,s:m.sheets,d:m.deleted})!==JSON.stringify({f:db.folders||{},s:db.sheets||{},d:db.deleted||{}})){ _forcePush=true; setTimeout(flushSave,0); } }
   if(first){ try{ if(purgeOldTrash()) _forcePush=true; }catch(e){} }   /* Trash keeps things for 30 days */
   if(DB.ui.open&&(!DB.sheets[DB.ui.open]||isTrashed("sheet",DB.ui.open))) DB.ui.open=null;
   if(DB.ui.cwd&&DB.ui.cwd!=="__trash"&&isTrashed("folder",DB.ui.cwd)) DB.ui.cwd=null;
@@ -3107,8 +3121,8 @@ function isTrashed(kind,id){ const seen=new Set(); let it=(kind==="folder"?DB.fo
 function trashItems(){ const out=[]; Object.values(DB.folders).forEach(f=>{ if(f.trashed) out.push({kind:"folder",it:f}); }); Object.values(DB.sheets).forEach(s=>{ if(s.trashed) out.push({kind:"sheet",it:s}); }); return out.sort((a,b)=>b.it.trashed-a.it.trashed); }
 function trashItem(kind,id){ const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return; it.trashed=Date.now(); if(DB.ui.open===id||(DB.ui.open&&isTrashed("sheet",DB.ui.open))) DB.ui.open=null; if(DB.ui.cwd&&isTrashed("folder",DB.ui.cwd)) DB.ui.cwd=it.parent&&!isTrashed("folder",it.parent)?it.parent:null;
   save(); render(); toast(`Moved “${it.name}” to Trash — restore it within ${TRASH_DAYS} days`); }
-function restoreItem(kind,id){ const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return; delete it.trashed; if(it.parent&&(!DB.folders[it.parent]||isTrashed("folder",it.parent))) it.parent=null; save(); render(); toast(`Restored “${it.name}”`+(it.parent?"":" to All grids")); }
-function purgeItem(kind,id){ if(kind==="folder") deleteFolderDeep(id); else { delete DB.sheets[id]; tomb(id); } }
+function restoreItem(kind,id){ const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return; delete it.trashed; it.restoredAt=Date.now(); if(it.parent&&(!DB.folders[it.parent]||isTrashed("folder",it.parent))) it.parent=null; save(); render(); toast(`Restored “${it.name}”`+(it.parent?"":" to All grids")); }
+function purgeItem(kind,id){ const copy=kind==="sheet"&&DB.sheets[id];if(copy?.recoveredFrom){DB.deleted=mergeGridsDB({sheets:{[id]:copy},deleted:DB.deleted},{}).deleted;DB.deleted["__recoveryDismissed__:"+copy.recoveredFrom]=Date.now();} if(kind==="folder") deleteFolderDeep(id); else { delete DB.sheets[id]; tomb(id); } }
 function deleteForever(kind,id){ const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return; confirmModal("Delete forever?",`“${it.name}”${kind==="folder"?" and everything inside it":""} will be permanently deleted. This can't be undone.`,()=>{ purgeItem(kind,id); save(); render(); toast("Deleted forever"); }); }
 function emptyTrash(){ const L=trashItems(); if(!L.length) return; confirmModal("Empty Trash?",`${L.length} item${L.length===1?"":"s"} will be permanently deleted. This can't be undone.`,()=>{ L.forEach(x=>purgeItem(x.kind,x.it.id)); save(); render(); toast("Trash emptied"); }); }
 function purgeOldTrash(){ const cut=Date.now()-TRASH_DAYS*864e5; let n=0; trashItems().forEach(x=>{ if(x.it.trashed<cut){ purgeItem(x.kind,x.it.id); n++; } }); return n; }
@@ -5907,7 +5921,7 @@ const _bdPU=()=>_bdEnd(true), _bdPC=()=>_bdEnd(false);
 const _bdTM=e=>{ if(!_bd) return; const t=e.touches[0]; if(!_bd.on){ if(Math.hypot(t.clientX-_bd.x0,t.clientY-_bd.y0)>8) _bdEnd(false); return; } e.preventDefault(); if(!_bd.mv&&Math.hypot(t.clientX-_bd.x0,t.clientY-_bd.y0)>8) _bd.mv=true; _bdMove(t.clientX,t.clientY); };
 /* picked up and put straight back down = a press-and-hold: open the card's menu (iPad has no right-click) */
 const _bdTE=()=>{ const d=_bd; if(d&&d.on&&!d.mv){ _bdEnd(false); _lpUntil=Date.now()+300; d.card.dispatchEvent(new MouseEvent("contextmenu",{bubbles:true,cancelable:true,clientX:d.x0,clientY:d.y0,button:2,view:window})); return; } _bdEnd(true); }, _bdTC=()=>_bdEnd(false);
-document.addEventListener("pointerdown",e=>{ const card=e.target.closest&&e.target.closest("#browserArea .item[data-kind]"); if(!card||e.target.closest(".kebab")||(e.button!==undefined&&e.button!==0)) return;
+document.addEventListener("pointerdown",e=>{ const card=e.target.closest&&e.target.closest("#browserArea .item[data-kind]"); if(!card||e.target.closest("button,.cacts,.lact")||(e.button!==undefined&&e.button!==0)) return;
   _bd={kind:card.dataset.kind,id:card.dataset.id,card,x0:e.clientX,y0:e.clientY,on:false,over:null};
   if(e.pointerType==="touch"){ _bd.timer=setTimeout(()=>{ if(_bd&&!_bd.on){ try{ navigator.vibrate&&navigator.vibrate(12); }catch(_){} _bdBegin(_bd.x0,_bd.y0); } },350);
     document.addEventListener("touchmove",_bdTM,{passive:false}); document.addEventListener("touchend",_bdTE); document.addEventListener("touchcancel",_bdTC); }

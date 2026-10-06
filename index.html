@@ -4414,14 +4414,22 @@ function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b
 function _mergeGrids(a,b){
   a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
   const time=x=>+(x&&(x.updated||x.created))||0;
-  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav','restoredAt','recoveredFrom','recoveredAt','recoveredSignature'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
-  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
+  Object.keys(del).forEach(k=>{const at=k.indexOf('-recovered-');if(at>0&&!k.startsWith('__')){const root='__recoveryDismissed__:'+k.slice(0,at);del[root]=Math.max(+del[root]||0,+del[k]||0);}});
+  // A content revision is recovered once, regardless of changing sync timestamps.
+  const recoveryKey=(id,sig)=>'__recovery__:'+id+':'+sig;
+  function recoveredSignature(copy){if(copy.recoveredSignature)return copy.recoveredSignature;const original=JSON.parse(JSON.stringify(copy));original.id=copy.recoveredFrom;original.name=(copy.name||'Grid').replace(/ · recovered conflict$/,'');delete original.trashed;return hash(content(original));}
+  [a.sheets,b.sheets].forEach(map=>Object.values(map||{}).forEach(copy=>{if(copy.recoveredFrom){if(copy.trashed){const dismissed='__recoveryDismissed__:'+copy.recoveredFrom;del[dismissed]=Math.max(+del[dismissed]||0,+copy.trashed||0);}const k=recoveryKey(copy.recoveredFrom,recoveredSignature(copy));del[k]=Math.max(+del[k]||0,time(copy),+copy.recoveredAt||0,1);}}));
+  function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);// A trashed recovery stays deleted unless explicitly restored after that deletion.
+      if(recover&&(x.recoveredFrom||y.recoveredFrom)&&(x.trashed||y.trashed)){const trash=+(x.trashed||0)>=+(y.trashed||0)?x:y;const other=trash===x?y:x;if((+other.restoredAt||0)<=(+trash.trashed||0))winner=trash;}
+      const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
       /* A descendant already includes the other revision. Divergent revisions retain the loser. */
-      if(recover&&sx!==sy&&!winner.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!(del[key]&&del[key]>=time(loser))){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;}}
-    }if(winner&&!(del[id]&&del[id]>=time(winner)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k])out[k]=copies[k];});return out;}
+      if(recover&&sx!==sy&&!x.trashed&&!y.trashed&&!winner.recoveredFrom&&!loser.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const sig=hash(content(loser)),seen=recoveryKey(id,sig),copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+sig,legacy=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!del[seen]&&!del[key]&&!del[legacy]&&time(loser)>(+del['__recoveryDismissed__:'+id]||0)){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredSignature=sig;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;del[seen]=Math.max(time(x),time(y),1);}}
+    }if(winner&&!(del[id]&&(del[id]>=time(winner)||winner.recoveredFrom)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k]&&!del[k])out[k]=copies[k];});return out;}
   return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)};
 }
+
 
 function mergeHubData(local,cloud){ var base=_mergeHubDataBase(local,cloud); try{ if(base&&local&&cloud&&(local.grids||cloud.grids)) base.grids=_mergeGrids(local.grids,cloud.grids); }catch(e){} return base; }
 function _mergeHubDataBase(local,cloud){ if(!cloud) return local; if(!local) return cloud; var lu=+new Date(local.updatedAt||0)||0, cu=+new Date(cloud.updatedAt||0)||0; var base=(lu>=cu)?Object.assign({},cloud,local):Object.assign({},local,cloud); var tomb=Object.assign({},cloud.deleted||{}); var ld=local.deleted||{}; Object.keys(ld).forEach(function(k){ if(tomb[k]==null||Math.abs(+ld[k]||0)>Math.abs(+tomb[k]||0)) tomb[k]=ld[k]; }); base.deleted=tomb; var _newer=(lu>=cu)?local:cloud, _older=(lu>=cu)?cloud:local; ["notes","routines","links","goals","routineCats","workspaces"].forEach(function(k){ base[k]=_mergeArr(_newer[k],_older[k],tomb,false); });
@@ -10561,7 +10569,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-06-controls-delete-8";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-06-mobile-sync-9";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
@@ -10588,7 +10596,7 @@ var _gridsAcctSent=null;
 /* merge (not overwrite): anything that reached the hub from another device while Grids was busy survives; on a tie the frame's copy wins */
 window.__gridsSave=function(db,acct){ if(!db||typeof db!=="object") return; if(acct!==undefined&&acct!==_gridsAcct()) return;   /* a late save from the previous account */
   var merged=_mergeGrids(db,data.grids); data.grids=merged; _gridsSent=data.grids; var _ok=save(); if(_ok===false) gridsNoteSync(false); else if(!_gridsCloud()) gridsNoteSync(true);   /* storage full: Grids must not say "Saved" */ try{ renderGridReports(); }catch(e){}   /* guest: saved on this device is the whole story */
-  var stale=Object.keys(merged.sheets||{}).some(function(k){ var a=merged.sheets[k], b=(db.sheets||{})[k]; return !b||(+a.updated||0)!==(+b.updated||0); })||Object.keys(db.sheets||{}).some(function(k){ return !(merged.sheets||{})[k]; });
+  var stale=JSON.stringify({f:merged.folders,s:merged.sheets,d:merged.deleted})!==JSON.stringify({f:db.folders||{},s:db.sheets||{},d:db.deleted||{}});
   if(stale) setTimeout(function(){ gridsPost({type:"grids:update",db:gridsDB(),acct:_gridsAcct()}); },0); };
 window.addEventListener("message",function(e){ var f=document.getElementById("gridsFrame"); if(!f||e.source!==f.contentWindow) return; if(location.protocol!=="file:"&&e.origin!==location.origin) return; var m=e.data||{};
   if(m.type==="grids:ready"){ _gridsFrame=f; _gridsSent=data.grids; _gridsAcctSent=_gridsAcct(); gridsPost({type:"grids:init",db:gridsDB(),acct:_gridsAcctSent,who:_gridsWho(),cloud:_gridsCloud(),syncAt:_gridsLastSync,dark:document.documentElement.classList.contains("dark")}); if(_gridsPendingOpen){ var po=_gridsPendingOpen; _gridsPendingOpen=null; setTimeout(function(){ gridsPost(po); },80); } }
