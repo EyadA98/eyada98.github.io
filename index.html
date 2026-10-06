@@ -10561,7 +10561,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-06-ui-polish-4";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-06-workflow-6";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */

@@ -1750,6 +1750,36 @@ html.dark .paste-index{color:var(--lilac)}
 .paste-modal{width:min(640px,calc(100vw - 32px));max-width:640px}
 @media(max-width:520px){.paste-header-list{grid-template-columns:1fr}.paste-modal .mfoot>.btn{flex:1 1 auto;justify-content:center}.gbottom .efoot{gap:6px 10px}.gbottom .efoot .syncst{margin-left:0!important}}
 
+
+/* Filter editor: one scroll owner and a compact, accessible parent-row switch. */
+.saved-filter-form{max-height:none;overflow:visible;min-width:0}
+.filter-modal>.mbody{scrollbar-width:none;overscroll-behavior:contain}
+.filter-modal>.mbody::-webkit-scrollbar{display:none}
+.filter-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:18px}
+.filter-fields label.fld{margin:0}
+.filter-condition{margin-bottom:12px}
+.filter-condition [data-remove-condition]{width:30px;height:30px;padding:0;border-radius:8px}
+.filter-parent-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;margin-top:20px;border:1px solid var(--border);border-radius:12px;background:var(--surface-raised);cursor:pointer}
+.filter-parent-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.filter-parent-copy strong{font-size:.82rem;font-weight:600;color:var(--text)}
+.filter-parent-copy small{font-size:.74rem;line-height:1.5;color:var(--muted)}
+.filter-switch{position:relative;width:38px;height:22px;flex:none}
+.filter-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;z-index:1;cursor:pointer}
+.filter-switch-track{position:absolute;inset:0;background:var(--border);border:1px solid var(--border);border-radius:999px;transition:background .18s,border-color .18s}
+.filter-switch-track::after{content:"";position:absolute;width:16px;height:16px;top:2px;left:2px;background:var(--card);border-radius:50%;box-shadow:0 1px 4px rgba(36,8,82,.18);transition:transform .18s}
+.filter-switch input:checked+.filter-switch-track{background:var(--violet);border-color:var(--violet)}
+.filter-switch input:checked+.filter-switch-track::after{transform:translateX(16px);background:#fff}
+.filter-switch input:focus-visible+.filter-switch-track{outline:2px solid var(--lavender);outline-offset:3px}
+#filterFormError:empty{display:none}
+#filterFormError:not(:empty){margin:12px 0 0}
+.item.lrow .ic,.item.folder.lrow .ic.fic{background:transparent!important;box-shadow:none!important;border:0;border-radius:0}
+.item.folder.lrow .ic.fic svg{width:26px;height:26px;overflow:visible}
+@media(max-width:520px){.filter-fields{grid-template-columns:1fr;gap:14px}.filter-parent-toggle{padding:12px}.filter-parent-copy small{font-size:.72rem}}
+@media(prefers-reduced-motion:reduce){.filter-switch-track,.filter-switch-track::after{transition:none}}
+
+
+.grid-filter-control{display:flex;align-items:center;gap:8px;flex-shrink:0}.filter-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.filter-row-count{font-size:11px;color:var(--muted);white-space:nowrap}.toolbar-filter-switch{margin:0;display:flex;align-items:center}.sort-levels-form,.workflow-section{display:grid;gap:14px}.sort-level{display:grid;grid-template-columns:24px minmax(150px,1fr) minmax(125px,.65fr) 30px 30px;gap:8px;align-items:center}.sort-order{font-size:12px;color:var(--muted);text-align:center}.workflow-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.workflow-section{margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}.lookup-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lookup-fields label,.overwrite-check{display:flex;align-items:center;gap:9px;font-size:13px}.lookup-fields input,.overwrite-check input{accent-color:var(--lavender)}.record-results{display:grid;gap:6px;margin-top:16px;max-height:320px;overflow:auto}.record-option{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}.record-option.on,.record-option:hover{background:var(--surface-sel);border-color:var(--lavender)}.record-option small{color:var(--muted);white-space:nowrap}.record-pill{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 7px;border:0;border-radius:7px;background:var(--surface-sel);color:var(--lavender);font:inherit;cursor:pointer}.record-pill svg{width:13px;height:13px;flex-shrink:0}.record-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.transpose-dimensions{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:var(--surface-sel);font-size:13px;margin-bottom:16px}.transpose-preview{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:12px;margin:18px 0}.transpose-preview table{width:100%;border-collapse:collapse}.transpose-preview td{padding:10px 12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}.overwrite-check{padding:14px;border-radius:12px;background:var(--surface-sel)}@media(max-width:600px){.workflow-fields,.lookup-fields{grid-template-columns:1fr}.sort-level{grid-template-columns:20px 1fr 30px 30px}.sort-level>.csel:nth-child(3){grid-column:2}.filter-name{max-width:110px}.filter-row-count{display:none}.transpose-dimensions{flex-wrap:wrap}}
+
 </style>
 </head>
 <body>
@@ -2649,7 +2679,7 @@ function callFn(node,sheet,rowId,ctx){
   return "#NAME?";
 }
 /* ================= dynamic arrays: a cell formula that returns many values "spills" into the empty cells below / to the right ================= */
-const NOSPILL_T=new Set(["formula","checkbox","rating","progress","autonumber","created","modified","createdby","modifiedby"]);
+const NOSPILL_T=new Set(["record","recordLookup","formula","checkbox","rating","progress","autonumber","created","modified","createdby","modifiedby"]);
 let _cellTick=0;   /* bumped on every render / edit so the list of spilling cells is re-read */
 const _spC=new WeakMap();
 const _SPILL_RE=/\b(FILTER|SORT|SORTBY|UNIQUE|SEQUENCE|RANDARRAY|TRANSPOSE|TAKE|DROP|CHOOSECOLS|CHOOSEROWS|VSTACK|HSTACK|TOCOL|TOROW|TEXTSPLIT|XLOOKUP|VLOOKUP|HLOOKUP|INDEX|LET|ARRAYFORMULA|GROUPBY|PIVOTBY|IF|IFERROR)\s*\(|\$?[A-Za-z]{1,3}\$?\d*\s*:\s*\$?[A-Za-z]{1,3}|\d\s*:\s*\$?\d|\{|#/i;
@@ -2753,6 +2783,7 @@ function _rowById(sheet,rowId,ctx){ let m=ctx.rix&&ctx.rix.get(sheet); if(!m||m.
 function formulaRowPositions(sheet,ctx){ctx.positions=ctx.positions||new Map();let p=ctx.positions.get(sheet);if(!p||p.size!==sheet.rows.length){p=new Map(sheet.rows.map((r,i)=>[r.id,i]));ctx.positions.set(sheet,p);}return p;}
 function cellComputed(sheet,rowId,col,ctx){
   ctx=ctx||newCtx(); if(!ctx.memo) ctx.memo={}; if(!ctx.stack) ctx.stack={};
+  if(col.type==="record"||col.type==="recordLookup"){const row=_rowById(sheet,rowId,ctx);return row?linkedCellValue(sheet,row,col):"";}
   const key=rowId+":"+col.id;
   if(key in ctx.memo) return ctx.memo[key];
   if(ctx.stack[key]) return "#CIRC!";
@@ -3196,7 +3227,7 @@ function openFindReplace(focusReplace){ if(_fr){ const i=document.querySelector(
   el.querySelector("#frRepOne").onclick=frReplaceOne; el.querySelector("#frRepAll").onclick=frReplaceAll;
   const cur=_search||(SELR&&SELC?String((curSheet().rows.find(r=>r.id===SELR)||{cells:{}}).cells[SELC]||""):""); if(cur){ find.value=cur; frCompute(cur); } find.focus(); find.select(); }
 function closeFindReplace(){ document.querySelectorAll("td.frhit,td.frcur").forEach(t=>t.classList.remove("frhit","frcur")); const el=document.querySelector(".frbar"); if(el)el.remove(); _fr=null; }
-function frEditable(col){ return !(_ro(col)||["checkbox","rating","progress","person","createdby","modifiedby","created","modified","autonumber"].includes(col.type)); }
+function frEditable(col){ return !(_ro(col)||["record","checkbox","rating","progress","person","createdby","modifiedby","created","modified","autonumber"].includes(col.type)); }
 function frCompute(q){ if(!_fr)return; _fr.q=q; _fr.matches=[]; _fr.idx=-1; const sh=curSheet();
   if(q){ const ql=q.toLowerCase(); const vr=_viewRows&&_viewRows.length?_viewRows:visibleRows(sh), vc=_viewCols&&_viewCols.length?_viewCols:visCols(sh);   /* only what's on screen, in screen order */
     vr.forEach(row=>{ vc.forEach(col=>{ if(!frEditable(col))return; const v=row.cells[col.id]; if(v!=null&&(Array.isArray(v)?v.join(", "):String(v)).toLowerCase().indexOf(ql)>=0) _fr.matches.push({r:row.id,c:col.id}); }); }); }
@@ -3214,7 +3245,7 @@ function frReplaceAll(){ if(!_fr||!_fr.q)return; const rep=document.getElementBy
 function frRepl(s,q,rep){ if(!q)return s; const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"); return s.replace(re,()=>rep); }
 function frReplVal(v,q,rep){ if(Array.isArray(v)) return v.map(x=>frRepl(String(x),q,rep)).filter(x=>x!==""); return frRepl(String(v==null?"":v),q,rep); }
 /* rawCellVal: the value a filter/sort compares on (computed for formulas, raw otherwise) */
-function rawCellVal(sh,row,col,ctx){ if(col.type==="autonumber"||col.type==="progress"||col.type==="rating"){ const v=row.cells[col.id]; return v==null?"":v; } if(col.type==="created")return row.created?localISO(new Date(row.created),true):""; if(col.type==="modified")return row.modified?localISO(new Date(row.modified),true):""; if(col.type==="createdby")return row.createdBy||""; if(col.type==="modifiedby")return row.modifiedBy||""; if(col.type==="formula"||String(row.cells[col.id]||"")[0]==="=") return cellComputed(sh,row.id,col,ctx||newCtx()); const v=row.cells[col.id]; if((v==null||v==="")&&!NOSPILL_T.has(col.type)){ const sv=spillAt(sh,row.id,col.id,ctx); if(sv!==undefined) return sv; } return Array.isArray(v)?v.join(", "):(v==null?"":v); }
+function rawCellVal(sh,row,col,ctx){ if(col.type==="record"||col.type==="recordLookup")return linkedCellValue(sh,row,col); if(col.type==="autonumber"||col.type==="progress"||col.type==="rating"){ const v=row.cells[col.id]; return v==null?"":v; } if(col.type==="created")return row.created?localISO(new Date(row.created),true):""; if(col.type==="modified")return row.modified?localISO(new Date(row.modified),true):""; if(col.type==="createdby")return row.createdBy||""; if(col.type==="modifiedby")return row.modifiedBy||""; if(col.type==="formula"||String(row.cells[col.id]||"")[0]==="=") return cellComputed(sh,row.id,col,ctx||newCtx()); const v=row.cells[col.id]; if((v==null||v==="")&&!NOSPILL_T.has(col.type)){ const sv=spillAt(sh,row.id,col.id,ctx); if(sv!==undefined) return sv; } return Array.isArray(v)?v.join(", "):(v==null?"":v); }
 /* ---------- row grouping (parent/child indentation, Smartsheet-style) ---------- */
 function rowHasChildren(sh,i){ const r=sh.rows[i], nx=sh.rows[i+1]; return !!(nx && (nx.indent||0) > (r.indent||0)); }
 /* extent of a row's subtree: [i+1, end) are its descendants */
@@ -3227,13 +3258,9 @@ function collapsedHidden(sh){ const hidden=new Set(); let hideLevel=null;
   return hidden; }
 function sheetHasGroups(sh){ return sh.rows.some(r=>(r.indent||0)>0); }
 function visibleRows(sh){ let rows=sh.rows.slice(); const _ch=collapsedHidden(sh); if(_ch.size) rows=rows.filter(r=>!_ch.has(r.id)); const filters=sh.filters||{}; const fkeys=Object.keys(filters).filter(k=>filters[k]&&((filters[k].text&&filters[k].text.length)||(filters[k].excl&&filters[k].excl.length)));
-  if(fkeys.length){ const ctx=newCtx(); rows=rows.filter(row=>fkeys.every(cid=>{ const col=sh.columns.find(c=>c.id===cid); if(!col)return true; const f=filters[cid]; const dv=String(rawCellVal(sh,row,col,ctx)); if(f.text&&dv.toLowerCase().indexOf(f.text.toLowerCase())<0)return false; if(f.excl&&f.excl.indexOf(dv)>=0)return false; return true; })); }
+  if(sh.filterEnabled!==false&&fkeys.length){ const ctx=newCtx(); rows=rows.filter(row=>fkeys.every(cid=>{ const col=sh.columns.find(c=>c.id===cid); if(!col)return true; const f=filters[cid]; const dv=String(rawCellVal(sh,row,col,ctx)); if(f.text&&dv.toLowerCase().indexOf(f.text.toLowerCase())<0)return false; if(f.excl&&f.excl.indexOf(dv)>=0)return false; return true; })); }
   rows=applySavedFilterRows(sh,rows);
-  if(sh.sort&&sh.sort.col){ const col=sh.columns.find(c=>c.id===sh.sort.col); if(col){ const dir=sh.sort.dir||1; const ctx=newCtx();
-      /* keys computed once per row; blanks always sink to the bottom; numbers & dates compare as numbers, before text */
-      const K=new Map(rows.map(r=>{ let v=rawCellVal(sh,r,col,ctx); if(Array.isArray(v)) v=v.join(", "); const blank=v==null||v===""||isFErr(v); const n=blank?NaN:numOrNaN(v); return [r.id,{blank,n,s:blank?"":String(fmtScalar(v)).toLowerCase()}]; }));
-      rows.sort((a,b)=>{ const x=K.get(a.id), y=K.get(b.id); if(x.blank||y.blank) return x.blank===y.blank?0:(x.blank?1:-1);
-        const xn=!isNaN(x.n), yn=!isNaN(y.n); if(xn&&yn) return (x.n-y.n)*dir; if(xn!==yn) return (xn?-1:1)*dir; return x.s.localeCompare(y.s,undefined,{numeric:true})*dir; }); } }
+  rows=sortGridRows(sh,rows);
   return rows;
 }
 /* Undo/redo: one history per grid tab (switching tabs or grids never replays another sheet's history).
@@ -3263,9 +3290,9 @@ function undo(){ _structSnap=null; const sh=curSheet(); if(!sh) return; _undoSyn
   if(!undoStack.length){ toast("Nothing to undo"); return; } redoStack.push(cur); _undoApply(sh,undoStack.pop()); afterEdit(); }
 function redo(){ _structSnap=null; const sh=curSheet(); if(!sh) return; _undoSync(); if(!redoStack.length){ toast("Nothing to redo"); return; } undoStack.push(_undoSnap(sh)); _undoApply(sh,redoStack.pop()); afterEdit(); }
 
-const TYPES={text:"Text",longtext:"Long text",number:"Number",currency:"Currency",percent:"Percent",date:"Date",datetime:"Date & time",checkbox:"Checkbox",select:"Dropdown",multiselect:"Multi-select",status:"Status",priority:"Priority",person:"Person",email:"Email",phone:"Phone",url:"URL",rating:"Rating",progress:"Progress",formula:"Formula",autonumber:"Auto-number",created:"Created time",createdby:"Created by",modified:"Modified time",modifiedby:"Modified by"};
+const TYPES={record:"Linked record",recordLookup:"Live field",text:"Text",longtext:"Long text",number:"Number",currency:"Currency",percent:"Percent",date:"Date",datetime:"Date & time",checkbox:"Checkbox",select:"Dropdown",multiselect:"Multi-select",status:"Status",priority:"Priority",person:"Person",email:"Email",phone:"Phone",url:"URL",rating:"Rating",progress:"Progress",formula:"Formula",autonumber:"Auto-number",created:"Created time",createdby:"Created by",modified:"Modified time",modifiedby:"Modified by"};
 const TYPE_GROUPS=[["Basic",["text","longtext","number","currency","percent","checkbox"]],["Date",["date","datetime"]],["Choice",["select","multiselect","status","priority"]],["People & contact",["person","email","phone","url"]],["Visual",["rating","progress"]],["Computed",["formula","autonumber"]],["Metadata",["created","createdby","modified","modifiedby"]]];
-const READONLY_TYPES=["formula","autonumber","created","createdby","modified","modifiedby"];
+const READONLY_TYPES=["recordLookup","formula","autonumber","created","createdby","modified","modifiedby"];
 const LOCK_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>', UNLOCK_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
 /* ---------- protection: locked columns and protected sheets ---------- */
 function sheetLocked(sh){ sh=sh||curSheet(); return !!(sh&&sh.locked); }
@@ -3287,7 +3314,7 @@ function toggleSheetLock(id){ const d=curDoc(); const t=(d.tabs||[]).find(x=>x.i
   if(t.locked) confirmModal("Unprotect this sheet?",`“${t.name}” will be editable again.`,flip); else flip(); }
 const STATUS_DEFAULTS=[{value:"To do",color:"#6a5f86"},{value:"In progress",color:"#2f7ec2"},{value:"In review",color:"#c98a1e"},{value:"Blocked",color:"#d1495b"},{value:"Done",color:"#1e915f"}];
 const PRIORITY_DEFAULTS=[{value:"Urgent",color:"#d1495b"},{value:"High",color:"#c66a2b"},{value:"Medium",color:"#c98a1e"},{value:"Low",color:"#6a5f86"}];
-const TYPE_SVG={text:'<path d="M5 6h14M12 6v13"/>',longtext:'<path d="M4 6h16M4 11h16M4 16h10"/>',number:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/>',
+const TYPE_SVG={record:'<path d="m10 14 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4m12 0 2-2a4 4 0 0 1 6 6l-4 4"/>',recordLookup:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',text:'<path d="M5 6h14M12 6v13"/>',longtext:'<path d="M4 6h16M4 11h16M4 16h10"/>',number:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/>',
   currency:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/>',percent:'<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="17" r="2.4"/>',
   date:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',checkbox:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12l3 3 5-6"/>',
   select:'<circle cx="12" cy="12" r="9"/><path d="M8.5 10.5l3.5 3.5 3.5-3.5"/>',status:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/>',
@@ -3435,7 +3462,7 @@ function renderEditor(){ _cellTick++;
   _viewCols=visCols(sh); const _vc=_viewCols;
   _vc.forEach((col,ci)=>{
     const flt=sh.filters&&sh.filters[col.id]; const isFilt=flt&&((flt.text&&flt.text.length)||(flt.excl&&flt.excl.length));
-    const sortInd=(sh.sort&&sh.sort.col===col.id)?(sh.sort.dir<0?" ↓":" ↑"):"";
+    const sortLevels=gridSortLevels(sh),sortAt=sortLevels.findIndex(x=>x.col===col.id),sortInd=sortAt<0?"":(sortLevels[sortAt].dir<0?" ↓":" ↑")+(sortLevels.length>1?String(sortAt+1):"");
     const fullIdx=sh.columns.findIndex(c=>c.id===col.id); let hiddenBefore=0; for(let k=fullIdx-1;k>=0&&sh.columns[k].hidden;k--)hiddenBefore++;
     const hb=hiddenBefore?`<span class="hidmark" title="${hiddenBefore} hidden column${hiddenBefore>1?"s":""} — click to show" onmousedown="event.stopPropagation()" onclick="event.stopPropagation();revealBefore('${col.id}')"><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4'><path d='M9 6l6 6-6 6'/></svg></span>`:"";
     html+=`<th style="width:${_colW(col)}px;min-width:${_colW(col)}px" oncontextmenu="colMenu(event,'${col.id}')" onpointerdown="colDragStart(event,'${col.id}')">${hb}
@@ -3642,6 +3669,8 @@ function cvStyleFrom(eff){ if(!eff)return ""; let s=""; if(eff.align)s+="justify
 function chipHTML(val,opts){ const o=(opts||[]).find(o=>o.value===val); const c=o?o.color:"#6a5f86"; return `<span class="chip" style="background:${hex2rgba(c,.16)};color:${c};--cc:${c}">${esc(val)}</span>`; }
 function cellDisplay(sh,row,col,ctx,eff){
   const t=col.type;
+  if(t==="record"){const label=linkedCellValue(sh,row,col);return label===''?'':`<button class="record-pill" onclick="event.stopPropagation();openLinkedRecord('${row.id}','${col.id}')" title="Open linked record">${polishIcon('link')}<span>${esc(String(label))}</span></button>`;}
+  if(t==="recordLookup")return fmtVal(linkedCellValue(sh,row,col),{...col,type:col.valueType||"text"},eff);
   if(t==="checkbox"){ const on=row.cells[col.id]==="1"||row.cells[col.id]===true; return `<span class="cbx ${on?'on':''}" onclick="event.stopPropagation();toggleCheck('${row.id}','${col.id}')">${on?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>':''}</span>`; }
   if(t==="autonumber"){ const v=row.cells[col.id]; return v?`<span>${esc(String(v))}</span>`:""; }
   if(t==="created"){ return row.created?`<span>${esc(fmtDateTime(localISO(new Date(row.created),true),true))}</span>`:""; }
@@ -3857,6 +3886,7 @@ function startEdit(r,c){
   if(t!=="formula"&&READONLY_TYPES.includes(t)){ toast(TYPES[t]+" is filled automatically"); return; }
   if(colLocked(col)){ lockToast(col); return; }
   SELR=r; SELC=c;
+  if(t==="record"){recordPicker(r,c);return;}
   const td=document.querySelector(`td[data-r="${r}"][data-c="${c}"]`); if(!td) return;
   const row=sh.rows.find(x=>x.id===r); const cur=row.cells[c]==null?"":row.cells[c];
   if(t==="select"||t==="status"||t==="priority"){ openSelectEditor(td,r,c,col,cur); return; }
@@ -4120,13 +4150,13 @@ function setSummary(cid,k){ const sh=curSheet(); const col=sh.columns.find(c=>c.
 /* ===================== Saved views (named filter + sort combinations, per sheet tab) ===================== */
 const VIEW_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>';
 function _cleanFilters(f){ const o={}; Object.keys(f||{}).sort().forEach(k=>{ const x=f[k]; if(x&&((x.text&&x.text.length)||(x.excl&&x.excl.length))){ const y={}; if(x.text) y.text=x.text; if(x.excl&&x.excl.length) y.excl=x.excl.slice().sort(); o[k]=y; } }); return o; }
-function _viewState(sh){ return {sort:sh.sort&&sh.sort.col?{col:sh.sort.col,dir:sh.sort.dir||1}:null,filters:_cleanFilters(sh.filters),columns:sh.columns.map(c=>({id:c.id,hidden:!!c.hidden,width:c.width,wManual:!!c.wManual})),density:sh.density||null,freeze:clone(sh.freeze||{}),wrapText:!!sh.wrapText}; }
+function _viewState(sh){ return {sort:sh.sort&&sh.sort.col?clone(sh.sort):null,filters:_cleanFilters(sh.filters),columns:sh.columns.map(c=>({id:c.id,hidden:!!c.hidden,width:c.width,wManual:!!c.wManual})),density:sh.density||null,freeze:clone(sh.freeze||{}),wrapText:!!sh.wrapText}; }
 function _sameState(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 function _curView(sh){ return (sh.views||[]).find(v=>v.id===sh.activeView)||null; }
 function viewPillHTML(sh){ const v=_curView(sh), cur=_viewState(sh); const any=!!cur.sort||Object.keys(cur.filters).length>0;
   const mod=!!v&&!_sameState(v.state,cur); const label=v?v.name:(any?"Unsaved view":"All rows");
   return `<button class="menb viewpill${v?" on":""}${any&&!v?" loose":""}" onclick="viewsMenu(event)" title="Saved views: filters, sort, columns, widths, density and freeze">${VIEW_IC}<span class="vpl">${esc(label)}</span>${mod?`<i class="vmod" title="Changed since it was saved"></i>`:""}<svg class="vch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>`; }
-function _viewDesc(sh,st){ const parts=[]; if(st.sort){ const c=sh.columns.find(x=>x.id===st.sort.col); if(c) parts.push("sorted by "+c.name+(st.sort.dir<0?" ↓":" ↑")); }
+function _viewDesc(sh,st){ const parts=[]; if(st.sort){ const levels=st.sort.levels||[st.sort];parts.push("sorted by "+levels.map(l=>{const c=sh.columns.find(x=>x.id===l.col);return c?c.name+(l.dir<0?" ↓":" ↑"):"";}).filter(Boolean).join(", ")); }
   const fk=Object.keys(st.filters||{}); if(fk.length){ const names=fk.map(k=>(sh.columns.find(c=>c.id===k)||{}).name).filter(Boolean); parts.push("filtered on "+names.slice(0,3).join(", ")+(names.length>3?"…":"")); }
   return parts.join(" · ")||"no filters"; }
 function viewsMenu(e){ const sh=curSheet(); const views=sh.views||[]; const v=_curView(sh), cur=_viewState(sh); const mod=!!v&&!_sameState(v.state,cur); const any=!!cur.sort||Object.keys(cur.filters).length>0;
@@ -4563,7 +4593,7 @@ function validateVal(sh,col,row,val,cache){ const v=colRules(col); if(!v) return
     if(row&&_vKey(row.cells[col.id]??"")!==k) c++; if(c>1) return fail("Duplicate — values in this column must be unique"); }
   return null; }
 /* value shown in the cell (formula cells check their result) */
-function _vCellVal(sh,row,col,ctx){ const raw=row.cells[col.id]; return (typeof raw==="string"&&raw[0]==="=")?cellComputed(sh,row.id,col,ctx):raw; }
+function _vCellVal(sh,row,col,ctx){ if(col.type==="record"||col.type==="recordLookup")return linkedCellValue(sh,row,col); const raw=row.cells[col.id]; return (typeof raw==="string"&&raw[0]==="=")?cellComputed(sh,row.id,col,ctx):raw; }
 /* check an edit before it's written: returns true when it may be saved */
 function ruleGate(sh,col,row,val,how){ const v=colRules(col); if(!v||!row) return true; if(typeof val==="string"&&val[0]==="=") return true;
   if(_vKey(row.cells[col.id]??"")===_vKey(val??"")) return true;   /* unchanged */
@@ -4782,14 +4812,15 @@ function brandColorPicker(anchor,current,opt){ opt=opt||{}; closeCtx(); cpClose(
 document.addEventListener("pointerdown",e=>{ if(_cpEl&&!_cpEl.contains(e.target)) cpClose(); },true);
 /* ---------- formula bar ---------- */
 /* the formula bar reflects the selected cell; syncFx keeps it current when NOT actively editing */
-function syncFx(){ const inp=$("#fxInput"), ref=$("#fxRef"); if(!inp||!ref) return; if(_FE.active&&_FE.el===inp) return; const sh=curSheet();
+function syncFx(){ const inp=$("#fxInput"), ref=$("#fxRef"); if(!inp||!ref) return; if(_FE.active&&_FE.el===inp) return; const sh=curSheet();inp.readOnly=false;
   const xb=$("#fxExplain"); if(xb){ let has=false; try{ const c=sh&&sh.columns.find(c=>c.id===SELC), r=sh&&sh.rows.find(r=>r.id===SELR); has=!!(c&&r&&(c.type==="formula"||String(r.cells[c.id]==null?"":r.cells[c.id]).trim()[0]==="=")); }catch(e){} xb.classList.toggle("has",has); xb.classList.toggle("on",!!_fx); }
   if(!sh||SELR==null||SELC==null){ ref.textContent="—"; inp.value=""; feHint(false); const pv=$("#fxPrev"); if(pv)pv.textContent=""; return; }
   const col=sh.columns.find(c=>c.id===SELC); const ri=sh.rows.findIndex(r=>r.id===SELR); if(!col||ri<0){ ref.textContent="—"; inp.value=""; return; }
   const ci=sh.columns.indexOf(col), L=colLetter(ci);
   ref.textContent=L+(ri+1)+(col.name.trim().toUpperCase()!==L?" · "+col.name:"");   /* the "column formula" chip on the right already says it applies to every row */
   ref.title=ref.textContent+(col.type==="formula"?" · column formula":"");
-  if(col.type==="formula"){ inp.value=col.formula||""; inp.placeholder="Column formula, e.g. =[Budget]-[Spent]"; }
+  if(col.type==="record"||col.type==="recordLookup"){inp.readOnly=true;inp.value=String(rawCellVal(sh,sh.rows[ri],col));inp.placeholder="Double-click the cell to choose a record";}
+  else if(col.type==="formula"){ inp.value=col.formula||""; inp.placeholder="Column formula, e.g. =[Budget]-[Spent]"; }
   else { const row=sh.rows.find(r=>r.id===SELR); inp.value=row.cells[col.id]==null?"":row.cells[col.id]; inp.placeholder="Enter a value — or type = to start a formula";
     if(inp.value===""){ try{ const m=spillMap(sh,newCtx()); const e=m&&m.get(SELR+":"+SELC); if(e&&e.a){ const [ar,ac]=e.a.split(":"); const arow=sh.rows.find(r=>r.id===ar), acol=sh.columns.find(c=>c.id===ac); if(arow&&acol) inp.placeholder="Spilled from "+colLetter(sh.columns.indexOf(acol))+(sh.rows.indexOf(arow)+1)+"  "+arow.cells[acol.id]+"  — edit it there"; } }catch(err){} } }
   const pv=$("#fxPrev"); if(pv){ pv.textContent=""; pv.className="fxprev"; }
@@ -5044,7 +5075,7 @@ function selTSV(){ const sh=curSheet(); const B=_selBox(); if(!sh||!B) return nu
   const inBlk=new Set(); rIds.forEach(r=>cIds.forEach(c=>inBlk.add(r+":"+c))); let SM=null; try{ if(_spillCands(sh).length) SM=spillMap(sh,ctx); }catch(e){}
   const raw=rIds.map(r=>cIds.map(c=>{ const col=CM.get(c), v=RM.get(r).cells[c]; if(col.type==="formula") return cellExportVal(sh,RM.get(r),col,ctx);
     if(v==null||v===""){ const e=SM&&SM.get(r+":"+c); return e&&("v" in e)&&!inBlk.has(e.a)?cellExportVal(sh,RM.get(r),col,ctx):""; } return clone(v); }));
-  const vals=rIds.map(r=>cIds.map(c=>{ const col=CM.get(c), row=RM.get(r), v=row.cells[c]; if(col.type==="formula"||v==null||v===""||(typeof v==="string"&&v[0]==="=")) return cellExportVal(sh,row,col,ctx); return clone(v); }));
+  const vals=rIds.map(r=>cIds.map(c=>{ const col=CM.get(c), row=RM.get(r), v=row.cells[c]; if(["formula","record","recordLookup"].includes(col.type)||v==null||v===""||(typeof v==="string"&&v[0]==="=")) return cellExportVal(sh,row,col,ctx); return clone(v); }));
   const fmts=rIds.map(r=>cIds.map(c=>{ const f=sh.fmt&&sh.fmt[r+":"+c]; return f?clone(f):null; }));
   return {tsv,raw,vals,fmts,rIds,cIds,tab:sh.id,n:rIds.length*cIds.length}; }
 function copySel(){ const X=selTSV(); if(!X) return; _clip=X; try{ navigator.clipboard.writeText(X.tsv).then(()=>toast(X.n>1?"Copied "+X.n+" cells":"Copied"),()=>toast("Couldn't reach the clipboard — use Ctrl+C")); }catch(e){} }
@@ -5108,6 +5139,7 @@ function _applyPaste(src,mode,transpose){ mode=mode||"all"; let sh=curSheet(); c
         if(Array.isArray(v)&&col.type!=="multiselect") v=v.join(", "); else if(!Array.isArray(v)&&col.type==="multiselect") v=_pasteVal(col,v);
         else if(mode==="values"&&!Array.isArray(v)) v=_pasteVal(col,v); }
       else v=_pasteVal(col,v);
+      if(col.type==="record"){if(v!==""&&!linkedSource(col,v)){rejected++;continue;}}else if(v&&typeof v==="object"&&!Array.isArray(v)&&v.grid&&v.row){const sr=internal&&internal.vals&&internal.vals[r%h]?.[c%w];v=sr==null?"":sr;}
       const vr_=colRules(col); if(vr_&&vr_.mode==="reject"&&validateVal(sh,col,row,v,null)){ rejected++; continue; }   /* a "Reject" column rule applies to pasted values too */
       row.cells[col.id]=v; touchRow(row); lastR=B.r0+r; lastC=B.c0+c; } }
   if(cutMove) _cutMoveRefs(sh,internal.rIds,internal.cIds,vr[B.r0],vc[B.c0]);
@@ -5409,8 +5441,8 @@ function openFilterAt(){ if(!_fltA)return; const cid=_fltA.cid; const sh=curShee
 }
 function filtListSearch(q){ q=(q||"").toLowerCase(); document.querySelectorAll("#fltList .filt-item").forEach(it=>{ it.style.display=(!q||(it.getAttribute("data-v")||"").indexOf(q)>=0)?"":"none"; }); }
 function _fobj(sh,cid){ sh.filters=sh.filters||{}; return sh.filters[cid]||(sh.filters[cid]={excl:[]}); }
-function filterToggle(cid,v){ const sh=curSheet(); const f=_fobj(sh,cid); f.excl=f.excl||[]; const i=f.excl.indexOf(v); if(i>=0)f.excl.splice(i,1); else f.excl.push(v); if(!f.excl.length)delete sh.filters[cid]; save(); renderEditor(); openFilterAt(); }
-function filterAll(cid,all){ const sh=curSheet(); const col=sh.columns.find(c=>c.id===cid); const f=_fobj(sh,cid); if(all){ delete sh.filters[cid]; } else { const ctx=newCtx(); const vals={}; sh.rows.forEach(r=>{ vals[String(rawCellVal(sh,r,col,ctx))]=1; }); f.excl=Object.keys(vals); } save(); renderEditor(); openFilterAt(); }
+function filterToggle(cid,v){ const sh=curSheet(); const f=_fobj(sh,cid); f.excl=f.excl||[]; const i=f.excl.indexOf(v); if(i>=0)f.excl.splice(i,1); else f.excl.push(v); if(!f.excl.length)delete sh.filters[cid]; sh.filterEnabled=true;save(); renderEditor(); openFilterAt(); }
+function filterAll(cid,all){ const sh=curSheet(); const col=sh.columns.find(c=>c.id===cid); const f=_fobj(sh,cid); if(all){ delete sh.filters[cid]; } else { const ctx=newCtx(); const vals={}; sh.rows.forEach(r=>{ vals[String(rawCellVal(sh,r,col,ctx))]=1; }); f.excl=Object.keys(vals); } sh.filterEnabled=true;save(); renderEditor(); openFilterAt(); }
 function toggleBands(){ _undoPoint(); const sh=curSheet(); sh.bands=!sh.bands; closeCtx(); save(); renderEditor(); toast(sh.bands?"Alternating colors on":"Alternating colors off"); }
 function toggleWrapAll(){ _undoPoint(); const sh=curSheet(); sh.wrapText=!sh.wrapText; closeCtx(); save(); renderEditor(); toast(sh.wrapText?"Text wrapping on":"Text wrapping off"); }
 function toggleGridlines(){ _undoPoint(); const sh=curSheet(); sh.noGrid=!sh.noGrid; closeCtx(); save(); renderEditor(); toast(sh.noGrid?"Gridlines hidden":"Gridlines shown"); }
@@ -5448,7 +5480,7 @@ function insertHyperlink(){ const sh=curSheet(); if(!sh||SELR==null||SELC==null)
   const body=document.createElement("div"); body.innerHTML=`<label class="fld"><span class="lb">Text to display</span><input class="inp" id="hlText" value="${escAttr(curText)}" placeholder="Optional — leave blank to show the link"></label><label class="fld"><span class="lb">Link</span><input class="inp" id="hlUrl" value="${escAttr(curUrl)}" placeholder="https://…" spellcheck="false"></label>`;
   modal("Insert link",body,()=>{ let u=($("#hlUrl").value||"").trim(); if(!u||u==="https://")return; if(!/^(https?:\/\/|mailto:|tel:)/i.test(u))u="https://"+u; const t=($("#hlText").value||"").trim(); pushUndo(); row.cells[SELC]= t? `[${t}](${u})` : u; if(!col.link&&col.type==="text")col.link=true; touchRow(row); afterEdit(); },"Insert");
   setTimeout(()=>{ const i=$("#hlText"); if(i){ i.focus(); i.select(); } },30); }
-function clearAllFilters(){ const sh=curSheet(); delete sh.filters; delete sh.sort; save(); renderEditor(); toast("Filters & sort cleared"); }
+function clearAllFilters(){ const sh=curSheet(); delete sh.filters;delete sh.activeFilter;delete sh.filterEnabled;delete sh.activeView;const d=curDoc();if(d)delete _fStash[d.id+":"+sh.id];closeCtx();save();renderEditor();toast("All filters cleared — saved definitions kept"); }
 /* ============================ CHARTS (brand-styled, inline SVG) ============================ */
 /* Categorical series palettes, validated for colour-blind separation & surface contrast
    in both themes (dataviz six-checks). Assigned in fixed order, never cycled past 6. */
@@ -5683,14 +5715,17 @@ function menuFormat(e){ const sh=curSheet(); const chev='<svg class="mchev" view
   ${SELC?`<button onclick="closeCtx();toggleDupHighlight(SELC)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="12" height="7" rx="1.5"/><rect x="9" y="13" width="12" height="7" rx="1.5"/></svg><span class="mtx">${_dupRule(sh,SELC)?"Stop duplicate highlight":"Highlight duplicates"}</span></button>`:""}
   ${SELC?`<button onclick="closeCtx();setTimeout(()=>vizMenu(event,SELC),0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="12" height="4" rx="1"/><rect x="3" y="17" width="7" height="4" rx="1"/></svg><span class="mtx">Color scale & bars</span></button>`:""}
   <button onclick="closeCtx();openRules()">${MI.rules}<span class="mtx">Conditional format</span></button>`); }
-function menuData(e){ const sh=curSheet(); const hasFilt=sh.filters&&Object.keys(sh.filters).length; ctxAt(e,`<div class="lbl">Data</div>
+function menuData(e){ const sh=curSheet(); const hasFilt=definedGridFilters(sh); ctxAt(e,`<div class="lbl">Data</div>
+  <button onclick="closeCtx();multiSortDialog()">${polishIcon('sort')}<span class="mtx">Sort rows</span></button>
+  <button onclick="closeCtx();linkedRecordsDialog()">${polishIcon('link')}<span class="mtx">Linked records</span></button>
+  <button onclick="closeCtx();transposeSelectionDialog()">${polishIcon('transpose')}<span class="mtx">Transpose selection</span></button>
     ${sh.sort?`<button onclick="clearSort()">${I.del}<span class="mtx">Clear sort</span></button>`:""}
   ${hasFilt?`<button onclick="closeCtx();clearAllFilters()">${I.del}<span class="mtx">Clear all filters</span></button>`:""}
   <button onclick="closeCtx();openRules()">${MI.rules}<span class="mtx">Automations</span></button>
   <button onclick="dataCleanupMenu(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6M4 20l8.5-8.5M12 6l6 6-3 3-6-6zM3 21l2-5 3 3z"/></svg><span class="mtx">Data cleanup</span><span aria-hidden="true">›</span></button>
   <button onclick="closeCtx();flashFill()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="mtx">Flash fill</span><span class="kbd">Ctrl+Alt+E</span></button>
   <button onclick="closeCtx();summariseDialog()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span class="mtx">Summary table</span></button>
-  <button onclick="closeCtx();toggleFilters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span class="mtx">Show filters</span><span class="kbd">Ctrl+Shift+L</span></button>
+  <button onclick="closeCtx();toggleFilters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span class="mtx">Toggle filters</span><span class="kbd">Ctrl+Shift+L</span></button>
   ${SELC?`<button onclick="closeCtx();colInsights(SELC)">${INS_IC}<span class="mtx">Insights</span></button>`:""}
   ${SELR&&SELC?`<button onclick="closeCtx();cellHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="mtx">Cell history</span></button>`:""}
   <button onclick="closeCtx();openVersionHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span class="mtx">Version history</span><span class="kbd">Ctrl+Alt+Shift+H</span></button>
@@ -5817,7 +5852,7 @@ function openColumnEditor(cid,isNew){
   function draw(){
     body.innerHTML=`
     <label class="fld"><span class="lb">Column name</span><input class="inp" id="cName" value="${esc(col.name)}"></label>
-    <label class="fld"><span class="lb">Type</span>${selHTML("cType",Object.keys(TYPES).map(t=>({value:t,label:TYPES[t]})),col.type)}</label>
+    <label class="fld"><span class="lb">Type</span>${selHTML("cType",Object.keys(TYPES).filter(t=>["record","recordLookup"].includes(col.type)?t===col.type:!["record","recordLookup"].includes(t)).map(t=>({value:t,label:TYPES[t]})),col.type)}</label>
     <div id="typeExtra"></div>`;
     setTimeout(()=>{ const ct=$("#cType"); if(!ct) return; /* dialog already closed */ ct.addEventListener("change",()=>{ drawExtra(); });   /* the type is only applied on Save — Cancel leaves the column as it was */ drawExtra(); },0);
   }
@@ -5938,7 +5973,7 @@ function ruleBuilder(sh,existing,done){
 }
 
 /* ============================ IMPORT / EXPORT (CSV + Excel) ============================ */
-function cellExportVal(sh,r,c,ctx){ if(["created","modified","createdby","modifiedby"].includes(c.type)) return rawCellVal(sh,r,c,ctx); let v=(c.type==="formula"||String(r.cells[c.id]||"")[0]==="=")?cellComputed(sh,r.id,c,ctx):r.cells[c.id]; if((v==null||v==="")&&!NOSPILL_T.has(c.type)){ const sv=spillAt(sh,r.id,c.id,ctx); if(sv!==undefined) v=sv; } if(Array.isArray(v))v=v.join(", "); return fmtScalar(v); }
+function cellExportVal(sh,r,c,ctx){ if(c.type==="record"||c.type==="recordLookup")return fmtScalar(linkedCellValue(sh,r,c)); if(["created","modified","createdby","modifiedby"].includes(c.type)) return rawCellVal(sh,r,c,ctx); let v=(c.type==="formula"||String(r.cells[c.id]||"")[0]==="=")?cellComputed(sh,r.id,c,ctx):r.cells[c.id]; if((v==null||v==="")&&!NOSPILL_T.has(c.type)){ const sv=spillAt(sh,r.id,c.id,ctx); if(sv!==undefined) v=sv; } if(Array.isArray(v))v=v.join(", "); return fmtScalar(v); }
 /* the riyal mark comes from a web font; if it can't load, fall back to the standard ﷼ sign so money never shows a blank box */
 let _noRiyal=false;
 function riyalHTML(st){ return _noRiyal?`<span class="riyal nr"${st?` style="${st}"`:""}>&#xFDFC;</span>`:`<span class="riyal"${st?` style="${st}"`:""}>&#xe900;</span>`; }
@@ -5973,10 +6008,8 @@ function tabStep(dir){ const d=curDoc(); if(!d) return; ensureTabs(d); const vis
 const _fStash={};
 function _filtActive(sh){ return !!(sh.filters&&Object.values(sh.filters).some(f=>f&&((f.text&&f.text.length)||(f.excl&&f.excl.length)))); }
 function _hdrPoint(cid){ const h=document.querySelector(`.hname[data-hname="${cid}"]`); const th=h&&h.closest("th"); const r=th?th.getBoundingClientRect():{left:200,bottom:160,width:0}; return {clientX:Math.round(r.left+Math.min(r.width,140)-8),clientY:Math.round(r.bottom+2),preventDefault(){},stopPropagation(){}}; }
-function toggleFilters(){ const sh=curSheet(), d=curDoc(); if(!sh) return; if(currentSavedFilter(sh)){toggleSavedFilter();return;} const key=d.id+":"+sh.id;
-  if(_filtActive(sh)){ _fStash[key]=clone(sh.filters); delete sh.filters; save(); renderEditor(); toast("Filters off — Ctrl+Shift+L turns them back on"); return; }
-  if(_fStash[key]){ sh.filters=_fStash[key]; delete _fStash[key]; save(); renderEditor(); toast("Filters back on"); return; }
-  if(SELC){ filterMenu(_hdrPoint(SELC),SELC); } else toast("Click a cell in the column you want to filter"); }
+function toggleFilters(){toggleGridFilters();}
+
 /* Alt+↓: a dropdown/date cell opens its picker; any other cell opens its column's filter */
 function altDown(){ const sh=curSheet(); if(!sh||!SELR||!SELC) return; const col=sh.columns.find(c=>c.id===SELC); if(!col) return;
   if(["select","status","priority","multiselect","date","datetime","person"].includes(col.type)&&!_ro(col)){ startEdit(SELR,SELC); return; }
@@ -6866,7 +6899,7 @@ function rowDetails(rid) {
   const b = document.createElement('div');
   b.className = 'grid-row-details';
   const ctx = newCtx();
-  b.innerHTML = sh.columns.map((c, i) => `<label class="fld"><span class="lb">${esc(c.name)}${_ro(c) ? ' · computed' : ''}</span><textarea class="inp" rows="${c.type === 'text' ? 3 : 1}" data-detail-index="${i}" ${_ro(c) || colLocked(c, sh) || sheetLocked(sh) ? 'disabled' : ''}>${esc(_ro(c) ? cellExportVal(sh, r, c, ctx) : Array.isArray(r.cells[c.id]) ? r.cells[c.id].join(', ') : r.cells[c.id] ?? '')}</textarea></label>`).join('') + `<div class="lb">Workspace links</div><div id="rowLinks">Loading tasks and notes…</div><div class="hint" id="rowDetailError" role="alert"></div>`;
+  b.innerHTML = sh.columns.map((c, i) => `<label class="fld"><span class="lb">${esc(c.name)}${_ro(c) ? ' · computed' : ''}</span><textarea class="inp" rows="${c.type === 'text' ? 3 : 1}" data-detail-index="${i}" ${_ro(c) || c.type==='record' || colLocked(c, sh) || sheetLocked(sh) ? 'disabled' : ''}>${esc(_ro(c) || c.type==='record' ? cellExportVal(sh, r, c, ctx) : Array.isArray(r.cells[c.id]) ? r.cells[c.id].join(', ') : r.cells[c.id] ?? '')}</textarea></label>`).join('') + `<div class="lb">Workspace links</div><div id="rowLinks">Loading tasks and notes…</div><div class="hint" id="rowDetailError" role="alert"></div>`;
   modal('Row details', b, () => {
     if (sheetLocked(sh)) return;
     const changes = [];
@@ -7217,17 +7250,13 @@ function applySavedFilterRows(sh, rows) {
   }
   return out;
 }
-function savedFilterToolbar(sh) {
-  const f = currentSavedFilter(sh),
-    on = !!f && sh.filterEnabled !== false;
-  return `<button class="fbtn saved-filter${on ? ' on' : ''}" onclick="savedFiltersMenu(event)" title="${esc(f ? f.name + (on ? ' · on' : ' · off') : 'Saved filters')}" aria-label="Saved filters">${FILTER_ICON}<span>Filter${on ? ' on' : ''}</span><span aria-hidden="true">▾</span></button>`;
-}
+function savedFilterToolbar(sh){const f=currentSavedFilter(sh),defined=definedGridFilters(sh),on=gridFiltersOn(sh),label=f?f.name:_filtActive(sh)?'Column filters':'Filter';const total=_usedRows(sh,sh.rows).length,shown=_usedRows(sh,visibleRows(sh)).length;return `<div class="grid-filter-control"><button class="fbtn saved-filter${on?' on':''}" onclick="savedFiltersMenu(event)" title="${escAttr(label)}" aria-label="Saved filters">${FILTER_ICON}<span class="filter-name">${esc(label)}</span><span aria-hidden="true">▾</span></button>${defined?`<label class="filter-switch toolbar-filter-switch" title="Turn filters ${on?'off':'on'}"><input type="checkbox" role="switch" aria-label="Enable filters" ${on?'checked':''} onchange="toggleGridFilters(this.checked)"><span class="filter-switch-track" aria-hidden="true"></span></label><span class="filter-row-count" title="Populated rows shown">${shown} of ${total}</span>`:''}</div>`;}
 const FILTER_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg>';
 function savedFiltersMenu(e) {
   const sh = curSheet(),
     f = currentSavedFilter(sh),
-    on = f && sh.filterEnabled !== false;
-  let html = `<div class="lbl">Saved filters</div><button onclick="closeCtx();editSavedFilter()">${I.add}<span class="mtx">New filter</span></button>${f ? `<button onclick="closeCtx();toggleSavedFilter()">${polishIcon(on?'toggleOn':'toggleOff')}<span class="mtx">Turn ${on ? 'off' : 'on'}</span></button><button onclick="closeCtx();editSavedFilter('${f.id}')">${I.edit}<span class="mtx">Edit filter</span></button>` : ''}<div class="div"></div>`;
+    on = gridFiltersOn(sh);
+  let html = `<div class="lbl">Saved filters</div>${definedGridFilters(sh)?`<button onclick="clearAllFilters()">${I.del}<span class="mtx">Clear all filters</span></button>`:''}<button onclick="closeCtx();editSavedFilter()">${I.add}<span class="mtx">New filter</span></button>${definedGridFilters(sh) ? `<button onclick="closeCtx();toggleSavedFilter()">${polishIcon(on?'toggleOn':'toggleOff')}<span class="mtx">Turn ${on ? 'off' : 'on'}</span></button>${f?`<button onclick="closeCtx();editSavedFilter('${f.id}')">${I.edit}<span class="mtx">Edit filter</span></button>`:''}` : ''}<div class="div"></div>`;
   html += (sh.savedFilters || []).map(x => `<div class="vrowi"><button onclick="closeCtx();useSavedFilter('${x.id}')"><span class="mtx">${esc(x.name)}</span>${f?.id === x.id && on ? '✓' : ''}</button><button class="vmini" title="Edit" onclick="closeCtx();editSavedFilter('${x.id}')">${I.edit}</button><button class="vmini" title="Rename" onclick="closeCtx();renameSavedFilter('${x.id}')">${polishIcon('rename')}</button><button class="vmini dan" title="Delete" onclick="closeCtx();deleteSavedFilter('${x.id}')">${I.del}</button></div>`).join('');
   if (!sh.savedFilters?.length) html += '<div class="hint" style="padding:8px">Save conditions to show the rows you need.</div>';
   formatDropdown(e, '', html);
@@ -7240,13 +7269,7 @@ function useSavedFilter(id) {
   save();
   renderEditor();
 }
-function toggleSavedFilter() {
-  const sh = curSheet();
-  if (!currentSavedFilter(sh)) return;
-  sh.filterEnabled = sh.filterEnabled === false;
-  save();
-  renderEditor();
-}
+function toggleSavedFilter(){toggleGridFilters();}
 function renameSavedFilter(id) {
   const sh = curSheet(),
     f = (sh.savedFilters || []).find(x => x.id === id);
@@ -7289,13 +7312,13 @@ function editSavedFilter(id) {
   const b = document.createElement('div');
   b.className = 'saved-filter-form';
   const draw = () => {
-    b.innerHTML = `<label class="fld"><span class="lb">Name</span><input class="inp" data-filter-name value="${esc(state.name)}" placeholder="Filter name"></label><label class="fld"><span class="lb">Show rows matching</span>${selHTML('filterMatch', [{
+    b.innerHTML = `<div class="filter-fields"><label class="fld"><span class="lb">Name</span><input class="inp" data-filter-name value="${esc(state.name)}" placeholder="Filter name"></label><label class="fld"><span class="lb">Show rows matching</span>${selHTML('filterMatch', [{
       value: 'all',
       label: 'All conditions'
     }, {
       value: 'any',
       label: 'Any condition'
-    }], state.match)}</label><div class="filter-conditions">${state.conditions.map((c, i) => {
+    }], state.match)}</label></div><div class="filter-conditions">${state.conditions.map((c, i) => {
       const col = sh.columns.find(x => x.id === c.col),
         noValue = ['empty', 'notEmpty', 'checked', 'unchecked'].includes(c.op);
       return `<div class="filter-condition" data-condition="${i}">${selHTML('filterColumn' + i, sh.columns.map(c => ({
@@ -7305,7 +7328,7 @@ function editSavedFilter(id) {
         value,
         label
       })), c.op)}<input class="inp" type="${col?.type === 'date' && !noValue && !['contains', 'notContains', 'hasAny', 'hasNone'].includes(c.op) ? 'date' : 'text'}" data-filter-value="${i}" value="${esc(c.value)}" ${noValue ? 'disabled' : ''} placeholder="${c.op === 'hasAny' || c.op === 'hasNone' ? 'Values separated by commas' : 'Value'}" list="filterValues${i}"><datalist id="filterValues${i}">${(col?.options || []).map(o => `<option value="${esc(o.value)}">`).join('')}</datalist><button type="button" class="btn sm" data-remove-condition="${i}" aria-label="Remove condition">×</button></div>`;
-    }).join('')}</div><button type="button" class="btn sm" id="filterAddCondition">Add condition</button><label class="fld" style="margin-top:14px"><span><input type="checkbox" id="filterParents" ${state.includeParents ? 'checked' : ''}> Include parent rows</span></label><p class="hint" id="filterFormError" role="alert"></p>`;
+    }).join('')}</div><button type="button" class="btn sm" id="filterAddCondition">Add condition</button><label class="filter-parent-toggle"><span class="filter-parent-copy"><strong>Include parent rows</strong><small>Keep group context with matching rows.</small></span><span class="filter-switch"><input type="checkbox" role="switch" id="filterParents" aria-label="Include parent rows" ${state.includeParents ? 'checked' : ''}><span class="filter-switch-track" aria-hidden="true"></span></span></label><p class="hint" id="filterFormError" role="alert"></p>`;
   };
   draw();
   b.addEventListener('input', e => {
@@ -7351,7 +7374,7 @@ function editSavedFilter(id) {
     sh.filterEnabled = true;
     afterEdit();
   }, 'Save & apply');
-  document.querySelector('.modal')?.classList.add('wide');
+  document.querySelector('.modal')?.classList.add('wide','filter-modal');
 }
 
 "use strict";
@@ -7791,7 +7814,7 @@ function advancedCleanupDialog(mode) {
       g.fields.forEach(f => {
         if (f.conflict) f.choice = decisions.get(g.keeper.id + ':' + f.c.id) || null;
       });
-      return `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><label><input type="checkbox" data-merge-group="${g.keeper.id}" ${excluded.has(g.keeper.id) || g.blocked ? '' : 'checked'} ${g.blocked ? 'disabled' : ''}> Keep row ${rn(g.keeper)}, merge rows ${g.donors.map(rn).join(', ')}</label>${g.blocked ? `<p class="hint">${esc(g.blocked)}</p>` : g.fields.map(f => f.conflict ? `<label class="fld"><span class="lb">${esc(f.c.name)} · choose a value</span>${selHTML('mergeChoice_' + g.keeper.id + '_' + f.c.id, [{
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><label><input type="checkbox" data-merge-group="${g.keeper.id}" ${excluded.has(g.keeper.id) || g.blocked ? '' : 'checked'} ${g.blocked ? 'disabled' : ''}> Keep row ${rn(g.keeper)}, merge rows ${g.donors.map(rn).join(', ')}</label>${g.blocked ? `<p class="hint">${esc(g.blocked)}</p>` : g.fields.map(f => f.conflict ? `<label class="fld"><span class="lb">${esc(f.c.name)} · choose a value</span>${selHTML('mergeChoice_' + g.keeper.id + '_' + f.c.id, [{
         value: '',
         label: 'Choose a value'
       }, ...f.variants.map(v => ({
@@ -7910,7 +7933,25 @@ function polishIcon(key){const paths={
  flag:'<path d="M5 21V3l7 2 7-2v11l-7 2-7-2"/>',
  unflag:'<path d="M5 21V3l7 2 7-2v11l-7 2-7-2M2 2l20 20"/>',
  case:'<path d="M3 19L9 5l6 14M5 14h8"/><circle cx="19" cy="16" r="3"/><path d="M22 13v6"/>',
- split:'<path d="M12 21V12M12 12L5 5M12 12l7-7M5 10V5h5M14 5h5v5"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]||paths.spark}</svg>`;}
+ sort:'<path d="M7 4v16M3 16l4 4 4-4M15 6h6M15 12h4M15 18h2"/>',link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/>',transpose:'<path d="M4 14V4h10M4 4l16 16M20 10v10H10"/>',split:'<path d="M12 21V12M12 12L5 5M12 12l7-7M5 10V5h5M14 5h5v5"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]||paths.spark}</svg>`;}
+
+/* Filters and sorting share the existing view state. */
+function gridSortLevels(sh){const raw=sh.sort?.levels?.length?sh.sort.levels:sh.sort?.col?[sh.sort]:[];const seen=new Set();return raw.filter(x=>sh.columns.some(c=>c.id===x.col)&&!seen.has(x.col)&&(seen.add(x.col),true)).map(x=>({col:x.col,dir:x.dir===-1?-1:1}));}
+function sortGridRows(sh,rows){const levels=gridSortLevels(sh);if(!levels.length)return rows;const ctx=newCtx(),cols=levels.map(l=>sh.columns.find(c=>c.id===l.col));const keys=new Map(rows.map(r=>[r.id,cols.map(c=>{let v=rawCellVal(sh,r,c,ctx);if(Array.isArray(v))v=v.join(', ');const blank=v==null||v===''||isFErr(v);return {blank,n:blank?NaN:numOrNaN(v),s:blank?'':String(fmtScalar(v)).toLowerCase()};})]));return rows.slice().sort((a,b)=>{const A=keys.get(a.id),B=keys.get(b.id);for(let i=0;i<levels.length;i++){const x=A[i],y=B[i];let n=0;if(x.blank||y.blank)n=x.blank===y.blank?0:x.blank?1:-1;else {const xn=!isNaN(x.n),yn=!isNaN(y.n);n=(xn&&yn?x.n-y.n:xn!==yn?xn?-1:1:x.s.localeCompare(y.s,undefined,{numeric:true}))*levels[i].dir;}if(n)return n;}return 0;});}
+function multiSortDialog(){const sh=curSheet(),state=gridSortLevels(sh);if(!state.length&&sh.columns.length)state.push({col:SELC||sh.columns[0].id,dir:1});const b=document.createElement('div');b.className='sort-levels-form';const draw=()=>{b.innerHTML=`<p class="hint">Rows are sorted by the first field, then by each additional field. Blank values stay at the bottom.</p>${state.map((x,i)=>`<div class="sort-level" data-sort-level="${i}"><span class="sort-order">${i+1}</span>${selHTML('sortField'+i,sh.columns.map(c=>({value:c.id,label:c.name})),x.col)}${selHTML('sortDirection'+i,[{value:'1',label:'Ascending'},{value:'-1',label:'Descending'}],String(x.dir))}<button type="button" class="icon-btn" data-sort-up="${i}" aria-label="Move level up" ${i===0?'disabled':''}>↑</button><button type="button" class="icon-btn" data-sort-remove="${i}" aria-label="Remove level">×</button></div>`).join('')}<button type="button" class="btn sm" id="sortAddLevel" ${state.length>=sh.columns.length?'disabled':''}>${I.add}Add sort level</button><p class="hint" id="sortError" role="alert"></p>`;};draw();b.addEventListener('change',e=>{const el=e.target,wrap=el.closest('[data-sort-level]');if(!wrap)return;const x=state[+wrap.dataset.sortLevel];if(el.id.startsWith('sortField'))x.col=el.value;else if(el.id.startsWith('sortDirection'))x.dir=+el.value;});b.addEventListener('click',e=>{const up=e.target.closest('[data-sort-up]'),del=e.target.closest('[data-sort-remove]');if(up){const i=+up.dataset.sortUp;if(i>0)[state[i-1],state[i]]=[state[i],state[i-1]];draw();}else if(del){state.splice(+del.dataset.sortRemove,1);draw();}else if(e.target.closest('#sortAddLevel')){const c=sh.columns.find(c=>!state.some(x=>x.col===c.id));if(c)state.push({col:c.id,dir:1});draw();}});modal('Sort rows',b,()=>{if(curSheet()!==sh)return false;if(new Set(state.map(x=>x.col)).size!==state.length){b.querySelector('#sortError').textContent='Choose a different field for each level.';return false;}if(state.length)sh.sort={...state[0],levels:clone(state)};else delete sh.sort;save();renderEditor();},'Apply sort');document.querySelector('.modal')?.classList.add('wide');}
+function definedGridFilters(sh){return !!currentSavedFilter(sh)||_filtActive(sh);}
+function gridFiltersOn(sh){return definedGridFilters(sh)&&sh.filterEnabled!==false;}
+function toggleGridFilters(on){const sh=curSheet();if(!definedGridFilters(sh)){editSavedFilter();return;}sh.filterEnabled=typeof on==='boolean'?on:sh.filterEnabled===false;save();renderEditor();}
+
+const _recordEvalStack=new Set();
+function linkedSource(col,ref){const cfg=col.reference;if(!cfg||!ref||ref.grid!==cfg.grid||ref.tab!==cfg.tab)return null;const doc=DB.sheets[cfg.grid];if(!doc||isTrashed('sheet',doc.id))return null;const tab=doc.tabs?.find(t=>t.id===cfg.tab),row=tab?.rows.find(r=>r.id===ref.row);return row?{doc,tab,row}:null;}
+function linkedCellValue(sh,row,col){let refCol=col,field;if(col.type==='recordLookup'){refCol=sh.columns.find(c=>c.id===col.lookup?.record);field=col.lookup?.field;}if(!refCol)return '#REF!';const ref=row.cells[refCol.id];if(!ref)return '';const src=linkedSource(refCol,ref);if(!src)return '#REF!';const target=src.tab.columns.find(c=>c.id===(field||refCol.reference.label));if(!target)return '#REF!';const key=src.doc.id+':'+src.tab.id+':'+src.row.id+':'+target.id;if(_recordEvalStack.has(key))return '#CIRC!';_recordEvalStack.add(key);const old=_pvDocCtx;try{_pvDocCtx=src.doc;return rawCellVal(src.tab,src.row,target,newCtx());}finally{_pvDocCtx=old;_recordEvalStack.delete(key);}}
+function linkedRecordsDialog(){const sh=curSheet();if(sheetLocked(sh)){toast('Unlock this sheet first');return;}const docs=Object.values(DB.sheets).filter(d=>!isTrashed('sheet',d.id)&&d.tabs?.length);if(!docs.length)return;const b=document.createElement('div');let gid=docs[0].id,tid=docs[0].tabs[0].id,label='',fields=new Set(),name='Linked record';const draw=()=>{const doc=DB.sheets[gid],tab=doc.tabs.find(t=>t.id===tid)||doc.tabs[0];tid=tab.id;const labels=tab.columns.filter(c=>!['record','recordLookup'].includes(c.type));if(!labels.some(c=>c.id===label))label=labels[0]?.id||'';b.innerHTML=`<p class="hint">Choose a source grid, then select the fields to keep in sync. Each row can link to one record.</p><div class="workflow-fields"><label class="fld"><span class="lb">Column name</span><input id="recordName" class="inp" value="${escAttr(name)}"></label><label class="fld"><span class="lb">Source grid</span>${selHTML('recordGrid',docs.map(d=>({value:d.id,label:d.name})),gid)}</label><label class="fld"><span class="lb">Source sheet</span>${selHTML('recordTab',doc.tabs.map(t=>({value:t.id,label:t.name})),tid)}</label><label class="fld"><span class="lb">Record label</span>${selHTML('recordLabel',labels.map(c=>({value:c.id,label:c.name})),label)}</label></div><div class="workflow-section"><span class="lb">Live fields <span class="hint">Optional</span></span><div class="lookup-fields">${tab.columns.filter(c=>!['record','recordLookup'].includes(c.type)).map(c=>`<label><input type="checkbox" data-lookup-field="${c.id}" ${fields.has(c.id)?'checked':''}>${esc(c.name)}</label>`).join('')}</div></div>`;};draw();b.addEventListener('input',e=>{if(e.target.id==='recordName')name=e.target.value;});b.addEventListener('change',e=>{const x=e.target;if(x.id==='recordGrid'){gid=x.value;tid=DB.sheets[gid].tabs[0].id;label='';fields.clear();draw();}else if(x.id==='recordTab'){tid=x.value;label='';fields.clear();draw();}else if(x.id==='recordLabel')label=x.value;else if(x.dataset.lookupField){if(x.checked)fields.add(x.dataset.lookupField);else fields.delete(x.dataset.lookupField);}});modal('Linked records',b,()=>{if(curSheet()!==sh||sheetLocked(sh))return false;const doc=DB.sheets[gid],tab=doc?.tabs.find(t=>t.id===tid);if(!tab?.columns.some(c=>c.id===label)||!name.trim()){toast('Choose a record label and column name');return false;}pushUndo();const names=new Set(sh.columns.map(c=>c.name.toLowerCase()));const unique=n=>{let out=n,k=2;while(names.has(out.toLowerCase()))out=n+' '+k++;names.add(out.toLowerCase());return out;};const col={id:uid(),name:unique(name.trim()),type:'record',width:180,reference:{grid:gid,tab:tid,label}};sh.columns.push(col);for(const id of fields){const src=tab.columns.find(c=>c.id===id);if(!src)continue;const lookup={id:uid(),name:unique(src.name),type:'recordLookup',valueType:src.type,width:160,lookup:{record:col.id,field:id}};for(const key of ['format','currency','decimals','dateFormat'])if(src[key]!=null)lookup[key]=clone(src[key]);if(src.type==='date'||src.type==='datetime')lookup.format='date';sh.columns.push(lookup);}afterEdit();toast('Linked column added — double-click a cell to choose a record');},'Add columns');document.querySelector('.modal')?.classList.add('wide');}
+function recordPicker(rid,cid){const sh=curSheet(),col=sh.columns.find(c=>c.id===cid),row=sh.rows.find(r=>r.id===rid);if(!row||!col||colLocked(col))return;const doc=DB.sheets[col.reference?.grid],tab=doc?.tabs.find(t=>t.id===col.reference.tab),labelCol=tab?.columns.find(c=>c.id===col.reference.label);if(!tab||!labelCol||isTrashed('sheet',doc.id)){toast('The source sheet is unavailable');return;}const b=document.createElement('div');b.innerHTML=`<p class="hint">${esc(doc.name)} · ${esc(tab.name)}. Linked values update with the source record.</p><input class="inp" id="recordSearch" type="search" placeholder="Search records" aria-label="Search records"><div class="record-results" role="group" aria-label="Records"></div>`;let selected=row.cells[cid]?.row||'',query='';const rows=_usedRows(tab,tab.rows);const draw=()=>{const found=rows.map(r=>({r,label:String(linkedCellValue(sh,{cells:{[cid]:{grid:doc.id,tab:tab.id,row:r.id}}},col)||'Untitled record')})).filter(x=>x.label.toLowerCase().includes(query.toLowerCase()));b.querySelector('.record-results').innerHTML=`<button type="button" class="record-option ${selected===''?'on':''}" data-record-id="" aria-pressed="${selected===''}">Clear link</button>${found.slice(0,150).map(x=>`<button type="button" class="record-option ${selected===x.r.id?'on':''}" data-record-id="${x.r.id}" aria-pressed="${selected===x.r.id}"><span>${esc(x.label)}</span><small>Row ${tab.rows.indexOf(x.r)+1}</small></button>`).join('')}${!found.length?'<p class="hint">No matching records</p>':found.length>150?'<p class="hint">Showing 150 records. Search to narrow the list.</p>':''}`;};draw();b.addEventListener('input',e=>{if(e.target.id==='recordSearch'){query=e.target.value;draw();}});b.addEventListener('click',e=>{const x=e.target.closest('[data-record-id]');if(x){selected=x.dataset.recordId;draw();}});modal('Choose record',b,()=>{if(curSheet()!==sh||colLocked(col)||!sh.rows.includes(row))return false;if(selected&&!tab.rows.some(r=>r.id===selected)){toast('This record was removed');return false;}const value=selected?{grid:doc.id,tab:tab.id,row:selected}:'';if(!ruleGate(sh,col,row,value))return false;pushUndo();row.cells[cid]=value;afterEdit();},'Apply link');b.querySelector('#recordSearch').focus();}
+function openLinkedRecord(rid,cid){const sh=curSheet(),col=sh.columns.find(c=>c.id===cid),row=sh.rows.find(r=>r.id===rid),src=col&&row&&linkedSource(col,row.cells[cid]);if(!src){toast('The linked record is unavailable');return;}DB.ui.open=src.doc.id;src.doc.activeTab=src.tab.id;_selReset();save();render();rowDetails(src.row.id);}
+function planTranspose(sh,B){const h=B.r1-B.r0+1,w=B.c1-B.c0+1;if(h*w<2)throw Error('Select at least two cells');if(B.r0+w>B.vr.length||B.c0+h>B.vc.length)throw Error('Add enough rows or columns for the transposed result, then try again');const ctx=newCtx(),source=new Set(),changes=new Map(),preview=Array.from({length:w},()=>[]);for(let r=0;r<h;r++)for(let c=0;c<w;c++){const row=B.vr[B.r0+r],col=B.vc[B.c0+c],key=row.id+':'+col.id;source.add(key);changes.set(key,{row,col,value:'',format:null});}let overwritten=0;for(let r=0;r<w;r++)for(let c=0;c<h;c++){const srcR=B.vr[B.r0+c],srcC=B.vc[B.c0+r],row=B.vr[B.r0+r],col=B.vc[B.c0+c],key=row.id+':'+col.id;const exported=cellExportVal(sh,srcR,srcC,ctx);const value=normTyped(col,typeof exported==='string'&&exported.startsWith('=')?"'"+exported:_pasteVal(col,exported));if(!source.has(key)&&!isBlank(row.cells[col.id]))overwritten++;changes.set(key,{row,col,value,format:clone(sh.fmt?.[srcR.id+':'+srcC.id]||null)});preview[r][c]=value;}const proposed=clone(sh),byRow=new Map(proposed.rows.map(r=>[r.id,r]));for(const x of changes.values()){if(_ro(x.col)||x.col.type==='record')throw Error('The range includes a locked, linked or automatic column');byRow.get(x.row.id).cells[x.col.id]=x.value;}for(const x of changes.values()){const rules=colRules(x.col);const error=rules?.mode==='reject'&&validateVal(proposed,x.col,byRow.get(x.row.id),x.value,{});if(error)throw Error(x.col.name+': '+error);}return {changes:[...changes.values()],preview,overwritten,h:w,w:h};}
+function transposeSelection(){const sh=curSheet(),B=_selBox();if(!sh||!B)return;if(sheetLocked(sh)||_selCells.size){toast('Select one continuous, editable range');return;}let plan;try{plan=planTranspose(sh,B);}catch(e){toast(e.message);return;}const baseline=JSON.stringify({columns:sh.columns,rows:sh.rows,fmt:sh.fmt});const b=document.createElement('div');b.innerHTML=`<div class="transpose-dimensions"><span>${B.r1-B.r0+1} rows × ${B.c1-B.c0+1} columns</span><span aria-hidden="true">→</span><strong>${plan.h} rows × ${plan.w} columns</strong></div><p class="hint">Rows become columns, starting at the top-left cell. Formats move with the values. Formulas become their current results. Old cells outside the result are cleared.</p><div class="transpose-preview"><table><tbody>${plan.preview.slice(0,8).map(row=>'<tr>'+row.slice(0,8).map(v=>'<td>'+esc(String(v))+'</td>').join('')+'</tr>').join('')}</tbody></table></div>${plan.h>8||plan.w>8?'<p class="hint">Preview shows the first 8 rows and columns.</p>':''}${plan.overwritten?`<label class="overwrite-check"><input type="checkbox" id="transposeReplace">Replace ${plan.overwritten} occupied cells outside the selection</label>`:'<p class="hint">No data outside the selection will be replaced.</p>'}`;modal('Transpose selection',b,()=>{if(curSheet()!==sh||baseline!==JSON.stringify({columns:sh.columns,rows:sh.rows,fmt:sh.fmt})){toast('The grid changed. Open a fresh preview');return false;}if(plan.overwritten&&!b.querySelector('#transposeReplace').checked){toast('Confirm replacing the occupied cells');return false;}pushUndo();sh.fmt=sh.fmt||{};for(const x of plan.changes){x.row.cells[x.col.id]=x.value;touchRow(x.row);const key=x.row.id+':'+x.col.id;if(x.format)sh.fmt[key]=x.format;else delete sh.fmt[key];}SELR=B.vr[B.r0].id;SELC=B.vc[B.c0].id;FR=B.vr[B.r0+plan.h-1].id;FC=B.vc[B.c0+plan.w-1].id;afterEdit();toast('Selection transposed');},'Transpose');document.querySelector('.modal')?.classList.add('wide');}
+
 
 /* ============================ BOOT ============================ */
 if(EMBED){ $("#main").innerHTML=`<div class="gload"><span class="gspin"></span>Loading your grids…</div>`; try{ window.parent.postMessage({type:"grids:ready"},_hubOrigin()); }catch(e){} }
