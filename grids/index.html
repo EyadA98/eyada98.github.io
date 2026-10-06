@@ -1780,6 +1780,76 @@ html.dark .paste-index{color:var(--lilac)}
 
 .grid-filter-control{display:flex;align-items:center;gap:8px;flex-shrink:0}.filter-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.filter-row-count{font-size:11px;color:var(--muted);white-space:nowrap}.toolbar-filter-switch{margin:0;display:flex;align-items:center}.sort-levels-form,.workflow-section{display:grid;gap:14px}.sort-level{display:grid;grid-template-columns:24px minmax(150px,1fr) minmax(125px,.65fr) 30px 30px;gap:8px;align-items:center}.sort-order{font-size:12px;color:var(--muted);text-align:center}.workflow-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.workflow-section{margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}.lookup-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lookup-fields label,.overwrite-check{display:flex;align-items:center;gap:9px;font-size:13px}.lookup-fields input,.overwrite-check input{accent-color:var(--lavender)}.record-results{display:grid;gap:6px;margin-top:16px;max-height:320px;overflow:auto}.record-option{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}.record-option.on,.record-option:hover{background:var(--surface-sel);border-color:var(--lavender)}.record-option small{color:var(--muted);white-space:nowrap}.record-pill{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 7px;border:0;border-radius:7px;background:var(--surface-sel);color:var(--lavender);font:inherit;cursor:pointer}.record-pill svg{width:13px;height:13px;flex-shrink:0}.record-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.transpose-dimensions{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:var(--surface-sel);font-size:13px;margin-bottom:16px}.transpose-preview{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:12px;margin:18px 0}.transpose-preview table{width:100%;border-collapse:collapse}.transpose-preview td{padding:10px 12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}.overwrite-check{padding:14px;border-radius:12px;background:var(--surface-sel)}@media(max-width:600px){.workflow-fields,.lookup-fields{grid-template-columns:1fr}.sort-level{grid-template-columns:20px 1fr 30px 30px}.sort-level>.csel:nth-child(3){grid-column:2}.filter-name{max-width:110px}.filter-row-count{display:none}.transpose-dimensions{flex-wrap:wrap}}
 
+
+/* One brand control system for dialogs, toggles, checklists and sort levels. */
+.modal,html.dark .modal{background:var(--card)}
+.modal>.mbody{overscroll-behavior:contain;scrollbar-width:none}
+.modal>.mbody::-webkit-scrollbar{display:none}
+.modal .csel,.modal .fld,.modal .inp{min-width:0}
+.modal .csel-btn{min-height:38px;padding:9px 12px;gap:10px;line-height:1.4;text-align:start}
+.modal .csel-btn span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.modal .csel-btn svg{width:14px;height:14px;flex:none;margin-left:auto}
+.modal .csel-btn:focus-visible,.modal .btn:focus-visible{outline:2px solid var(--lavender);outline-offset:3px}
+.modal .icon-btn{width:32px;height:32px;min-width:32px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center}
+.modal .icon-btn:hover{background:var(--surface-hover);border-color:var(--border);color:var(--text)}
+.modal .icon-btn:disabled{opacity:.35;cursor:default}
+.modal .icon-btn svg{width:16px;height:16px}
+.modal .icon-btn:focus-visible{outline:2px solid var(--lavender);outline-offset:2px}
+.modal input[type="checkbox"]:not([role="switch"]),.pvp input[type="checkbox"],.pv-fl input[type="checkbox"]{appearance:none;-webkit-appearance:none;display:inline-grid;place-content:center;width:17px;height:17px;min-width:17px;padding:0;margin:0 7px 0 0;vertical-align:-3px;border:1.5px solid var(--muted);border-radius:5px;background:var(--card);color:#fff;cursor:pointer;flex:none}
+.modal input[type="checkbox"]:not([role="switch"])::before,.pvp input[type="checkbox"]::before,.pv-fl input[type="checkbox"]::before{content:"";width:8px;height:4px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) scale(0);margin-top:-2px}
+.modal input[type="checkbox"]:not([role="switch"]):checked,.pvp input[type="checkbox"]:checked,.pv-fl input[type="checkbox"]:checked{background:var(--violet);border-color:var(--violet)}
+.modal input[type="checkbox"]:not([role="switch"]):checked::before,.pvp input[type="checkbox"]:checked::before,.pv-fl input[type="checkbox"]:checked::before{transform:rotate(-45deg) scale(1)}
+.modal input[type="checkbox"]:not([role="switch"]):focus-visible{outline:2px solid var(--lavender);outline-offset:3px}
+.modal input[type="checkbox"]:disabled{opacity:.45;cursor:default}
+.gsw{width:40px;height:24px;min-width:40px;border:1px solid var(--border);background:var(--border);border-radius:999px;box-shadow:none;transition:background .18s var(--ease),border-color .18s var(--ease)}
+.gsw::after{width:18px;height:18px;left:2px;top:2px;background:#fff;box-shadow:0 1px 3px rgba(21,16,58,.18)}
+.gsw.on{background:var(--violet);border-color:var(--violet)}
+.gsw.on::after{transform:translateX(16px)}
+.gsw:disabled{opacity:.45;cursor:default}
+.modal .vrow{gap:18px;padding:14px 0;align-items:center}
+.modal .vrow .vtx small{margin-top:4px;line-height:1.5}
+.filter-parent-toggle{background:var(--surface-raised);padding:14px 16px;gap:20px;min-height:68px}
+.filter-switch{width:40px;height:24px;min-width:40px;flex:none;display:inline-block}
+.filter-switch-track{background:var(--border);border-color:var(--border)}
+.filter-switch-track::after{width:18px;height:18px;left:2px;top:2px;background:#fff}
+.filter-switch input:checked+.filter-switch-track::after{transform:translateX(16px)}
+.filter-switch input:disabled+.filter-switch-track{opacity:.45}
+.filter-condition{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 32px;gap:10px;align-items:center}
+.filter-condition [data-remove-condition]{width:32px;height:32px;display:grid;place-items:center;border:1px solid transparent;background:transparent;color:var(--muted)}
+.filter-condition [data-remove-condition]:hover{background:var(--red-soft);color:var(--red);border-color:var(--red-soft)}
+.filter-condition [data-remove-condition]:focus-visible{outline:2px solid var(--lavender);outline-offset:2px}
+.sort-levels-form{gap:16px}
+.sort-levels-form>.hint{margin:0;line-height:1.6}
+.sort-level{grid-template-columns:28px minmax(0,1fr) minmax(120px,.55fr) 32px 32px;gap:10px}
+.sort-order{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;background:var(--surface-raised);color:var(--muted);font-size:11px;font-weight:600}
+#sortAddLevel{justify-self:start;width:auto;max-width:100%;display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px}
+#sortAddLevel svg{width:14px;height:14px}
+#sortError:empty{display:none}
+.cleanup-scope-count{margin:2px 0 18px;font-size:12px;color:var(--muted)}
+.cleanup-column-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}
+.cleanup-column-head .lb{margin:0}
+.cleanup-select-all{display:inline-flex;align-items:center;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.cleanup-column-list{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:18px;background:var(--surface-raised)}
+.cleanup-column-option{display:flex;align-items:center;gap:3px;min-width:0;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;line-height:1.5}
+.cleanup-column-option:hover{background:var(--surface-hover)}
+.cleanup-column-option:has(input:checked){background:var(--surface-sel)}
+.cleanup-column-option span{min-width:0;overflow-wrap:anywhere}
+.cleanup-settings{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 0 16px}
+.cleanup-settings .fld{margin:0;font-size:12px;line-height:1.5}
+.cleanup-settings .fld>span{display:flex;align-items:flex-start;gap:2px}
+.cleanup-settings input{margin-top:1px!important}
+.cleanup-modal .grid-review{max-height:none;overflow:visible;padding:12px;border-radius:12px;font-size:12px;line-height:1.6}
+.cleanup-modal .grid-review>div+div{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+@media(max-width:600px){.sort-level{grid-template-columns:28px minmax(0,1fr) 32px 32px;gap:8px}.sort-level>.csel:nth-of-type(1){grid-column:2;grid-row:1}.sort-level>.csel:nth-of-type(2){grid-column:2;grid-row:2}.sort-level>[data-sort-up]{grid-column:3;grid-row:1/3}.sort-level>[data-sort-remove]{grid-column:4;grid-row:1/3}.sort-order{grid-row:1/3}.filter-condition{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}.cleanup-settings{grid-template-columns:1fr}.cleanup-column-list{grid-template-columns:1fr}.filter-parent-toggle{padding:12px;gap:12px}}
+@media(prefers-reduced-motion:reduce){.gsw,.gsw::after{transition:none}}
+@media(forced-colors:active){.modal input[type="checkbox"]:not([role="switch"]){appearance:auto}.modal input[type="checkbox"]:not([role="switch"])::before{display:none}}
+
+
+.modal input[type="checkbox"]:not([role="switch"]):indeterminate{background:var(--violet);border-color:var(--violet)}
+.modal input[type="checkbox"]:not([role="switch"]):indeterminate::before{width:8px;height:0;border-left:0;border-bottom:2px solid #fff;transform:none;margin:0}
+.modal .grid-review:has([data-print-index]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;max-height:none;overflow:visible}
+.modal .grid-review:has([data-print-index]) .fld{margin:0;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:600px){.modal .grid-review:has([data-print-index]){grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -3130,7 +3200,7 @@ function newSheet(){ const st={name:"",named:false,src:"blank",colNames:"",rows:
     if(s==="file"||s==="paste"){ let h=s==="file"?`<div class="ng-file"><button type="button" class="btn" id="ngPick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>${st.file?"Choose another file…":"Choose Excel or CSV…"}</button>${st.file?`<span class="ng-fn">${esc(st.file)}</span>`:""}</div>`
         :`<label class="fld"><span class="lb">Paste your rows</span><textarea class="inp ng-paste" id="ngPaste" placeholder="Copy cells in Excel or Google Sheets, then paste here (Ctrl+V)">${esc(st.paste||"")}</textarea></label>`;
       if(st.rows&&st.rows.length){ const g=_gridFromRows(st.rows.slice(0,40),st.hdr); const n=st.rows.length-(st.hdr?1:0); const W=g.columns.length; const show=g.columns.slice(0,7);
-        h+=`<div class="vrow ng-hdr"><div class="vtx"><b>First row has column names</b><small>${n.toLocaleString()} row${n===1?"":"s"} × ${W} column${W===1?"":"s"}</small></div><button type="button" class="gsw${st.hdr?" on":""}" id="ngHdr" role="switch" aria-checked="${st.hdr}"></button></div>`+colChips(show)+(W>7?`<div class="ng-note">+ ${W-7} more column${W-7===1?"":"s"}</div>`:"")
+        h+=`<div class="vrow ng-hdr"><div class="vtx"><b>First row has column names</b><small>${n.toLocaleString()} row${n===1?"":"s"} × ${W} column${W===1?"":"s"}</small></div><button type="button" class="gsw${st.hdr?" on":""}" id="ngHdr" aria-label="First row has column names" role="switch" aria-checked="${st.hdr}"></button></div>`+colChips(show)+(W>7?`<div class="ng-note">+ ${W-7} more column${W-7===1?"":"s"}</div>`:"")
           +`<div class="vh-tbl ng-prev"><table><thead><tr>${show.map(c=>`<th>${esc(c.name)}</th>`).join("")}</tr></thead><tbody>${g.rows.slice(0,4).map(r=>`<tr>${show.map(c=>`<td>${esc(r.cells[c.id]==null?"":r.cells[c.id])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
       return h; }
     return ""; };
@@ -3754,6 +3824,8 @@ function updateSelDOM(){ document.querySelectorAll("td.cell.sel,td.cell.inrange"
     /* highlight the header when a whole column is selected, and the row number when a whole row is */
     if(!_selCells.size){ if(B.r0===0&&B.r1===B.vr.length-1){ const ths=[...document.querySelectorAll("table.gr thead th")].slice(1); for(let c=B.c0;c<=B.c1;c++) if(ths[c]) ths[c].classList.add("colsel"); }
       if(B.c0===0&&B.c1===B.vc.length-1){ document.querySelectorAll("table.gr tbody tr").forEach(tr=>{ const c=tr.querySelector("td.cell"); if(!c) return; const ri=rIdx.get(c.dataset.r); if(ri!=null&&ri>=B.r0&&ri<=B.r1) tr.classList.add("selrow"); }); } } }
+  if(sh&&_hdrSel==="col"){const chosen=new Set(selColumnIds()),cols=B?B.vc:visCols(sh);[...document.querySelectorAll("table.gr thead th")].slice(1).forEach((th,i)=>{if(cols[i]&&chosen.has(cols[i].id))th.classList.add("colsel");});}
+  if(sh&&_hdrSel==="row"){const chosen=new Set(selRowIds());document.querySelectorAll("table.gr tbody tr").forEach(tr=>{const cell=tr.querySelector("td.cell");if(cell&&chosen.has(cell.dataset.r))tr.classList.add("selrow");});}
   syncFmtButtons(); syncFx(); if(_fx){ try{ if(SELR!==_fx.rid||SELC!==_fx.cid) fxRefresh(); else applyFxHL(); }catch(e){ console.error(e); } }
   const area=B?(B.r1-B.r0+1)*(B.c1-B.c0+1):0; clearTimeout(_selSumT);
   if(area>20000){ const el=document.getElementById("selSum"); if(el){ el.className="selsum on"; el.innerHTML=`<span><span class="k">Count</span><b>…</b></span>`; } _selSumT=setTimeout(()=>updateSelSum(),120); } else updateSelSum();
@@ -3874,8 +3946,8 @@ function fullRowSel(){ const sh=curSheet(); if(SELR==null||SELC==null)return nul
 function fullColSel(){ const sh=curSheet(); if(SELR==null||SELC==null)return null; const vc=_viewCols&&_viewCols.length?_viewCols:sh.columns; const vr=_viewRows&&_viewRows.length?_viewRows:sh.rows;
   const ri=vr.findIndex(r=>r.id===SELR), fri=FR?vr.findIndex(r=>r.id===FR):ri; if(Math.min(ri,fri)!==0||Math.max(ri,fri)!==vr.length-1)return null;
   const ci=vc.findIndex(c=>c.id===SELC), fci=FC?vc.findIndex(c=>c.id===FC):ci; const out=[]; for(let i=Math.min(ci,fci);i<=Math.max(ci,fci);i++)if(vc[i])out.push(vc[i].id); return out.length?out:null; }
-function deleteRows(ids){ const sh=curSheet(); if(sh.rows.length<=ids.length){ toast("A grid needs at least one row"); return; } pushUndo(); sh.rows=sh.rows.filter(r=>!ids.includes(r.id)); _selReset(); afterEdit(); toast(ids.length+" row"+(ids.length>1?"s":"")+" deleted"); }
-function deleteColumns(ids){ const sh=curSheet(); { const _c=sh.columns.find(x=>ids.includes(x.id)&&x.locked); if(_c){ lockToast(_c); return; } } if(sh.columns.length<=ids.length){ toast("A grid needs at least one column"); return; } pushUndo(); sh.columns=sh.columns.filter(c=>!ids.includes(c.id)); sh.rows.forEach(r=>ids.forEach(id=>delete r.cells[id])); _selReset(); afterEdit(); toast(ids.length+" column"+(ids.length>1?"s":"")+" deleted"); }
+function deleteRows(ids){ const sh=curSheet(); if(sheetLocked(sh)){lockToast();return;} ids=[...new Set(ids)].filter(id=>sh.rows.some(r=>r.id===id));if(!ids.length)return; if(sh.rows.length<=ids.length){ toast("A grid needs at least one row"); return; } pushUndo(); sh.rows=sh.rows.filter(r=>!ids.includes(r.id)); _selReset();_selCells.clear();_hdrSel=null; afterEdit(); toast(ids.length+" row"+(ids.length>1?"s":"")+" deleted"); }
+function deleteColumns(ids){ const sh=curSheet(); if(sheetLocked(sh)){lockToast();return;} ids=[...new Set(ids)].filter(id=>sh.columns.some(c=>c.id===id));if(!ids.length)return; { const _c=sh.columns.find(x=>ids.includes(x.id)&&x.locked); if(_c){ lockToast(_c); return; } } if(sh.columns.length<=ids.length){ toast("A grid needs at least one column"); return; } pushUndo(); sh.columns=sh.columns.filter(c=>!ids.includes(c.id)); sh.rows.forEach(r=>ids.forEach(id=>delete r.cells[id])); _selReset();_selCells.clear();_hdrSel=null; afterEdit(); toast(ids.length+" column"+(ids.length>1?"s":"")+" deleted"); }
 function highlightSel(){ updateSelDOM(); }
 function toggleCheck(r,c){ { const _s=curSheet(), _c=_s.columns.find(x=>x.id===c); if(colLocked(_c)){ lockToast(_c); return; } } pushUndo(); const sh=curSheet(); const row=sh.rows.find(x=>x.id===r); row.cells[c]=row.cells[c]==="1"?"":"1"; touchRow(row); afterEdit(); }
 let _typedEntry=false;   /* true while starting an edit from a typed key (dates then take text, like Sheets) */
@@ -3961,7 +4033,7 @@ function jsAttr(s){ return esc(String(s==null?"":s).replace(/\\/g,"\\\\").replac
    listeners keep working), a styled button opens a brand popup. No native dropdown anywhere. */
 const _cselReg={};
 function selHTML(id,options,value){ _cselReg[id]={options}; const cur=options.find(o=>String(o.value)===String(value))||options[0]||{value:"",label:""};
-  return `<div class="csel"><input type="hidden" id="${id}" value="${escAttr(String(cur.value))}"><button type="button" class="csel-btn" id="${id}__b" onclick="cselOpen(event,'${id}')"><span id="${id}__l">${esc(cur.label)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>`; }
+  return `<div class="csel"><input type="hidden" id="${id}" value="${escAttr(String(cur.value))}"><button type="button" class="csel-btn" id="${id}__b" aria-haspopup="true" aria-labelledby="${id}__l" onclick="cselOpen(event,'${id}')"><span id="${id}__l">${esc(cur.label)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>`; }
 function cselOpen(e,id){ e.preventDefault(); e.stopPropagation(); const reg=_cselReg[id]; if(!reg)return; const cur=($("#"+id)||{}).value; const b=$("#"+id+"__b").getBoundingClientRect();
   const el=document.createElement("div"); el.className="ctx csel-pop"; el.style.left=b.left+"px"; el.style.top=(b.bottom+3)+"px"; el.style.minWidth=b.width+"px";
   el.innerHTML=reg.options.map(o=>`<button type="button" class="${String(o.value)===String(cur)?"on":""}" onclick="cselPick('${id}','${jsAttr(String(o.value))}')">${o.color?`<span class='dot' style='background:${o.color}'></span>`:""}${esc(o.label)}</button>`).join(""); openCtxEl(el); }
@@ -4357,7 +4429,7 @@ function cleanupDialog(tab){if(!tab||tab==="dups"||tab==="space"){cleanupActionD
         <div class="fld"><span class="lb">Split at</span><div class="vseg cln-sep">${[["first","First space (First | Last)"],["last","Last space"],["space","Every space"],["comma","Comma"],["dash","Dash"],["custom","Other"]].map(([k,l])=>`<button type="button" data-p="${k}" class="${st.sep===k?"on":""}">${l}</button>`).join("")}</div></div>
         ${st.sep==="custom"?`<label class="fld"><span class="lb">Separator</span><input class="inp" id="clnCustom" value="${esc(st.custom)}" placeholder="e.g. /  or  |" maxlength="5"></label>`:""}
         <div class="cln-prev">${rows.slice(0,3).map((r,i)=>`<div><span class="cp-from">${esc(String(r.cells[st.col]).slice(0,40))}</span><span class="cp-arrow">→</span>${parts[i].slice(0,n).map(p=>`<span class="cp-part">${esc(p)}</span>`).join("")}</div>`).join("")||`<div class="ins-note">This column is empty.</div>`}</div>
-        <div class="vrow" style="border-top:0"><div class="vtx"><b>Keep the original column</b><small>The new columns are added to its right</small></div><button type="button" class="gsw${st.keep?" on":""}" id="clnKeep"></button></div>
+        <div class="vrow" style="border-top:0"><div class="vtx"><b>Keep the original column</b><small>The new columns are added to its right</small></div><button type="button" class="gsw${st.keep?" on":""}" id="clnKeep" role="switch" aria-label="Keep the original column" aria-checked="${st.keep}"></button></div>
         <button class="btn pri" data-a="split" ${rows.length&&n>1?"":"disabled"}>Split into ${n>1?n:""} columns</button>`; }
     body.innerHTML=h+`</div>`;
     const cs=document.getElementById("clnCol"); if(cs) cs.addEventListener("change",()=>{ st.col=cs.value; draw(); });
@@ -5038,7 +5110,7 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="PageDown"){ e.preventDefault(); moveSel(10,0,ext); }
   else if(e.key===" "&&e.shiftKey){ e.preventDefault(); if(SELR)selectRow(SELR,{}); }
   else if(e.key==="Enter"||e.key==="F2"){ e.preventDefault(); startEdit(SELR,SELC); }
-  else if(e.key==="Delete"||e.key==="Backspace"){ e.preventDefault(); if(isAllSelected()){ clearAllContents(); return; }
+  else if(e.key==="Delete"||e.key==="Backspace"){ e.preventDefault(); if(_hdrSel==="row"||_hdrSel==="col"){requestDeleteSelected(_hdrSel==="row"?"rows":"columns");return;} if(isAllSelected()){ clearAllContents(); return; }
     /* whole rows picked from the row numbers are deleted (Smartsheet-style, undoable); everything else — even a whole column — is only cleared */
     const fr=_hdrSel==="row"?fullRowSel():null; if(fr&&fr.length){ deleteRows(fr); return; }
     pushUndo(); const sh=curSheet(); const CM=new Map(sh.columns.map(c=>[c.id,c])), RM=new Map(sh.rows.map(r=>[r.id,r]));
@@ -5160,7 +5232,7 @@ document.addEventListener("paste",e=>{
 function pasteSpecial(){ if(!curSheet()||SELR==null){ toast("Select where to paste first"); return; }
   const st={mode:"values",tr:false}; const body=document.createElement("div");
   const draw=()=>{ body.innerHTML=`<div class="fld"><span class="lb">Paste</span><div class="vseg" id="psMode">${[["all","Everything"],["values","Values only"],["formats","Formats only"]].map(([k,t])=>`<button type="button" data-m="${k}" class="${st.mode===k?"on":""}">${t}</button>`).join("")}</div></div>
-    <div class="vrow" style="border-top:0"><div class="vtx"><b>Transpose</b><small>Rows become columns and columns become rows${st.tr?" · formulas go in as their results":""}</small></div><button type="button" class="gsw${st.tr?" on":""}" id="psTr" role="switch" aria-checked="${st.tr}"></button></div>
+    <div class="vrow" style="border-top:0"><div class="vtx"><b>Transpose</b><small>Rows become columns and columns become rows${st.tr?" · formulas go in as their results":""}</small></div><button type="button" class="gsw${st.tr?" on":""}" id="psTr" aria-label="Transpose pasted cells" role="switch" aria-checked="${st.tr}"></button></div>
     <div class="hint" style="margin:8px 0 0">${_clip?`From the ${_clip.n} cell${_clip.n===1?"":"s"} you copied in Grids.`:"From your clipboard (text only — formats come from cells copied in Grids)."} Tip: Ctrl+Shift+V pastes values straight away.</div>`; };
   draw();
   body.addEventListener("click",e=>{ const m=e.target.closest("#psMode button"); if(m){ st.mode=m.dataset.m; draw(); return; } if(e.target.closest("#psTr")){ st.tr=!st.tr; draw(); } });
@@ -5315,6 +5387,7 @@ const CUST_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const STAR_MI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>';
 function bgMenu(e){ if(e.target.closest(".item")) return; ctxAt(e,`<div class="lbl">${esc(DB.ui.cwd?DB.folders[DB.ui.cwd].name:"Home")}</div><button onclick="closeCtx();newSheet()">${I.add}New grid</button><button onclick="closeCtx();newFolder()">${I.add}New folder</button>`); }
 function colMenu(e,cid){ if(_justDragged){ if(e){e.preventDefault();e.stopPropagation();} return; } const sh=curSheet(); const col=sh.columns.find(c=>c.id===cid);
+  if(_hdrSel!=="col"||!selColumnIds().includes(cid))selectColumn(cid);
   const nHl=(colRules(col)?1:0)+(_dupRule(sh,cid)?1:0)+(col.viz?1:0)+Object.keys(QUICK_HL).filter(op=>_quickRule(sh,cid,op)).length;
   ctxAt(e,`<div class="lbl">${esc(col.name)}</div>
     <div class="cm-quick"><button onclick="closeCtx();sortView('${cid}',1)" title="Sort A → Z">${I.down}<span>A → Z</span></button><button onclick="closeCtx();sortView('${cid}',-1)" title="Sort Z → A">${I.up}<span>Z → A</span></button><button onclick="closeCtx();filterMenu(event,'${cid}')" title="Filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span>Filter</span></button></div>
@@ -5324,7 +5397,7 @@ function colMenu(e,cid){ if(_justDragged){ if(e){e.preventDefault();e.stopPropag
     <button onclick="colSubMenu('hl','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-6 6v3h9l3-3M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="mtx">Highlight & rules</span>${nHl?`<span class="mtag">${nHl} on</span>`:""}<svg class="mchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
     <button onclick="colSubMenu('col','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18"/></svg><span class="mtx">Column</span><svg class="mchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="div"></div>
-    <button class="dan" onclick="closeCtx();delColumn('${cid}')">${I.del}Delete column</button>`); }
+    <button class="dan" onclick="closeCtx();requestDeleteSelected('columns')">${I.del}Delete ${selColumnIds().length>1?selColumnIds().length+" columns":"column"}</button>`); }
 /* second-level column menus open in place of the first, with a way back */
 function colSubMenu(which,cid){ const sh=curSheet(); const col=sh.columns.find(c=>c.id===cid); if(!col) return; const m=_ctxEl; const r=m?m.getBoundingClientRect():{left:200,top:120};
   const back=`<button class="cm-back" onclick="colMenu({preventDefault(){},stopPropagation(){},clientX:${Math.round(r.left)},clientY:${Math.round(r.top)}},'${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>${esc(col.name)}</button>`;
@@ -5382,7 +5455,7 @@ function changeIndent(delta){ const sh=curSheet(); if(!sh)return; const ids=selR
   afterEdit(); }
 function toggleCollapse(rid){ const sh=curSheet(); const row=sh.rows.find(r=>r.id===rid); if(!row)return; const i=sh.rows.indexOf(row); if(!rowHasChildren(sh,i))return; row.collapsed=!row.collapsed; save(); renderEditor(); }
 function collapseAllGroups(v){ const sh=curSheet(); let any=false; sh.rows.forEach((r,i)=>{ if(rowHasChildren(sh,i)){ r.collapsed=v; any=true; } }); if(!any){ toast("No groups yet — indent rows to create one"); return; } save(); renderEditor(); toast(v?"All groups collapsed":"All groups expanded"); }
-function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details</button><button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
+function rowMenu(e,rid){ const sh=curSheet();if(_hdrSel!=="row"||!selRowIds().includes(rid))selectRow(rid); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details</button><button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
     <button onclick="closeCtx();addRowAt('${rid}',true)">${I.add}Insert below</button>
     <button onclick="closeCtx();dupRow('${rid}')">${I.copy}Duplicate row</button>
     <div class="div"></div>
@@ -5390,7 +5463,7 @@ function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id=
     <button onclick="closeCtx();changeIndent(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M10 12h10M10 18h10M7 10v4l-3-2z"/></svg>Outdent</button>
     ${kids?`<button onclick="closeCtx();toggleCollapse('${rid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>${collapsed?"Expand group":"Collapse group"}</button>`:""}
     <button onclick="closeCtx();freezeUpToRow('${rid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 3v18"/></svg>Freeze up to this row</button>
-    <div class="div"></div><button class="dan" onclick="closeCtx();delRow('${rid}')">${I.del}Delete row</button>`); }
+    <div class="div"></div><button class="dan" onclick="closeCtx();requestDeleteSelected('rows')">${I.del}Delete ${selRowIds().length>1?selRowIds().length+" rows":"row"}</button>`); }
 function cellMenu(e,rid,cid){ const sh=curSheet();
   /* keep an existing multi-cell selection if the right-click lands inside it; otherwise select the clicked cell */
   const inSel=rangeCells().some(x=>x.r===rid&&x.c===cid);
@@ -5409,7 +5482,7 @@ function cellMenu(e,rid,cid){ const sh=curSheet();
     <button onclick="closeCtx();changeIndent(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6H10M20 18H10M20 12H10M7 9l-3 3 3 3"/></svg>Outdent row${_selRowCount()>1?"s":""}</button>
     <div class="div"></div>
     <button onclick="closeCtx();addRowAt('${rid}',true)">${I.add}Insert row below</button>
-    <button onclick="closeCtx();deleteRows(selRowIds())">${I.del}Delete row${selRowIds().length>1?"s ("+selRowIds().length+")":""}</button>`); }
+    <button onclick="closeCtx();requestDeleteSelected('rows')">${I.del}Delete row${selRowIds().length>1?"s ("+selRowIds().length+")":""}</button>`); }
 function selRowIds(){ const B=_selBox(); if(!B) return []; const ids=new Set(B.vr.slice(B.r0,B.r1+1).map(r=>r.id)); _selCells.forEach(k=>ids.add(k.slice(0,k.indexOf("|")))); return [...ids]; }
 function clearSelection(){ const sh=curSheet(); const cells=rangeCells(); if(!cells.length) return; pushUndo(); const CM=new Map(sh.columns.map(c=>[c.id,c])), RM=new Map(sh.rows.map(r=>[r.id,r]));
   cells.forEach(({r,c})=>{ const col=CM.get(c), row=RM.get(r); if(!col||!row||_ro(col)) return; if(row.cells[c]!=null&&row.cells[c]!==""){ row.cells[c]=""; touchRow(row); } }); afterEdit(); }
@@ -6427,7 +6500,7 @@ function importRows(rows,label){
         <button type="button" data-m="replace" class="${st.mode==="replace"?"on":""}">Replace this sheet</button>
         <button type="button" data-m="append" class="${st.mode==="append"?"on":""}">Add rows below</button>
         <button type="button" data-m="tab" class="${st.mode==="tab"?"on":""}">New sheet tab</button></div></div>
-      <div class="vrow" style="border-top:0;padding-top:4px"><div class="vtx"><b>First row has column names</b><small>${st.hdr?"Used as the column headers":"Imported as a normal row"}</small></div><button type="button" class="gsw${st.hdr?" on":""}" id="impHdr" role="switch" aria-checked="${st.hdr}"></button></div>
+      <div class="vrow" style="border-top:0;padding-top:4px"><div class="vtx"><b>First row has column names</b><small>${st.hdr?"Used as the column headers":"Imported as a normal row"}</small></div><button type="button" class="gsw${st.hdr?" on":""}" id="impHdr" aria-label="First row has column names" role="switch" aria-checked="${st.hdr}"></button></div>
       <div class="vh-tbl" style="margin:6px 0 0;max-height:220px"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}${W>8?"<th>…</th>":""}</tr></thead><tbody>${data.slice(0,6).map(r=>`<tr>${cols.map((_,i)=>`<td>${esc(r[i]==null?"":r[i])}</td>`).join("")}${W>8?"<td></td>":""}</tr>`).join("")}</tbody></table></div>
       ${st.mode==="replace"&&!empty?`<div class="hint" style="margin:10px 0 0;color:var(--red)">This replaces everything on “${esc(sh.name)}”. A version is saved first, and Ctrl+Z undoes it.</div>`:""}`; };
   draw();
@@ -7327,7 +7400,7 @@ function editSavedFilter(id) {
       })), c.col)}${selHTML('filterOperator' + i, GRID_FILTER_OPS.map(([value, label]) => ({
         value,
         label
-      })), c.op)}<input class="inp" type="${col?.type === 'date' && !noValue && !['contains', 'notContains', 'hasAny', 'hasNone'].includes(c.op) ? 'date' : 'text'}" data-filter-value="${i}" value="${esc(c.value)}" ${noValue ? 'disabled' : ''} placeholder="${c.op === 'hasAny' || c.op === 'hasNone' ? 'Values separated by commas' : 'Value'}" list="filterValues${i}"><datalist id="filterValues${i}">${(col?.options || []).map(o => `<option value="${esc(o.value)}">`).join('')}</datalist><button type="button" class="btn sm" data-remove-condition="${i}" aria-label="Remove condition">×</button></div>`;
+      })), c.op)}<input class="inp" type="${col?.type === 'date' && !noValue && !['contains', 'notContains', 'hasAny', 'hasNone'].includes(c.op) ? 'date' : 'text'}" data-filter-value="${i}" value="${esc(c.value)}" ${noValue ? 'disabled' : ''} placeholder="${c.op === 'hasAny' || c.op === 'hasNone' ? 'Values separated by commas' : 'Value'}" list="filterValues${i}"><datalist id="filterValues${i}">${(col?.options || []).map(o => `<option value="${esc(o.value)}">`).join('')}</datalist><button type="button" class="btn sm" data-remove-condition="${i}" aria-label="Remove condition"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
     }).join('')}</div><button type="button" class="btn sm" id="filterAddCondition">Add condition</button><label class="filter-parent-toggle"><span class="filter-parent-copy"><strong>Include parent rows</strong><small>Keep group context with matching rows.</small></span><span class="filter-switch"><input type="checkbox" role="switch" id="filterParents" aria-label="Include parent rows" ${state.includeParents ? 'checked' : ''}><span class="filter-switch-track" aria-hidden="true"></span></span></label><p class="hint" id="filterFormError" role="alert"></p>`;
   };
   draw();
@@ -7489,6 +7562,7 @@ function cleanupActionDialog(mode) {
   state.ignoreEmpty = true;
   state.columns = new Set(state.colIds.size ? [...state.colIds] : visCols(sh).map(c => c.id));
   const b = document.createElement('div');
+  b.className = 'cleanup-options-form';
   let plan = [],
     rows = [],
     columns = [];
@@ -7508,7 +7582,8 @@ function cleanupActionDialog(mode) {
     }, {
       value: 'all',
       label: 'Whole sheet'
-    }], state.scope)}</label><p>${rows.length} populated rows · ${columns.length} columns</p><div class="lb">Columns to check</div><label class="fld"><span><input type="checkbox" id="cleanupAllColumns" ${state.columns.size === sh.columns.length ? 'checked' : ''}> Select all</span></label><div class="grid-review">${sh.columns.map(c => `<label class="fld"><span><input type="checkbox" data-cleanup-column="${c.id}" ${state.columns.has(c.id) ? 'checked' : ''}> ${esc(c.name)}</span></label>`).join('')}</div>${mode === 'dups' ? `<label class="fld"><span><input type="checkbox" id="cleanupHeader" ${state.header ? 'checked' : ''}> First row is a header</span></label><label class="fld"><span><input type="checkbox" id="cleanupCase" ${state.ignoreCase ? 'checked' : ''}> Ignore letter case</span></label><label class="fld"><span><input type="checkbox" id="cleanupTrim" ${state.trim ? 'checked' : ''}> Ignore extra spaces</span></label><label class="fld"><span><input type="checkbox" id="cleanupEmpty" ${state.ignoreEmpty ? 'checked' : ''}> Ignore empty keys</span></label><p class="hint">The first copy is kept. Duplicate rows are removed in full, based on the checked columns.</p>` : '<p class="hint">Trims leading and trailing spaces and repeated spaces. Line breaks and formulas are preserved. Locked and computed cells are skipped.</p>'}<p><b>${plan.length - blocked}</b> ${mode === 'dups' ? 'rows to remove' : 'cells to change'}${blocked ? ' · ' + blocked + ' blocked by validation' : ''}</p>${preview ? `<div class="grid-review">${preview}</div>` : '<p class="hint">Nothing to clean in this scope.</p>'}${plan.length > 12 ? '<p class="hint">Showing the first 12 matches.</p>' : ''}<p id="cleanupError" class="hint" role="alert"></p>`;
+    }], state.scope)}</label><p class="cleanup-scope-count">${rows.length} populated rows · ${columns.length} ${columns.length===1?'column':'columns'}</p><div class="cleanup-column-head"><span class="lb">Columns to check</span><label class="cleanup-select-all"><input type="checkbox" id="cleanupAllColumns" ${state.columns.size === sh.columns.length ? 'checked' : ''}> Select all</label></div><div class="cleanup-column-list">${sh.columns.map(c => `<label class="cleanup-column-option"><input type="checkbox" data-cleanup-column="${c.id}" ${state.columns.has(c.id) ? 'checked' : ''}><span>${esc(c.name)}</span></label>`).join('')}</div>${mode === 'dups' ? `<div class="cleanup-settings"><label class="fld"><span><input type="checkbox" id="cleanupHeader" ${state.header ? 'checked' : ''}> First row is a header</span></label><label class="fld"><span><input type="checkbox" id="cleanupCase" ${state.ignoreCase ? 'checked' : ''}> Ignore letter case</span></label><label class="fld"><span><input type="checkbox" id="cleanupTrim" ${state.trim ? 'checked' : ''}> Ignore extra spaces</span></label><label class="fld"><span><input type="checkbox" id="cleanupEmpty" ${state.ignoreEmpty ? 'checked' : ''}> Ignore empty keys</span></label></div><p class="hint">The first copy is kept. Duplicate rows are removed in full, based on the checked columns.</p>` : '<p class="hint">Trims leading and trailing spaces and repeated spaces. Line breaks and formulas are preserved. Locked and computed cells are skipped.</p>'}<p><b>${plan.length - blocked}</b> ${mode === 'dups' ? 'rows to remove' : 'cells to change'}${blocked ? ' · ' + blocked + ' blocked by validation' : ''}</p>${preview ? `<div class="grid-review">${preview}</div>` : '<p class="hint">Nothing to clean in this scope.</p>'}${plan.length > 12 ? '<p class="hint">Showing the first 12 matches.</p>' : ''}<p id="cleanupError" class="hint" role="alert"></p>`;
+    const all=b.querySelector('#cleanupAllColumns');if(all)all.indeterminate=state.columns.size>0&&state.columns.size<sh.columns.length;
   };
   draw();
   b.addEventListener('change', e => {
@@ -7555,7 +7630,7 @@ function cleanupActionDialog(mode) {
     afterEdit();
     toast((mode === 'dups' ? 'Removed ' + n + ' duplicate rows' : 'Trimmed ' + n + ' cells') + ' — Ctrl+Z to undo');
   }, mode === 'dups' ? 'Remove duplicates' : 'Trim whitespace');
-  document.querySelector('.modal')?.classList.add('wide');
+  document.querySelector('.modal')?.classList.add('wide','cleanup-modal');
 }
 
 "use strict";
@@ -7831,7 +7906,7 @@ function advancedCleanupDialog(mode) {
     }, {
       value: 'all',
       label: 'All rows'
-    }], state.scope)}</label>${mode !== 'empty' ? `<div class="fld"><span class="lb">${mode === 'merge' ? 'Match records using' : 'Columns'}</span><label><input type="checkbox" id="advancedAll" ${cols.length === sh.columns.length ? 'checked' : ''}> All columns</label><div style="display:flex;flex-wrap:wrap;gap:12px">${sh.columns.map(c => `<label><input type="checkbox" data-advanced-column="${c.id}" ${state.colIds.has(c.id) ? 'checked' : ''}> ${esc(c.name)}</label>`).join('')}</div></div>` : ''}${mode === 'dates' ? `<label class="fld"><span class="lb">Ambiguous dates</span>${selHTML('advancedOrder', [{
+    }], state.scope)}</label>${mode !== 'empty' ? `<div class="fld"><span class="lb">${mode === 'merge' ? 'Match records using' : 'Columns'}</span><label><input type="checkbox" id="advancedAll" ${cols.length === sh.columns.length ? 'checked' : ''}> All columns</label><div class="cleanup-column-list">${sh.columns.map(c => `<label class="cleanup-column-option"><input type="checkbox" data-advanced-column="${c.id}" ${state.colIds.has(c.id) ? 'checked' : ''}><span>${esc(c.name)}</span></label>`).join('')}</div></div>` : ''}${mode === 'dates' ? `<label class="fld"><span class="lb">Ambiguous dates</span>${selHTML('advancedOrder', [{
       value: '',
       label: 'Leave for review'
     }, {
@@ -7938,7 +8013,7 @@ function polishIcon(key){const paths={
 /* Filters and sorting share the existing view state. */
 function gridSortLevels(sh){const raw=sh.sort?.levels?.length?sh.sort.levels:sh.sort?.col?[sh.sort]:[];const seen=new Set();return raw.filter(x=>sh.columns.some(c=>c.id===x.col)&&!seen.has(x.col)&&(seen.add(x.col),true)).map(x=>({col:x.col,dir:x.dir===-1?-1:1}));}
 function sortGridRows(sh,rows){const levels=gridSortLevels(sh);if(!levels.length)return rows;const ctx=newCtx(),cols=levels.map(l=>sh.columns.find(c=>c.id===l.col));const keys=new Map(rows.map(r=>[r.id,cols.map(c=>{let v=rawCellVal(sh,r,c,ctx);if(Array.isArray(v))v=v.join(', ');const blank=v==null||v===''||isFErr(v);return {blank,n:blank?NaN:numOrNaN(v),s:blank?'':String(fmtScalar(v)).toLowerCase()};})]));return rows.slice().sort((a,b)=>{const A=keys.get(a.id),B=keys.get(b.id);for(let i=0;i<levels.length;i++){const x=A[i],y=B[i];let n=0;if(x.blank||y.blank)n=x.blank===y.blank?0:x.blank?1:-1;else {const xn=!isNaN(x.n),yn=!isNaN(y.n);n=(xn&&yn?x.n-y.n:xn!==yn?xn?-1:1:x.s.localeCompare(y.s,undefined,{numeric:true}))*levels[i].dir;}if(n)return n;}return 0;});}
-function multiSortDialog(){const sh=curSheet(),state=gridSortLevels(sh);if(!state.length&&sh.columns.length)state.push({col:SELC||sh.columns[0].id,dir:1});const b=document.createElement('div');b.className='sort-levels-form';const draw=()=>{b.innerHTML=`<p class="hint">Rows are sorted by the first field, then by each additional field. Blank values stay at the bottom.</p>${state.map((x,i)=>`<div class="sort-level" data-sort-level="${i}"><span class="sort-order">${i+1}</span>${selHTML('sortField'+i,sh.columns.map(c=>({value:c.id,label:c.name})),x.col)}${selHTML('sortDirection'+i,[{value:'1',label:'Ascending'},{value:'-1',label:'Descending'}],String(x.dir))}<button type="button" class="icon-btn" data-sort-up="${i}" aria-label="Move level up" ${i===0?'disabled':''}>↑</button><button type="button" class="icon-btn" data-sort-remove="${i}" aria-label="Remove level">×</button></div>`).join('')}<button type="button" class="btn sm" id="sortAddLevel" ${state.length>=sh.columns.length?'disabled':''}>${I.add}Add sort level</button><p class="hint" id="sortError" role="alert"></p>`;};draw();b.addEventListener('change',e=>{const el=e.target,wrap=el.closest('[data-sort-level]');if(!wrap)return;const x=state[+wrap.dataset.sortLevel];if(el.id.startsWith('sortField'))x.col=el.value;else if(el.id.startsWith('sortDirection'))x.dir=+el.value;});b.addEventListener('click',e=>{const up=e.target.closest('[data-sort-up]'),del=e.target.closest('[data-sort-remove]');if(up){const i=+up.dataset.sortUp;if(i>0)[state[i-1],state[i]]=[state[i],state[i-1]];draw();}else if(del){state.splice(+del.dataset.sortRemove,1);draw();}else if(e.target.closest('#sortAddLevel')){const c=sh.columns.find(c=>!state.some(x=>x.col===c.id));if(c)state.push({col:c.id,dir:1});draw();}});modal('Sort rows',b,()=>{if(curSheet()!==sh)return false;if(new Set(state.map(x=>x.col)).size!==state.length){b.querySelector('#sortError').textContent='Choose a different field for each level.';return false;}if(state.length)sh.sort={...state[0],levels:clone(state)};else delete sh.sort;save();renderEditor();},'Apply sort');document.querySelector('.modal')?.classList.add('wide');}
+function multiSortDialog(){const sh=curSheet(),state=gridSortLevels(sh);if(!state.length&&sh.columns.length)state.push({col:SELC||sh.columns[0].id,dir:1});const b=document.createElement('div');b.className='sort-levels-form';const draw=()=>{b.innerHTML=`<p class="hint">Rows are sorted by the first field, then by each additional field. Blank values stay at the bottom.</p>${state.map((x,i)=>`<div class="sort-level" data-sort-level="${i}"><span class="sort-order" title="Sort priority ${i+1}">${i+1}</span>${selHTML('sortField'+i,sh.columns.map(c=>({value:c.id,label:c.name})),x.col)}${selHTML('sortDirection'+i,[{value:'1',label:'Ascending'},{value:'-1',label:'Descending'}],String(x.dir))}<button type="button" class="icon-btn" data-sort-up="${i}" aria-label="Move level up" title="Move level up" ${i===0?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button><button type="button" class="icon-btn" data-sort-remove="${i}" aria-label="Remove level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`).join('')}<button type="button" class="btn sm" id="sortAddLevel" ${state.length>=sh.columns.length?'disabled':''}>${I.add}Add sort level</button><p class="hint" id="sortError" role="alert"></p>`;};draw();b.addEventListener('change',e=>{const el=e.target,wrap=el.closest('[data-sort-level]');if(!wrap)return;const x=state[+wrap.dataset.sortLevel];if(el.id.startsWith('sortField'))x.col=el.value;else if(el.id.startsWith('sortDirection'))x.dir=+el.value;});b.addEventListener('click',e=>{const up=e.target.closest('[data-sort-up]'),del=e.target.closest('[data-sort-remove]');if(up){const i=+up.dataset.sortUp;if(i>0)[state[i-1],state[i]]=[state[i],state[i-1]];draw();}else if(del){state.splice(+del.dataset.sortRemove,1);draw();}else if(e.target.closest('#sortAddLevel')){const c=sh.columns.find(c=>!state.some(x=>x.col===c.id));if(c)state.push({col:c.id,dir:1});draw();}});modal('Sort rows',b,()=>{if(curSheet()!==sh)return false;if(new Set(state.map(x=>x.col)).size!==state.length){b.querySelector('#sortError').textContent='Choose a different field for each level.';return false;}if(state.length)sh.sort={...state[0],levels:clone(state)};else delete sh.sort;save();renderEditor();},'Apply sort');document.querySelector('.modal')?.classList.add('wide');}
 function definedGridFilters(sh){return !!currentSavedFilter(sh)||_filtActive(sh);}
 function gridFiltersOn(sh){return definedGridFilters(sh)&&sh.filterEnabled!==false;}
 function toggleGridFilters(on){const sh=curSheet();if(!definedGridFilters(sh)){editSavedFilter();return;}sh.filterEnabled=typeof on==='boolean'?on:sh.filterEnabled===false;save();renderEditor();}
@@ -7952,6 +8027,10 @@ function openLinkedRecord(rid,cid){const sh=curSheet(),col=sh.columns.find(c=>c.
 function planTranspose(sh,B){const h=B.r1-B.r0+1,w=B.c1-B.c0+1;if(h*w<2)throw Error('Select at least two cells');if(B.r0+w>B.vr.length||B.c0+h>B.vc.length)throw Error('Add enough rows or columns for the transposed result, then try again');const ctx=newCtx(),source=new Set(),changes=new Map(),preview=Array.from({length:w},()=>[]);for(let r=0;r<h;r++)for(let c=0;c<w;c++){const row=B.vr[B.r0+r],col=B.vc[B.c0+c],key=row.id+':'+col.id;source.add(key);changes.set(key,{row,col,value:'',format:null});}let overwritten=0;for(let r=0;r<w;r++)for(let c=0;c<h;c++){const srcR=B.vr[B.r0+c],srcC=B.vc[B.c0+r],row=B.vr[B.r0+r],col=B.vc[B.c0+c],key=row.id+':'+col.id;const exported=cellExportVal(sh,srcR,srcC,ctx);const value=normTyped(col,typeof exported==='string'&&exported.startsWith('=')?"'"+exported:_pasteVal(col,exported));if(!source.has(key)&&!isBlank(row.cells[col.id]))overwritten++;changes.set(key,{row,col,value,format:clone(sh.fmt?.[srcR.id+':'+srcC.id]||null)});preview[r][c]=value;}const proposed=clone(sh),byRow=new Map(proposed.rows.map(r=>[r.id,r]));for(const x of changes.values()){if(_ro(x.col)||x.col.type==='record')throw Error('The range includes a locked, linked or automatic column');byRow.get(x.row.id).cells[x.col.id]=x.value;}for(const x of changes.values()){const rules=colRules(x.col);const error=rules?.mode==='reject'&&validateVal(proposed,x.col,byRow.get(x.row.id),x.value,{});if(error)throw Error(x.col.name+': '+error);}return {changes:[...changes.values()],preview,overwritten,h:w,w:h};}
 function transposeSelection(){const sh=curSheet(),B=_selBox();if(!sh||!B)return;if(sheetLocked(sh)||_selCells.size){toast('Select one continuous, editable range');return;}let plan;try{plan=planTranspose(sh,B);}catch(e){toast(e.message);return;}const baseline=JSON.stringify({columns:sh.columns,rows:sh.rows,fmt:sh.fmt});const b=document.createElement('div');b.innerHTML=`<div class="transpose-dimensions"><span>${B.r1-B.r0+1} rows × ${B.c1-B.c0+1} columns</span><span aria-hidden="true">→</span><strong>${plan.h} rows × ${plan.w} columns</strong></div><p class="hint">Rows become columns, starting at the top-left cell. Formats move with the values. Formulas become their current results. Old cells outside the result are cleared.</p><div class="transpose-preview"><table><tbody>${plan.preview.slice(0,8).map(row=>'<tr>'+row.slice(0,8).map(v=>'<td>'+esc(String(v))+'</td>').join('')+'</tr>').join('')}</tbody></table></div>${plan.h>8||plan.w>8?'<p class="hint">Preview shows the first 8 rows and columns.</p>':''}${plan.overwritten?`<label class="overwrite-check"><input type="checkbox" id="transposeReplace">Replace ${plan.overwritten} occupied cells outside the selection</label>`:'<p class="hint">No data outside the selection will be replaced.</p>'}`;modal('Transpose selection',b,()=>{if(curSheet()!==sh||baseline!==JSON.stringify({columns:sh.columns,rows:sh.rows,fmt:sh.fmt})){toast('The grid changed. Open a fresh preview');return false;}if(plan.overwritten&&!b.querySelector('#transposeReplace').checked){toast('Confirm replacing the occupied cells');return false;}pushUndo();sh.fmt=sh.fmt||{};for(const x of plan.changes){x.row.cells[x.col.id]=x.value;touchRow(x.row);const key=x.row.id+':'+x.col.id;if(x.format)sh.fmt[key]=x.format;else delete sh.fmt[key];}SELR=B.vr[B.r0].id;SELC=B.vc[B.c0].id;FR=B.vr[B.r0+plan.h-1].id;FC=B.vc[B.c0+plan.w-1].id;afterEdit();toast('Selection transposed');},'Transpose');document.querySelector('.modal')?.classList.add('wide');}
 
+
+
+function selColumnIds(){const sh=curSheet(),B=_selBox();if(!sh)return [];const ids=new Set(B?B.vc.slice(B.c0,B.c1+1).map(c=>c.id):SELC?[SELC]:[]);_selCells.forEach(k=>ids.add(k.slice(k.indexOf('|')+1)));return sh.columns.filter(c=>ids.has(c.id)).map(c=>c.id);}
+function requestDeleteSelected(kind){const sh=curSheet();if(!sh||sheetLocked(sh)){toast('Unlock this sheet first');return;}const ids=kind==='columns'?selColumnIds():selRowIds();const list=kind==='columns'?sh.columns:sh.rows;const selected=list.filter(x=>ids.includes(x.id));if(!selected.length)return;if(selected.length>=list.length){toast('Keep at least one '+(kind==='columns'?'column':'row')+' in the grid');return;}if(kind==='columns'&&selected.some(c=>colLocked(c,sh))){toast('The selection includes a locked column');return;}const b=document.createElement('div');b.innerHTML=`<p>Delete <strong>${selected.length} ${selected.length===1?(kind==='columns'?'column':'row'):kind}</strong> and their contents?</p>${kind==='columns'?`<div class="cln-chips">${selected.slice(0,12).map(c=>`<span class="cln-chip">${esc(c.name)}</span>`).join('')}${selected.length>12?`<span class="hint">+ ${selected.length-12} more</span>`:''}</div>`:''}<p class="hint">You can restore this deletion with Ctrl+Z.</p>`;modal('Delete '+kind,b,()=>{if(curSheet()!==sh||sheetLocked(sh))return false;const current=kind==='columns'?sh.columns:sh.rows;if(selected.some(x=>!current.includes(x))){toast('The grid changed. Select the items again');return false;}if(kind==='columns')deleteColumns(ids);else deleteRows(ids);},'Delete '+selected.length);document.querySelector('#mSave')?.classList.add('danger');}
 
 /* ============================ BOOT ============================ */
 if(EMBED){ $("#main").innerHTML=`<div class="gload"><span class="gspin"></span>Loading your grids…</div>`; try{ window.parent.postMessage({type:"grids:ready"},_hubOrigin()); }catch(e){} }
