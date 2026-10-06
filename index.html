@@ -4414,7 +4414,7 @@ function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b
 function _mergeGrids(a,b){
   a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
   const time=x=>+(x&&(x.updated||x.created))||0;
-  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
   function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
       /* A descendant already includes the other revision. Divergent revisions retain the loser. */
@@ -10561,7 +10561,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-05-tools-2";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-06-formats-filters-3";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */

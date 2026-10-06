@@ -154,7 +154,7 @@ body.resizing *{user-select:none!important}
 body.selecting{user-select:none}
 body.selecting td.cell{cursor:cell}
 body.selecting *{user-select:none!important}
-.fillhandle{position:absolute;right:-4px;bottom:-4px;width:9px;height:9px;background:var(--sel);border:1.5px solid var(--card);border-radius:2px;cursor:crosshair;z-index:12}
+.fillhandle{position:absolute;right:-4px;bottom:-4px;width:7px;height:7px;background:var(--sel);border:1px solid var(--card);border-radius:2px;cursor:crosshair;z-index:12}
 td.cell.filltarget{box-shadow:inset 0 0 0 9999px rgba(129,126,255,.14)}
 html.dark td.cell.filltarget{box-shadow:inset 0 0 0 9999px rgba(179,169,255,.18)}
 input.hname-edit{flex:1;min-width:40px;font:inherit;font-size:.82rem;font-weight:700;color:var(--text);background:var(--card);border:2px solid var(--sel);border-radius:6px;padding:2px 6px;outline:none}
@@ -450,19 +450,18 @@ th .col-resize{cursor:col-resize;touch-action:none}
 .drag-ind.v{width:3px}
 .ghost-label{position:fixed;z-index:260;pointer-events:none;background:var(--card);border:1px solid var(--lilac);color:var(--text);
   border-radius:9px;padding:5px 12px;font-size:.8rem;font-weight:700;box-shadow:0 10px 26px rgba(20,14,50,.25)}
-/* A separate, pointer-transparent selection layer keeps manual/rule fills intact.
-   Two contrasting strokes stay visible even on a fill matching the selection ink.
-   The active cell has a heavier frame than the other cells in the range. */
-:root{--grid-selection-ink:#4a38b5;--grid-selection-keyline:rgba(255,255,255,.95);--grid-selection-tint:rgba(129,126,255,.08)}
-html.dark{--grid-selection-ink:#b3a9ff;--grid-selection-keyline:rgba(19,10,48,.95);--grid-selection-tint:rgba(179,169,255,.10)}
+/* Thin, pointer-transparent selection outlines. Only the outside edges of a range are drawn. */
+:root{--grid-selection-ink:#817eff;--grid-selection-tint:rgba(129,126,255,.055)}
+html.dark{--grid-selection-ink:#b3a9ff;--grid-selection-tint:rgba(179,169,255,.065)}
 table.gr td.cell.inrange::after,table.gr td.cell.sel::after{
-  content:"";position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:4;
-  border:1px solid var(--grid-selection-ink);
-  box-shadow:inset 0 0 0 2px var(--grid-selection-keyline);
-  background:var(--grid-selection-tint)
+ content:"";position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:4;
+ border:0 solid var(--grid-selection-ink);background:var(--grid-selection-tint)
 }
-table.gr td.cell.sel::after{border-width:3px;background:transparent}
-/* Existing editors (z-index 10) and the fill handle remain above the frame. */
+table.gr td.cell.sel::after{border-width:1px;background:transparent}
+table.gr td.cell.inrange.selt::after{border-top-width:1px}
+table.gr td.cell.inrange.selr::after{border-right-width:1px}
+table.gr td.cell.inrange.selb::after{border-bottom-width:1px}
+table.gr td.cell.inrange.sell::after{border-left-width:1px}
 /* banded (alternating) rows */
 tr.band td.cell{background:var(--surface-raised)}
 /* freeze panes */
@@ -965,7 +964,7 @@ td.cell.invalid{box-shadow:inset 0 0 0 9999px color-mix(in srgb,var(--red) 7%,tr
 .vh-list{border-right:1px solid var(--border);overflow:auto;padding:12px 10px 16px}
 .vh-top{display:flex;gap:8px;padding:2px 6px 10px}
 .vh-top .btn{flex:1;justify-content:center}
-.vh-day{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 8px 6px}
+.vh-day{font-size:.8rem;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);padding:12px 8px 6px}
 .vh-it{display:block;width:100%;text-align:left;border:0;background:none;color:var(--text);font:inherit;padding:9px 10px;border-radius:10px;cursor:pointer;position:relative}
 .vh-it:hover{background:var(--surface-hover)}
 .vh-it.on{background:var(--surface-sel)}
@@ -1264,27 +1263,27 @@ html:not(.dark) .qa{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 6px 18px rg
 .item .cacts .kebab,.item .cacts .favstar,.item .lact .kebab,.item .lact .favstar{position:static;transform:none}
 .item .meta .med{white-space:nowrap}
 /* list view */
-.grid-items.list{display:flex;flex-direction:column;gap:0;border:1px solid var(--card-line,var(--border));border-radius:18px;background:var(--card-glass,var(--card));overflow:hidden}
+.grid-items.list{display:flex;flex-direction:column;gap:0;border:1px solid var(--card-line,var(--border));border-radius:0;background:var(--card);overflow:hidden}
 html:not(.dark) .grid-items.list{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 10px 30px rgba(36,8,82,.06)}
-.grid-items.list .lhead,.grid-items.list .item.lrow{display:grid;grid-template-columns:40px minmax(0,1fr) 150px 130px 70px;align-items:center;column-gap:14px}
-.grid-items.list .lhead{padding:8px 16px;border-bottom:1px solid var(--border);font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.grid-items.list .lhead,.grid-items.list .item.lrow{display:grid;grid-template-columns:32px minmax(0,1fr) 190px 110px 70px;align-items:center;column-gap:14px}
+.grid-items.list .lhead{padding:8px 16px;border-bottom:1px solid var(--border);font-size:.8rem;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted)}
 .lhead .lh{border:0;background:none;padding:2px 0;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;text-align:left;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
 .lhead span.lh{cursor:default}
 .lhead .lh.lname-h{grid-column:1 / span 2;justify-self:start}
 .lhead .lh.on,.lhead button.lh:hover{color:var(--text)}
 .lhead .lh svg{width:11px;height:11px}
-.grid-items.list .item.lrow{border:0;border-radius:0;box-shadow:none!important;background:transparent;min-height:0;padding:10px 16px;row-gap:0;border-bottom:1px solid var(--border);transform:none!important}
+.grid-items.list .item.lrow{min-height:49px!important;border:0;border-radius:0;box-shadow:none!important;background:transparent;min-height:0;padding:10px 16px;row-gap:0;border-bottom:1px solid var(--border);transform:none!important}
 .grid-items.list .item.lrow:last-child{border-bottom:0}
 .grid-items.list .item.lrow:hover{background:rgba(129,126,255,.07)}
-.item.lrow .ic{width:36px;height:36px;border-radius:11px}
+.item.lrow .ic{width:28px;height:28px;border-radius:6px;background:transparent!important;box-shadow:none!important}
 .item.lrow .ic svg{width:18px;height:18px}
 .item.lrow .lname{min-width:0}
-.item.lrow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
+.item.lrow .nm{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
 .item.lrow .desc{-webkit-line-clamp:1;margin-top:1px;font-size:.76rem}
 .item.lrow .meta.lm{display:none}
 .item.lrow .lcol{margin:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item.lrow .lact{display:flex;justify-content:flex-end;gap:2px}
-.item.lrow .kebab{opacity:0}
+.item.lrow .kebab{opacity:.8}
 /* list view: folders and grids are told apart at a glance */
 .grid-items.list .lgroup{display:flex;align-items:center;gap:8px;padding:9px 16px 7px;font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--lavender) 5%,transparent);border-bottom:1px solid var(--border)}
 .grid-items.list .lgroup b{font-weight:800;font-size:.66rem;letter-spacing:0;padding:1px 7px;border-radius:99px;background:color-mix(in srgb,var(--lavender) 14%,transparent);color:var(--violet)}
@@ -1448,7 +1447,7 @@ html.dark .ctx .qhl-sw{filter:saturate(1.6) brightness(.8)}
 html.dark .editor .ftool .fbtn.on{color:#fff;background:rgba(129,126,255,.3)}
 .editor .ftool .fdiv{height:20px;margin:0 7px;opacity:.9}
 .editor.notb .ftool{display:none}
-/* ===== Column insights v2 ===== */
+/* ===== Insights v2 ===== */
 .modal.ins2m{max-width:720px}
 .modal.ins2m .mfoot{display:none}
 .modal.ins2m .mbody{padding:14px 20px 18px;position:relative}
@@ -1458,7 +1457,7 @@ html.dark .editor .ftool .fbtn.on{color:#fff;background:rgba(129,126,255,.3)}
 .ins-sub i{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
 .ins-card{border:1px solid var(--border);border-radius:16px;padding:14px 16px;background:var(--card)}
 html.dark .ins-card{background:rgba(255,255,255,.03)}
-.ins2 .ins-h{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ins2 .ins-h{font-size:.8rem;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);margin-bottom:10px}
 .ins2 .ins-h small{text-transform:none;letter-spacing:0;font-weight:500;margin-left:6px}
 .ins-compbar{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;background:var(--surface-hover)}
 .ins-compbar i{display:block;min-width:4px}
@@ -1694,6 +1693,25 @@ table.gr td.rowhdr,table.gr th.rowhdr{position:sticky;left:0}
 
 /* Shared panels for imports, row forms and print controls. */
 .grid-review{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:10px}.grid-review p{overflow-wrap:anywhere}.grid-row-details textarea{resize:vertical;white-space:pre-wrap}.grid-row-details{max-height:65vh;overflow:auto;padding-right:4px}
+
+/* Menus size to their content; narrow screens wrap instead of truncating labels. */
+.ctx{width:max-content;min-width:min(250px,calc(100vw - 16px));max-width:calc(100vw - 16px);overflow-x:hidden}
+.ctx button{min-height:36px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
+.ctx button .mtx{white-space:normal;overflow:visible;text-overflow:clip}
+.ctx .lbl{white-space:normal;overflow-wrap:anywhere}
+.ctx .cm-quick button{min-width:0}.ctx .cm-quick{gap:8px}
+.format-split{display:inline-flex;align-items:center;gap:0}.format-split .format-more{width:18px;padding:0;min-width:18px;font-size:12px}
+.ctx.format-list{min-width:260px}.ctx.format-list button{justify-content:space-between;gap:16px}
+
+.saved-filter{display:inline-flex;align-items:center;gap:6px}.saved-filter.on{color:var(--violet);background:var(--surface-sel)}
+.saved-filter-form{max-height:65vh;overflow:auto}.filter-condition{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 30px;gap:8px;margin-bottom:10px;align-items:center}.filter-condition .inp{min-width:0}
+.saved-filter-form .filter-conditions{min-width:0}@media(max-width:600px){.filter-condition{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px}.filter-condition [data-filter-value]{grid-column:1/3;grid-row:2}.filter-condition [data-remove-condition]{grid-column:3;grid-row:1/3}}
+.ctx .vrowi>.vmini{width:30px;min-width:30px;padding:5px}.ctx .vrowi>button:first-child{min-width:0}
+
+table.gr[dir="rtl"] td.cell.inrange.sell::after{border-left-width:0;border-right-width:1px}
+table.gr[dir="rtl"] td.cell.inrange.selr::after{border-right-width:0;border-left-width:1px}
+table.gr[dir="rtl"] td.cell.inrange.sell.selr::after{border-left-width:1px;border-right-width:1px}
+.reviewmark{position:absolute;bottom:2px;right:3px;color:#b7791f;font-size:8px;line-height:1;z-index:2;cursor:help}
 </style>
 </head>
 <body>
@@ -1748,9 +1766,9 @@ function save(){ try{ localStorage.setItem(UI_KEY,JSON.stringify(DB.ui||{})); }c
 /* content signature — view state (active tab, sort, filters) is left out, so merely LOOKING at a grid a
    different way never makes this device's older copy "newer" than an edit made elsewhere */
 function _itemSig(x){ const c=Object.assign({},x); delete c.updated; delete c.ancestors; delete c.activeTab; delete c.fav;
-  if(Array.isArray(c.tabs)) c.tabs=c.tabs.map(t=>{ if(!t||(t.sort===undefined&&t.filters===undefined&&t.activeView===undefined&&!(t.pivot&&t.pivot.snap))) return t; const u=Object.assign({},t); delete u.sort; delete u.filters; delete u.activeView; if(u.pivot&&u.pivot.snap){ u.pivot=Object.assign({},u.pivot); delete u.pivot.snap; } return u; });   /* the dashboard snapshot is derived — refreshing it isn't an edit */
+  if(Array.isArray(c.tabs)) c.tabs=c.tabs.map(t=>{ if(!t||(t.sort===undefined&&t.filters===undefined&&t.activeView===undefined&&t.activeFilter===undefined&&t.filterEnabled===undefined&&!(t.pivot&&t.pivot.snap))) return t; const u=Object.assign({},t); delete u.sort; delete u.filters; delete u.activeView; delete u.activeFilter; delete u.filterEnabled; if(u.pivot&&u.pivot.snap){ u.pivot=Object.assign({},u.pivot); delete u.pivot.snap; } return u; });   /* the dashboard snapshot is derived — refreshing it isn't an edit */
   return JSON.stringify(c); }
-function _viewSig(x){ return JSON.stringify([x.activeTab||"",(x.tabs||[]).map(t=>[t.sort||null,t.filters||null,t.activeView||null]),!!x.fav]); }
+function _viewSig(x){ return JSON.stringify([x.activeTab||"",(x.tabs||[]).map(t=>[t.sort||null,t.filters||null,t.activeView||null,t.activeFilter||null,t.filterEnabled!==false]),!!x.fav]); }
 let _vhashes={};
 function stampChanged(){ const now=Date.now(); let changed=false; const seen={};
   [["s",DB.sheets],["f",DB.folders]].forEach(([p,map])=>{ Object.values(map||{}).forEach(x=>{ const k=p+x.id; seen[k]=1; const h=_itemSig(x);
@@ -1773,7 +1791,7 @@ function tomb(id){ DB.deleted=DB.deleted||{}; DB.deleted[id]=Date.now(); }
 function mergeGridsDB(a,b){
   a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
   const time=x=>+(x&&(x.updated||x.created))||0;
-  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
   function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
       /* A descendant already includes the other revision. Divergent revisions retain the loser. */
@@ -2856,9 +2874,9 @@ function renderBrowser(){
   }else if(list){
     const s=DB.ui.bsort||"name"; const hd=(k,t,cls)=>`<button class="lh ${cls||""}${s===k?" on":""}" onclick="setBSort('${k}')">${t}${s===k?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>':""}</button>`;
     const grp=(t,n)=>`<div class="lgroup"><span>${t}</span><b>${n}</b></div>`;
-    html+=`<div class="grid-items list"><div class="lhead">${hd("name","Name","lname-h")}<span class="lh lcol">Contents</span>${hd("edited","Last edited","lcol")}<span></span></div>`
-      +(fF.length?grp("Folders",fF.length)+fF.map(f=>cardHTML("folder",f,{list:true})).join(""):"")
-      +(sF.length?grp("Grids",sF.length)+sF.map(x=>cardHTML("sheet",x,{list:true})).join(""):"")+`</div>`;
+    html+=`<div class="grid-items list"><div class="lhead">${hd("name","Name","lname-h")}${hd("edited","Date modified","lcol")}<span class="lh lcol">File size</span><span></span></div>`
+      +(fF.length?fF.map(f=>cardHTML("folder",f,{list:true})).join(""):"")
+      +(sF.length?sF.map(x=>cardHTML("sheet",x,{list:true})).join(""):"")+`</div>`;
   }else{
     if(fF.length){ html+=`<div class="section-label">Folders</div><div class="grid-items">`+fF.map(f=>cardHTML("folder",f)).join("")+`</div>`; }
     if(sF.length){ html+=`<div class="section-label">Grids</div><div class="grid-items">`+sF.map(s=>cardHTML("sheet",s)).join("")+`</div>`; }
@@ -2914,21 +2932,20 @@ const ITEM_COLORS=[null,"#817eff","#4a38b5","#2f7ec2","#1e915f","#7fd1c4","#c98a
 function _icSVG(key,fallback){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ITEM_ICONS[key]||ITEM_ICONS[fallback]}</svg>`; }
 function _icStyle(it){ if(!it.color) return ""; return `style="background:linear-gradient(140deg,${hex2rgba(it.color,.72)} 0%,${it.color} 100%);box-shadow:0 6px 16px ${hex2rgba(it.color,.28)}"`; }
 function cardHTML(kind,it,o){ o=o||{}; const isF=kind==="folder";
-  let meta; if(isF) meta=_folderMeta(it.id);
-  else { meta=_sheetMeta(it); if(o.recent||o.mini){ const p=it.parent&&DB.folders[it.parent]; meta=p?"in "+esc(p.name):"All grids"; } }
-  const edited=isF?_folderEdited(it.id):_sheetEdited(it);
   const open=isF?`openFolder('${it.id}')`:`openSheet('${it.id}')`;
   const star=`<button class="favstar${it.fav?" on":""}" title="${it.fav?"Remove from favourites":"Add to favourites"}" onclick="event.stopPropagation();toggleFav('${kind}','${it.id}')">${STAR_IC}</button>`;
   const keb=`<button class="kebab" title="More" onclick="event.stopPropagation();itemMenu(event,'${kind}','${it.id}')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>`;
   const head=`<div class="item ${isF?"folder":"sheet"}${o.mini?" mini":""}${o.list?" lrow":""}${it.fav?" faved":""}" data-kind="${kind}" data-id="${it.id}"${isF&&!o.mini?` data-drop="${it.id}"`:""} onclick="${open}" oncontextmenu="itemMenu(event,'${kind}','${it.id}')">`;
   const ic=`<div class="ic" ${_icStyle(it)}>${_icSVG(it.icon,isF?"folder":"grid")}</div>`;
   if(o.list){
-    /* list view: a folder reads as a folder (folder-shaped icon, "Folder" label); a grid as a grid (tile, rows × columns). The whole row opens it. */
+    /* Drive-style list: icon, name, date, size and row actions. */
     const lic=isF?`<div class="ic fic" style="--fc:${esc(it.color||"#e0894a")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fb" d="M2.5 6.5A2 2 0 0 1 4.5 4.5h4.3l2.1 2.2h8.6a2 2 0 0 1 2 2v9.8a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z"/><path class="ft" d="M2.5 9.2h19"/></svg></div>`:ic;
-    const lmeta=isF?meta:_sheetMetaL(it);
-    return head+lic+`<div class="lname"><div class="nm">${esc(it.name)}</div>${it.desc?`<div class="desc">${esc(it.desc)}</div>`:""}<div class="meta lm"><span class="ltype">${isF?"Folder":"Grid"}</span>${lmeta}${edited?" · "+_ago(edited):""}</div></div><div class="lcol meta"><span class="ltype">${isF?"Folder":"Grid"}</span>${lmeta}</div><div class="lcol meta" title="${edited?esc(new Date(edited).toLocaleString()):""}">${edited?_ago(edited):"—"}</div><div class="lact">${star}${keb}</div></div>`; }
-  if(o.mini) return head+keb+star+ic+`<div class="nm">${esc(it.name)}</div><div class="meta">${meta}</div></div>`;
-  return head+`<div class="cacts">${keb}${star}</div>`+ic+`<div class="nm">${esc(it.name)}</div>${it.desc?`<div class="desc">${esc(it.desc)}</div>`:""}<div class="meta">${meta}${edited?`<span class="med"> · edited ${_ago(edited)}</span>`:""}</div></div>`; }
+    const edited=isF?_folderEdited(it.id):_sheetEdited(it), date=edited?new Date(edited).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"—", size=browserFileSize(kind,it);
+    return head+lic+`<div class="lname"><div class="nm">${esc(it.name)}</div><div class="meta lm">${esc(date)}${isF?"":" · "+size}</div></div><div class="lcol meta" title="${edited?escAttr(new Date(edited).toLocaleString()):""}">${esc(date)}</div><div class="lcol meta" title="${isF?"Folders have no file size":"Size of the grid data"}">${size}</div><div class="lact">${star}${keb}</div></div>`; }
+  if(o.mini) return head+keb+star+ic+`<div class="nm">${esc(it.name)}</div></div>`;
+  return head+`<div class="cacts">${keb}${star}</div>`+ic+`<div class="nm">${esc(it.name)}</div>${it.desc?`<div class="desc">${esc(it.desc)}</div>`:""}</div>`; }
+function browserFileSize(kind,it){if(kind==='folder')return '—';try{const bytes=new TextEncoder().encode(JSON.stringify(it)).length;if(bytes<1024)return bytes+' B';if(bytes<1048576)return (bytes/1024).toFixed(1)+' KB';return (bytes/1048576).toFixed(1)+' MB';}catch(e){return '—';}}
+
 /* ---------- favourites & recent ---------- */
 function toggleFav(kind,id){ const it=(kind==="folder"?DB.folders:DB.sheets)[id]; if(!it) return; if(it.fav) delete it.fav; else it.fav=true; save(); render(); toast(it.fav?"Added “"+it.name+"” to favourites":"Removed from favourites"); }
 function noteRecent(id){ DB.ui.recent=[id].concat((DB.ui.recent||[]).filter(x=>x!==id)).slice(0,12); }
@@ -3173,6 +3190,7 @@ function collapsedHidden(sh){ const hidden=new Set(); let hideLevel=null;
 function sheetHasGroups(sh){ return sh.rows.some(r=>(r.indent||0)>0); }
 function visibleRows(sh){ let rows=sh.rows.slice(); const _ch=collapsedHidden(sh); if(_ch.size) rows=rows.filter(r=>!_ch.has(r.id)); const filters=sh.filters||{}; const fkeys=Object.keys(filters).filter(k=>filters[k]&&((filters[k].text&&filters[k].text.length)||(filters[k].excl&&filters[k].excl.length)));
   if(fkeys.length){ const ctx=newCtx(); rows=rows.filter(row=>fkeys.every(cid=>{ const col=sh.columns.find(c=>c.id===cid); if(!col)return true; const f=filters[cid]; const dv=String(rawCellVal(sh,row,col,ctx)); if(f.text&&dv.toLowerCase().indexOf(f.text.toLowerCase())<0)return false; if(f.excl&&f.excl.indexOf(dv)>=0)return false; return true; })); }
+  rows=applySavedFilterRows(sh,rows);
   if(sh.sort&&sh.sort.col){ const col=sh.columns.find(c=>c.id===sh.sort.col); if(col){ const dir=sh.sort.dir||1; const ctx=newCtx();
       /* keys computed once per row; blanks always sink to the bottom; numbers & dates compare as numbers, before text */
       const K=new Map(rows.map(r=>{ let v=rawCellVal(sh,r,col,ctx); if(Array.isArray(v)) v=v.join(", "); const blank=v==null||v===""||isFErr(v); const n=blank?NaN:numOrNaN(v); return [r.id,{blank,n,s:blank?"":String(fmtScalar(v)).toLowerCase()}]; }));
@@ -3182,7 +3200,7 @@ function visibleRows(sh){ let rows=sh.rows.slice(); const _ch=collapsedHidden(sh
 }
 /* Undo/redo: one history per grid tab (switching tabs or grids never replays another sheet's history).
    A step stores the tab's data + formatting, plus other tabs' formulas when this tab's structure can rewrite them. */
-const _UNDO_KEYS=["columns","rows","rules","fmt","notes","charts","freeze","name","density","wrapText","noGrid","bands","rtl","sumRow","views","pivot","links"];
+const _UNDO_KEYS=["columns","rows","rules","fmt","notes","charts","freeze","name","density","wrapText","noGrid","bands","rtl","sumRow","views","pivot","links","savedFilters","activeFilter","filterEnabled","reviewFlags"];
 let _undoKey=null, _undoMap={}, _undoBytes=new WeakMap();
 function _undoSync(){ const sh=curSheet(); const key=(DB.ui&&DB.ui.open||"")+":"+(sh?sh.id:""); if(key===_undoKey) return;
   if(_undoKey) _undoMap[_undoKey]={u:undoStack,r:redoStack}; const e=_undoMap[key]||{u:[],r:[]}; undoStack=e.u; redoStack=e.r; _undoKey=key; }
@@ -3308,7 +3326,7 @@ function renderEditor(){ _cellTick++;
         <button class="menb" onclick="menuFormat(event)">Format</button>
         <button class="menb" onclick="menuData(event)">Data</button><button class="menb" onclick="gridTools(event)">Tools</button>
         <button class="menb" onclick="menuView(event)">View</button>
-        ${viewPillHTML(sh)}
+        ${savedFilterToolbar(sh)}${viewPillHTML(sh)}
       </nav>
       <div class="sp"></div>
       <div class="searchbox${_search||_searchOpen?" open":""}" onclick="openGridSearch(event)" title="Search this sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="gsearch" placeholder="Search this sheet…" value="${esc(_search)}" oninput="gridSearch(this.value)" onblur="closeGridSearch()" onkeydown="if(event.key==='Escape'){event.stopPropagation();gridSearch('');_searchOpen=false;renderEditor();}">${_search?`<button class="sx" onmousedown="event.preventDefault()" onclick="event.stopPropagation();gridSearch('')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:""}</div>
@@ -3326,7 +3344,8 @@ function renderEditor(){ _cellTick++;
       <button class="fbtn" title="Paint format (copy a cell's style, then click cells to apply)" onclick="startPaint()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="13" height="6" rx="1.5"/><path d="M16 7h3a1 1 0 0 1 1 1v2.5a1 1 0 0 1-1 1h-6a1 1 0 0 0-1 1V15"/><rect x="10.5" y="15" width="4" height="5" rx="1"/></svg></button>
       <button class="fbtn" title="Clear formatting (Ctrl+\\)" onclick="clearFmt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 12h6M14 14l6 6M20 14l-6 6"/></svg></button>
       <span class="fdiv"></span>
-      <button class="fbtn" title="Currency — Saudi Riyal (Ctrl+Shift+4)" onclick="setNumFmt('currency')">${riyalHTML("font-size:1.02rem;line-height:1")}</button>
+      <div class="format-split"><button class="fbtn" title="Saudi Riyal (Ctrl+Shift+4)" onclick="setCurrencyFormat('SAR')">${riyalHTML("font-size:1.02rem;line-height:1")}</button><button class="fbtn format-more" title="More currencies" onclick="currencyFormatMenu(event)" aria-label="More currencies">▾</button></div>
+      <div class="format-split"><button class="fbtn" title="Date format" onclick="setDateFormat('regional')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18"/></svg></button><button class="fbtn format-more" title="More date formats" onclick="dateFormatMenu(event)" aria-label="More date formats">▾</button></div>
       <button class="fbtn sm2" title="Percent (Ctrl+Shift+5)" onclick="setNumFmt('percent')" style="font-size:1rem">%</button>
       <button class="fbtn sm2 fdec" title="Decrease decimal places" onclick="decDec(-1)"><span>.0</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M15 6l-6 6 6 6"/></svg></button>
       <button class="fbtn sm2 fdec" title="Increase decimal places" onclick="decDec(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M9 6l6 6-6 6"/></svg><span>.00</span></button>
@@ -3367,7 +3386,7 @@ function renderEditor(){ _cellTick++;
         oninput="feOnInput()" onkeydown="feOnKey(event,'fx')" onfocus="feFocus('fx')" onblur="feBlur(event,'fx')">
       <span class="fxprev" id="fxPrev"></span>
       <span class="fxscope" id="fxScope"></span>
-      <button class="fxexplain" id="fxExplain" title="Explain this cell — step by step, what it reads and what uses it" onmousedown="event.preventDefault()" onclick="_fx?closeExplainer():openExplainer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg><span>Explain</span></button>
+      <button class="fxexplain" id="fxExplain" title="Explain cell — step by step, what it reads and what uses it" onmousedown="event.preventDefault()" onclick="_fx?closeExplainer():openExplainer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg><span>Explain</span></button>
       <span class="fxhint" id="fxHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg><span class="fxh-l">Click a cell · drag for a range · header = whole column</span><span class="fxh-s">Click cells to add them</span></span>
     </div>
     </div>
@@ -3383,7 +3402,7 @@ function renderEditor(){ _cellTick++;
     html+=`<th style="width:${_colW(col)}px;min-width:${_colW(col)}px" oncontextmenu="colMenu(event,'${col.id}')" onpointerdown="colDragStart(event,'${col.id}')">${hb}
       <div class="hc"><span class="hname" data-hname="${col.id}" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectColumn('${col.id}',event)}" onclick="selectColumn('${col.id}',event)" ondblclick="renameColumn(event,'${col.id}')" title="${esc(col.name)} — click to select, Shift-click to extend, double-click to rename, drag to reorder">${esc(col.name)}</span>${col.locked?`<span class="hlock" title="Locked — can't be edited. Unlock from the column menu.">${LOCK_IC}</span>`:""}${colRules(col)?`<span class="rhdr-rule" title="Has column rules — click to edit" onclick="event.stopPropagation();openColumnRules('${col.id}')">${RULE_ICON}</span>`:""}
       <span class="htype">${_hdrRoom(col)?typeBadge(col):""}${sortInd?`<span class="hsort">${sortInd}</span>`:""}</span>
-      <span class="hacts${isFilt?" filtered":""}"><button class="hins" title="Column insights" onclick="event.stopPropagation();colInsights('${col.id}')">${INS_IC}</button><button class="hfilter ${isFilt?"on":""}" title="Sort & filter" onclick="filterMenu(event,'${col.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></button>
+      <span class="hacts${isFilt?" filtered":""}"><button class="hins" title="Insights" onclick="event.stopPropagation();colInsights('${col.id}')">${INS_IC}</button><button class="hfilter ${isFilt?"on":""}" title="Sort & filter" onclick="filterMenu(event,'${col.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></button>
       <button class="hcaret" onclick="colMenu(event,'${col.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></span></div>
       <div class="col-resize" title="Drag to resize · double-click to fit content" onpointerdown="startResize(event,'${col.id}')" ondblclick="autofitColumn('${col.id}',event)"></div></th>`;
   });
@@ -3439,7 +3458,7 @@ function rowHTML(sh,row,ri,ctx,S){ const _vc=S.vc; const hl=hlForTheme(row._hl);
   h+=`<td class="rowhdr" onpointerdown="rowDragStart(event,'${row.id}')" oncontextmenu="rowMenu(event,'${row.id}')" title="Click to select · Shift-click to extend · drag to reorder"><span class="rnum">${(S.rowNo&&S.rowNo[row.id])||ri+1}</span><div class="row-resize" onpointerdown="startRowResize(event,'${row.id}')"></div></td>`;
   _vc.forEach((col,ci)=>{ const eff=effFmt(sh,row.id,col); const selc=(ri===S.ri&&ci===S.ci);
     const _hc=S.cellHL&&S.cellHL.get(row.id+":"+col.id); const hlx=_hc?hlForTheme(_hc):hl;   /* a cell-level rule (e.g. duplicates) beats the row colour */
-    const inr=(S.ri>=0&&ri>=S.r0&&ri<=S.r1&&ci>=S.c0&&ci<=S.c1&&!selc);
+    const inr=!selc&&((S.ri>=0&&ri>=S.r0&&ri<=S.r1&&ci>=S.c0&&ci<=S.c1)||_selCells.has(row.id+'|'+col.id));
     const isF=col.type==='formula'||(String(row.cells[col.id]||'')[0]==='=');
     const _sk=row.id+":"+col.id, _se=S.spill&&S.spill.size?S.spill.get(_sk):null; const spl=!isF&&_se&&("v" in _se)&&(row.cells[col.id]==null||row.cells[col.id]==="");   /* a value spilled from a formula above / to the left */
     /* numbers typed into a plain text column line up on the right, like Sheets (unless the cell has its own alignment) */
@@ -3447,13 +3466,14 @@ function rowHTML(sh,row,ri,ctx,S){ const _vc=S.vc; const hl=hlForTheme(row._hl);
     const _vz=(col.viz&&S.viz&&S.viz[col.id])?vizCell(col,isF?cellComputed(sh,row.id,col,ctx):row.cells[col.id],S.viz[col.id],!!(hlx||eff.fill)):null;
     const _fill=hlx||eff.fill; const _cv=cvStyleFrom(eff)+((_fill&&isLight(_fill)&&!eff.color)?"color:#241a3a;":"");
     const note=sh.notes&&sh.notes[row.id+":"+col.id];
+    const review=sh.reviewFlags?.[row.id+":"+col.id], reviewActive=review&&review.value===row.cells[col.id];
     const bad=col.valid?validateVal(sh,col,row,_vCellVal(sh,row,col,ctx),S.vcache||(S.vcache={})):null;
     const isP=ci===0 && S.hier; let disp=spl?`<span>${fmtVal(_se.v,col,eff)}</span>`:cellDisplay(sh,row,col,ctx,eff);
     if(isP){ const H=S.hier[row.id]||{lv:0,kids:false,collapsed:false}; const lv=H.lv||0;
       const tw=H.kids?`<button class="rtwist${H.collapsed?' col':''}" onclick="event.stopPropagation();toggleCollapse('${row.id}')" title="${H.collapsed?'Expand group':'Collapse group'}"><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.6'><path d='M9 6l6 6-6 6'/></svg></button>`:(lv>0?`<span class='rtwist-sp'></span>`:"");
       disp=`<span class="rgrp" style="padding-left:${lv*16}px">${tw}</span><span class="pcv">${disp}</span>`;
     }
-    h+=`<td class="cell ${_autoNum?'num':cellClass(col)} ${isP?'pcol':''} ${selc?'sel':''} ${inr?'inrange':''} ${isF||spl?'formulaC':''}${spl?' spilled':''}${_se&&_se.anchor?' spillanchor':''}${bad?' invalid':''}${_vz?_vz.cls:''}" style="${tdStyleFrom(eff,hlx)}${_vz&&_vz.style?_vz.style:''}"${bad?` title="${escAttr(bad)}"`:""} data-r="${row.id}" data-c="${col.id}" onpointerdown="cellDown('${row.id}','${col.id}',event)" onclick="cellClick('${row.id}','${col.id}',event)" ondblclick="startEdit('${row.id}','${col.id}')" oncontextmenu="cellMenu(event,'${row.id}','${col.id}')">${_vz&&_vz.inner?_vz.inner:""}<div class="cv" style="${_cv}">${disp}</div>${note?`<span class="notemark" title="${esc(note)}" onclick="noteAt(event,'${row.id}','${col.id}')"></span>`:""}</td>`; });
+    h+=`<td class="cell ${_autoNum?'num':cellClass(col)} ${isP?'pcol':''} ${selc?'sel':''} ${inr?'inrange '+selectionEdges(S,ri,ci).join(' '):''} ${isF||spl?'formulaC':''}${spl?' spilled':''}${_se&&_se.anchor?' spillanchor':''}${bad?' invalid':''}${_vz?_vz.cls:''}" style="${tdStyleFrom(eff,hlx)}${_vz&&_vz.style?_vz.style:''}"${bad?` title="${escAttr(bad)}"`:""} data-r="${row.id}" data-c="${col.id}" onpointerdown="cellDown('${row.id}','${col.id}',event)" onclick="cellClick('${row.id}','${col.id}',event)" ondblclick="startEdit('${row.id}','${col.id}')" oncontextmenu="cellMenu(event,'${row.id}','${col.id}')">${_vz&&_vz.inner?_vz.inner:""}<div class="cv" style="${_cv}">${disp}</div>${reviewActive?`<span class="reviewmark" title="${escAttr(review.message)}" aria-label="Review inconsistent value">●</span>`:""}${note?`<span class="notemark" title="${esc(note)}" onclick="noteAt(event,'${row.id}','${col.id}')"></span>`:""}</td>`; });
   h+=`<td></td></tr>`; return h; }
 const _rowCal={}; let _calibrating=false;
 function virtWindow(scrollTop,viewportH){ const z=gZoom(); scrollTop/=z; viewportH/=z; const offs=_virt.offs, n=_virt.vr.length, BUF=8;
@@ -3552,7 +3572,7 @@ function effFmt(sh,r,col){ const b=col.style||{}, f=cellFmtOf(sh,r,col.id)||{};
     align: f.a||b.align||null,
     bold: f.b!=null?f.b:!!b.bold, italic:!!f.i, underline:!!f.u, strike:!!f.s,
     color: f.fg||b.color||null, fill: f.bg||b.fill||null,
-    nf: (f.nf!=null?f.nf:undefined), dp: (f.dp!=null?f.dp:(col.decimals!=null?col.decimals:undefined)),
+    nf: (f.nf!=null?f.nf:undefined), df:f.df||col.dateFormat||"regional", cc:f.cc||col.currency||"SAR", dp: (f.dp!=null?f.dp:(col.decimals!=null?col.decimals:undefined)),
     wrap: f.wr||b.wrap||(sh&&sh.wrapText?"wrap":null), valign: f.va||b.valign||null, fs: (f.fs!=null?f.fs:(b.fs!=null?b.fs:null)), border: f.bd||b.border||null
   };
 }
@@ -3590,7 +3610,7 @@ function cellDisplay(sh,row,col,ctx,eff){
   if(t==="createdby"){ const n=row.createdBy||"You"; return `<span class="person"><span class="pav" style="background:${personColor(n)}">${esc(initials(n)||"?")}</span>${esc(n)}</span>`; }
   if(t==="modifiedby"){ const n=row.modifiedBy||"You"; return `<span class="person"><span class="pav" style="background:${personColor(n)}">${esc(initials(n)||"?")}</span>${esc(n)}</span>`; }
   let val;
-  if(t==="formula"||String(row.cells[col.id]||"")[0]==="="){ val=cellComputed(sh,row.id,col,ctx); if((t==="date"||t==="datetime")&&typeof val==="string"&&isDateStr(val)) return `<span>${esc(fmtDateTime(val,t==="datetime"))}</span>`; return `<span>${fmtVal(val,col,eff)}</span>`; }   /* a date formula in a date column reads like the other dates */
+  if(t==="formula"||String(row.cells[col.id]||"")[0]==="="){ val=cellComputed(sh,row.id,col,ctx); if((t==="date"||t==="datetime")&&typeof val==="string"&&isDateStr(val)) return `<span>${fmtVal(val,col,eff)}</span>`; return `<span>${fmtVal(val,col,eff)}</span>`; }   /* a date formula in a date column reads like the other dates */
   val=row.cells[col.id];
   if(t==="rating"){ const n=Math.max(0,Math.min(5,Math.round(num(val)))); let s=""; for(let i=1;i<=5;i++)s+=`<span class="star ${i<=n?'on':''}" onclick="event.stopPropagation();setCellVal('${row.id}','${col.id}','${i===n?0:i}')"><svg viewBox="0 0 24 24" fill="${i<=n?'currentColor':'none'}" stroke="currentColor" stroke-width="1.6"><path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.8 6.6 19.7l1.2-6.1L3.3 9.4l6.1-.8z"/></svg></span>`; return `<span class="stars">${s}</span>`; }
   if(t==="progress"){ const n=Math.max(0,Math.min(100,Math.round(num(val)))); if(isBlank(val))return ""; return `<span class="prog"><span class="prog-bar"><span style="width:${n}%"></span></span><span class="prog-n">${n}%</span></span>`; }
@@ -3599,8 +3619,8 @@ function cellDisplay(sh,row,col,ctx,eff){
   if(t==="select"||t==="status"||t==="priority"){ return chipHTML(val,col.options||(t==="status"?STATUS_DEFAULTS:t==="priority"?PRIORITY_DEFAULTS:[])); }
   if(t==="multiselect"){ const vs=multiVals(val); const opts=col.options||[]; return vs.map(v=>chipHTML(v,opts)).join(" "); }
   if(t==="person"){ const n=String(val); return `<span class="person"><span class="pav" style="background:${personColor(n)}">${esc(initials(n)||"?")}</span>${esc(n)}</span>`; }
-  if(t==="date"){ return `<span>${esc(fmtDateTime(val,false))}</span>`; }
-  if(t==="datetime"){ return `<span>${esc(fmtDateTime(val,true))}</span>`; }
+  if(t==="date"){ return `<span>${fmtVal(val,col,eff)}</span>`; }
+  if(t==="datetime"){ return `<span>${fmtVal(val,col,eff)}</span>`; }
   if(t==="email"){ const u=String(val).trim(); return `<a class="gl" href="mailto:${esc(u)}" onclick="event.stopPropagation()">${esc(u)}</a>`; }
   if(t==="phone"){ const u=String(val).trim(); return `<a class="gl" href="tel:${esc(u.replace(/[^0-9+]/g,''))}" onclick="event.stopPropagation()">${esc(u)}</a>`; }
   if(t==="url"||col.link||/^https?:\/\/\S+$/i.test(String(val).trim())){ const raw=String(val).trim(); if(/^https?:\/\//i.test(raw)){ return `<a class="gl" href="${esc(raw)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(raw.replace(/^https?:\/\//,""))}</a>`; } }
@@ -3614,9 +3634,10 @@ function fmtVal(v,col,eff){
   if(typeof v==="boolean") return v?"TRUE":"FALSE";
   const dp=(eff&&eff.dp!=null&&eff.dp!=="")?clampDp(eff.dp):((col.decimals!=null&&col.decimals!=="")?clampDp(col.decimals):null);
   let ef; if(eff&&eff.nf!=null&&eff.nf!==undefined) ef=eff.nf; else if(col.format) ef=col.format; else ef=(col.type==="currency"||col.type==="percent")?col.type:"";
+  if(ef==="date"||(!ef&&(col.type==="date"||col.type==="datetime")))return esc(gridDateText(v,(eff&&eff.df)||col.dateFormat||"regional",col.type==="datetime"));
   const numericCol=["number","currency","percent","formula"].includes(col.type)||ef==="currency"||ef==="percent";
   if((ef==="currency"||ef==="percent")&&typeof v==="string"&&v.trim()!==""&&isNaN(numOrNaN(v))) return esc(v);   /* a heading or note in a money column stays text */
-  if(ef==="currency"){ if(isBlank(v)&&v!==0)return ""; const n=num(v); return riyalHTML()+esc(n.toLocaleString(undefined,{minimumFractionDigits:dp==null?0:dp,maximumFractionDigits:dp==null?2:dp})); }
+  if(ef==="currency"){ if(isBlank(v)&&v!==0)return ""; const n=num(v); return gridCurrencyHTML(n,(eff&&eff.cc)||col.currency||"SAR",dp); }
   if(ef==="percent"){ const n=num(v)*100; return esc(n.toFixed(dp==null?(n%1===0?0:1):dp)+"%"); }
   if(numericCol && (typeof v==="number" || (!isBlank(v)&&!isDateStr(String(v))&&!isNaN(numOrNaN(v))))){ const n=num(v); return esc(n.toLocaleString(undefined,{minimumFractionDigits:dp==null?0:dp,maximumFractionDigits:dp==null?6:dp})); }
   if(typeof v==="number"){ if(dp!=null) return esc(v.toFixed(dp)); const a=Math.abs(v); return esc(a!==0&&(a>=1e15||a<1e-9)?v.toPrecision(10).replace(/\.?0+e/,"e"):String(Math.round(v*1e10)/1e10)); }   /* results in a text column: no float noise */
@@ -3653,13 +3674,14 @@ function _selBox(){ const sh=curSheet(); if(!sh||SELR==null||SELC==null) return 
   const ri=vr.findIndex(r=>r.id===SELR), ci=vc.findIndex(c=>c.id===SELC); if(ri<0||ci<0) return null; const fri=FR?vr.findIndex(r=>r.id===FR):ri, fci=FC?vc.findIndex(c=>c.id===FC):ci;
   return {vr,vc,r0:Math.min(ri,fri<0?ri:fri),r1:Math.max(ri,fri<0?ri:fri),c0:Math.min(ci,fci<0?ci:fci),c1:Math.max(ci,fci<0?ci:fci)}; }
 let _selSumT=0;
-function updateSelDOM(){ document.querySelectorAll("td.cell.sel,td.cell.inrange").forEach(td=>td.classList.remove("sel","inrange")); document.querySelectorAll("th.colsel,tr.selrow").forEach(t=>t.classList.remove("colsel","selrow"));
+function selectionEdges(B,ri,ci){const has=(r,c)=>{if(r<0||c<0||r>=B.vr.length||c>=B.vc.length)return false;return (r>=B.r0&&r<=B.r1&&c>=B.c0&&c<=B.c1)||_selCells.has(B.vr[r].id+'|'+B.vc[c].id);};return [[ri-1,ci,'selt'],[ri,ci+1,'selr'],[ri+1,ci,'selb'],[ri,ci-1,'sell']].filter(([r,c])=>!has(r,c)).map(x=>x[2]);}
+function updateSelDOM(){ document.querySelectorAll("td.cell.sel,td.cell.inrange").forEach(td=>td.classList.remove("sel","inrange","selt","selr","selb","sell")); document.querySelectorAll("th.colsel,tr.selrow").forEach(t=>t.classList.remove("colsel","selrow"));
   const sh=curSheet(); const B=_selBox();
   if(sh&&B){ const rIdx=new Map(), cIdx=new Map(); B.vr.forEach((r,i)=>rIdx.set(r.id,i)); B.vc.forEach((c,i)=>cIdx.set(c.id,i));
     /* only the cells actually drawn are touched, so selecting 100,000 cells costs the same as selecting ten */
     const multi=B.r0!==B.r1||B.c0!==B.c1||_selCells.size;
     if(multi) document.querySelectorAll("table.gr tbody td.cell").forEach(td=>{ const ri=rIdx.get(td.dataset.r), ci=cIdx.get(td.dataset.c); if(ri==null||ci==null) return;
-      if((ri>=B.r0&&ri<=B.r1&&ci>=B.c0&&ci<=B.c1)||(_selCells.size&&_selCells.has(td.dataset.r+"|"+td.dataset.c))) td.classList.add("inrange"); });
+      if((ri>=B.r0&&ri<=B.r1&&ci>=B.c0&&ci<=B.c1)||(_selCells.size&&_selCells.has(td.dataset.r+"|"+td.dataset.c))) { td.classList.add("inrange"); const edges=selectionEdges(B,ri,ci); if(edges.length)td.classList.add(...edges); } });
     const a=document.querySelector(`td[data-r="${SELR}"][data-c="${SELC}"]`); if(a){ a.classList.remove("inrange"); a.classList.add("sel"); if(!_suppressSelScroll){ try{ ensureCellVisible(a); }catch(e){} } }
     /* highlight the header when a whole column is selected, and the row number when a whole row is */
     if(!_selCells.size){ if(B.r0===0&&B.r1===B.vr.length-1){ const ths=[...document.querySelectorAll("table.gr thead th")].slice(1); for(let c=B.c0;c<=B.c1;c++) if(ths[c]) ths[c].classList.add("colsel"); }
@@ -3976,7 +3998,7 @@ async function openVersionHistory(){ const gid=DB.ui.open; if(!gid||!DB.sheets[g
   body.addEventListener("click",vhClick); }
 function vhDraw(){ const L=document.getElementById("vhList"), P=document.getElementById("vhPv"); if(!L||!P||!_vh) return;
   const cur=DB.sheets[_vh.gid]; const curSig=cur?_vhHash(_vhJson(cur)):"";
-  let h=`<div class="vh-top"><button class="btn" data-a="name">${I.edit}Name current version</button></div>`, day="";
+  let h=`<div class="vh-top"><button class="btn" data-a="name">${I.edit}Name version</button></div>`, day="";
   _vh.list.forEach(v=>{ const d=_vhDay(v.ts); if(d!==day){ day=d; h+=`<div class="vh-day">${esc(d)}</div>`; }
     const isCur=v.sig===curSig&&v===_vh.list.find(x=>x.sig===curSig);
     h+=`<button class="vh-it${v.id===_vh.sel?" on":""}" data-id="${v.id}"><div class="t">${esc(_vhTime(v.ts))}${v.kind==="named"?` <span class="nm">· ${esc(v.label)}</span>`:""}${isCur?`<span class="cur">Current</span>`:""}</div>
@@ -4087,14 +4109,14 @@ function updateView(id){ const sh=curSheet(); const v=(sh.views||[]).find(x=>x.i
 function renameView(id){ const sh=curSheet(); const v=(sh.views||[]).find(x=>x.id===id); if(!v) return; promptModal("Rename view","View name",v.name,n=>{ n=String(n).trim(); if(!n) return; pushUndo(); v.name=n; afterEdit(); }); }
 function deleteView(id){ const sh=curSheet(); const v=(sh.views||[]).find(x=>x.id===id); if(!v) return; pushUndo(); sh.views=sh.views.filter(x=>x.id!==id); if(sh.activeView===id) delete sh.activeView; afterEdit(); toast("View deleted — Ctrl+Z to undo"); }
 
-/* ===================== Column insights ===================== */
+/* ===================== Insights ===================== */
 const INS_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></svg>';
 function _usedRows(sh,rows){ const sys=new Set((sh&&sh.columns||[]).filter(c=>c.type==="autonumber").map(c=>c.id)); return rows.filter(r=>{ const c=r.cells||{}; for(const k in c){ if(sys.has(k)) continue; const v=c[k]; if(v!=null&&v!==""&&!(Array.isArray(v)&&!v.length)) return true; } return false; }); }
 function _fmtN(n){ if(n==null||!isFinite(n)) return "—"; const a=Math.abs(n); return (a>=1e6||a<0.01&&a>0)?n.toPrecision(4):n.toLocaleString(undefined,{maximumFractionDigits:2}); }
 function _histSVG(counts,labels){ const W=520,H=96,n=counts.length,mx=Math.max(1,...counts),bw=W/n; let s=`<svg class="ins-hist" viewBox="0 0 ${W} ${H+18}" preserveAspectRatio="none">`;
   counts.forEach((c,i)=>{ const h=c?Math.max(3,c/mx*H):0; s+=`<rect x="${(i*bw+1.5).toFixed(1)}" y="${(H-h).toFixed(1)}" width="${Math.max(1,bw-3).toFixed(1)}" height="${h.toFixed(1)}" rx="3"><title>${esc(labels[i])}: ${c}</title></rect>`; });
   s+=`<text x="0" y="${H+14}" class="ins-ax">${esc(labels[0].split(" – ")[0])}</text><text x="${W}" y="${H+14}" text-anchor="end" class="ins-ax">${esc(labels[n-1].split(" – ").pop())}</text></svg>`; return s; }
-/* ---------- Column insights (v2): completeness bar, stat tiles, distribution with average marker + box strip, top values, one-click actions ---------- */
+/* ---------- Insights (v2): completeness bar, stat tiles, distribution with average marker + box strip, top values, one-click actions ---------- */
 function _insHist(counts,labels,o){ o=o||{}; const W=560,H=120,PT=18,n=counts.length,mx=Math.max(1,...counts),gap=n>24?1:2,bw=W/n; const tot=counts.reduce((a,b)=>a+b,0)||1;
   let s=`<svg class="ins-hist2" viewBox="0 0 ${W} ${H+PT+22}" preserveAspectRatio="none" role="img" aria-label="${esc(o.aria||"Distribution")}">`;
   s+=`<line x1="0" x2="${W}" y1="${H+PT}" y2="${H+PT}" class="ins-base"/>`;
@@ -4230,7 +4252,7 @@ function setViz(cid,k){ const sh=curSheet(); const col=sh.columns.find(c=>c.id==
   if(k&&!Object.keys(vizRanges(sh,[col])).length) toast("No numbers in "+col.name+" yet — the colours appear once it has some"); }
 
 /* ===================== Smart cleanup ===================== */
-function cleanupDialog(tab){ const sh=curSheet(); const vc=visCols(sh); const st={tab:tab||"dups",cols:new Set(vc.filter(c=>sh.rows.some(r=>!isBlank(r.cells[c.id]))).map(c=>c.id)),col:SELC&&vc.find(c=>c.id===SELC)?SELC:(vc[0]&&vc[0].id),caseMode:"title",sep:"first",custom:"",keep:true};
+function cleanupDialog(tab){if(!tab||tab==="dups"||tab==="space"){cleanupActionDialog(tab||"dups");return;} const sh=curSheet(); const vc=visCols(sh); const st={tab:tab||"dups",cols:new Set(vc.filter(c=>sh.rows.some(r=>!isBlank(r.cells[c.id]))).map(c=>c.id)),col:SELC&&vc.find(c=>c.id===SELC)?SELC:(vc[0]&&vc[0].id),caseMode:"title",sep:"first",custom:"",keep:true};
   if(!st.cols.size) vc.forEach(c=>st.cols.add(c.id));
   const body=document.createElement("div"); body.className="cln";
   const textCols=()=>vc.filter(c=>!READONLY_TYPES.includes(c.type)&&c.type!=="formula"&&!c.locked&&!["checkbox","rating","progress","multiselect"].includes(c.type));
@@ -4241,7 +4263,7 @@ function cleanupDialog(tab){ const sh=curSheet(); const vc=visCols(sh); const st
   const caseScan=()=>{ const out=[]; used().forEach(r=>{ const v=r.cells[st.col]; if(typeof v==="string"&&v&&v[0]!=="="&&caseFn(v)!==v) out.push(r); }); return out; };
   const splitFn=s=>{ s=String(s==null?"":s).trim(); if(!s) return []; if(st.sep==="first"){ const i=s.search(/\s/); return i<0?[s]:[s.slice(0,i),s.slice(i).trim()]; } if(st.sep==="last"){ const i=s.search(/\s\S*$/); return i<=0?[s]:[s.slice(0,i).trim(),s.slice(i).trim()]; }
     const d=st.sep==="space"?/\s+/:st.sep==="comma"?/\s*,\s*/:st.sep==="dash"?/\s*-\s*/:(st.custom?new RegExp("\\s*"+st.custom.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*"):null); return d?s.split(d):[s]; };
-  const draw=()=>{ const seg=(k,l)=>`<button type="button" data-t="${k}" class="${st.tab===k?"on":""}">${l}</button>`;
+  const draw=()=>{if((st.tab==="case"||st.tab==="split")&&!textCols().some(c=>c.id===st.col))st.col=(textCols()[0]||{}).id; const seg=(k,l)=>`<button type="button" data-t="${k}" class="${st.tab===k?"on":""}">${l}</button>`;
     let h=`<div class="vseg cln-tabs">${seg("dups","Duplicate rows")}${seg("space","Extra spaces")}${seg("case","Capitalisation")}${seg("split","Split a column")}</div><div class="cln-body">`;
     const colSel=(id,list)=>selHTML(id,list.map(c=>({value:c.id,label:c.name})),st.col);
     if(st.tab==="dups"){ const d=dupScan(); const RN={}; sh.rows.forEach((r,i)=>RN[r.id]=i+1);
@@ -4262,7 +4284,7 @@ function cleanupDialog(tab){ const sh=curSheet(); const vc=visCols(sh); const st
         <button class="btn pri" data-a="case" ${s.length?"":"disabled"}>Fix ${s.length||""} cell${s.length===1?"":"s"}</button>`; }
     else { const rows=used().filter(r=>!isBlank(r.cells[st.col])); const parts=rows.map(r=>splitFn(Array.isArray(r.cells[st.col])?r.cells[st.col].join(", "):r.cells[st.col])); const n=Math.min(8,Math.max(0,...parts.map(p=>p.length)));
       h+=`<label class="fld"><span class="lb">Column</span>${colSel("clnCol",textCols())}</label>
-        <div class="fld"><span class="lb">Split at</span><div class="vseg cln-sep">${[["first","First space (First | Last)"],["last","Last space"],["space","Every space"],["comma","Comma"],["dash","Dash"],["custom","Other…"]].map(([k,l])=>`<button type="button" data-p="${k}" class="${st.sep===k?"on":""}">${l}</button>`).join("")}</div></div>
+        <div class="fld"><span class="lb">Split at</span><div class="vseg cln-sep">${[["first","First space (First | Last)"],["last","Last space"],["space","Every space"],["comma","Comma"],["dash","Dash"],["custom","Other"]].map(([k,l])=>`<button type="button" data-p="${k}" class="${st.sep===k?"on":""}">${l}</button>`).join("")}</div></div>
         ${st.sep==="custom"?`<label class="fld"><span class="lb">Separator</span><input class="inp" id="clnCustom" value="${esc(st.custom)}" placeholder="e.g. /  or  |" maxlength="5"></label>`:""}
         <div class="cln-prev">${rows.slice(0,3).map((r,i)=>`<div><span class="cp-from">${esc(String(r.cells[st.col]).slice(0,40))}</span><span class="cp-arrow">→</span>${parts[i].slice(0,n).map(p=>`<span class="cp-part">${esc(p)}</span>`).join("")}</div>`).join("")||`<div class="ins-note">This column is empty.</div>`}</div>
         <div class="vrow" style="border-top:0"><div class="vtx"><b>Keep the original column</b><small>The new columns are added to its right</small></div><button type="button" class="gsw${st.keep?" on":""}" id="clnKeep"></button></div>
@@ -4281,7 +4303,7 @@ function cleanupDialog(tab){ const sh=curSheet(); const vc=visCols(sh); const st
       if(!st.keep){ sh.columns.splice(sh.columns.indexOf(src),1); sh.rows.forEach(r=>delete r.cells[src.id]); } }
     closeModal(); afterEdit();
     toast(a==="dups"?`Removed ${n} duplicate row${n===1?"":"s"}`:a==="split"?`Split ${n} cell${n===1?"":"s"}`:`Cleaned ${n} cell${n===1?"":"s"}`+" — Ctrl+Z to undo"); };
-  body.addEventListener("click",e=>{ const t=e.target.closest("[data-t]"); if(t){ st.tab=t.dataset.t; draw(); return; }
+  body.addEventListener("click",e=>{ const t=e.target.closest("[data-t]"); if(t){if(t.dataset.t==="dups"||t.dataset.t==="space"){cleanupActionDialog(t.dataset.t);return;} st.tab=t.dataset.t; draw(); return; }
     const c=e.target.closest(".cln-chip"); if(c){ const id=c.dataset.c; if(st.cols.has(id)) st.cols.delete(id); else st.cols.add(id); if(!st.cols.size) st.cols.add(id); draw(); return; }
     const s=e.target.closest("[data-s]"); if(s){ st.scope=s.dataset.s; draw(); return; }
     const m=e.target.closest("[data-m]"); if(m){ st.caseMode=m.dataset.m; draw(); return; }
@@ -4618,7 +4640,7 @@ function setAlign(a){ const sh=curSheet(); const cells=rangeCells(); if(!cells.l
   applyToRange(f=>{ if(on)f.a=a; else delete f.a; });
 }
 function setColorFmt(prop,val){ closeCtx(); applyToRange(f=>{ if(val)f[prop]=val; else delete f[prop]; }); }
-function setNumFmt(nf){ applyToRange(f=>{ f.nf=nf; }); }
+function setNumFmt(nf){if(nf==='currency'){setCurrencyFormat('SAR');return;}applyToRange(f=>{f.nf=nf;});}
 /* text wrapping · vertical align · font size · borders */
 function setWrap(mode){ closeCtx(); applyToRange(f=>{ if(mode&&mode!=="ellipsis")f.wr=mode; else delete f.wr; }); }
 function setVAlign(v){ closeCtx(); applyToRange(f=>{ if(v&&v!=="middle")f.va=v; else delete f.va; }); }
@@ -5061,7 +5083,7 @@ document.addEventListener("paste",e=>{
   e.preventDefault(); const sh=curSheet();
   const norm=String(txt).replace(/\r\n?/g,"\n").replace(/\n$/,""); const internal=_clip&&_clip.tsv===norm?_clip:null;
   if(internal&&internal.tab!==sh.id&&mode==="all"){ _applyPaste(Object.assign({},internal,{internal:true,raw:internal.vals||internal.raw}),"all",false); return; }   /* from another tab: values + formats (references wouldn't point at the right cells) */
-  _applyPaste(internal?Object.assign({internal:true},internal):{raw:_parseTSV(norm)},mode,false);
+  if(internal)_applyPaste(Object.assign({internal:true},internal),mode,false);else externalGridPaste({raw:_parseTSV(norm)},mode,false);
 });
 function pasteSpecial(){ if(!curSheet()||SELR==null){ toast("Select where to paste first"); return; }
   const st={mode:"values",tr:false}; const body=document.createElement("div");
@@ -5070,7 +5092,7 @@ function pasteSpecial(){ if(!curSheet()||SELR==null){ toast("Select where to pas
     <div class="hint" style="margin:8px 0 0">${_clip?`From the ${_clip.n} cell${_clip.n===1?"":"s"} you copied in Grids.`:"From your clipboard (text only — formats come from cells copied in Grids)."} Tip: Ctrl+Shift+V pastes values straight away.</div>`; };
   draw();
   body.addEventListener("click",e=>{ const m=e.target.closest("#psMode button"); if(m){ st.mode=m.dataset.m; draw(); return; } if(e.target.closest("#psTr")){ st.tr=!st.tr; draw(); } });
-  modal("Paste special",body,()=>{ const go=src=>{ setTimeout(()=>_applyPaste(src,st.mode,st.tr),0); };
+  modal("Paste special",body,()=>{ const go=src=>{ setTimeout(()=>src.internal?_applyPaste(src,st.mode,st.tr):externalGridPaste(src,st.mode,st.tr),0); };
     if(_clip) go(Object.assign({internal:true},_clip));
     else { try{ navigator.clipboard.readText().then(t=>{ if(!t){ toast("The clipboard is empty — copy some cells first"); return; } go({raw:_parseTSV(String(t).replace(/\r\n?/g,"\n").replace(/\n$/,""))}); },()=>toast("Copy the cells first (Ctrl+C), then press Ctrl+Alt+V")); }catch(err){ toast("Copy the cells first (Ctrl+C), then press Ctrl+Alt+V"); } } },"Paste"); }
 
@@ -5116,7 +5138,7 @@ function endRowResize(){ if(_rrz){ save(); renderEditor(); } _rrz=null; document
 let _drag=null,_justDragged=false,_dragInd=null,_dragGhost=null;
 function _dEnsure(){ if(!_dragInd){ _dragInd=document.createElement("div"); document.body.appendChild(_dragInd); } if(!_dragGhost){ _dragGhost=document.createElement("div"); _dragGhost.className="ghost-label"; document.body.appendChild(_dragGhost); } }
 function _dClear(){ if(_dragInd){_dragInd.remove();_dragInd=null;} if(_dragGhost){_dragGhost.remove();_dragGhost=null;} }
-function rowDragStart(e,rid){ if(e.button!==0) return; if(e.target.closest(".row-resize")) return; if(e.shiftKey||e.metaKey||e.ctrlKey){ e.preventDefault(); selectRow(rid,e); return; } const sh=curSheet(); if(_paintFmt){ selectRow(rid); applyPaint(); return; } if((sh.sort&&sh.sort.col)||(sh.filters&&Object.keys(sh.filters).length)||_search){ selectRowShift(e,rid); return; } _drag={kind:"row",id:rid,x0:e.clientX,y0:e.clientY,moved:false,target:0,shift:e.shiftKey}; document.addEventListener("pointermove",_dragMove); document.addEventListener("pointerup",_dragEnd); }
+function rowDragStart(e,rid){ if(e.button!==0) return; if(e.target.closest(".row-resize")) return; if(e.shiftKey||e.metaKey||e.ctrlKey){ e.preventDefault(); selectRow(rid,e); return; } const sh=curSheet(); if(_paintFmt){ selectRow(rid); applyPaint(); return; } if((sh.sort&&sh.sort.col)||(sh.filters&&Object.keys(sh.filters).length)||(currentSavedFilter(sh)&&sh.filterEnabled!==false)||_search){ selectRowShift(e,rid); return; } _drag={kind:"row",id:rid,x0:e.clientX,y0:e.clientY,moved:false,target:0,shift:e.shiftKey}; document.addEventListener("pointermove",_dragMove); document.addEventListener("pointerup",_dragEnd); }
 function selectRowShift(e,rid){ _hdrSel="row"; const sh=curSheet(); const vc=_viewCols&&_viewCols.length?_viewCols:sh.columns; if(e&&e.shiftKey&&SELR){ FR=rid; FC=vc[vc.length-1].id; } else { SELR=rid; SELC=vc[0].id; FR=rid; FC=vc[vc.length-1].id; } updateSelDOM(); }
 function colDragStart(e,cid){ if(e.button!==0) return; if(e.target.closest(".col-resize")||e.target.closest(".hcaret")||e.target.closest(".hins")||e.target.closest(".hfilter")) return; if(e.shiftKey||e.metaKey||e.ctrlKey) return; /* modifier-click selects instead of dragging */ _drag={kind:"col",id:cid,x0:e.clientX,y0:e.clientY,moved:false,target:0}; document.addEventListener("pointermove",_dragMove); document.addEventListener("pointerup",_dragEnd); }
 function _dragMove(e){ if(!_drag) return; if(!_drag.moved){ if(Math.hypot(e.clientX-_drag.x0,e.clientY-_drag.y0)<6) return; _drag.moved=true; document.body.style.cursor="grabbing"; _dEnsure(); }
@@ -5226,9 +5248,9 @@ function colMenu(e,cid){ if(_justDragged){ if(e){e.preventDefault();e.stopPropag
     <div class="cm-quick"><button onclick="closeCtx();sortView('${cid}',1)" title="Sort A → Z">${I.down}<span>A → Z</span></button><button onclick="closeCtx();sortView('${cid}',-1)" title="Sort Z → A">${I.up}<span>Z → A</span></button><button onclick="closeCtx();filterMenu(event,'${cid}')" title="Filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span>Filter</span></button></div>
     <button onclick="closeCtx();editColumn('${cid}')">${I.edit}Edit column</button>
     ${col.type==="formula"?`<button onclick="closeCtx();editFormula('${cid}')">${I.fx}Edit formula</button>`:""}
-    <button onclick="closeCtx();colInsights('${cid}')">${INS_IC}Column insights</button>
+    <button onclick="closeCtx();colInsights('${cid}')">${INS_IC}Insights</button>
     <button onclick="colSubMenu('hl','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l-6 6v3h9l3-3M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="mtx">Highlight & rules</span>${nHl?`<span class="mtag">${nHl} on</span>`:""}<svg class="mchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button onclick="colSubMenu('col','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18"/></svg><span class="mtx">Column</span><span class="mhint">insert, hide, freeze, lock</span><svg class="mchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button onclick="colSubMenu('col','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18"/></svg><span class="mtx">Column</span><svg class="mchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="div"></div>
     <button class="dan" onclick="closeCtx();delColumn('${cid}')">${I.del}Delete column</button>`); }
 /* second-level column menus open in place of the first, with a way back */
@@ -5236,15 +5258,15 @@ function colSubMenu(which,cid){ const sh=curSheet(); const col=sh.columns.find(c
   const back=`<button class="cm-back" onclick="colMenu({preventDefault(){},stopPropagation(){},clientX:${Math.round(r.left)},clientY:${Math.round(r.top)}},'${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>${esc(col.name)}</button>`;
   const html=which==="hl"?back+`<div class="lbl">Highlight & rules</div>
     ${NO_RULE_TYPES.includes(col.type)?"":`<button onclick="closeCtx();openColumnRules('${cid}')">${RULE_ICON}Column rules</button>`}
-    <button onclick="closeCtx();toggleDupHighlight('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="12" height="7" rx="1.5"/><rect x="9" y="13" width="12" height="7" rx="1.5"/></svg>${_dupRule(sh,cid)?"Stop highlighting duplicates":"Highlight duplicates"}</button>
+    <button onclick="closeCtx();toggleDupHighlight('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="12" height="7" rx="1.5"/><rect x="9" y="13" width="12" height="7" rx="1.5"/></svg>${_dupRule(sh,cid)?"Clear duplicate highlight":"Highlight duplicates"}</button>
     <div class="div"></div><div class="lbl">Quick highlights</div>
     ${Object.entries(QUICK_HL).map(([op,Q])=>`<button onclick="closeCtx();toggleQuickHL('${cid}','${op}')"><span class="qhl-sw" style="background:${Q.c}"></span><span class="mtx">${Q.t}</span>${_quickRule(sh,cid,op)?'<svg class="mrck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l5 5L20 7"/></svg>':""}</button>`).join("")}
     <div class="div"></div>
-    <button onclick="closeCtx();setTimeout(()=>vizMenu(event,'${cid}'),0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="12" height="4" rx="1"/><rect x="3" y="17" width="7" height="4" rx="1"/></svg>Colour scale & data bars…${col.viz?'<span class="mtag">on</span>':""}</button>`
+    <button onclick="closeCtx();setTimeout(()=>vizMenu(event,'${cid}'),0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="12" height="4" rx="1"/><rect x="3" y="17" width="7" height="4" rx="1"/></svg>Colour scale${col.viz?'<span class="mtag">on</span>':""}</button>`
   :back+`<div class="lbl">Column</div>
     <button onclick="closeCtx();addColumnAt('${cid}',false)">${I.add}Insert left</button><button onclick="closeCtx();addColumnAt('${cid}',true)">${I.add}Insert right</button>
     <button onclick="closeCtx();autofitColumn('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3"/></svg>Fit to content</button>
-    <button onclick="closeCtx();freezeUpToCol('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v18M3 9h18"/></svg>Freeze up to this column</button>
+    <button onclick="closeCtx();freezeUpToCol('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v18M3 9h18"/></svg>Freeze through column</button>
     <button onclick="closeCtx();hideColumn('${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg>Hide column</button>
     <button onclick="closeCtx();toggleColLock('${cid}')">${col.locked?UNLOCK_IC+"Unlock column":LOCK_IC+"Lock column"}</button>`;
   ctxAt({preventDefault(){},stopPropagation(){},clientX:r.left,clientY:r.top},html); }
@@ -5288,7 +5310,7 @@ function changeIndent(delta){ const sh=curSheet(); if(!sh)return; const ids=selR
   afterEdit(); }
 function toggleCollapse(rid){ const sh=curSheet(); const row=sh.rows.find(r=>r.id===rid); if(!row)return; const i=sh.rows.indexOf(row); if(!rowHasChildren(sh,i))return; row.collapsed=!row.collapsed; save(); renderEditor(); }
 function collapseAllGroups(v){ const sh=curSheet(); let any=false; sh.rows.forEach((r,i)=>{ if(rowHasChildren(sh,i)){ r.collapsed=v; any=true; } }); if(!any){ toast("No groups yet — indent rows to create one"); return; } save(); renderEditor(); toast(v?"All groups collapsed":"All groups expanded"); }
-function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details & Workspace links…</button><button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
+function rowMenu(e,rid){ const sh=curSheet(); const i=sh.rows.findIndex(r=>r.id===rid); const kids=i>=0&&rowHasChildren(sh,i); const collapsed=i>=0&&sh.rows[i].collapsed; ctxAt(e,`<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details</button><button onclick="closeCtx();addRowAt('${rid}',false)">${I.add}Insert above</button>
     <button onclick="closeCtx();addRowAt('${rid}',true)">${I.add}Insert below</button>
     <button onclick="closeCtx();dupRow('${rid}')">${I.copy}Duplicate row</button>
     <div class="div"></div>
@@ -5302,13 +5324,13 @@ function cellMenu(e,rid,cid){ const sh=curSheet();
   const inSel=rangeCells().some(x=>x.r===rid&&x.c===cid);
   if(!inSel){ SELR=rid; SELC=cid; FR=rid; FC=cid; _selCells.clear(); updateSelDOM(); }
   const hasNote=sh.notes&&sh.notes[rid+":"+cid];
-  ctxAt(e,`${formulaColumnMenu(sh,rid,cid)}<button onclick="closeCtx();rowDetails('${rid}')">${I.edit}Row details & Workspace links…</button><button onclick="closeCtx();startEdit('${rid}','${cid}')">${I.edit}Edit</button>
+  ctxAt(e,`${formulaColumnMenu(sh,rid,cid)}<button onclick="closeCtx();startEdit('${rid}','${cid}')">${I.edit}Edit</button>
     <button onclick="closeCtx();copySel()">${I.copy}<span class="mtx">Copy</span><span class="kbd">Ctrl+C</span></button>
     <button onclick="closeCtx();pasteSpecial()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="mtx">Paste special</span><span class="kbd">Ctrl+Alt+V</span></button>
     <button onclick="closeCtx();clearSelection()">${I.del}Clear${rangeCells().length>1?" "+rangeCells().length+" cells":""}</button>
-    <button onclick="closeCtx();SELR='${rid}';SELC='${cid}';openExplainer('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>Explain this cell</button>
-    <button onclick="closeCtx();cellHistory('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Cell history…${(sh.hist&&sh.hist[rid+":"+cid]&&sh.hist[rid+":"+cid].length)?`<span class="mtag">${sh.hist[rid+":"+cid].length}</span>`:""}</button>
-    <button onclick="closeCtx();editNote('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>${hasNote?"Edit note…":"Add note…"}</button>
+    <button onclick="closeCtx();SELR='${rid}';SELC='${cid}';openExplainer('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>Explain cell</button>
+    <button onclick="closeCtx();cellHistory('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Cell history${(sh.hist&&sh.hist[rid+":"+cid]&&sh.hist[rid+":"+cid].length)?`<span class="mtag">${sh.hist[rid+":"+cid].length}</span>`:""}</button>
+    <button onclick="closeCtx();editNote('${rid}','${cid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>${hasNote?"Edit note":"Add note"}</button>
     ${hasNote?`<button class="dan" onclick="closeCtx();deleteNote('${rid}','${cid}')">${I.del}Delete note</button>`:""}
     <div class="div"></div>
     <button onclick="closeCtx();changeIndent(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 18h16M10 12h10M4 9l3 3-3 3"/></svg>Indent row${_selRowCount()>1?"s":""}</button>
@@ -5625,11 +5647,11 @@ function menuData(e){ const sh=curSheet(); const hasFilt=sh.filters&&Object.keys
     ${sh.sort?`<button onclick="clearSort()">${I.del}<span class="mtx">Clear sort</span></button>`:""}
   ${hasFilt?`<button onclick="closeCtx();clearAllFilters()">${I.del}<span class="mtx">Clear all filters</span></button>`:""}
   <button onclick="closeCtx();openRules()">${MI.rules}<span class="mtx">Automations</span></button>
-  <button onclick="closeCtx();cleanupDialog()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6M4 20l8.5-8.5M12 6l6 6-3 3-6-6zM3 21l2-5 3 3z"/></svg><span class="mtx">Clean up</span></button>
-  <button onclick="closeCtx();flashFill()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="mtx">Flash fill</span><span class="kbd">Ctrl+E</span></button>
+  <button onclick="dataCleanupMenu(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6M4 20l8.5-8.5M12 6l6 6-3 3-6-6zM3 21l2-5 3 3z"/></svg><span class="mtx">Data cleanup</span><span aria-hidden="true">›</span></button>
+  <button onclick="closeCtx();flashFill()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="mtx">Flash fill</span><span class="kbd">Ctrl+Alt+E</span></button>
   <button onclick="closeCtx();summariseDialog()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span class="mtx">Summary table</span></button>
   <button onclick="closeCtx();toggleFilters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span class="mtx">Show filters</span><span class="kbd">Ctrl+Shift+L</span></button>
-  ${SELC?`<button onclick="closeCtx();colInsights(SELC)">${INS_IC}<span class="mtx">Column insights</span></button>`:""}
+  ${SELC?`<button onclick="closeCtx();colInsights(SELC)">${INS_IC}<span class="mtx">Insights</span></button>`:""}
   ${SELR&&SELC?`<button onclick="closeCtx();cellHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="mtx">Cell history</span></button>`:""}
   <button onclick="closeCtx();openVersionHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span class="mtx">Version history</span><span class="kbd">Ctrl+Alt+Shift+H</span></button>
   <button onclick="closeCtx();setTimeout(()=>rulesPicker(event),0)">${RULE_ICON}<span class="mtx">Validation rules</span></button>
@@ -5911,7 +5933,7 @@ function tabStep(dir){ const d=curDoc(); if(!d) return; ensureTabs(d); const vis
 const _fStash={};
 function _filtActive(sh){ return !!(sh.filters&&Object.values(sh.filters).some(f=>f&&((f.text&&f.text.length)||(f.excl&&f.excl.length)))); }
 function _hdrPoint(cid){ const h=document.querySelector(`.hname[data-hname="${cid}"]`); const th=h&&h.closest("th"); const r=th?th.getBoundingClientRect():{left:200,bottom:160,width:0}; return {clientX:Math.round(r.left+Math.min(r.width,140)-8),clientY:Math.round(r.bottom+2),preventDefault(){},stopPropagation(){}}; }
-function toggleFilters(){ const sh=curSheet(), d=curDoc(); if(!sh) return; const key=d.id+":"+sh.id;
+function toggleFilters(){ const sh=curSheet(), d=curDoc(); if(!sh) return; if(currentSavedFilter(sh)){toggleSavedFilter();return;} const key=d.id+":"+sh.id;
   if(_filtActive(sh)){ _fStash[key]=clone(sh.filters); delete sh.filters; save(); renderEditor(); toast("Filters off — Ctrl+Shift+L turns them back on"); return; }
   if(_fStash[key]){ sh.filters=_fStash[key]; delete _fStash[key]; save(); renderEditor(); toast("Filters back on"); return; }
   if(SELC){ filterMenu(_hdrPoint(SELC),SELC); } else toast("Click a cell in the column you want to filter"); }
@@ -5919,7 +5941,7 @@ function toggleFilters(){ const sh=curSheet(), d=curDoc(); if(!sh) return; const
 function altDown(){ const sh=curSheet(); if(!sh||!SELR||!SELC) return; const col=sh.columns.find(c=>c.id===SELC); if(!col) return;
   if(["select","status","priority","multiselect","date","datetime","person"].includes(col.type)&&!_ro(col)){ startEdit(SELR,SELC); return; }
   filterMenu(_hdrPoint(SELC),SELC); }
-/* ---------- Flash Fill (Ctrl+E): learn a pattern from one or two typed examples and fill the rest of the column ----------
+/* ---------- Flash Fill (Ctrl+Alt+E): learn a pattern from one or two typed examples and fill the rest of the column ----------
    A pattern is a chain of pieces: fixed text, or a part of another column in the same row (the whole value, the n-th word
    from the start or the end, everything from/up to a word) — optionally UPPER / lower / Title case or just its first letter. */
 const _FF_CASES=["as","lower","upper","proper","init","initU","initL"];
@@ -5953,7 +5975,7 @@ function flashFill(){ const sh=curSheet(); if(!sh||!SELC){ toast("Click a cell i
   const srcOf=row=>srcCols.map(c=>{ const v=cellExportVal(sh,row,c,ctx); return v==null?"":String(v).trim(); });
   const filled=r=>{ const v=r.cells[col.id]; return v!=null&&String(v).trim()!==""; };
   const ex=[]; rows.forEach(r=>{ if(filled(r)&&ex.length<6){ const src=srcOf(r); if(src.some(Boolean)) ex.push({row:r,src,out:String(r.cells[col.id]).trim()}); } });
-  if(!ex.length){ toast("Type one or two examples in "+col.name+" first, then press Ctrl+E"); return; }
+  if(!ex.length){ toast("Type one or two examples in "+col.name+" first, then press Ctrl+Alt+E"); return; }
   const prog=_ffLearn(ex); if(!prog){ toast("Couldn't spot a pattern — type one more example and try again"); return; }
   const todo=rows.filter(r=>!filled(r)); const out=[]; todo.forEach(r=>{ const src=srcOf(r); if(!src.some(Boolean)) return; const v=_ffRun(prog,src); if(v!=null&&v!=="") out.push([r,v]); });
   if(!out.length){ toast("The pattern fits your examples, but there's nothing left to fill"); return; }
@@ -6269,7 +6291,7 @@ function renderPivotInto(host,html,sh,doc){ try{ _hsBtns.forEach(x=>{ try{x.remo
 function fileMenu(e){ ctxAt(e,`<div class="lbl">Download</div>
   <button onclick="closeCtx();exportXlsx()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8l6 8M15 8l-6 8"/></svg>Excel (.xlsx)</button>
   <button onclick="closeCtx();exportCsv()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 9h16M9 4v16"/></svg>CSV (.csv)</button>
-  <button onclick="closeCtx();printGridDialog()">${I.copy}Print / Save as PDF…</button><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><div class="div"></div><div class="lbl">Bring data in</div>
+  <button onclick="closeCtx();printGridDialog()">${I.copy}Print / PDF</button><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><div class="div"></div><div class="lbl">Bring data in</div>
   <button onclick="closeCtx();importFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Import Excel or CSV</button>`);
   const m=_ctxEl; if(m&&e.currentTarget){ const r=e.currentTarget.getBoundingClientRect(); m.style.top=(r.bottom+6)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8,r.right-m.offsetWidth))+"px"; } }
 function exportMenu(e){ ctxAt(e,`<div class="lbl">Export as</div>
@@ -6347,7 +6369,7 @@ function applyImport(rows,st,label){ if(st.mode==="append"&&!st.reviewed){const 
   let n=data.length;
   if(st.mode==="tab"){ ensureTabs(doc); const cols=mkCols(); const t={id:uid(),name:_uniqTabName(doc,"Import "+(doc.tabs.length+1)),columns:cols,rows:data.map(r=>toRow(r,cols)),rules:[],fmt:{}}; while(t.rows.length<BLANK_ROWS) t.rows.push(emptyRow()); doc.tabs.push(t); doc.activeTab=t.id; _selReset(); save(); render(); }
   else if(st.mode==="replace"){ pushUndo(); const cols=mkCols(); if(cols.length<BLANK_COLS&&!hdr) while(cols.length<BLANK_COLS) cols.push({id:uid(),name:uniq(colLetter(cols.length)),type:"text",width:120});
-    sh.columns=cols; sh.rows=data.map(r=>toRow(r,cols)); while(sh.rows.length<BLANK_ROWS) sh.rows.push(emptyRow()); sh.fmt={}; sh.notes={}; sh.links={}; sh.rules=[]; sh.views=[]; delete sh.activeView; delete sh.sort; delete sh.filters; delete sh.freeze; if(hdr) sh.freeze={rows:0,cols:0}; _selReset(); afterEdit(); }
+    sh.columns=cols; sh.rows=data.map(r=>toRow(r,cols)); while(sh.rows.length<BLANK_ROWS) sh.rows.push(emptyRow()); sh.fmt={}; sh.notes={}; sh.links={}; sh.rules=[]; sh.views=[]; sh.savedFilters=[]; delete sh.activeFilter; delete sh.filterEnabled; delete sh.activeView; delete sh.sort; delete sh.filters; delete sh.freeze; if(hdr) sh.freeze={rows:0,cols:0}; _selReset(); afterEdit(); }
   else { pushUndo(); sh.columns.forEach(c=>names.push(c.name));
     const initialMap=importColumnMap(sh,rows,st);
     const map=initialMap.map((c,i)=>{if(c)return c;const col={id:uid(),name:uniq((hdr&&hdr[i])||colLetter(sh.columns.length)),type:"text",width:140};sh.columns.push(col);return col;});
@@ -6404,8 +6426,8 @@ function formulaColumnMenu(sh, rid, cid) {
   const c = sh.columns.find(c => c.id === cid),
     r = sh.rows.find(r => r.id === rid);
   if (!c || !r || colLocked(c, sh) || sheetLocked(sh)) return '';
-  if (c.type === 'formula') return `<button onclick="closeCtx();unapplyColumnFormula('${cid}')">${I.edit}Un-apply column formula…</button>`;
-  return typeof r.cells[cid] === 'string' && r.cells[cid].startsWith('=') ? `<button onclick="closeCtx();applyColumnFormula('${rid}','${cid}')">${I.edit}Apply formula to column</button>` : '';
+  if (c.type === 'formula') return `<button onclick="closeCtx();unapplyColumnFormula('${cid}')">${I.edit}Un-apply formula</button>`;
+  return typeof r.cells[cid] === 'string' && r.cells[cid].startsWith('=') ? `<button onclick="closeCtx();applyColumnFormula('${rid}','${cid}')">${I.edit}Apply to column</button>` : '';
 }
 function applyColumnFormula(rid, cid) {
   const sh = curSheet(),
@@ -6429,7 +6451,7 @@ function unapplyColumnFormula(cid) {
   if (!c || c.type !== 'formula' || sheetLocked(sh) || colLocked(c, sh)) return;
   const b = document.createElement('div');
   b.innerHTML = `<p>${c.formulaRestore ? 'Restore the column’s previous type and contents?' : 'This formula column has no previous contents to restore. Convert its current results to editable values?'}</p>`;
-  modal('Un-apply column formula', b, () => {
+  modal('Un-apply formula', b, () => {
     pushUndo();
     if (c.formulaRestore) {
       const old = clone(c.formulaRestore),
@@ -6566,7 +6588,7 @@ function chooseWorkbookSheets(wb) {
 }
 /* ==================== Grid tools: backups, templates & print ==================== */
 function gridTools(e) {
-  ctxAt(e, `<div class="lbl">Grid tools</div><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><button onclick="closeCtx();restoreGridsFile()">${I.add}Restore backup…</button><div class="div"></div><button onclick="closeCtx();saveGridTemplate()">${I.add}Save reusable template…</button><button onclick="closeCtx();chooseGridTemplate()">${I.copy}Create from template…</button><button onclick="closeCtx();printGridDialog()">${I.copy}Print / Save as PDF…</button>`);
+  ctxAt(e, `<div class="lbl">Grid tools</div><button onclick="closeCtx();backupGrids()">${I.copy}Full backup (.json)</button><button onclick="closeCtx();restoreGridsFile()">${I.add}Restore backup</button><div class="div"></div><button onclick="closeCtx();saveGridTemplate()">${I.add}Save template</button><button onclick="closeCtx();chooseGridTemplate()">${I.copy}Use template</button><button onclick="closeCtx();printGridDialog()">${I.copy}Print / PDF</button>`);
 }
 function gridDownload(name, value) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], {
@@ -6691,7 +6713,7 @@ function saveGridTemplate() {
   const d = curDoc(),
     b = document.createElement('div');
   b.innerHTML = `<label class="fld"><span class="lb">Template name</span><input class="inp" id="templateName" value="${esc(d.name)}"></label><label class="fld"><span><input type="checkbox" id="templateData"> Include existing values and Workspace links</span></label><p class="hint">Column types, formulas, validation, formatting, rules, notes, views and tabs are preserved.</p>`;
-  modal('Save reusable template', b, () => {
+  modal('Save template', b, () => {
     const name = b.querySelector('#templateName').value.trim();
     if (!name) return false;
     const x = clone(d);
@@ -6716,6 +6738,7 @@ function saveGridTemplate() {
       });
       delete t.links;
       delete t.hist;
+      delete t.reviewFlags;
     });
     DB.sheets[x.id] = x;
     save();
@@ -6730,7 +6753,7 @@ function chooseGridTemplate() {
   }
   const b = document.createElement('div');
   b.innerHTML = `<label class="fld"><span class="lb">Template</span><select class="inp" id="templatePick">${templates.map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('')}</select></label><label class="fld"><span class="lb">New grid name</span><input class="inp" id="templateNewName" placeholder="My new grid"></label>`;
-  modal('Create from template', b, () => {
+  modal('Use template', b, () => {
     const x = clone(DB.sheets[b.querySelector('#templatePick').value]);
     const templateId=x.id;
     x.id = uid();
@@ -6771,7 +6794,7 @@ function printGridDialog() {
     return;
   }
   b.innerHTML = `<label class="fld"><span class="lb">Rows</span><select class="inp" id="printRows"><option value="filtered">Current filtered rows</option><option value="all">All rows</option></select></label><label class="fld"><span class="lb">Orientation</span><select class="inp" id="printOrientation"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></label><span class="lb">Columns</span><div class="grid-review">${sh.columns.map((c, i) => `<label class="fld"><span><input type="checkbox" data-print-index="${i}" ${c.hidden ? '' : 'checked'}> ${esc(c.name)}</span></label>`).join('')}</div><p class="hint">Headers repeat on each printed page. Choose Save as PDF in the print dialog.</p>`;
-  modal('Print / Save as PDF', b, () => {
+  modal('Print / PDF', b, () => {
     const cols = [...b.querySelectorAll('[data-print-index]:checked')].map(x => sh.columns[+x.dataset.printIndex]);
     if (!cols.length) {
       toast('Choose at least one column');
@@ -6790,7 +6813,7 @@ function printGrid(sh, cols, rows, orientation) {
   }
   const ctx = newCtx();
   w.document.open();
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(curDoc().name)}</title><style>@page{size:${orientation === 'portrait' ? 'portrait' : 'landscape'};margin:12mm}body{font-family:Arial,sans-serif;color:#25183f}h1{font-size:22px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #ccc;padding:6px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px}th{background:#eee7fa;text-align:left}thead{display:table-header-group}tr{break-inside:avoid}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h1>${esc(curDoc().name)} · ${esc(sh.name)}</h1><table><thead><tr>${cols.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(cellExportVal(sh, r, c, ctx) ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`);
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(curDoc().name)}</title><style>@page{size:${orientation === 'portrait' ? 'portrait' : 'landscape'};margin:12mm}body{font-family:Arial,sans-serif;color:#25183f}h1{font-size:22px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #ccc;padding:6px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px}th{background:#eee7fa;text-align:left}thead{display:table-header-group}tr{break-inside:avoid}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / PDF</button><h1>${esc(curDoc().name)} · ${esc(sh.name)}</h1><table><thead><tr>${cols.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(cellExportVal(sh, r, c, ctx) ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`);
   w.document.close();
   return true;
 }
@@ -6875,6 +6898,958 @@ window.addEventListener('message', e => {
     }, _hubOrigin());
   };
 });
+
+"use strict";
+
+/* ==================== Date and currency format dropdowns ==================== */
+const GRID_DATE_FORMATS = [['regional', 'Regional'], ['dmy2', '26/04/18'], ['dmy4', '26/04/2018'], ['mdy4', '04/26/2018'], ['iso', '2018-04-26'], ['dots', '2018.04.26'], ['long', 'April 26, 2018'], ['short', 'Apr 26, 2018'], ['dmon', '26-Apr-2018'], ['daylong', 'Thursday, April 26, 2018'], ['dayshort', 'Thu 26-Apr-2018'], ['daynumeric', 'Thu 04/26/2018'], ['monthday', 'April 26'], ['daymonth', '26 April'], ['datetime', '26/04/2018 14:30']];
+const GRID_CURRENCIES = [['SAR', 'Saudi riyal'], ['USD', 'US dollar'], ['EUR', 'Euro'], ['GBP', 'British pound'], ['AED', 'UAE dirham'], ['BHD', 'Bahraini dinar'], ['KWD', 'Kuwaiti dinar'], ['OMR', 'Omani rial'], ['QAR', 'Qatari riyal'], ['EGP', 'Egyptian pound'], ['JOD', 'Jordanian dinar'], ['AUD', 'Australian dollar'], ['CAD', 'Canadian dollar'], ['CHF', 'Swiss franc'], ['CNY', 'Chinese yuan'], ['JPY', 'Japanese yen'], ['INR', 'Indian rupee'], ['PKR', 'Pakistani rupee'], ['TRY', 'Turkish lira'], ['ARS', 'Argentine peso'], ['BRL', 'Brazilian real'], ['CLP', 'Chilean peso'], ['DKK', 'Danish krone'], ['HKD', 'Hong Kong dollar'], ['ILS', 'Israeli shekel'], ['MXN', 'Mexican peso'], ['NZD', 'New Zealand dollar'], ['NOK', 'Norwegian krone'], ['RUB', 'Russian ruble'], ['SGD', 'Singapore dollar'], ['ZAR', 'South African rand'], ['KRW', 'South Korean won'], ['SEK', 'Swedish krona']];
+function gridDateText(value, format, withTime) {
+  if (value == null || value === '') return '';
+  let iso = typeof value === 'number' && isFinite(value) ? serialDate(value, true) : String(value);
+  if (!/^\d{4}-\d{2}-\d{2}(?:$|[ T])/.test(iso)) {
+    const parsed = parseDateInput(iso, withTime);
+    if (!parsed) return String(value);
+    iso = parsed;
+  }
+  const d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso.replace(' ', 'T'));
+  if (isNaN(d)) return String(value);
+  const pad = n => String(n).padStart(2, '0'),
+    D = pad(d.getDate()),
+    M = pad(d.getMonth() + 1),
+    Y = d.getFullYear(),
+    short = d.toLocaleDateString('en-US', {
+      month: 'short'
+    }),
+    long = d.toLocaleDateString('en-US', {
+      month: 'long'
+    }),
+    day = d.toLocaleDateString('en-US', {
+      weekday: 'short'
+    }),
+    time = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  const formats = {
+    regional: d.toLocaleDateString(undefined, {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
+    }),
+    dmy2: D + '/' + M + '/' + String(Y).slice(-2),
+    dmy4: D + '/' + M + '/' + Y,
+    mdy4: M + '/' + D + '/' + Y,
+    iso: Y + '-' + M + '-' + D,
+    dots: Y + '.' + M + '.' + D,
+    long: long + ' ' + d.getDate() + ', ' + Y,
+    short: short + ' ' + d.getDate() + ', ' + Y,
+    dmon: D + '-' + short + '-' + Y,
+    daylong: d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }),
+    dayshort: day + ' ' + D + '-' + short + '-' + Y,
+    daynumeric: day + ' ' + M + '/' + D + '/' + Y,
+    monthday: long + ' ' + d.getDate(),
+    daymonth: d.getDate() + ' ' + long,
+    datetime: D + '/' + M + '/' + Y + ' ' + time
+  };
+  let result = formats[format] || formats.regional;
+  if (withTime && format !== 'datetime') result += ' ' + time;
+  return result;
+}
+function gridCurrencyHTML(n, code, dp) {
+  code = GRID_CURRENCIES.some(c => c[0] === code) ? code : 'SAR';
+  if (code === 'SAR') return riyalHTML() + esc(n.toLocaleString(undefined, {
+    minimumFractionDigits: dp == null ? 0 : dp,
+    maximumFractionDigits: dp == null ? 2 : dp
+  }));
+  try {
+    const options = {
+      style: 'currency',
+      currency: code,
+      currencyDisplay: 'narrowSymbol'
+    };
+    if (dp != null) options.minimumFractionDigits = options.maximumFractionDigits = clampDp(dp);
+    return esc(new Intl.NumberFormat(undefined, options).format(n));
+  } catch (e) {
+    return esc(code + ' ' + n.toLocaleString());
+  }
+}
+function setDateFormat(code) {
+  if (!GRID_DATE_FORMATS.some(f => f[0] === code)) return;
+  closeCtx();
+  applyToRange((f,col) => {
+    f.nf = 'date';
+    f.df = code;
+    if(_hdrSel==='col'){col.format='date';col.dateFormat=code;}
+  });
+}
+function setCurrencyFormat(code) {
+  if (!GRID_CURRENCIES.some(c => c[0] === code)) return;
+  closeCtx();
+  applyToRange((f,col) => {
+    f.nf = 'currency';
+    f.cc = code;
+    if(_hdrSel==='col'){col.format='currency';col.currency=code;}
+  });
+}
+function formatDropdown(e, title, html) {
+  e.preventDefault();
+  e.stopPropagation();
+  const b = e.currentTarget.getBoundingClientRect(),
+    el = document.createElement('div');
+  el.className = 'ctx format-list';
+  el.style.left = b.left + 'px';
+  el.style.top = b.bottom + 5 + 'px';
+  el.innerHTML = (title ? `<div class="lbl">${esc(title)}</div>` : '') + html;
+  openCtxEl(el);
+}
+function dateFormatMenu(e) {
+  const current = _curEff().df || 'regional';
+  formatDropdown(e, 'Date formats', GRID_DATE_FORMATS.map(([code, label]) => `<button onclick="setDateFormat('${code}')"><span class="mtx">${esc(label)}</span>${code === current ? '✓' : ''}</button>`).join(''));
+}
+function currencyFormatMenu(e) {
+  const current = _curEff().cc || 'SAR';
+  formatDropdown(e, 'Currency', GRID_CURRENCIES.map(([code, label]) => `<button onclick="setCurrencyFormat('${code}')"><span class="mtx">${code === 'SAR' ? riyalHTML() : esc(code)} · ${esc(label)}</span>${code === current ? '✓' : ''}</button>`).join(''));
+}
+/* ==================== External spreadsheet paste: optional headers ==================== */
+function externalGridPaste(src, mode, transpose) {
+  if (mode === 'formats') {
+    return _applyPaste(src, mode, transpose);
+  }
+  let raw = src.raw;
+  if (transpose) {
+    const width = Math.max(...raw.map(r => r.length));
+    raw = Array.from({
+      length: width
+    }, (_, i) => raw.map(r => r[i] ?? ''));
+  }
+  const data = {
+    raw
+  };
+  if (raw.length < 2) return _applyPaste(data, mode, false);
+  const sh = curSheet(),
+    doc = curDoc(),
+    acct = _acct,
+    target = {
+      r: SELR,
+      c: SELC,
+      fr: FR,
+      fc: FC
+    };
+  const b = document.createElement('div');
+  b.innerHTML = `<p>Use the first row as column names?</p><div class="grid-review">${raw[0].map(v => `<div>${esc(v == null ? '' : v)}</div>`).join('')}</div><p class="hint">Use as headers renames the columns at your paste position. The remaining rows are pasted as data.</p><button type="button" class="btn" id="pasteKeepRows">Keep as data</button>`;
+  const valid = () => curSheet() === sh && curDoc() === doc && _acct === acct;
+  const reset = () => {
+    SELR = target.r;
+    SELC = target.c;
+    FR = target.fr;
+    FC = target.fc;
+  };
+  modal('Paste data', b, () => {
+    if (!valid()) return false;
+    reset();
+    return pasteWithColumnNames(data, mode);
+  }, 'Use as headers');
+  b.querySelector('#pasteKeepRows').onclick = () => {
+    if (!valid()) return;
+    closeModal();
+    reset();
+    _applyPaste(data, mode, false);
+  };
+}
+"use strict";
+
+function pasteWithColumnNames(src, mode) {
+  const sh = curSheet(),
+    B = _selBox();
+  if (!B || sheetLocked(sh)) {
+    lockToast();
+    return false;
+  }
+  const headers = src.raw[0],
+    start = B.c0,
+    colsBefore = B.vc.slice(start, start + headers.length);
+  if (colsBefore.some(c => colLocked(c, sh))) {
+    toast('Unlock the destination columns before renaming them');
+    return false;
+  }
+  SELR = FR = B.vr[B.r0].id;
+  SELC = FC = B.vc[B.c0].id;
+  _selCells.clear();
+  const applied = _applyPaste({
+    raw: src.raw.slice(1)
+  }, mode, false);
+  if (applied === false) return false;
+  const targets = visCols(sh).slice(start, start + headers.length),
+    ids = new Set(targets.map(c => c.id)),
+    used = new Set(sh.columns.filter(c => !ids.has(c.id)).map(c => c.name.toLowerCase()));
+  targets.forEach((c, i) => {
+    if (!String(headers[i] ?? '').replace(/[\[\]!]/g, '').trim()) used.add(c.name.toLowerCase());
+  });
+  const changes = [];
+  targets.forEach((c, i) => {
+    const clean = String(headers[i] ?? '').replace(/[\[\]!]/g, '').trim();
+    if (!clean) return;
+    let name = clean,
+      k = 2;
+    while (used.has(name.toLowerCase())) name = clean + ' ' + k++;
+    used.add(name.toLowerCase());
+    if (name !== c.name) changes.push({
+      c,
+      old: c.name,
+      name,
+      temp: '_paste_' + uid()
+    });
+  });
+  changes.forEach(x => {
+    x.c.name = x.temp;
+    renameColRefs(sh, x.old, x.temp);
+  });
+  changes.forEach(x => {
+    x.c.name = x.name;
+    renameColRefs(sh, x.temp, x.name);
+  });
+  afterEdit();
+  return true;
+}
+
+/* ==================== Saved toolbar filters ==================== */
+const GRID_FILTER_OPS = [['contains', 'contains'], ['notContains', 'does not contain'], ['eq', 'is'], ['ne', 'is not'], ['hasAny', 'has any of'], ['hasNone', 'has none of'], ['gt', 'greater than'], ['gte', 'at least'], ['lt', 'less than'], ['lte', 'at most'], ['before', 'before'], ['after', 'after'], ['empty', 'is blank'], ['notEmpty', 'is not blank'], ['checked', 'is checked'], ['unchecked', 'is unchecked']];
+function currentSavedFilter(sh) {
+  return (sh.savedFilters || []).find(f => f.id === sh.activeFilter) || null;
+}
+function savedFilterCondition(sh, row, c, ctx) {
+  const col = sh.columns.find(x => x.id === c.col);
+  if (!col) return false;
+  const value = rawCellVal(sh, row, col, ctx),
+    text = String(value ?? '').toLowerCase(),
+    query = String(c.value ?? '').toLowerCase();
+  if (c.op === 'empty') return value == null || value === '' || Array.isArray(value) && !value.length;
+  if (c.op === 'notEmpty') return !(value == null || value === '' || Array.isArray(value) && !value.length);
+  if (c.op === 'checked') return value === true || value === '1' || String(value).toLowerCase() === 'true';
+  if (c.op === 'unchecked') return !(value === true || value === '1' || String(value).toLowerCase() === 'true');
+  if (c.op === 'contains') return text.includes(query);
+  if (c.op === 'notContains') return !text.includes(query);
+  if (c.op === 'eq') return text === query;
+  if (c.op === 'ne') return text !== query;
+  if (c.op === 'hasAny' || c.op === 'hasNone') {
+    const wanted = query.split(/[,;\n]/).map(v => v.trim()).filter(Boolean),
+      items = Array.isArray(row.cells[col.id]) ? row.cells[col.id].map(x => String(x).toLowerCase()) : [text];
+    const match = wanted.some(v => items.includes(v));
+    return c.op === 'hasAny' ? match : !match;
+  }
+  const date = col.type === 'date' || col.type === 'datetime';
+  const a = numOrNaN(value),
+    b = numOrNaN(date ? parseDateInput(String(c.value), col.type === 'datetime') || c.value : c.value);
+  if (isNaN(a) || isNaN(b) || value === '' || c.value === '') return false;
+  return {
+    gt: a > b,
+    gte: a >= b,
+    lt: a < b,
+    lte: a <= b,
+    before: a < b,
+    after: a > b
+  }[c.op] || false;
+}
+function applySavedFilterRows(sh, rows) {
+  const f = currentSavedFilter(sh);
+  if (!f || sh.filterEnabled === false || !f.conditions?.length) return rows;
+  const ctx = newCtx();
+  let out = rows.filter(r => f.match === 'any' ? f.conditions.some(c => savedFilterCondition(sh, r, c, ctx)) : f.conditions.every(c => savedFilterCondition(sh, r, c, ctx)));
+  if (f.includeParents) {
+    const chosen = new Set(out.map(r => r.id)),
+      parents = [],
+      allowed = new Set(rows.map(r => r.id));
+    sh.rows.forEach(r => {
+      const level = r.indent || 0;
+      while (parents.length && (parents[parents.length - 1].indent || 0) >= level) parents.pop();
+      if (chosen.has(r.id)) parents.forEach(p => {
+        if (allowed.has(p.id)) chosen.add(p.id);
+      });
+      parents.push(r);
+    });
+    out = rows.filter(r => chosen.has(r.id));
+  }
+  return out;
+}
+function savedFilterToolbar(sh) {
+  const f = currentSavedFilter(sh),
+    on = !!f && sh.filterEnabled !== false;
+  return `<button class="menb saved-filter${on ? ' on' : ''}" onclick="savedFiltersMenu(event)" title="${esc(f ? f.name + (on ? ' · on' : ' · off') : 'Saved filters')}" aria-label="Saved filters">${FILTER_ICON}<span>Filter${on ? ' on' : ''}</span><span aria-hidden="true">▾</span></button>`;
+}
+const FILTER_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg>';
+function savedFiltersMenu(e) {
+  const sh = curSheet(),
+    f = currentSavedFilter(sh),
+    on = f && sh.filterEnabled !== false;
+  let html = `<div class="lbl">Saved filters</div><button onclick="closeCtx();editSavedFilter()">${I.add}New filter</button>${f ? `<button onclick="closeCtx();toggleSavedFilter()">${FILTER_ICON}Turn ${on ? 'off' : 'on'}</button><button onclick="closeCtx();editSavedFilter('${f.id}')">${I.edit}Edit filter</button>` : ''}<div class="div"></div>`;
+  html += (sh.savedFilters || []).map(x => `<div class="vrowi"><button onclick="closeCtx();useSavedFilter('${x.id}')"><span class="mtx">${esc(x.name)}</span>${f?.id === x.id && on ? '✓' : ''}</button><button class="vmini" title="Edit" onclick="closeCtx();editSavedFilter('${x.id}')">${I.edit}</button><button class="vmini" title="Rename" onclick="closeCtx();renameSavedFilter('${x.id}')">${I.edit}</button><button class="vmini dan" title="Delete" onclick="closeCtx();deleteSavedFilter('${x.id}')">${I.del}</button></div>`).join('');
+  if (!sh.savedFilters?.length) html += '<div class="hint" style="padding:8px">Save conditions to show the rows you need.</div>';
+  formatDropdown(e, '', html);
+}
+function useSavedFilter(id) {
+  const sh = curSheet();
+  if (!(sh.savedFilters || []).some(f => f.id === id)) return;
+  sh.activeFilter = id;
+  sh.filterEnabled = true;
+  save();
+  renderEditor();
+}
+function toggleSavedFilter() {
+  const sh = curSheet();
+  if (!currentSavedFilter(sh)) return;
+  sh.filterEnabled = sh.filterEnabled === false;
+  save();
+  renderEditor();
+}
+function renameSavedFilter(id) {
+  const sh = curSheet(),
+    f = (sh.savedFilters || []).find(x => x.id === id);
+  if (!f) return;
+  promptModal('Rename filter', 'Name', f.name, name => {
+    if (!name.trim()) return;
+    pushUndo();
+    f.name = name.trim();
+    afterEdit();
+  });
+}
+function deleteSavedFilter(id) {
+  const sh = curSheet(),
+    f = (sh.savedFilters || []).find(x => x.id === id);
+  if (!f) return;
+  confirmModal('Delete filter', 'Delete “' + f.name + '”? This will keep all grid data.', () => {
+    pushUndo();
+    sh.savedFilters = sh.savedFilters.filter(x => x.id !== id);
+    if (sh.activeFilter === id) {
+      delete sh.activeFilter;
+      delete sh.filterEnabled;
+    }
+    afterEdit();
+  });
+}
+function editSavedFilter(id) {
+  const sh = curSheet(),
+    original = (sh.savedFilters || []).find(x => x.id === id);
+  const state = original ? clone(original) : {
+    id: uid(),
+    name: '',
+    match: 'all',
+    includeParents: false,
+    conditions: [{
+      col: sh.columns[0]?.id || '',
+      op: 'contains',
+      value: ''
+    }]
+  };
+  const b = document.createElement('div');
+  b.className = 'saved-filter-form';
+  const draw = () => {
+    b.innerHTML = `<label class="fld"><span class="lb">Name</span><input class="inp" data-filter-name value="${esc(state.name)}" placeholder="Filter name"></label><label class="fld"><span class="lb">Show rows matching</span>${selHTML('filterMatch', [{
+      value: 'all',
+      label: 'All conditions'
+    }, {
+      value: 'any',
+      label: 'Any condition'
+    }], state.match)}</label><div class="filter-conditions">${state.conditions.map((c, i) => {
+      const col = sh.columns.find(x => x.id === c.col),
+        noValue = ['empty', 'notEmpty', 'checked', 'unchecked'].includes(c.op);
+      return `<div class="filter-condition" data-condition="${i}">${selHTML('filterColumn' + i, sh.columns.map(c => ({
+        value: c.id,
+        label: c.name
+      })), c.col)}${selHTML('filterOperator' + i, GRID_FILTER_OPS.map(([value, label]) => ({
+        value,
+        label
+      })), c.op)}<input class="inp" type="${col?.type === 'date' && !noValue && !['contains', 'notContains', 'hasAny', 'hasNone'].includes(c.op) ? 'date' : 'text'}" data-filter-value="${i}" value="${esc(c.value)}" ${noValue ? 'disabled' : ''} placeholder="${c.op === 'hasAny' || c.op === 'hasNone' ? 'Values separated by commas' : 'Value'}" list="filterValues${i}"><datalist id="filterValues${i}">${(col?.options || []).map(o => `<option value="${esc(o.value)}">`).join('')}</datalist><button type="button" class="btn sm" data-remove-condition="${i}" aria-label="Remove condition">×</button></div>`;
+    }).join('')}</div><button type="button" class="btn sm" id="filterAddCondition">Add condition</button><label class="fld" style="margin-top:14px"><span><input type="checkbox" id="filterParents" ${state.includeParents ? 'checked' : ''}> Include parent rows</span></label><p class="hint" id="filterFormError" role="alert"></p>`;
+  };
+  draw();
+  b.addEventListener('input', e => {
+    if (e.target.matches('[data-filter-name]')) state.name = e.target.value;
+    if (e.target.matches('[data-filter-value]')) state.conditions[+e.target.dataset.filterValue].value = e.target.value;
+  });
+  b.addEventListener('change', e => {
+    if (e.target.id === 'filterMatch') state.match = e.target.value;
+    if (e.target.id === 'filterParents') state.includeParents = e.target.checked;
+    const c = e.target.closest('[data-condition]');
+    if (c && (e.target.id.startsWith('filterColumn')||e.target.id.startsWith('filterOperator'))) {
+      const i = +c.dataset.condition;
+      if (e.target.id.startsWith('filterColumn')) state.conditions[i].col = e.target.value;else state.conditions[i].op = e.target.value;
+      draw();
+    }
+  });
+  b.addEventListener('click', e => {
+    const remove = e.target.closest('[data-remove-condition]');
+    if (remove) {
+      state.conditions.splice(+remove.dataset.removeCondition, 1);
+      draw();
+    }
+    if (e.target.closest('#filterAddCondition')) {
+      state.conditions.push({
+        col: sh.columns[0]?.id || '',
+        op: 'contains',
+        value: ''
+      });
+      draw();
+    }
+  });
+  modal(original ? 'Edit filter' : 'New filter', b, () => {
+    if (!state.conditions.length || state.conditions.some(c => !sh.columns.some(x => x.id === c.col) || !['empty', 'notEmpty', 'checked', 'unchecked'].includes(c.op) && !String(c.value).trim())) {
+      b.querySelector('#filterFormError').textContent = 'Add a field and value for each condition.';
+      return false;
+    }
+    state.name = String(state.name||'').trim() || 'Filter ' + ((sh.savedFilters || []).length + 1);
+    pushUndo();
+    sh.savedFilters = sh.savedFilters || [];
+    const index = sh.savedFilters.findIndex(f => f.id === state.id);
+    if (index < 0) sh.savedFilters.push(state);else sh.savedFilters[index] = state;
+    sh.activeFilter = state.id;
+    sh.filterEnabled = true;
+    afterEdit();
+  }, 'Save & apply');
+  document.querySelector('.modal')?.classList.add('wide');
+}
+
+"use strict";
+
+/* ==================== Data cleanup: preview before applying ==================== */
+function dataCleanupMenu(e) {
+  const m = _ctxEl,
+    r = m ? m.getBoundingClientRect() : e.currentTarget.getBoundingClientRect();
+  ctxAt({
+    preventDefault() {
+      e.preventDefault();
+    },
+    stopPropagation() {
+      e.stopPropagation();
+    },
+    clientX: r.left,
+    clientY: r.top
+  }, `<div class="lbl">Data cleanup</div><button onclick="closeCtx();cleanupSuggestions()">${I.edit}Cleanup suggestions</button><button onclick="closeCtx();cleanupActionDialog('dups')">${I.del}Remove duplicates</button><button onclick="closeCtx();cleanupActionDialog('space')">${I.edit}Trim whitespace</button><button onclick="closeCtx();advancedCleanupDialog('dates')">${I.edit}Standardise dates</button><button onclick="closeCtx();advancedCleanupDialog('empty')">${I.edit}Remove empty rows</button><button onclick="closeCtx();advancedCleanupDialog('merge')">${I.edit}Merge records</button><button onclick="closeCtx();advancedCleanupDialog('flags')">${I.edit}Flag inconsistent values</button><button onclick="closeCtx();clearCleanupFlags()">${I.edit}Clear review flags</button><div class="div"></div><button onclick="closeCtx();cleanupDialog('case')">${I.edit}Capitalisation</button><button onclick="closeCtx();cleanupDialog('split')">${I.edit}Split text</button>`);
+}
+function cleanupSelection() {
+  const sh = curSheet(),
+    B = _selBox(),
+    cells = B ? rangeCells() : [],
+    rows = new Set(cells.map(x => x.r)),
+    cols = new Set(cells.map(x => x.c));
+  return {
+    rowIds: rows,
+    colIds: cols,
+    cellKeys: new Set(cells.map(x => x.r + ':' + x.c)),
+    scope: rows.size ? 'selection' : 'all'
+  };
+}
+function cleanupScopedRows(sh, state) {
+  const rows = state.scope === 'selection' ? sh.rows.filter(r => state.rowIds.has(r.id)) : state.scope === 'filtered' ? visibleRows(sh) : sh.rows;
+  return _usedRows(sh, rows);
+}
+function cleanupDuplicatePlan(sh, rows, columns, options) {
+  options = options || {};
+  const seen = new Map(),
+    duplicates = [],
+    ctx = newCtx();
+  rows.forEach((row, i) => {
+    if (options.header && i === 0) return;
+    const values = columns.map(c => {
+      const v = rawCellVal(sh, row, c, ctx);
+      let text = Array.isArray(v) ? JSON.stringify(v) : String(v ?? '');
+      if (options.trim !== false) text = text.replace(/[\s\u00a0]+/g, ' ').trim();
+      if (options.ignoreCase !== false) text = text.toLowerCase();
+      return text;
+    });
+    if (options.ignoreEmpty !== false && values.every(v => !v)) return;
+    const key = JSON.stringify(values);
+    if (seen.has(key)) duplicates.push({
+      row,
+      first: seen.get(key)
+    });else seen.set(key, row);
+  });
+  return duplicates;
+}
+function trimGridWhitespace(value) {
+  return value.replace(/[^\S\r\n]+/g, ' ').replace(/^ +| +$/gm, '');
+}
+function cleanupWhitespacePlan(sh, rows, columns, state) {
+  const changes = [];
+  rows.forEach(r => columns.forEach(c => {
+    if (_ro(c) || colLocked(c, sh) || state?.scope === 'selection' && !state.cellKeys.has(r.id + ':' + c.id)) return;
+    const old = r.cells[c.id];
+    if (typeof old !== 'string' || old.trimStart().startsWith('=')) return;
+    const value = trimGridWhitespace(old);
+    if (value !== old) changes.push({
+      r,
+      c,
+      old,
+      value
+    });
+  }));
+  const byRow = new Map(changes.map(x => [x.r.id, clone(x.r)]));
+  changes.forEach(x => byRow.get(x.r.id).cells[x.c.id] = x.value);
+  const proposed = Object.assign({}, sh, {
+      rows: sh.rows.map(r => byRow.get(r.id) || r)
+    }),
+    cache = {};
+  changes.forEach(x => {
+    const rule = colRules(x.c);
+    x.error = rule && rule.mode === 'reject' ? validateVal(proposed, x.c, byRow.get(x.r.id), x.value, cache) : null;
+  });
+  return changes;
+}
+function cleanupSuggestions() {
+  const sh = curSheet(),
+    state = cleanupSelection(),
+    rows = cleanupScopedRows(sh, state),
+    cols = visCols(sh).filter(c => !state.colIds.size || state.colIds.has(c.id)),
+    dups = cleanupDuplicatePlan(sh, rows, cols, {}),
+    space = cleanupWhitespacePlan(sh, rows, cols, state);
+  const b = document.createElement('div');
+  b.innerHTML = `<p>Checked ${rows.length} populated rows in ${state.scope === 'selection' ? 'your selection' : 'this sheet'}.</p><div class="vrow"><span>${dups.length} duplicate rows</span><button type="button" class="btn" id="suggestDuplicates">Review duplicates</button></div><div class="vrow"><span>${space.length} cells with extra spaces</span><button type="button" class="btn" id="suggestSpaces">Review whitespace</button></div><p class="hint">Review the scope and columns before applying a change.</p>`;
+  modal('Cleanup suggestions', b, null, 'Close', true);
+  b.querySelector('#suggestDuplicates').onclick = () => cleanupActionDialog('dups');
+  b.querySelector('#suggestSpaces').onclick = () => cleanupActionDialog('space');
+}
+function cleanupActionDialog(mode) {
+  const sh = curSheet();
+  if (sheetLocked(sh)) {
+    lockToast();
+    return;
+  }
+  const state = cleanupSelection();
+  state.header = false;
+  state.ignoreCase = true;
+  state.trim = true;
+  state.ignoreEmpty = true;
+  state.columns = new Set(state.colIds.size ? [...state.colIds] : visCols(sh).map(c => c.id));
+  const b = document.createElement('div');
+  let plan = [],
+    rows = [],
+    columns = [];
+  const draw = () => {
+    rows = cleanupScopedRows(sh, state);
+    columns = sh.columns.filter(c => state.columns.has(c.id));
+    plan = mode === 'dups' ? cleanupDuplicatePlan(sh, rows, columns, state) : cleanupWhitespacePlan(sh, rows, columns, state);
+    const RN = new Map(sh.rows.map((r, i) => [r.id, i + 1])),
+      blocked = mode === 'space' ? plan.filter(x => x.error).length : 0;
+    const preview = mode === 'dups' ? plan.slice(0, 12).map(x => `<div>Row ${RN.get(x.row.id)} matches row ${RN.get(x.first.id)} · ${esc(columns.map(c => rawCellVal(sh, x.row, c, newCtx())).join(' | '))}</div>`).join('') : plan.slice(0, 12).map(x => `<div>Row ${RN.get(x.r.id)} · ${esc(x.c.name)}: <span style="white-space:pre-wrap">${esc(x.old)}</span> → <span style="white-space:pre-wrap">${esc(x.value)}</span>${x.error ? ` <b>${esc(x.error)}</b>` : ''}</div>`).join('');
+    b.innerHTML = `<label class="fld"><span class="lb">Scope</span>${selHTML('cleanupScope', [{
+      value: 'selection',
+      label: 'Selected cells'
+    }, {
+      value: 'filtered',
+      label: 'Filtered rows'
+    }, {
+      value: 'all',
+      label: 'Whole sheet'
+    }], state.scope)}</label><p>${rows.length} populated rows · ${columns.length} columns</p><div class="lb">Columns to check</div><label class="fld"><span><input type="checkbox" id="cleanupAllColumns" ${state.columns.size === sh.columns.length ? 'checked' : ''}> Select all</span></label><div class="grid-review">${sh.columns.map(c => `<label class="fld"><span><input type="checkbox" data-cleanup-column="${c.id}" ${state.columns.has(c.id) ? 'checked' : ''}> ${esc(c.name)}</span></label>`).join('')}</div>${mode === 'dups' ? `<label class="fld"><span><input type="checkbox" id="cleanupHeader" ${state.header ? 'checked' : ''}> First row is a header</span></label><label class="fld"><span><input type="checkbox" id="cleanupCase" ${state.ignoreCase ? 'checked' : ''}> Ignore letter case</span></label><label class="fld"><span><input type="checkbox" id="cleanupTrim" ${state.trim ? 'checked' : ''}> Ignore extra spaces</span></label><label class="fld"><span><input type="checkbox" id="cleanupEmpty" ${state.ignoreEmpty ? 'checked' : ''}> Ignore empty keys</span></label><p class="hint">The first copy is kept. Duplicate rows are removed in full, based on the checked columns.</p>` : '<p class="hint">Trims leading and trailing spaces and repeated spaces. Line breaks and formulas are preserved. Locked and computed cells are skipped.</p>'}<p><b>${plan.length - blocked}</b> ${mode === 'dups' ? 'rows to remove' : 'cells to change'}${blocked ? ' · ' + blocked + ' blocked by validation' : ''}</p>${preview ? `<div class="grid-review">${preview}</div>` : '<p class="hint">Nothing to clean in this scope.</p>'}${plan.length > 12 ? '<p class="hint">Showing the first 12 matches.</p>' : ''}<p id="cleanupError" class="hint" role="alert"></p>`;
+  };
+  draw();
+  b.addEventListener('change', e => {
+    const el = e.target;
+    if (el.id === 'cleanupScope') state.scope = el.value;else if (el.id === 'cleanupAllColumns') state.columns = new Set(el.checked ? sh.columns.map(c => c.id) : []);else if (el.dataset.cleanupColumn) {
+      if (el.checked) state.columns.add(el.dataset.cleanupColumn);else state.columns.delete(el.dataset.cleanupColumn);
+    } else {
+      const keys = {
+        cleanupHeader: 'header',
+        cleanupCase: 'ignoreCase',
+        cleanupTrim: 'trim',
+        cleanupEmpty: 'ignoreEmpty'
+      };
+      if (keys[el.id]) state[keys[el.id]] = el.checked;
+    }
+    draw();
+  });
+  modal(mode === 'dups' ? 'Remove duplicates' : 'Trim whitespace', b, () => {
+    if (!columns.length) {
+      b.querySelector('#cleanupError').textContent = 'Choose at least one column.';
+      return false;
+    }
+    if (!plan.some(x => !x.error)) {
+      b.querySelector('#cleanupError').textContent = 'No changes to apply.';
+      return false;
+    }
+    try {
+      vhSnap(DB.ui.open, 'cleanup');
+    } catch (e) {}
+    pushUndo();
+    let n = 0;
+    if (mode === 'dups') {
+      const ids = new Set(plan.map(x => x.row.id));
+      sh.rows = sh.rows.filter(r => !ids.has(r.id));
+      n = ids.size;
+      _selReset();
+    } else {
+      plan.filter(x => !x.error).forEach(x => {
+        x.r.cells[x.c.id] = x.value;
+        touchRow(x.r);
+        n++;
+      });
+    }
+    afterEdit();
+    toast((mode === 'dups' ? 'Removed ' + n + ' duplicate rows' : 'Trimmed ' + n + ' cells') + ' — Ctrl+Z to undo');
+  }, mode === 'dups' ? 'Remove duplicates' : 'Trim whitespace');
+  document.querySelector('.modal')?.classList.add('wide');
+}
+
+"use strict";
+
+/* Advanced cleanup: conservative plans, explicit review, one undo. */
+function cleanupBlank(v) {
+  return v == null || v === '' || Array.isArray(v) && !v.length || typeof v === 'string' && !v.trim();
+}
+function cleanupNormal(v) {
+  return String(v ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+function cleanupDateValue(v, order, serial, time) {
+  const text = String(v ?? '').trim();
+  if (!text) return {
+    skip: true
+  };
+  if (serial && /^\d+(\.\d+)?$/.test(text) && Number(text) > 0 && Number(text) < 2958466) return {
+    value: serialDate(Number(text), !!time)
+  };
+  let s = text.replace(/^(\d{4}-\d{2}-\d{2})T/, '$1 ').replace(/(\d)-([A-Za-z])/g, '$1 $2').replace(/([A-Za-z])-(\d)/g, '$1 $2');
+  const m = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4}|\d{2})(.*)$/);
+  if (m) {
+    let a = +m[1],
+      b = +m[2],
+      y = +m[3];
+    if (y < 100) y += 2000;
+    if (a <= 12 && b <= 12 && a !== b && !order) return {
+      error: 'Ambiguous date — choose day first or month first'
+    };
+    let month, day;
+    if (a > 12) {
+      day = a;
+      month = b;
+    } else if (b > 12) {
+      month = a;
+      day = b;
+    } else {
+      day = order === 'mdy' ? b : a;
+      month = order === 'mdy' ? a : b;
+    }
+    s = y + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0') + m[4];
+  }
+  if (!/\d{4}|\d{1,2}[/.\-]\d{1,2}[/.\-]\d{2}\b/.test(text)) return {
+    error: 'A full date with a year is required'
+  };
+  const value = parseDateInput(s, !!time);
+  return value ? {
+    value
+  } : {
+    error: 'Invalid date'
+  };
+}
+function cleanupDatePlan(sh, rows, cols, state) {
+  const out = [];
+  rows.forEach(r => cols.forEach(c => {
+    const old = r.cells[c.id];
+    if (cleanupBlank(old) || _ro(c) || colLocked(c, sh) || String(old).trimStart().startsWith('=') || state.scope === 'selection' && !state.cellKeys.has(r.id + ':' + c.id)) return;
+    const result = cleanupDateValue(old, state.order, state.serial, c.type === 'datetime' || /\d:\d/.test(String(old)));
+    if (result.error || result.value !== String(old)) out.push({
+      r,
+      c,
+      old,
+      ...result
+    });
+  }));
+  const changes = out.filter(x => !x.error),
+    byRow = new Map(changes.map(x => [x.r.id, clone(x.r)]));
+  changes.forEach(x => byRow.get(x.r.id).cells[x.c.id] = x.value);
+  const proposed = {
+      ...sh,
+      rows: sh.rows.map(r => byRow.get(r.id) || r)
+    },
+    cache = {};
+  changes.forEach(x => {
+    if (colRules(x.c)?.mode === 'reject') x.error = validateVal(proposed, x.c, byRow.get(x.r.id), x.value, cache);
+  });
+  return out;
+}
+function cleanupRowProtected(sh, r) {
+  const i = sh.rows.indexOf(r);
+  return !!(r.indent || r.collapsed || sh.rows[i + 1]?.indent > (r.indent || 0) || sh.links?.[r.id] || Object.keys(sh.notes || {}).some(k => k.startsWith(r.id + ':') && sh.notes[k]));
+}
+function cleanupRowHasData(sh, r) {
+  return sh.columns.some(c => !['autonumber', 'created', 'modified', 'createdby', 'modifiedby'].includes(c.type) && !cleanupBlank(r.cells[c.id]) && (c.type !== 'checkbox' || !['0', 'false', false].includes(r.cells[c.id]))) || cleanupRowProtected(sh, r);
+}
+function cleanupEmptyPlan(sh, rows) {
+  const first = sh.rows.findIndex(r => cleanupRowHasData(sh, r));
+  let last = sh.rows.length - 1;
+  while (last >= 0 && !cleanupRowHasData(sh, sh.rows[last])) last--;
+  return rows.filter(r => {
+    const i = sh.rows.indexOf(r);
+    return i > first && i < last && !cleanupRowHasData(sh, r) && !r.locked;
+  });
+}
+function cleanupMergePlan(sh, rows, cols) {
+  if (!cols.length) return [];
+  const groups = new Map();
+  cleanupDuplicatePlan(sh, rows, cols, {}).forEach(x => {
+    if (!groups.has(x.first.id)) groups.set(x.first.id, {
+      keeper: x.first,
+      donors: [],
+      fields: [],
+      blocked: null
+    });
+    groups.get(x.first.id).donors.push(x.row);
+  });
+  return [...groups.values()].map(g => {
+    const records = [g.keeper, ...g.donors];
+    if (records.some(r => cleanupRowProtected(sh, r) || r.locked)) g.blocked = 'Rows with notes, links, locks or hierarchy stay separate';
+    sh.columns.forEach(c => {
+      if (colLocked(c, sh) && records.some(r => JSON.stringify(r.cells[c.id]) !== JSON.stringify(g.keeper.cells[c.id]))) {
+        g.blocked = 'Unlock conflicting columns before merging';
+        return;
+      }
+      if (_ro(c)) {
+        if (c.type === 'formula' && records.some(r => JSON.stringify(r.cells[c.id]) !== JSON.stringify(g.keeper.cells[c.id]))) g.blocked = 'Formula columns contain different stored values; keep these records separate';
+        return;
+      }
+      const variants = [];
+      records.forEach(r => {
+        const value = r.cells[c.id];
+        if (!cleanupBlank(value) && !variants.some(x => JSON.stringify(x.value) === JSON.stringify(value))) variants.push({
+          row: r,
+          value
+        });
+      });
+      if (!variants.length) return;
+      const old = g.keeper.cells[c.id];
+      if (colLocked(c, sh) && variants.some(x => JSON.stringify(x.value) !== JSON.stringify(old))) {
+        g.blocked = 'Unlock conflicting columns before merging';
+        return;
+      }
+      if (variants.length > 1) g.fields.push({
+        c,
+        variants,
+        conflict: true,
+        choice: null
+      });else if (cleanupBlank(old)) g.fields.push({
+        c,
+        variants,
+        conflict: false,
+        choice: variants[0].row.id
+      });
+    });
+    return g;
+  });
+}
+function cleanupApplyMerge(sh, groups) {
+  const oldRows = sh.rows.slice(),
+    redirect = new Map();
+  groups.forEach(g => {
+    g.fields.forEach(f => {
+      const source = f.variants.find(x => x.row.id === f.choice);
+      if (!source) return;
+      g.keeper.cells[f.c.id] = fillFormula(sh, clone(source.value), source.row.id, f.c.id, g.keeper.id, f.c.id);
+      const fmt = sh.fmt?.[source.row.id + ':' + f.c.id];
+      if (fmt && source.row !== g.keeper) {
+        sh.fmt = sh.fmt || {};
+        sh.fmt[g.keeper.id + ':' + f.c.id] = clone(fmt);
+      }
+    });
+    touchRow(g.keeper);
+    g.donors.forEach(r => redirect.set(r.id, g.keeper.id));
+  });
+  sh.rows = sh.rows.filter(r => !redirect.has(r.id));
+  const index = new Map(sh.rows.map((r, i) => [r.id, i]));
+  const map = oldRows.map(r => index.get(redirect.get(r.id) || r.id));
+  sh.columns.forEach(c => {
+    if (redirect.has(c.formulaAnchor)) c.formulaAnchor = redirect.get(c.formulaAnchor);
+    if (c.formulaAnchor) c.formulaAnchorIndex = index.get(c.formulaAnchor);
+  });
+  _structSnap = null;
+  remapRefs(sh, map, null);
+  return redirect.size;
+}
+function cleanupInconsistentPlan(sh, rows, cols, state) {
+  const groups = [];
+  cols.forEach(c => {
+    if (!['text', 'select', 'multiselect'].includes(c.type)) return;
+    const byValue = new Map();
+    rows.forEach(r => {
+      const value = r.cells[c.id];
+      if (typeof value !== 'string' || cleanupBlank(value) || value.trimStart().startsWith('=') || state.scope === 'selection' && !state.cellKeys.has(r.id + ':' + c.id)) return;
+      if (!byValue.has(value)) byValue.set(value, []);
+      byValue.get(value).push(r);
+    });
+    const values = [...byValue.keys()],
+      parent = values.map((_, i) => i),
+      root = i => {
+        while (parent[i] !== i) i = parent[i];
+        return i;
+      };
+    for (let i = 0; i < values.length; i++) for (let j = i + 1; j < values.length; j++) {
+      const a = cleanupNormal(values[i]),
+        b = cleanupNormal(values[j]);
+      if (a === b || Math.min(a.length, b.length) >= 4 && (a.startsWith(b + ' ') || b.startsWith(a + ' '))) parent[root(j)] = root(i);
+    }
+    const clusters = new Map();
+    values.forEach((v, i) => {
+      const k = root(i);
+      if (!clusters.has(k)) clusters.set(k, []);
+      clusters.get(k).push({
+        value: v,
+        rows: byValue.get(v)
+      });
+    });
+    clusters.forEach(variants => {
+      if (variants.length > 1) groups.push({
+        c,
+        variants
+      });
+    });
+  });
+  return groups;
+}
+function clearCleanupFlags() {
+  const sh = curSheet(),
+    state = cleanupSelection();
+  if (sheetLocked(sh)) return lockToast();
+  const keys = Object.keys(sh.reviewFlags || {}).filter(k => state.scope === 'all' || state.cellKeys.has(k));
+  if (!keys.length) return toast('No review flags in this selection');
+  pushUndo();
+  keys.forEach(k => delete sh.reviewFlags[k]);
+  afterEdit();
+  toast('Review flags cleared — Ctrl+Z to undo');
+}
+function advancedCleanupDialog(mode) {
+  const sh = curSheet();
+  if (!sh || sheetLocked(sh)) return lockToast();
+  const state = cleanupSelection();
+  state.order = '';
+  state.serial = false;
+  if (!state.colIds.size) state.colIds = new Set(sh.columns.map(c => c.id));
+  const b = document.createElement('div');
+  let plan = [],
+    rows = [],
+    cols = [];
+  const decisions = new Map(),
+    excluded = new Set();
+  const titles = {
+    dates: 'Standardise dates',
+    empty: 'Remove empty rows',
+    merge: 'Merge records',
+    flags: 'Flag inconsistent values'
+  };
+  const draw = () => {
+    rows = state.scope === 'selection' ? sh.rows.filter(r => state.rowIds.has(r.id)) : state.scope === 'filtered' ? visibleRows(sh) : sh.rows;
+    cols = sh.columns.filter(c => state.colIds.has(c.id));
+    plan = mode === 'dates' ? cleanupDatePlan(sh, rows, cols, state) : mode === 'empty' ? cleanupEmptyPlan(sh, rows) : mode === 'merge' ? cleanupMergePlan(sh, rows, cols) : cleanupInconsistentPlan(sh, rows, cols, state);
+    const rn = r => sh.rows.indexOf(r) + 1;
+    let preview = '';
+    if (mode === 'dates') preview = plan.map(x => `<div>Row ${rn(x.r)} · ${esc(x.c.name)}: ${esc(x.old)} → ${x.error ? `<span style="color:var(--danger)">${esc(x.error)}</span>` : esc(x.value)}</div>`).join('');
+    if (mode === 'empty') preview = plan.map(r => `<div>Remove row ${rn(r)}</div>`).join('');
+    if (mode === 'flags') preview = plan.map(g => `<div><strong>${esc(g.c.name)}</strong>: ${g.variants.map(v => `${esc(v.value)} (${v.rows.length})`).join(' · ')}</div>`).join('');
+    if (mode === 'merge') preview = plan.map(g => {
+      g.fields.forEach(f => {
+        if (f.conflict) f.choice = decisions.get(g.keeper.id + ':' + f.c.id) || null;
+      });
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><label><input type="checkbox" data-merge-group="${g.keeper.id}" ${excluded.has(g.keeper.id) || g.blocked ? '' : 'checked'} ${g.blocked ? 'disabled' : ''}> Keep row ${rn(g.keeper)}, merge rows ${g.donors.map(rn).join(', ')}</label>${g.blocked ? `<p class="hint">${esc(g.blocked)}</p>` : g.fields.map(f => f.conflict ? `<label class="fld"><span class="lb">${esc(f.c.name)} · choose a value</span>${selHTML('mergeChoice_' + g.keeper.id + '_' + f.c.id, [{
+        value: '',
+        label: 'Choose a value'
+      }, ...f.variants.map(v => ({
+        value: v.row.id,
+        label: 'Row ' + rn(v.row) + ': ' + String(v.value)
+      }))], f.choice || '')}</label>` : `<div class="hint">Fill ${esc(f.c.name)}: ${esc(f.variants[0].value)}</div>`).join('')}</div>`;
+    }).join('');
+    b.innerHTML = `<label class="fld"><span class="lb">Scope</span>${selHTML('advancedScope', [{
+      value: 'selection',
+      label: 'Selected cells'
+    }, {
+      value: 'filtered',
+      label: 'Visible rows'
+    }, {
+      value: 'all',
+      label: 'All rows'
+    }], state.scope)}</label>${mode !== 'empty' ? `<div class="fld"><span class="lb">${mode === 'merge' ? 'Match records using' : 'Columns'}</span><label><input type="checkbox" id="advancedAll" ${cols.length === sh.columns.length ? 'checked' : ''}> All columns</label><div style="display:flex;flex-wrap:wrap;gap:12px">${sh.columns.map(c => `<label><input type="checkbox" data-advanced-column="${c.id}" ${state.colIds.has(c.id) ? 'checked' : ''}> ${esc(c.name)}</label>`).join('')}</div></div>` : ''}${mode === 'dates' ? `<label class="fld"><span class="lb">Ambiguous dates</span>${selHTML('advancedOrder', [{
+      value: '',
+      label: 'Leave for review'
+    }, {
+      value: 'dmy',
+      label: 'Day first'
+    }, {
+      value: 'mdy',
+      label: 'Month first'
+    }], state.order)}</label><label><input type="checkbox" id="advancedSerial" ${state.serial ? 'checked' : ''}> Convert Excel serial dates</label>` : ''}<p class="hint">${mode === 'empty' ? 'Only blank rows between populated rows are removed. Trailing empty rows, notes, links and hierarchy are preserved.' : mode === 'merge' ? 'The first matching row is kept. Empty fields are filled. Choose each conflicting value, or deselect the group to keep its records separate.' : mode === 'flags' ? 'Similar text is flagged for review; the original values stay unchanged.' : 'Only valid, unambiguous conversions are applied. Formulas and locked cells are preserved.'}</p><p>${plan.length} ${mode === 'dates' ? 'cells to review' : mode === 'empty' ? 'empty rows' : mode === 'merge' ? 'matching groups' : 'inconsistent groups'}</p><div class="grid-review">${preview || '<p>No matching data in this scope.</p>'}</div><p id="advancedError" class="hint" role="alert"></p>`;
+  };
+  draw();
+  b.addEventListener('change', e => {
+    const el = e.target;
+    if (el.id === 'advancedScope') state.scope = el.value;else if (el.id === 'advancedOrder') state.order = el.value;else if (el.id === 'advancedSerial') state.serial = el.checked;else if (el.id === 'advancedAll') state.colIds = new Set(el.checked ? sh.columns.map(c => c.id) : []);else if (el.dataset.advancedColumn) {
+      if (el.checked) state.colIds.add(el.dataset.advancedColumn);else state.colIds.delete(el.dataset.advancedColumn);
+    } else if (el.dataset.mergeGroup) {
+      if (el.checked) excluded.delete(el.dataset.mergeGroup);else excluded.add(el.dataset.mergeGroup);
+    } else if (el.id.startsWith('mergeChoice_')) {
+      const g = plan.find(g => g.fields.some(f => 'mergeChoice_' + g.keeper.id + '_' + f.c.id === el.id));
+      const f = g?.fields.find(f => 'mergeChoice_' + g.keeper.id + '_' + f.c.id === el.id);
+      if (f) decisions.set(g.keeper.id + ':' + f.c.id, el.value);
+    }
+    draw();
+  });
+  modal(titles[mode], b, () => {
+    if (curSheet() !== sh || sheetLocked(sh)) return false;
+    const fail = msg => {
+      b.querySelector('#advancedError').textContent = msg;
+      return false;
+    };
+    let active = plan;
+    if (mode === 'dates') active = plan.filter(x => !x.error);
+    if (mode === 'merge') {
+      active = plan.filter(g => !g.blocked && !excluded.has(g.keeper.id));
+      if (active.some(g => g.fields.some(f => f.conflict && !f.choice))) return fail('Choose a value for every conflict, or deselect that group.');
+      const proposed = clone(sh);
+      active.forEach(g => {
+        const r = proposed.rows.find(r => r.id === g.keeper.id);
+        g.fields.forEach(f => {
+          const v = f.variants.find(v => v.row.id === f.choice);
+          if (v) r.cells[f.c.id] = v.value;
+        });
+      });
+      const removed = new Set(active.flatMap(g => g.donors.map(r => r.id)));
+      proposed.rows = proposed.rows.filter(r => !removed.has(r.id));
+      for (const g of active) for (const f of g.fields) {
+        if (colRules(f.c)?.mode === 'reject') {
+          const r = proposed.rows.find(r => r.id === g.keeper.id),
+            err = validateVal(proposed, f.c, r, r.cells[f.c.id], {});
+          if (err) return fail(err);
+        }
+      }
+    }
+    if (!active.length) return fail('No changes to apply.');
+    try {
+      vhSnap(DB.ui.open, 'cleanup');
+    } catch (e) {}
+    pushUndo();
+    if (mode === 'dates') active.forEach(x => {
+      x.r.cells[x.c.id] = x.value;
+      touchRow(x.r);
+    });
+    if (mode === 'empty') {
+      const ids = new Set(active.map(r => r.id));
+      sh.rows = sh.rows.filter(r => !ids.has(r.id));
+      _selReset();
+    }
+    if (mode === 'merge') {
+      cleanupApplyMerge(sh, active);
+      _selReset();
+    }
+    if (mode === 'flags') {
+      sh.reviewFlags = sh.reviewFlags || {};
+      active.forEach(g => g.variants.forEach(v => v.rows.forEach(r => sh.reviewFlags[r.id + ':' + g.c.id] = {
+        value: v.value,
+        message: 'Review similar values: ' + g.variants.map(v => v.value).join(' · ')
+      })));
+    }
+    afterEdit();
+    toast('Cleanup applied — Ctrl+Z to undo');
+  }, mode === 'flags' ? 'Flag for review' : 'Apply');
+  document.querySelector('.modal')?.classList.add('wide');
+}
+
 
 /* ============================ BOOT ============================ */
 if(EMBED){ $("#main").innerHTML=`<div class="gload"><span class="gspin"></span>Loading your grids…</div>`; try{ window.parent.postMessage({type:"grids:ready"},_hubOrigin()); }catch(e){} }
