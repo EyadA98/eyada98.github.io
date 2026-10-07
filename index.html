@@ -4414,20 +4414,21 @@ function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b
 function _mergeGrids(a,b){
   a=a||{};b=b||{};const del=Object.assign({},a.deleted||{});Object.keys(b.deleted||{}).forEach(k=>{del[k]=Math.max(+del[k]||0,+b.deleted[k]||0);});
   const time=x=>+(x&&(x.updated||x.created))||0;
-  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav','restoredAt','recoveredFrom','recoveredAt','recoveredSignature'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
+  const content=x=>{const c=JSON.parse(JSON.stringify(x));['updated','ancestors','activeTab','fav','restoredAt','recoveredFrom','recoveredAt','recoveredSignature'].forEach(k=>delete c[k]);(c.tabs||[]).forEach(t=>{delete t.sort;delete t.filters;delete t.activeView;delete t.activeFilter;delete t.filterEnabled;delete t.quickFilter;if(t.pivot)delete t.pivot.snap;});return JSON.stringify(c);};
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);};
   Object.keys(del).forEach(k=>{const at=k.indexOf('-recovered-');if(at>0&&!k.startsWith('__')){const root='__recoveryDismissed__:'+k.slice(0,at);del[root]=Math.max(+del[root]||0,+del[k]||0);}});
   // A content revision is recovered once, regardless of changing sync timestamps.
   const recoveryKey=(id,sig)=>'__recovery__:'+id+':'+sig;
   function recoveredSignature(copy){if(copy.recoveredSignature)return copy.recoveredSignature;const original=JSON.parse(JSON.stringify(copy));original.id=copy.recoveredFrom;original.name=(copy.name||'Grid').replace(/ · recovered conflict$/,'');delete original.trashed;return hash(content(original));}
-  [a.sheets,b.sheets].forEach(map=>Object.values(map||{}).forEach(copy=>{if(copy.recoveredFrom){if(copy.trashed){const dismissed='__recoveryDismissed__:'+copy.recoveredFrom;del[dismissed]=Math.max(+del[dismissed]||0,+copy.trashed||0);}const k=recoveryKey(copy.recoveredFrom,recoveredSignature(copy));del[k]=Math.max(+del[k]||0,time(copy),+copy.recoveredAt||0,1);}}));
+  [a.sheets,b.sheets].forEach(map=>Object.values(map||{}).forEach(copy=>{if(copy.recoveredFrom){if(copy.trashed){const sig=recoveredSignature(copy),gone='__recoveryDeleted__:'+copy.recoveredFrom+':'+sig;del[gone]=Math.max(+del[gone]||0,+copy.trashed||0);const dismissed='__recoveryDismissed__:'+copy.recoveredFrom;del[dismissed]=Math.max(+del[dismissed]||0,+copy.trashed||0);}const k=recoveryKey(copy.recoveredFrom,recoveredSignature(copy));del[k]=Math.max(+del[k]||0,time(copy),+copy.recoveredAt||0,1);}}));
   function pick(A,B,recover){A=A||{};B=B||{};const out={},copies={};new Set([...Object.keys(A),...Object.keys(B)]).forEach(id=>{const x=A[id],y=B[id];let winner=x||y;if(x&&y){const sx=content(x),sy=content(y);winner=time(y)>time(x)?y:time(y)<time(x)?x:(sy>sx?y:x);// A trashed recovery stays deleted unless explicitly restored after that deletion.
       if(recover&&(x.recoveredFrom||y.recoveredFrom)&&(x.trashed||y.trashed)){const trash=+(x.trashed||0)>=+(y.trashed||0)?x:y;const other=trash===x?y:x;if((+other.restoredAt||0)<=(+trash.trashed||0))winner=trash;}
       const loser=winner===x?y:x;if(del[id]&&del[id]>=time(winner))return;
       /* A descendant already includes the other revision. Divergent revisions retain the loser. */
       if(recover&&sx!==sy&&!x.trashed&&!y.trashed&&!winner.recoveredFrom&&!loser.recoveredFrom&&!(winner.ancestors||[]).includes(time(loser))){const sig=hash(content(loser)),seen=recoveryKey(id,sig),copy=JSON.parse(JSON.stringify(loser)),key=id+'-recovered-'+sig,legacy=id+'-recovered-'+hash(content(loser)+'|'+time(loser));if(!del[seen]&&!del[key]&&!del[legacy]&&time(loser)>(+del['__recoveryDismissed__:'+id]||0)){copy.id=key;copy.name=(loser.name||'Grid')+' · recovered conflict';copy.recoveredFrom=id;copy.recoveredSignature=sig;copy.recoveredAt=Math.max(time(x),time(y));copies[key]=copy;del[seen]=Math.max(time(x),time(y),1);}}
-    }if(winner&&!(del[id]&&(del[id]>=time(winner)||winner.recoveredFrom)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k]&&!del[k])out[k]=copies[k];});return out;}
-  return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:del,rev:Math.max(+a.rev||0,+b.rev||0)};
+    }if(winner&&recover&&winner.recoveredFrom){const sig=recoveredSignature(winner),gone=Math.max(+del['__recoveryDeleted__:'+winner.recoveredFrom+':'+sig]||0,((+winner.recoveredAt||time(winner))<=(+del['__recoveryDismissed__:'+winner.recoveredFrom]||0)?+del['__recoveryDismissed__:'+winner.recoveredFrom]||0:0));if(gone&&(+winner.restoredAt||0)<=gone){winner=JSON.parse(JSON.stringify(winner));winner.trashed=Math.max(+winner.trashed||0,gone);del['__recoveryDeleted__:'+winner.recoveredFrom+':'+sig]=gone;}}
+    if(winner&&!(del[id]&&(del[id]>=time(winner)||winner.recoveredFrom)))out[id]=winner;});Object.keys(copies).forEach(k=>{if(!out[k]&&!del[k])out[k]=copies[k];});return out;}
+  return {v:1,folders:pick(a.folders,b.folders,false),sheets:pick(a.sheets,b.sheets,true),deleted:Object.fromEntries(Object.keys(del).sort().map(k=>[k,del[k]])),rev:Math.max(+a.rev||0,+b.rev||0)};
 }
 
 
@@ -10569,7 +10570,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-06-mobile-sync-9";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-07-smart-data-11";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
