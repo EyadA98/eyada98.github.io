@@ -4385,29 +4385,67 @@ var _lastSettingsJSON="", _lastProfileJSON=""; function _syncSettingsBaseline(){
 var _saveWarned=false; function save(){ if((user?user.id:(_offline?_dataOwner:null))!==_dataOwner){ return; } try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } var _pj=JSON.stringify(data.profile||{}); if(_pj!==_lastProfileJSON){ data.profileUpdatedAt=Date.now(); _lastProfileJSON=_pj; } }catch(_s){} data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } scheduleHubSync(); return false; } scheduleHubSync(); return true; }
 _syncSettingsBaseline();
 let _hubTimer=null;
-function scheduleHubSync(){ if(!user||!supa) return; clearTimeout(_hubTimer); _hubTimer=setTimeout(pushHub,1200); }
-var _hubCloudAt=null;   /* updated_at of the cloud copy we last read or wrote */
+// One coordinator owns reads and writes; polls no longer re-upload unchanged data.
+var _hubCloudAt=null,_hubFlight=null,_hubDirty=false,_hubPullRequested=false,_hubRetry=0,_hubRetryAt=0,_hubEpoch=0,_hubSyncWarned=false,_hubBlocked=false;
+function scheduleHubSync(){if(!user||!supa)return;_hubBlocked=false;_hubDirty=true;clearTimeout(_hubTimer);_hubTimer=setTimeout(pushHub,Math.max(1200,_hubRetryAt-Date.now()));}
 function _modalOpen(){ return !!document.querySelector("#modalRoot .overlay"); }
 /* close the pop-ups through their own close functions, so their "open" state is reset and they open on the next click */
 function _closePops(){ try{ tdSchedClose(); }catch(_){} try{ tdAsgClose(); }catch(_){} try{ _dpClose(); }catch(_){} try{ _tmpClose(); }catch(_){} try{ document.querySelectorAll(".dp-pop,.tmp-pop,.asg-pop").forEach(function(p){ p.remove(); }); }catch(_){} }
 /* work held back while a dialog was open: changes from another tab, and a pending pull */
 function _afterModalClose(){ setTimeout(function(){ if(_modalOpen()) return; try{ if(_pendingIncoming){ var inc=_pendingIncoming; _pendingIncoming=null; data=fill(mergeHubData(data,inc)); _syncSettingsBaseline(); render(); } if(_pullPending){ _pullPending=false; pullHub(); } }catch(_){} },0); }
-async function pushHub(){ if(TEST_MODE){ try{ gridsNoteSync(true); }catch(_){} return; } if(!user||!supa) return; var uid0=user.id; try{
-    /* read → merge → write: if another device saved since we last looked, fold its changes in first instead of overwriting them */
-    const chk=await supa.from("hub").select("updated_at").eq("user_id",uid0).limit(1); if(chk.error) throw chk.error; if(!user||user.id!==uid0) return;
-    var cAt=chk.data&&chk.data[0]&&chk.data[0].updated_at; if(cAt&&(!_hubCloudAt||Date.parse(cAt)!==Date.parse(_hubCloudAt))){ if(_modalOpen()){ _pullPending=true; return; } const full=await supa.from("hub").select("data,updated_at").eq("user_id",uid0).limit(1); if(full.error) throw full.error; if(!user||user.id!==uid0) return;
-      if(_modalOpen()){ _pullPending=true; return; } var rec=full.data&&full.data[0]&&full.data[0].data; if(rec){ var merged=fill(mergeHubData(data,rec)); var ch=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(_){} if(ch) render(); } }
-    var at=new Date().toISOString(); const {error}=await supa.from("hub").upsert({user_id:uid0,data:data,updated_at:at},{onConflict:"user_id"}); if(error) throw error; _hubCloudAt=at; try{ gridsNoteSync(true); }catch(_){} }catch(e){ try{ gridsNoteSync(false); }catch(_){}
-  /* A failed cloud save used to reach console.error and nowhere else: you kept
-     working, the change never left the device, and another device showed stale
-     data with no hint anything had gone wrong. Finance and Travel both surface
-     this. Told once per failure run, not per retry, so a long offline spell does
-     not produce a stream of toasts. */
-  console.error("Hub sync failed:",(e&&e.message)||e);
-  if(!_hubSyncWarned){ _hubSyncWarned=true; try{ toast("Changes saved on this device — cloud sync failed"); }catch(_){} }
-  return;
-} _hubSyncWarned=false; }
-var _hubSyncWarned=false;
+
+function _hubReset(){_hubEpoch++;clearTimeout(_hubTimer);_hubFlight=null;_hubDirty=false;_hubPullRequested=false;_hubCloudAt=null;_hubRetry=0;_hubRetryAt=0;_hubSyncWarned=false;_hubBlocked=false;}
+function _hubRetryable(e){return !e||!e.code||e.code==='57014'||/^(08|40|53|57)/.test(e.code)||/timeout|fetch|network|temporar/i.test(e.message||'');}
+async function _hubSync(write){
+ if(TEST_MODE){if(write)try{gridsNoteSync(true);}catch(_){}return;}
+ if(!user||!supa)return;
+ if(write){_hubDirty=true;_hubBlocked=false;}else _hubPullRequested=true;
+ if(_hubBlocked)return;
+ if(_hubFlight)return _hubFlight;
+ if(Date.now()<_hubRetryAt)return;
+ if(_modalOpen()){_pullPending=true;return;}
+ const uid=user.id,epoch=_hubEpoch,active=()=>user&&user.id===uid&&epoch===_hubEpoch;
+ const flight=(async()=>{
+  try{
+   _hubPullRequested=false;
+   const res=await supa.from("hub").select("data,updated_at").eq("user_id",uid).limit(1);
+   if(!active())return;if(res.error)throw res.error;
+   if(_modalOpen()){_pullPending=true;return;}
+   const row=res.data&&res.data[0],rec=row&&row.data;
+   if(row)_hubCloudAt=row.updated_at;
+   if(rec){
+    const remoteJSON=JSON.stringify(fill(JSON.parse(JSON.stringify(rec)))),before=JSON.stringify(data),merged=fill(mergeHubData(data,rec));data=merged;_syncSettingsBaseline();
+    const json=JSON.stringify(data);try{localStorage.setItem(storeKey(),json);}catch(_){}
+    if(json!==before)render();
+    // Write only if the merged content contains changes absent from the cloud.
+    _hubDirty=JSON.stringify(data)!==remoteJSON;
+   }else _hubDirty=true;
+   if(_hubDirty){
+    const snapshot=JSON.stringify(data),payload=JSON.parse(snapshot),at=new Date().toISOString();
+    const saved=await supa.from("hub").upsert({user_id:uid,data:payload,updated_at:at},{onConflict:"user_id"});
+    if(!active())return;if(saved.error)throw saved.error;
+    _hubCloudAt=at;_hubDirty=JSON.stringify(data)!==snapshot;
+   }
+   _hubRetry=0;_hubRetryAt=0;_hubSyncWarned=false;
+   if(!_hubDirty)try{gridsNoteSync(true);}catch(_){}
+  }catch(e){
+   if(!active())return;
+   try{gridsNoteSync(false);}catch(_){}
+   console.error("Hub sync failed:",e&&e.code,e&&e.message);
+   const retry=_hubRetryable(e);
+   if(retry){_hubRetry=Math.min(_hubRetry+1,6);_hubRetryAt=Date.now()+Math.min(60000,2000*Math.pow(2,_hubRetry-1));}
+   else{_hubRetryAt=0;_hubBlocked=true;_hubPullRequested=false;}
+   if(!_hubSyncWarned){_hubSyncWarned=true;try{toast(retry?"Saved on this device — cloud sync will retry":"Saved on this device — cloud access needs attention");}catch(_){}}
+  }finally{
+   if(active()){
+    _hubFlight=null;
+    if(!_hubBlocked&&(_hubRetryAt||_hubDirty||_hubPullRequested)){clearTimeout(_hubTimer);_hubTimer=setTimeout(()=>_hubSync(false),Math.max(1200,_hubRetryAt-Date.now()));}
+   }
+  }
+ })();_hubFlight=flight;return flight;
+}
+function pushHub(){return _hubSync(true);}
+window.addEventListener('online',function(){if(!user||!supa)return;_hubRetryAt=0;_hubBlocked=false;pullHub();});
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>cu) map[id]=x; } }   /* a tie keeps this device's copy */ a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
@@ -4445,8 +4483,7 @@ function _mergeHubDataBase(local,cloud){ if(!cloud) return local; if(!local) ret
   base.tasks=_mergeArr(_tsrc.tasks,(_tsrc===local?cloud:local).tasks,tomb,false);
   if(_lto||_cto) base.tasksOrderAt=Math.max(_lto,_cto); /* a workspace carries its own columns: keep the newer side's statuses per id */ if(Array.isArray(base.workspaces)){ base.workspaces.forEach(function(w){ var n=(_newer.workspaces||[]).find(function(x){return x.id===w.id;}); var o=(_older.workspaces||[]).find(function(x){return x.id===w.id;}); var src=(n&&(+n.updated||0)>=((o&&+o.updated)||0))?n:(o||n); if(src&&Array.isArray(src.statuses)) w.statuses=src.statuses; }); } if(local.profile||cloud.profile){ /* your name/photo follow their own clock too — a brand-new device (still on the default profile) must never overwrite the real one */ var _lpu=+local.profileUpdatedAt||0, _cpu=+cloud.profileUpdatedAt||0; var _isDef=function(x){ try{ return JSON.stringify(x.profile||{})===JSON.stringify(DEFAULT.profile||{}); }catch(e){ return false; } }; var _pN; if(_lpu||_cpu) _pN=(_lpu>=_cpu)?local:cloud; else if(_isDef(local)&&!_isDef(cloud)) _pN=cloud; else if(_isDef(cloud)&&!_isDef(local)) _pN=local; else _pN=_newer; if(_pN===local&&_isDef(local)&&!_isDef(cloud)&&!_lpu) _pN=cloud; var _pO=(_pN===local)?cloud:local; base.profile=Object.assign({},_pO.profile||{},_pN.profile||{}); if(_lpu||_cpu) base.profileUpdatedAt=Math.max(_lpu,_cpu); } if(local.settings||cloud.settings){ /* settings follow their OWN clock (settingsUpdatedAt), not the whole-doc updatedAt — otherwise an unrelated newer edit on one device silently reverts a preference toggled on the other. Legacy data (no settingsUpdatedAt) keeps the newer-blob behaviour. */ var _lsu=+local.settingsUpdatedAt||0, _csu=+cloud.settingsUpdatedAt||0; var _sNewer=(_lsu||_csu)?((_lsu>=_csu)?local:cloud):_newer; var _sOlder=(_sNewer===local)?cloud:local; base.settings=Object.assign({}, _sOlder.settings||{}, _sNewer.settings||{}); if(_lsu||_csu) base.settingsUpdatedAt=Math.max(_lsu,_csu); if((local.settings&&local.settings.statuses)||(cloud.settings&&cloud.settings.statuses)){ base.settings.statuses=_mergeArr((_sNewer.settings&&_sNewer.settings.statuses)||[], (_sOlder.settings&&_sOlder.settings.statuses)||[], tomb); } var _lcu=(local.settings&&+local.settings.cityUpdated)||0,_ccu=(cloud.settings&&+cloud.settings.cityUpdated)||0; if(_lcu||_ccu){ var _cp=(_lcu>=_ccu)?(local.settings||{}):(cloud.settings||{}); if(_cp.city)base.settings.city=_cp.city; if(_cp.prayerCountry)base.settings.prayerCountry=_cp.prayerCountry; if(_cp.prayerMethod!=null)base.settings.prayerMethod=_cp.prayerMethod; base.settings.cityUpdated=Math.max(_lcu,_ccu); } } try{ if(local.mindmap||cloud.mindmap){ base.mindmap=Object.assign({}, _older.mindmap||{}, _newer.mindmap||{}); var _lb=(local.mindmap&&Array.isArray(local.mindmap.boards))?local.mindmap.boards:null, _cb=(cloud.mindmap&&Array.isArray(cloud.mindmap.boards))?cloud.mindmap.boards:null; if(_lb||_cb){ var _mb=_mergeArr(_lb||[],_cb||[],tomb); if(_mb.length) base.mindmap.boards=_mb; } } }catch(e){} try{ if(local.notif||cloud.notif){ base.notif=Object.assign({}, _older.notif||{}, _newer.notif||{}); ["read","snooze","pinned"].forEach(function(k){ base.notif[k]=Object.assign({}, (local.notif&&local.notif[k])||{}, (cloud.notif&&cloud.notif[k])||{}); }); /* `dismissed` records carry a per-id ts (a dismissal OR an un-dismiss tombstone); keep the NEWER one per id instead of a blind union, so reopening a task isn't undone by a stale cloud dismissal */ var _ld=(local.notif&&local.notif.dismissed)||{}, _cd=(cloud.notif&&cloud.notif.dismissed)||{}, _md=Object.assign({}, _ld); Object.keys(_cd).forEach(function(_id){ var a=_md[_id], b=_cd[_id]; if(!a){ _md[_id]=b; return; } var at=(a&&typeof a==="object"&&+a.ts)||0, bt=(b&&typeof b==="object"&&+b.ts)||0; _md[_id]=(bt>at)?b:a; }); base.notif.dismissed=_md; } }catch(e){} _reconcileNested(base,local,cloud,tomb); return base; }
 var _pullPending=false, _pendingIncoming=null;
-async function pullHub(){ if(!user||!supa) return; if(_modalOpen()){ _pullPending=true; return; }   /* never swap the data out from under an open editor — pull when it closes */
-  var uid0=user.id; try{ const {data:rows,error}=await supa.from("hub").select("data,updated_at").eq("user_id",uid0).order("updated_at",{ascending:false}).limit(1); if(error) throw error; if(!user||user.id!==uid0) return; if(_modalOpen()){ _pullPending=true; return; } const rec=rows&&rows[0]&&rows[0].data; if(rows&&rows[0]) _hubCloudAt=rows[0].updated_at; if(rec){ var merged=fill(mergeHubData(data,rec)); var changed=JSON.stringify(merged)!==JSON.stringify(data); data=merged; _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} if(changed) render(); pushHub(); } else { pushHub(); } }catch(e){ console.error("Hub pull failed:",(e&&e.message)||e); } }
+function pullHub(){return _hubSync(false);}
 /* ---- Nested-content merge (subtasks, comments, checklists, routine history) ----
    Keeps additions from both devices and honours per-item deletions via composite
    tombstones (#parent/type::key), so concurrent edits to the SAME item don't lose data. */
@@ -9064,6 +9101,7 @@ async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authSta
 /* Wipe every cloud-derived display global so a following account (or guest mode)
    never sees the previous user's finance / travel / calendar / inbox data. */
 function _clearCloudGlobals(){
+  _hubReset();
   try{
     financeStat=""; financeSeries=[]; financeUpdated="";
     calEvents=null; zakatDue=null;
@@ -10570,7 +10608,7 @@ function renderGridReports(){ var host=document.getElementById("dashReports"); i
 var _gridsPendingOpen=null;
 function openGridReport(gid,tid){ go("grids"); var m={type:"grids:open",grid:gid,tab:tid}; if(_gridsFrame&&_gridsAcctSent!==null) setTimeout(function(){ gridsPost(m); },60); else _gridsPendingOpen=m; }
 
-var GRIDS_VER="2026-10-10-analyze-journey-21";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
+var GRIDS_VER="2026-10-10-chart-workbench-23";   /* bump when Grids changes so browsers don't keep an old copy of the frame */
 function gridsSrc(){ return (/\/grids\/[^\/]*$/i.test(location.pathname) ? "index.html" : "grids/index.html")+"?embed=1&v="+GRIDS_VER; }   /* the folder is "grids" (lowercase) — web hosts are case-sensitive */
 function gridsDB(){ return data.grids||{v:1,folders:{},sheets:{},deleted:{}}; }
 function _gridsOrigin(){ return (location.protocol!=="file:"&&location.origin&&location.origin!=="null")?location.origin:"*"; }   /* only our own site; "*" only when opened from disk */
