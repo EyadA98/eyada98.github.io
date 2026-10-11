@@ -4367,6 +4367,60 @@ function fill(d){
   return d;
 }
 function loadLocal(k){ try{ const s=localStorage.getItem(k); if(s) return fill(JSON.parse(s)); }catch(e){} return null; }
+/* Larger account-scoped device cache. Keep legacy localStorage readable and never
+   delete old data on quota failure. IndexedDB transactions acknowledge durable saves. */
+var _deviceDBPromise=null,_deviceWrites={},_deviceLatest={},_deviceFailure=false;
+function _deviceDB(){
+ if(!_deviceDBPromise)_deviceDBPromise=new Promise(function(resolve,reject){
+  if(!window.indexedDB){reject(new Error("Browser storage unavailable"));return;}
+  var req=window.indexedDB.open("workspace-device-cache",1);
+  req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains("snapshots"))req.result.createObjectStore("snapshots");};
+  req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error);};
+  req.onblocked=function(){reject(new Error("Browser storage is blocked"));};
+ }).catch(function(e){_deviceDBPromise=null;throw e;});
+ return _deviceDBPromise;
+}
+async function _deviceRead(k){
+ try{var db=await _deviceDB();return await new Promise(function(resolve,reject){
+  var tx=db.transaction("snapshots","readonly"),r=tx.objectStore("snapshots").get(k);
+  r.onsuccess=function(){resolve(r.result?fill(JSON.parse(r.result.json)):null);};r.onerror=function(){reject(r.error);};
+ });}catch(e){return null;}
+}
+function _devicePut(k,json){
+ var previous=_deviceWrites[k]||Promise.resolve();
+ var next=previous.catch(function(){}).then(async function(){
+  var db=await _deviceDB();return new Promise(function(resolve,reject){
+   var tx=db.transaction("snapshots","readwrite");tx.objectStore("snapshots").put({json:json,savedAt:Date.now()},k);
+   tx.oncomplete=function(){resolve(true);};tx.onabort=tx.onerror=function(){reject(tx.error||new Error("Device save failed"));};
+  });
+ });_deviceWrites[k]=next;return next;
+}
+async function loadDevice(k){
+ var legacy=loadLocal(k),large=await _deviceRead(k);
+ return large?(legacy?fill(mergeHubData(large,legacy)):large):legacy;
+}
+function _saveDevice(json){
+ var k=storeKey(),localOK=false,oldCache=null;_deviceLatest[k]=json;
+ try{oldCache=localStorage.getItem(k);}catch(e){}
+ try{localStorage.setItem(k,json);localOK=true;_deviceFailure=false;_saveWarned=false;}catch(e){}
+ /* Mirror successful small saves too, so an old fallback never supersedes them. */
+ _devicePut(k,json).then(function(){
+  if(_deviceLatest[k]!==json||storeKey()!==k)return;
+  /* Only release this account's old quota-bound cache after durable transfer,
+     and only if another tab has not changed that exact cache in the meantime. */
+  if(!localOK)try{if(localStorage.getItem(k)===oldCache)localStorage.removeItem(k);}catch(e){}
+  _deviceFailure=false;_saveWarned=false;
+ }).catch(function(){
+  if(localOK||_deviceLatest[k]!==json||storeKey()!==k)return;_deviceFailure=true;
+  if(!_saveWarned){_saveWarned=true;toast(user?"Device save failed — cloud save is still pending. Keep this page open.":"Device save failed. Keep this page open and export a backup.");}
+ });return localOK;
+}
+async function _restoreDevice(){
+ var before=_dataOwner,owner=before;
+ try{if(!owner&&!localStorage.getItem(GUEST_FLAG))owner=localStorage.getItem("hub.lastUser")||null;}catch(e){}
+ var k=owner?KEY+":"+owner:KEY,cached=await loadDevice(k);
+ if(_dataOwner!==before)return;if(cached){_dataOwner=owner;data=fill(mergeHubData(data,cached));_syncSettingsBaseline();render();}
+}
 var _dataOwner=null;   /* whose data is in memory: a user id, or null for the guest copy — save() never writes one account's data under another's key */
 let data = (function(){
   try{
@@ -4382,12 +4436,12 @@ let data = (function(){
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); }
 })();
 var _lastSettingsJSON="", _lastProfileJSON=""; function _syncSettingsBaseline(){ try{ _lastSettingsJSON=JSON.stringify((data&&data.settings)||{}); _lastProfileJSON=JSON.stringify((data&&data.profile)||{}); }catch(e){ _lastSettingsJSON=""; _lastProfileJSON=""; } }
-var _saveWarned=false; function save(){ if((user?user.id:(_offline?_dataOwner:null))!==_dataOwner){ return; } try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } var _pj=JSON.stringify(data.profile||{}); if(_pj!==_lastProfileJSON){ data.profileUpdatedAt=Date.now(); _lastProfileJSON=_pj; } }catch(_s){} data.updatedAt=new Date().toISOString(); localStorage.setItem(storeKey(), JSON.stringify(data)); _saveWarned=false; }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } scheduleHubSync(); return false; } scheduleHubSync(); return true; }
+var _saveWarned=false; function save(){ if((user?user.id:(_offline?_dataOwner:null))!==_dataOwner){ return; } try{ /* stamp a settings-only clock so preference merges survive an unrelated newer edit on another device (H2) */ try{ var _sj=JSON.stringify(data.settings||{}); if(_sj!==_lastSettingsJSON){ data.settingsUpdatedAt=Date.now(); _lastSettingsJSON=_sj; } var _pj=JSON.stringify(data.profile||{}); if(_pj!==_lastProfileJSON){ data.profileUpdatedAt=Date.now(); _lastProfileJSON=_pj; } }catch(_s){} data.updatedAt=new Date().toISOString(); _saveDevice(JSON.stringify(data)); }catch(e){ if(!_saveWarned){ _saveWarned=true; try{toast("Couldn't save on this device — storage may be full.");}catch(_){} } scheduleHubSync(); return false; } scheduleHubSync(); return true; }
 _syncSettingsBaseline();
 let _hubTimer=null;
 // One coordinator owns reads and writes; polls no longer re-upload unchanged data.
 var _hubCloudAt=null,_hubFlight=null,_hubDirty=false,_hubPullRequested=false,_hubRetry=0,_hubRetryAt=0,_hubEpoch=0,_hubSyncWarned=false,_hubBlocked=false;
-function scheduleHubSync(){if(!user||!supa)return;_hubBlocked=false;_hubDirty=true;clearTimeout(_hubTimer);_hubTimer=setTimeout(pushHub,Math.max(1200,_hubRetryAt-Date.now()));}
+function scheduleHubSync(){if(!user||!supa)return;_hubBlocked=false;_hubDirty=true;clearTimeout(_hubTimer);_hubTimer=setTimeout(pushHub,Math.max(150,_hubRetryAt-Date.now()));}
 function _modalOpen(){ return !!document.querySelector("#modalRoot .overlay"); }
 /* close the pop-ups through their own close functions, so their "open" state is reset and they open on the next click */
 function _closePops(){ try{ tdSchedClose(); }catch(_){} try{ tdAsgClose(); }catch(_){} try{ _dpClose(); }catch(_){} try{ _tmpClose(); }catch(_){} try{ document.querySelectorAll(".dp-pop,.tmp-pop,.asg-pop").forEach(function(p){ p.remove(); }); }catch(_){} }
@@ -4415,7 +4469,7 @@ async function _hubSync(write){
    if(row)_hubCloudAt=row.updated_at;
    if(rec){
     const remoteJSON=JSON.stringify(fill(JSON.parse(JSON.stringify(rec)))),before=JSON.stringify(data),merged=fill(mergeHubData(data,rec));data=merged;_syncSettingsBaseline();
-    const json=JSON.stringify(data);try{localStorage.setItem(storeKey(),json);}catch(_){}
+    const json=JSON.stringify(data);_saveDevice(json);
     if(json!==before)render();
     // Write only if the merged content contains changes absent from the cloud.
     _hubDirty=JSON.stringify(data)!==remoteJSON;
@@ -4427,7 +4481,7 @@ async function _hubSync(write){
     _hubCloudAt=at;_hubDirty=JSON.stringify(data)!==snapshot;
    }
    _hubRetry=0;_hubRetryAt=0;_hubSyncWarned=false;
-   if(!_hubDirty)try{gridsNoteSync(true);}catch(_){}
+   if(!_hubDirty){try{gridsNoteSync(true);}catch(_){} if(_deviceFailure)try{toast("Saved to cloud. Device storage is unavailable.");}catch(_){}}
   }catch(e){
    if(!active())return;
    try{gridsNoteSync(false);}catch(_){}
@@ -4435,7 +4489,7 @@ async function _hubSync(write){
    const retry=_hubRetryable(e);
    if(retry){_hubRetry=Math.min(_hubRetry+1,6);_hubRetryAt=Date.now()+Math.min(60000,2000*Math.pow(2,_hubRetry-1));}
    else{_hubRetryAt=0;_hubBlocked=true;_hubPullRequested=false;}
-   if(!_hubSyncWarned){_hubSyncWarned=true;try{toast(retry?"Saved on this device — cloud sync will retry":"Saved on this device — cloud access needs attention");}catch(_){}}
+   if(!_hubSyncWarned){_hubSyncWarned=true;try{toast(retry?(_deviceFailure?"Cloud save failed; device save also failed. Keep this page open.":"Cloud sync failed — retrying. Keep this page open until synced."):(_deviceFailure?"Cloud access and device save failed. Keep this page open.":"Cloud access needs attention — your edits remain on this page."));}catch(_){}}
   }finally{
    if(active()){
     _hubFlight=null;
@@ -4446,6 +4500,15 @@ async function _hubSync(write){
 }
 function pushHub(){return _hubSync(true);}
 window.addEventListener('online',function(){if(!user||!supa)return;_hubRetryAt=0;_hubBlocked=false;pullHub();});
+/* Mobile suspension can freeze debounce timers. Start pending work before hiding;
+   on resume clear transient/auth backoff and merge this device's saved copy. */
+function _hubWake(){if(!user||!supa)return;_hubRetryAt=0;_hubBlocked=false;return pullHub();}
+document.addEventListener('visibilitychange',function(){
+ if(document.visibilityState==='hidden'){if(_hubDirty){clearTimeout(_hubTimer);pushHub();}}
+ else _hubWake();
+});
+window.addEventListener('pagehide',function(){if(_hubDirty){clearTimeout(_hubTimer);pushHub();}});
+window.addEventListener('pageshow',function(e){if(e&&e.persisted)_hubWake();});
 function tombKey(x){ return (x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); }
 function tombstone(x){ if(x==null) return; data.deleted=data.deleted||{}; data.deleted[tombKey(x)]=Date.now(); }
 function _mergeArr(a,b,tomb,hard){ a=Array.isArray(a)?a:[]; b=Array.isArray(b)?b:[]; tomb=tomb||{}; var map={},order=[]; function add(x){ if(x==null) return; var id=(x&&x.id!=null)?("#"+x.id):("$"+JSON.stringify(x)); var xu=+new Date(x.updated||x.updatedAt||x.ts||0)||0; var tv=+tomb[id]||0; /* hard: a positive tombstone wins outright, no matter how fresh the incoming copy claims to be. Negative tombstones (the undo path) are still an un-delete either way. */ if(tv>0&&(hard||tv>=xu)) return; /* fix: a strictly-newer edit wins over an older tombstone (was: any id-bearing item was dropped) */ if(!(id in map)){ order.push(id); map[id]=x; } else { var cur=map[id]; var cu=+new Date(cur.updated||cur.updatedAt||cur.ts||0)||0; if(xu>cu) map[id]=x; } }   /* a tie keeps this device's copy */ a.forEach(add); b.forEach(add); return order.map(function(k){return map[k];}); }
@@ -9091,17 +9154,18 @@ async function doForgot(){
   const {error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   authErr(error?error.message:"Reset link sent — check your inbox.",!error);
 }
-function _adoptUser(u){ var _st=loadLocal(KEY+":"+u.id), _gu=_dataOwner===u.id?null:loadLocal(KEY);
+async function _adoptUser(u){ var _st=await loadDevice(KEY+":"+u.id), _gu=_dataOwner===u.id?null:await loadDevice(KEY);
+  if(!user||user.id!==u.id)return false;
   /* keep what's on screen only if it already belongs to this account (or is guest work being brought in) — never another account's data */
   var base=(_dataOwner===u.id||_dataOwner===null)?data:JSON.parse(JSON.stringify(DEFAULT));
   var m=base; if(_st) m=mergeHubData(m,_st); if(_gu) m=mergeHubData(m,_gu); data=fill(m); _dataOwner=u.id;
   try{ localStorage.removeItem(GUEST_FLAG); localStorage.setItem("hub.lastUser",u.id); }catch(e){}
-  _syncSettingsBaseline(); try{localStorage.setItem(storeKey(),JSON.stringify(data));}catch(e){} }
+  _syncSettingsBaseline(); _saveDevice(JSON.stringify(data)); return true; }
 async function signOut(){ closeModal(); try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} if(supa) await supa.auth.signOut(); }
 /* Wipe every cloud-derived display global so a following account (or guest mode)
    never sees the previous user's finance / travel / calendar / inbox data. */
 function _clearCloudGlobals(){
-  _hubReset();
+  _hubReset();_deviceFailure=false;_saveWarned=false;
   try{
     financeStat=""; financeSeries=[]; financeUpdated="";
     calEvents=null; zakatDue=null;
@@ -9138,9 +9202,12 @@ document.addEventListener("keydown",function(e){
 });
 
 async function initAuth(){
+  await _restoreDevice();
   accountInit();
   if(!supaReady){ if(!localStorage.getItem(GUEST_FLAG)) authUI("in"); return; }
   supa.auth.onAuthStateChange((evt,session)=>{
+    /* Supabase holds its auth lock during this callback. Run SDK requests after it releases. */
+    setTimeout(async function(){
     const u=session?session.user:null;
     const signedIn=u&&(!user||user.id!==u.id), signedOut=!u&&!!user;
     user=u; accountInit();
@@ -9148,8 +9215,10 @@ async function initAuth(){
        restores for us. Without this a restored session inherits whatever
        hub.authStart was left behind, so the 4h timer could already be spent
        the moment the page finished loading. */
-    if(signedIn){ if(_sessionExpired()&&!_freshLogin){ try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} user=null; accountInit(); _clearCloudGlobals(); data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); try{ render(); }catch(e){} authUI("in"); toast("Signed out after 4h of inactivity — please sign in again"); supa.auth.signOut(); return; } _freshLogin=false; _touchAuth(); closeAuth(); _adoptUser(u); render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
+    if(signedIn){ if(_sessionExpired()&&!_freshLogin){ try{localStorage.removeItem("hub.authStart");localStorage.removeItem("hub.lastUser");}catch(e){} user=null; accountInit(); _clearCloudGlobals(); data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); try{ render(); }catch(e){} authUI("in"); toast("Signed out after 4h of inactivity — please sign in again"); supa.auth.signOut(); return; } _freshLogin=false; _touchAuth(); closeAuth(); if(!(await _adoptUser(u)))return; render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} toast("Welcome back"); }
     if(signedOut){ _clearCloudGlobals(); try{localStorage.removeItem("hub.lastUser");}catch(e){} data=loadLocal(KEY)||JSON.parse(JSON.stringify(DEFAULT)); _dataOwner=null; _syncSettingsBaseline(); render(); authUI("in"); }
+    if(evt==="TOKEN_REFRESHED"&&user){_hubRetryAt=0;_hubBlocked=false;pullHub();}
+    },0);
   });
   const {data:{session}}=await supa.auth.getSession();
   /* Lower the gate here too. Closing it was left entirely to the signedIn branch
@@ -9161,7 +9230,7 @@ async function initAuth(){
      is an invisible sheet of glass over the whole workspace: every click lands
      on it and nothing in the app responds. closeAuth() is idempotent, so
      calling it on both paths costs nothing and removes the race. */
-  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); _adoptUser(user); render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
+  if(session){ user=session.user; if(_sessionExpired()){ try{localStorage.removeItem("hub.authStart");}catch(e){} toast("Signed out after 4h of inactivity — please sign in again"); await supa.auth.signOut(); authUI("in"); return; } _touchAuth(); closeAuth(); accountInit(); if(!(await _adoptUser(user)))return; render(); loadFinance(); loadTravel(); pullHub(); try{ gAutoConnect(); }catch(e){} }
   else authUI("in");
 }
 
